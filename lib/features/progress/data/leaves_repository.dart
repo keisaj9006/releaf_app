@@ -1,0 +1,201 @@
+// FILE: lib/features/progress/data/leaves_repository.dart
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../model/leaves_state.dart';
+
+final leavesNotifierProvider =
+StateNotifierProvider<LeavesNotifier, LeavesState>(
+      (ref) => LeavesNotifier(),
+);
+
+/// Zwracamy to do UI, żeby móc pokazać SnackBar / Haptic / “Perfect day”.
+class RewardResult {
+  final int added; // baza (np. Brain=2)
+  final int bonusAdded; // bonus za 3/3 (np. +2)
+  final int newTotal;
+  final int completedToday; // 0..3
+
+  const RewardResult({
+    required this.added,
+    required this.bonusAdded,
+    required this.newTotal,
+    required this.completedToday,
+  });
+
+  bool get hasBonus => bonusAdded > 0;
+  int get totalAdded => added + bonusAdded;
+}
+
+class LeavesNotifier extends StateNotifier<LeavesState> {
+  LeavesNotifier()
+      : super(
+    LeavesState(
+      totalLeaves: 0,
+      todayKey: _currentDateString(),
+      reliefDone: false,
+      habitDone: false,
+      brainDone: false,
+    ),
+  ) {
+    _load();
+  }
+
+  // ---- Rewards (P0) ----
+  static const int _habitReward = 1;
+  static const int _reliefReward = 1;
+  static const int _brainReward = 2;
+
+  // “podwójnie za trzeci filar” = bonus równy bazie trzeciego filaru
+  static int _bonusForThird(int base) => base;
+
+  // ---- Pref keys (z migracją) ----
+  static const String _kTotalLeaves = 'totalLeaves';
+  static const String _kOldLeavesTotal = 'leaves_total'; // legacy (BrokenMirror itp.)
+  static const String _kTodayKey = 'todayKey';
+  static const String _kReliefDone = 'reliefDone';
+  static const String _kHabitDone = 'habitDone';
+  static const String _kBrainDone = 'brainDone';
+
+  static String _currentDateString() {
+    final now = DateTime.now();
+    final y = now.year.toString().padLeft(4, '0');
+    final m = now.month.toString().padLeft(2, '0');
+    final d = now.day.toString().padLeft(2, '0');
+    return '$y-$m-$d';
+  }
+
+  int _completedCount(LeavesState s) {
+    var c = 0;
+    if (s.habitDone) c++;
+    if (s.reliefDone) c++;
+    if (s.brainDone) c++;
+    return c;
+  }
+
+  Future<void> _load() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    // migration: jeśli ktoś ma stary klucz, przenieś do nowego
+    final old = prefs.getInt(_kOldLeavesTotal);
+    final total = prefs.getInt(_kTotalLeaves) ??
+        (old ?? 0);
+
+    if (old != null && prefs.getInt(_kTotalLeaves) == null) {
+      await prefs.setInt(_kTotalLeaves, old);
+    }
+
+    final date = prefs.getString(_kTodayKey) ?? _currentDateString();
+    final reliefDone = prefs.getBool(_kReliefDone) ?? false;
+    final habitDone = prefs.getBool(_kHabitDone) ?? false;
+    final brainDone = prefs.getBool(_kBrainDone) ?? false;
+
+    state = LeavesState(
+      totalLeaves: total,
+      todayKey: date,
+      reliefDone: reliefDone,
+      habitDone: habitDone,
+      brainDone: brainDone,
+    );
+
+    await _resetIfNewDay();
+  }
+
+  Future<void> _resetIfNewDay() async {
+    final current = _currentDateString();
+    if (state.todayKey == current) return;
+
+    final prefs = await SharedPreferences.getInstance();
+    state = state.copyWith(
+      todayKey: current,
+      reliefDone: false,
+      habitDone: false,
+      brainDone: false,
+    );
+
+    await prefs.setString(_kTodayKey, current);
+    await prefs.setBool(_kReliefDone, false);
+    await prefs.setBool(_kHabitDone, false);
+    await prefs.setBool(_kBrainDone, false);
+  }
+
+  Future<void> _persistTotal(int total) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_kTotalLeaves, total);
+  }
+
+  Future<void> _persistFlag(String key, bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(key, value);
+  }
+
+  /// Zostawiamy jako “narzędzie”, ale UI NIE powinno tego wołać za filary.
+  Future<void> addLeaves(int amount) async {
+    await _resetIfNewDay();
+    final newTotal = state.totalLeaves + amount;
+    state = state.copyWith(totalLeaves: newTotal);
+    await _persistTotal(newTotal);
+  }
+
+  /// Relief: raz dziennie +1 (i bonus jeśli to 3/3)
+  Future<RewardResult?> markReliefDone() async {
+    return _complete(
+      baseReward: _reliefReward,
+      isDone: state.reliefDone,
+      setDone: () async {
+        state = state.copyWith(reliefDone: true);
+        await _persistFlag(_kReliefDone, true);
+      },
+    );
+  }
+
+  /// Habits: raz dziennie +1 (i bonus jeśli to 3/3)
+  Future<RewardResult?> markHabitDone() async {
+    return _complete(
+      baseReward: _habitReward,
+      isDone: state.habitDone,
+      setDone: () async {
+        state = state.copyWith(habitDone: true);
+        await _persistFlag(_kHabitDone, true);
+      },
+    );
+  }
+
+  /// Brain: raz dziennie +2 (i bonus jeśli to 3/3)
+  Future<RewardResult?> markBrainDone() async {
+    return _complete(
+      baseReward: _brainReward,
+      isDone: state.brainDone,
+      setDone: () async {
+        state = state.copyWith(brainDone: true);
+        await _persistFlag(_kBrainDone, true);
+      },
+    );
+  }
+
+  Future<RewardResult?> _complete({
+    required int baseReward,
+    required bool isDone,
+    required Future<void> Function() setDone,
+  }) async {
+    await _resetIfNewDay();
+    if (isDone) return null;
+
+    await setDone();
+
+    final completedNow = _completedCount(state);
+    final isThird = completedNow == 3;
+    final bonus = isThird ? _bonusForThird(baseReward) : 0;
+
+    final newTotal = state.totalLeaves + baseReward + bonus;
+    state = state.copyWith(totalLeaves: newTotal);
+    await _persistTotal(newTotal);
+
+    return RewardResult(
+      added: baseReward,
+      bonusAdded: bonus,
+      newTotal: newTotal,
+      completedToday: completedNow,
+    );
+  }
+}

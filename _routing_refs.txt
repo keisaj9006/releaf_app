@@ -1,0 +1,78 @@
+lib\core\di\providers.dart:2:import 'package:audioplayers/audioplayers.dart';
+lib\core\di\providers.dart:3:import 'package:flutter_riverpod/flutter_riverpod.dart';
+lib\core\di\providers.dart:4:import 'package:shared_preferences/shared_preferences.dart';
+lib\core\di\providers.dart:6:import '../../features/brain/data/brain_repository.dart';
+lib\core\di\providers.dart:7:import '../../features/habits/data/habits_repository.dart';
+lib\core\di\providers.dart:8:import '../../features/habits/presentation/habits_controller.dart';
+lib\core\di\providers.dart:9:import '../../features/legal/privacy.dart';
+lib\core\di\providers.dart:10:import '../../routing/app_router.dart';
+lib\games\math_race\math_puzzle_generator.dart:1:import 'dart:math';
+lib\games\math_race\math_race_screen.dart:1:import 'dart:async';
+lib\games\math_race\math_race_screen.dart:2:import 'package:flutter/material.dart';
+lib\games\math_race\math_race_screen.dart:3:import 'math_puzzle_generator.dart';
+lib\games\math_race\math_race_screen.dart:4:import 'math_race_stats.dart';
+lib\games\math_race\math_race_stats.dart:1:import 'package:shared_preferences/shared_preferences.dart';
+lib\main.dart:1:import 'package:flutter/material.dart';
+lib\main.dart:2:import 'package:flutter/services.dart';
+lib\main.dart:4:import 'routing/app_router.dart';
+lib\main.dart:57:      routerConfig: appRouter,
+lib\routing\app_router.dart:1:import 'package:flutter/material.dart';
+lib\routing\app_router.dart:2:import 'package:go_router/go_router.dart';
+lib\routing\app_router.dart:4:import '../screens/dashboard_screen.dart';
+lib\routing\app_router.dart:5:import '../screens/games_screen.dart';
+lib\routing\app_router.dart:6:import '../screens/labirynth_stats_screen.dart';
+lib\routing\app_router.dart:7:import '../games/math_race/math_race_screen.dart';
+lib\routing\app_router.dart:8:import 'app_routes.dart';
+lib\routing\app_router.dart:20:final GoRouter appRouter = GoRouter(
+lib\routing\app_router.dart:21:  initialLocation: AppRoutes.dashboard,
+lib\routing\app_router.dart:24:      path: AppRoutes.dashboard,
+lib\routing\app_router.dart:25:      name: AppRoutes.dashboardName,
+lib\routing\app_router.dart:29:      path: AppRoutes.games,
+lib\routing\app_router.dart:30:      name: AppRoutes.gamesName,
+lib\routing\app_router.dart:34:      path: AppRoutes.mathRace,
+lib\routing\app_router.dart:35:      name: AppRoutes.mathRaceName,
+lib\routing\app_router.dart:39:      path: AppRoutes.labirynthStats,
+lib\routing\app_router.dart:40:      name: AppRoutes.labirynthStatsName,
+lib\routing\app_routes.dart:1:class AppRoutes {
+lib\routing\scaffold_with_nav.dart:2:import 'package:flutter/material.dart';
+lib\routing\scaffold_with_nav.dart:3:import 'package:go_router/go_router.dart';
+lib\routing\scaffold_with_nav.dart:5:import 'routes.dart';
+lib\screens\badges_screen.dart:1:import 'package:flutter/material.dart';
+lib\screens\broken_mirror_game_screen.dart:1:import 'dart:async';
+lib\screens\broken_mirror_game_screen.dart:2:import 'dart:math' as math;
+lib\screens\broken_mirror_game_screen.dart:3:import 'package:flutter/material.dart';
+lib\screens\broken_mirror_game_screen.dart:4:import 'package:flutter/services.dart' show HapticFeedback;
+lib\screens\broken_mirror_game_screen.dart:5:import 'package:shared_preferences/shared_preferences.dart';
+lib\screens\dashboard_screen.dart:1:import 'package:flutter/material.dart';
+lib\screens\dashboard_screen.dart:2:import 'games_screen.dart';
+lib\screens\dashboard_screen.dart:3:import 'labirynth_stats_screen.dart'; // <-- dodaj jeśli brak
+lib\screens\games_screen.dart:1:import 'package:flutter/material.dart';
+lib\screens\games_screen.dart:2:import 'package:flutter/services.dart' show HapticFeedback;
+lib\screens\games_screen.dart:5:import 'memory_game_screen.dart';
+lib\screens\games_screen.dart:6:import 'labirynth_game_screen.dart';
+lib\screens\games_screen.dart:7:import 'broken_mirror_game_screen.dart';
+lib\screens\games_screen.dart:9:// Math Race trzymasz poza screens – zostawiam Twój import:
+lib\screens\games_screen.dart:10:import 'package:releaf_app/games/math_race/math_race_screen.dart';
+lib\screens\labirynth_game_screen.dart:1:import 'dart:async';
+lib\screens\labirynth_game_screen.dart:2:import 'dart:math' as math;
+lib\screens\labirynth_game_screen.dart:3:import 'dart:typed_data';
+lib\screens\labirynth_game_screen.dart:4:import 'dart:ui' as ui;
+lib\screens\labirynth_game_screen.dart:6:import 'package:flutter/material.dart';
+lib\screens\labirynth_game_screen.dart:7:import 'package:flutter/services.dart' show rootBundle, HapticFeedback;
+lib\screens\labirynth_game_screen.dart:8:import 'package:lottie/lottie.dart';
+lib\screens\labirynth_settings_screen.dart:1:import 'package:flutter/material.dart';
+lib\screens\labirynth_settings_screen.dart:2:import 'package:shared_preferences/shared_preferences.dart';
+lib\screens\labirynth_stats_screen.dart:1:// usuń niepotrzebny import 'labirynth_stats_screen.dart';
+lib\screens\labirynth_stats_screen.dart:2:import 'package:flutter/material.dart';
+lib\screens\labirynth_stats_screen.dart:3:import 'package:shared_preferences/shared_preferences.dart';
+lib\screens\labirynth_stats_screen.dart:4:import 'package:fl_chart/fl_chart.dart';
+lib\screens\memory_game_screen.dart:1:import 'package:flutter/material.dart';
+lib\screens\memory_game_screen.dart:2:import 'dart:async';
+lib\screens\memory_game_screen.dart:3:import 'dart:math' show pi, max;
+lib\screens\memory_game_screen.dart:4:import 'package:shared_preferences/shared_preferences.dart';
+lib\screens\memory_game_screen.dart:5:import 'memory_stats_screen.dart';
+lib\screens\memory_stats_screen.dart:1:import 'package:flutter/material.dart';
+lib\screens\memory_stats_screen.dart:2:import 'package:shared_preferences/shared_preferences.dart';
+lib\screens\memory_stats_screen.dart:3:import 'package:fl_chart/fl_chart.dart';
+lib\screens\reset_screen.dart:1:import 'package:flutter/material.dart';
+lib\theme\app_theme.dart:2:import 'package:flutter/material.dart';

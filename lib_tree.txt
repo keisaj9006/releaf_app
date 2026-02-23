@@ -1,0 +1,89 @@
+Folder PATH listing for volume Windows-SSD
+Volume serial number is 0000023E A866:0360
+C:\RELEAF_APP\LIB
+|   main.dart
+|   
++---core
+|   +---di
+|   |       providers.dart
+|   |       
+|   +---storage
+|   |       prefs_keys.dart
+|   |       
+|   \---utils
+|           date_key.dart
+|           
++---data
+|       labirynth_map_data.dart
+|       
++---features
+|   +---bootstrap
+|   |       bootstrap_screen.dart
+|   |       
+|   +---brain
+|   |   +---data
+|   |   |       brain_repository.dart
+|   |   |       game_registry.dart
+|   |   |       
+|   |   \---presentation
+|   |           brain_screen.dart
+|   |           game_host_screen.dart
+|   |           game_result_screen.dart
+|   |           
+|   +---habits
+|   |   +---data
+|   |   |       habits_repository.dart
+|   |   |       
+|   |   +---model
+|   |   |       habit.dart
+|   |   |       
+|   |   \---presentation
+|   |           habits_controller.dart
+|   |           habits_screen.dart
+|   |           
+|   +---home
+|   |       daily_loop_screen.dart
+|   |       home_screen.dart
+|   |       
+|   +---legal
+|   |       disclaimer_screen.dart
+|   |       privacy.dart
+|   |       
+|   \---relief
+|       +---data
+|       |       audio_catalog.dart
+|       |       
+|       \---presentation
+|               breathing_widget.dart
+|               relief_screen.dart
+|               
++---games
+|   \---math_race
+|           math_puzzle_generator.dart
+|           math_race_screen.dart
+|           math_race_stats.dart
+|           
++---models
+|       growth_state.dart
+|       
++---routing
+|       app_router.dart
+|       app_routes.dart
+|       scaffold_with_nav.dart
+|       
++---screens
+|       badges_screen.dart
+|       broken_mirror_game_screen.dart
+|       dashboard_screen.dart
+|       games_screen.dart
+|       labirynth_game_screen.dart
+|       labirynth_levels.dart
+|       labirynth_settings_screen.dart
+|       labirynth_stats_screen.dart
+|       memory_game_screen.dart
+|       memory_stats_screen.dart
+|       reset_screen.dart
+|       
+\---theme
+        app_theme.dart
+        

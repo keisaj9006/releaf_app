@@ -1,0 +1,53 @@
+lib\core\di\providers.dart:1:// FILE: lib/core/di/providers.dart
+lib\features\bootstrap\bootstrap_screen.dart:4:import '../../core/storage/prefs_keys.dart';
+lib\features\bootstrap\bootstrap_screen.dart:5:import '../../core/di/providers.dart';
+lib\features\bootstrap\bootstrap_screen.dart:6:import '../../routing/routes.dart';
+lib\features\bootstrap\bootstrap_screen.dart:23:      final accepted = prefs.getBool(PrefKeys.disclaimerAccepted) ?? false;
+lib\features\bootstrap\bootstrap_screen.dart:25:        context.go(AppRoutes.disclaimer);
+lib\features\bootstrap\bootstrap_screen.dart:27:        context.go(AppRoutes.home);
+lib\features\brain\data\brain_repository.dart:4:import '../../../core/storage/prefs_keys.dart';
+lib\features\brain\data\brain_repository.dart:42:    final jsonStr = _prefs.getString(PrefKeys.brainSessionsJson);
+lib\features\brain\data\brain_repository.dart:56:    await _prefs.setString(PrefKeys.brainSessionsJson, jsonStr);
+lib\features\brain\data\presentation\brain_screen.dart:4:import '../../../routing/routes.dart';
+lib\features\brain\data\presentation\brain_screen.dart:27:                    onTap: () => context.go('${AppRoutes.brain}/game/${g.id}'),
+lib\features\brain\data\presentation\game_host_screen.dart:6:import '../../../core/di/providers.dart';
+lib\features\brain\data\presentation\game_host_screen.dart:7:import '../../../routing/routes.dart';
+lib\features\brain\data\presentation\game_host_screen.dart:41:    context.goNamed(AppRoutes.gameResult, extra: result);
+lib\features\brain\data\presentation\game_result_screen.dart:4:import '../../../routing/routes.dart';
+lib\features\brain\data\presentation\game_result_screen.dart:37:              onPressed: () => context.go(AppRoutes.brain),
+lib\features\brain\data\presentation\game_result_screen.dart:42:              onPressed: () => context.go('${AppRoutes.home}/${AppRoutes.dailyLoop}'),
+lib\features\habits\data\habits_repository.dart:5:import '../../../core/storage/prefs_keys.dart';
+lib\features\habits\data\habits_repository.dart:15:    final jsonStr = _prefs.getString(PrefKeys.habitsListJson);
+lib\features\habits\data\habits_repository.dart:35:    await _prefs.setString(PrefKeys.habitsListJson, jsonStr);
+lib\features\habits\data\habits_repository.dart:39:    final key = '${PrefKeys.habitsDonePrefix}${yyyymmdd(date)}';
+lib\features\habits\data\habits_repository.dart:45:    final key = '${PrefKeys.habitsDonePrefix}${yyyymmdd(date)}';
+lib\features\habits\presentation\habits_controller.dart:4:import '../../../core/di/providers.dart';
+lib\features\habits\presentation\habits_screen.dart:4:import '../../../core/di/providers.dart';
+lib\features\home\daily_loop_screen.dart:6:import '../../routing/routes.dart';
+lib\features\home\daily_loop_screen.dart:34:          onPressed: () => context.go(AppRoutes.home),
+lib\features\home\daily_loop_screen.dart:59:                      context.go('${AppRoutes.brain}/game/${suggestedGame.id}');
+lib\features\home\home_screen.dart:4:import '../../routing/routes.dart';
+lib\features\home\home_screen.dart:28:                      onPressed: () => context.go('${AppRoutes.home}/${AppRoutes.dailyLoop}'),
+lib\features\home\home_screen.dart:43:                    onTap: () => context.go(AppRoutes.relief),
+lib\features\home\home_screen.dart:49:                    onTap: () => context.go(AppRoutes.brain),
+lib\features\home\home_screen.dart:55:                    onTap: () => context.go(AppRoutes.habits),
+lib\features\legal\disclaimer_screen.dart:6:import '../../core/di/providers.dart';
+lib\features\legal\disclaimer_screen.dart:7:import '../../core/storage/prefs_keys.dart';
+lib\features\legal\disclaimer_screen.dart:8:import '../../routing/routes.dart';
+lib\features\legal\disclaimer_screen.dart:47:                prefs.setBool(PrefKeys.disclaimerAccepted, true);
+lib\features\legal\disclaimer_screen.dart:48:                context.go(AppRoutes.home);
+lib\features\relief\presentation\relief_screen.dart:6:import '../../../core/di/providers.dart';
+lib\routing\app_router.dart:16:import 'routes.dart';
+lib\routing\app_router.dart:28:    initialLocation: AppRoutes.bootstrap,
+lib\routing\app_router.dart:31:        path: AppRoutes.bootstrap,
+lib\routing\app_router.dart:35:        path: AppRoutes.disclaimer,
+lib\routing\app_router.dart:48:                path: AppRoutes.home,
+lib\routing\app_router.dart:52:                    path: AppRoutes.dailyLoop,
+lib\routing\app_router.dart:63:                path: AppRoutes.habits,
+lib\routing\app_router.dart:72:                path: AppRoutes.relief,
+lib\routing\app_router.dart:81:                path: AppRoutes.brain,
+lib\routing\app_router.dart:85:                    name: AppRoutes.game,
+lib\routing\app_router.dart:94:                    name: AppRoutes.gameResult,
+lib\routing\app_routes.dart:1:// FILE: lib/routing/routes.dart
+lib\routing\app_routes.dart:2:class AppRoutes {
+lib\routing\scaffold_with_nav.dart:5:import 'routes.dart';
