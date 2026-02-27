@@ -1,8 +1,7 @@
 // FILE: lib/features/progress/data/leaves_repository.dart
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import '../../../core/providers.dart';
 
+import '../../../core/providers.dart';
 import '../model/leaves_state.dart';
 
 final leavesNotifierProvider =
@@ -36,7 +35,6 @@ class LeavesNotifier extends StateNotifier<LeavesState> {
       : super(
     LeavesState(
       totalLeaves: 0,
-      // initial todayKey uses current date; the value will be overwritten in _load()
       todayKey: _currentDateString(),
       reliefDone: false,
       habitDone: false,
@@ -83,13 +81,18 @@ class LeavesNotifier extends StateNotifier<LeavesState> {
 
     // migracja: jeśli ktoś ma stary klucz, przenieś do nowego
     final old = prefs.getInt(_kOldLeavesTotal);
-    final total = prefs.getInt(_kTotalLeaves) ?? (old ?? 0);
+    final storedNew = prefs.getInt(_kTotalLeaves);
+    final total = storedNew ?? old ?? 0;
 
-    if (old != null && prefs.getInt(_kTotalLeaves) == null) {
+    if (old != null && storedNew == null) {
       await prefs.setInt(_kTotalLeaves, old);
     }
 
-    final date = prefs.getString(_kTodayKey) ?? ref.read(todayProvider);
+    // ✅ gwarantujemy String (nigdy null)
+    final savedTodayKey = prefs.getString(_kTodayKey);
+    final today = ref.read(todayProvider);
+    final date = (savedTodayKey == null || savedTodayKey.isEmpty) ? today : savedTodayKey;
+
     final reliefDone = prefs.getBool(_kReliefDone) ?? false;
     final habitDone = prefs.getBool(_kHabitDone) ?? false;
     final brainDone = prefs.getBool(_kBrainDone) ?? false;
@@ -110,6 +113,7 @@ class LeavesNotifier extends StateNotifier<LeavesState> {
     if (state.todayKey == current) return;
 
     final prefs = ref.read(sharedPreferencesProvider);
+
     state = state.copyWith(
       todayKey: current,
       reliefDone: false,

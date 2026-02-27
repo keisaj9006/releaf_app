@@ -1,3 +1,4 @@
+// FILE: lib/routing/app_router.dart
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -9,12 +10,13 @@ import '../features/home/home_screen.dart';
 import '../features/habits/presentation/habits_screen.dart';
 import '../features/relief/presentation/relief_screen.dart';
 
+// ✅ Relief session screen + catalog
+import '../features/relief/data/audio_catalog.dart';
+import '../features/relief/presentation/breathing_widget.dart';
+
 // ✅ Brain tab = legacy działający ekran z 6 grami
 import '../legacy/screens/games_screen.dart';
 
-// (opcjonalnie) nowe feature screeny Brain — zostawiamy tylko jeśli już ich używasz
-// import '../features/brain/presentation/brain_screen.dart';
-// import '../features/brain/presentation/game_host_screen.dart';
 import '../features/brain/presentation/game_result_screen.dart';
 
 // Import prawdziwego ekranu Daily Loop
@@ -84,6 +86,30 @@ final GoRouter appRouter = GoRouter(
             GoRoute(
               path: AppRoutes.relief,
               pageBuilder: (context, state) => _fadePage(const ReliefScreen()),
+              routes: [
+                // /relief/session/:sessionId
+                GoRoute(
+                  path: AppRoutes.reliefSession,
+                  pageBuilder: (context, state) {
+                    final sessionId = state.pathParameters['sessionId'] ?? '';
+                    final session = const AudioCatalog().getById(sessionId);
+
+                    if (session == null) {
+                      return _fadePage(
+                        const Scaffold(
+                          body: SafeArea(
+                            child: Center(
+                              child: Text('Session not found'),
+                            ),
+                          ),
+                        ),
+                      );
+                    }
+
+                    return _fadePage(BreathingWidget(session: session));
+                  },
+                ),
+              ],
             ),
           ],
         ),
