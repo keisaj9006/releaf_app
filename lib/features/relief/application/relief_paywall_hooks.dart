@@ -1,9 +1,8 @@
-// FILE: lib/features/relief/application/relief_paywall_hooks.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/providers.dart';
-import '../../../core/paywall/presentation/paywall_sheet.dart';
+import '../../paywall/presentation/paywall_sheet.dart';
 
 Future<void> reliefStarted(WidgetRef ref) async {
   final isPremium = ref.read(subscriptionControllerProvider).isPremium;
@@ -42,6 +41,5 @@ Future<void> maybeShowPaywall(
     builder: (_) => PaywallSheet(softOffer: softOffer),
   );
 
-  // Cooldown starts after the sheet is dismissed.
   await trigger.markPaywallShown();
 }
