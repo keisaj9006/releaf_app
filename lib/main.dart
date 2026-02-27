@@ -1,8 +1,11 @@
 // FILE: lib/main.dart
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import 'core/providers.dart';
 import 'routing/app_router.dart';
 
 Future<void> main() async {
@@ -20,7 +23,28 @@ Future<void> main() async {
     systemNavigationBarIconBrightness: Brightness.dark,
   ));
 
-  runApp(const ProviderScope(child: ReleafApp()));
+  // SharedPreferences -> Riverpod override.
+  final prefs = await SharedPreferences.getInstance();
+
+  final container = ProviderContainer(
+    overrides: [
+      sharedPreferencesProvider.overrideWithValue(prefs),
+    ],
+  );
+
+  // IMPORTANT: Init RevenueCat before UI starts using subscription state.
+  // TODO: wstaw swój klucz (najlepiej z env/flavors, nie hardcode w repo).
+  await container.read(revenueCatServiceProvider).init(
+    apiKey: 'REVENUECAT_ANDROID_API_KEY',
+    debug: kDebugMode,
+  );
+
+  runApp(
+    UncontrolledProviderScope(
+      container: container,
+      child: const ReleafApp(),
+    ),
+  );
 }
 
 class ReleafApp extends StatelessWidget {
@@ -81,7 +105,6 @@ class _AppBackground extends StatelessWidget {
       children: [
         Positioned.fill(
           child: Image.asset(
-            // FIX: masz ten plik w assets/ui/
             'assets/ui/background.png',
             fit: BoxFit.cover,
           ),

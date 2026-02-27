@@ -17,8 +17,8 @@ import '../legacy/screens/games_screen.dart';
 // import '../features/brain/presentation/game_host_screen.dart';
 import '../features/brain/presentation/game_result_screen.dart';
 
-// Uwaga: jeśli DailyLoopScreen nie istnieje / ma inną nazwę, użyjemy placeholdera
-// import '../features/home/daily_loop_screen.dart';
+// Import prawdziwego ekranu Daily Loop
+import '../features/home/daily_loop_screen.dart';
 
 CustomTransitionPage<void> _fadePage(Widget child) {
   return CustomTransitionPage<void>(
@@ -109,13 +109,10 @@ final GoRouter appRouter = GoRouter(
       },
     ),
 
-    // ✅ Tymczasowy placeholder daily-loop (żeby build nie padał)
-    // Jak potwierdzimy nazwę klasy w daily_loop_screen.dart, podmienimy na właściwy ekran.
+    // Trasa do Daily Loop – korzysta z realnego ekranu.
     GoRoute(
       path: AppRoutes.dailyLoop,
-      pageBuilder: (context, state) => _fadePage(
-        const _DailyLoopPlaceholderScreen(),
-      ),
+      pageBuilder: (context, state) => _fadePage(const DailyLoopScreen()),
     ),
 
     // Legacy aliases

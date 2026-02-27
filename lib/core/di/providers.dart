@@ -1,11 +1,26 @@
-// FILE: lib/core/providers.dart
+// FILE: lib/core/di/providers.dart
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../features/progress/data/leaves_repository.dart';
-import '../features/progress/model/leaves_state.dart';
+import '../../features/progress/data/leaves_repository.dart';
+import '../../features/progress/model/leaves_state.dart';
 
-/// Provider dla SharedPreferences (override w main.dart jeśli chcesz go używać gdzie indziej).
+import '../paywall/paywall_trigger.dart';
+import '../subscription/revenuecat_service.dart';
+import '../subscription/subscription_controller.dart';
+import '../subscription/subscription_state.dart';
+
+/// Provider zwracający dzisiejszy klucz w formacie YYYY-MM-DD.
+/// Używany do określania początku nowego dnia oraz w testach.
+final todayProvider = Provider<String>((ref) {
+  final now = DateTime.now();
+  final y = now.year.toString().padLeft(4, '0');
+  final m = now.month.toString().padLeft(2, '0');
+  final d = now.day.toString().padLeft(2, '0');
+  return '$y-$m-$d';
+});
+
+/// Provider dla SharedPreferences (override w main.dart).
 final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
   throw UnimplementedError(
     'sharedPreferencesProvider must be overridden in main.dart',
@@ -64,4 +79,22 @@ class ProgressActions {
 final progressActionsProvider = Provider<ProgressActions>((ref) {
   final leaves = ref.read(leavesNotifierProvider.notifier);
   return ProgressActions(leaves);
+});
+
+/// RevenueCat service (singleton-ish).
+final revenueCatServiceProvider = Provider<RevenueCatService>((ref) {
+  return RevenueCatService();
+});
+
+/// Subscription controller/state.
+final subscriptionControllerProvider =
+StateNotifierProvider<SubscriptionController, SubscriptionState>((ref) {
+  final service = ref.watch(revenueCatServiceProvider);
+  return SubscriptionController(service);
+});
+
+/// Paywall trigger based on counters in SharedPreferences.
+final paywallTriggerProvider = Provider<PaywallTrigger>((ref) {
+  final prefs = ref.watch(sharedPreferencesProvider);
+  return PaywallTrigger(prefs);
 });

@@ -1,4 +1,4 @@
-import import '../../../features/brain/presentation/game_result_screen.dart';'dart:async';
+import 'dart:async';
 import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -8,7 +8,7 @@ import 'package:flutter/services.dart' show rootBundle, HapticFeedback;
 import 'package:lottie/lottie.dart';
 
 // ✅ Spójny result flow aplikacji (nagroda + powrót)
-import '../../../features/brain/presentation/game_result_screen.dart';
+import '../../features/brain/presentation/game_result_screen.dart';
 
 class LabirynthGameScreen extends StatefulWidget {
   const LabirynthGameScreen({super.key});

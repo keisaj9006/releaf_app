@@ -42,6 +42,10 @@ class PrefKeys {
   static const String reliefSessionsTotal = '${_p}relief.sessions_total';
   static const String reliefLastSessionIso = '${_p}relief.last_session_iso';
 
+  /// Paywall counters (non-premium only)
+  static const String reliefPaywallStarts = '${_p}relief.paywall.starts';
+  static const String reliefPaywallCompletes = '${_p}relief.paywall.completes';
+
   // -----------------------
   // BRAIN — meta (wspólne)
   // -----------------------

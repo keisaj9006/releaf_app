@@ -1,12 +1,13 @@
 // FILE: lib/features/progress/data/leaves_repository.dart
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../core/providers.dart';
 
 import '../model/leaves_state.dart';
 
 final leavesNotifierProvider =
 StateNotifierProvider<LeavesNotifier, LeavesState>(
-      (ref) => LeavesNotifier(),
+      (ref) => LeavesNotifier(ref),
 );
 
 /// Zwracamy to do UI, żeby móc pokazać SnackBar / Haptic / “Perfect day”.
@@ -28,10 +29,14 @@ class RewardResult {
 }
 
 class LeavesNotifier extends StateNotifier<LeavesState> {
-  LeavesNotifier()
+  /// Riverpod reference to access other providers (prefs, todayProvider)
+  final Ref ref;
+
+  LeavesNotifier(this.ref)
       : super(
     LeavesState(
       totalLeaves: 0,
+      // initial todayKey uses current date; the value will be overwritten in _load()
       todayKey: _currentDateString(),
       reliefDone: false,
       habitDone: false,
@@ -74,18 +79,17 @@ class LeavesNotifier extends StateNotifier<LeavesState> {
   }
 
   Future<void> _load() async {
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = ref.read(sharedPreferencesProvider);
 
-    // migration: jeśli ktoś ma stary klucz, przenieś do nowego
+    // migracja: jeśli ktoś ma stary klucz, przenieś do nowego
     final old = prefs.getInt(_kOldLeavesTotal);
-    final total = prefs.getInt(_kTotalLeaves) ??
-        (old ?? 0);
+    final total = prefs.getInt(_kTotalLeaves) ?? (old ?? 0);
 
     if (old != null && prefs.getInt(_kTotalLeaves) == null) {
       await prefs.setInt(_kTotalLeaves, old);
     }
 
-    final date = prefs.getString(_kTodayKey) ?? _currentDateString();
+    final date = prefs.getString(_kTodayKey) ?? ref.read(todayProvider);
     final reliefDone = prefs.getBool(_kReliefDone) ?? false;
     final habitDone = prefs.getBool(_kHabitDone) ?? false;
     final brainDone = prefs.getBool(_kBrainDone) ?? false;
@@ -102,10 +106,10 @@ class LeavesNotifier extends StateNotifier<LeavesState> {
   }
 
   Future<void> _resetIfNewDay() async {
-    final current = _currentDateString();
+    final current = ref.read(todayProvider);
     if (state.todayKey == current) return;
 
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = ref.read(sharedPreferencesProvider);
     state = state.copyWith(
       todayKey: current,
       reliefDone: false,
@@ -120,12 +124,12 @@ class LeavesNotifier extends StateNotifier<LeavesState> {
   }
 
   Future<void> _persistTotal(int total) async {
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = ref.read(sharedPreferencesProvider);
     await prefs.setInt(_kTotalLeaves, total);
   }
 
   Future<void> _persistFlag(String key, bool value) async {
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = ref.read(sharedPreferencesProvider);
     await prefs.setBool(key, value);
   }
 

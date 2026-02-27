@@ -1,14 +1,11 @@
-// FILE: lib/features/relief/presentation/breathing_widget.dart
 import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import 'breath_pacer.dart';
 import '../../../core/session/session_manager.dart';
 import '../../progress/data/leaves_repository.dart';
-import '../application/relief_paywall_hooks.dart';
 import '../data/audio_catalog.dart';
 
 class BreathingWidget extends ConsumerStatefulWidget {
@@ -73,7 +70,6 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
 
     _timer?.cancel();
 
-    // Award leaves only on completion
     if (shouldAward) {
       final leavesNotifier = ref.read(leavesNotifierProvider.notifier);
       final result = await leavesNotifier.markReliefDone();
@@ -86,13 +82,6 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(message)),
         );
-      }
-
-      // Paywall hooks: only after a completed session
-      await reliefCompleted(ref, helpedALot: true);
-
-      if (mounted) {
-        await maybeShowPaywall(context, ref, softOffer: true);
       }
     }
 

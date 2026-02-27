@@ -2,13 +2,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../application/relief_paywall_hooks.dart';
 import '../data/audio_catalog.dart';
 import 'breathing_widget.dart';
 
 class ReliefScreen extends ConsumerWidget {
   const ReliefScreen({super.key});
 
-  void _openSession(BuildContext context, ReliefSession session) {
+  void _openSession(
+      BuildContext context,
+      WidgetRef ref,
+      ReliefSession session,
+      ) {
+    // Record session start (non-premium only)
+    reliefStarted(ref);
+
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => BreathingWidget(session: session),
@@ -50,7 +58,7 @@ class ReliefScreen extends ConsumerWidget {
               final session = sessions[index];
               return _SessionTile(
                 title: session.title,
-                onTap: () => _openSession(context, session),
+                onTap: () => _openSession(context, ref, session),
               );
             },
           ),
