@@ -1,4 +1,3 @@
-// FILE: lib/features/progress/data/leaves_repository.dart
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/providers.dart';
@@ -28,7 +27,6 @@ class RewardResult {
 }
 
 class LeavesNotifier extends StateNotifier<LeavesState> {
-  /// Riverpod reference to access other providers (prefs, todayProvider)
   final Ref ref;
 
   LeavesNotifier(this.ref)
@@ -54,7 +52,7 @@ class LeavesNotifier extends StateNotifier<LeavesState> {
 
   // ---- Pref keys (z migracją) ----
   static const String _kTotalLeaves = 'totalLeaves';
-  static const String _kOldLeavesTotal = 'leaves_total'; // legacy (BrokenMirror itp.)
+  static const String _kOldLeavesTotal = 'leaves_total'; // legacy
   static const String _kTodayKey = 'todayKey';
   static const String _kReliefDone = 'reliefDone';
   static const String _kHabitDone = 'habitDone';
@@ -66,6 +64,14 @@ class LeavesNotifier extends StateNotifier<LeavesState> {
     final m = now.month.toString().padLeft(2, '0');
     final d = now.day.toString().padLeft(2, '0');
     return '$y-$m-$d';
+  }
+
+  /// ✅ Normalizacja: dzisiejszy key zawsze jako NON-null String,
+  /// nawet jeśli todayProvider jest String?
+  String _todayKey() {
+    final fromProvider = ref.read(todayProvider);
+    if (fromProvider is String && fromProvider.isNotEmpty) return fromProvider;
+    return _currentDateString();
   }
 
   int _completedCount(LeavesState s) {
@@ -80,18 +86,16 @@ class LeavesNotifier extends StateNotifier<LeavesState> {
     final prefs = ref.read(sharedPreferencesProvider);
 
     // migracja: jeśli ktoś ma stary klucz, przenieś do nowego
-    final old = prefs.getInt(_kOldLeavesTotal);
-    final storedNew = prefs.getInt(_kTotalLeaves);
-    final total = storedNew ?? old ?? 0;
+    final oldTotal = prefs.getInt(_kOldLeavesTotal);
+    final storedTotal = prefs.getInt(_kTotalLeaves);
+    final total = storedTotal ?? oldTotal ?? 0;
 
-    if (old != null && storedNew == null) {
-      await prefs.setInt(_kTotalLeaves, old);
+    if (oldTotal != null && storedTotal == null) {
+      await prefs.setInt(_kTotalLeaves, oldTotal);
     }
 
-    // ✅ gwarantujemy String (nigdy null)
-    final savedTodayKey = prefs.getString(_kTodayKey);
-    final today = ref.read(todayProvider);
-    final date = (savedTodayKey == null || savedTodayKey.isEmpty) ? today : savedTodayKey;
+    // ✅ TU gwarantujemy String (nigdy null)
+    final date = prefs.getString(_kTodayKey) ?? _todayKey();
 
     final reliefDone = prefs.getBool(_kReliefDone) ?? false;
     final habitDone = prefs.getBool(_kHabitDone) ?? false;
@@ -109,7 +113,7 @@ class LeavesNotifier extends StateNotifier<LeavesState> {
   }
 
   Future<void> _resetIfNewDay() async {
-    final current = ref.read(todayProvider);
+    final current = _todayKey();
     if (state.todayKey == current) return;
 
     final prefs = ref.read(sharedPreferencesProvider);
@@ -137,7 +141,7 @@ class LeavesNotifier extends StateNotifier<LeavesState> {
     await prefs.setBool(key, value);
   }
 
-  /// Zostawiamy jako “narzędzie”, ale UI NIE powinno tego wołać za filary.
+  /// Narzędzie ogólne – UI nie powinno tego wołać zamiast "markXDone".
   Future<void> addLeaves(int amount) async {
     await _resetIfNewDay();
     final newTotal = state.totalLeaves + amount;

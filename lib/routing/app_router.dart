@@ -1,4 +1,3 @@
-// FILE: lib/routing/app_router.dart
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -10,16 +9,16 @@ import '../features/home/home_screen.dart';
 import '../features/habits/presentation/habits_screen.dart';
 import '../features/relief/presentation/relief_screen.dart';
 
-// ✅ Relief session screen + catalog
-import '../features/relief/data/audio_catalog.dart';
+// Relief session screen
 import '../features/relief/presentation/breathing_widget.dart';
 
-// ✅ Brain tab = legacy działający ekran z 6 grami
+// Brain tab = legacy działający ekran z 6 grami
 import '../legacy/screens/games_screen.dart';
 
+// Game result (legacy)
 import '../features/brain/presentation/game_result_screen.dart';
 
-// Import prawdziwego ekranu Daily Loop
+// Daily Loop
 import '../features/home/daily_loop_screen.dart';
 
 CustomTransitionPage<void> _fadePage(Widget child) {
@@ -92,21 +91,7 @@ final GoRouter appRouter = GoRouter(
                   path: AppRoutes.reliefSession,
                   pageBuilder: (context, state) {
                     final sessionId = state.pathParameters['sessionId'] ?? '';
-                    final session = const AudioCatalog().getById(sessionId);
-
-                    if (session == null) {
-                      return _fadePage(
-                        const Scaffold(
-                          body: SafeArea(
-                            child: Center(
-                              child: Text('Session not found'),
-                            ),
-                          ),
-                        ),
-                      );
-                    }
-
-                    return _fadePage(BreathingWidget(session: session));
+                    return _fadePage(BreathingWidget(sessionId: sessionId));
                   },
                 ),
               ],
@@ -114,7 +99,7 @@ final GoRouter appRouter = GoRouter(
           ],
         ),
 
-        // BRAIN -> legacy GamesScreen (Twoje 6 gier)
+        // BRAIN -> legacy GamesScreen
         StatefulShellBranch(
           routes: [
             GoRoute(
@@ -126,7 +111,7 @@ final GoRouter appRouter = GoRouter(
       ],
     ),
 
-    // ✅ Route do ekranu wyniku (używany przez legacy gry)
+    // Route do ekranu wyniku (legacy gry)
     GoRoute(
       path: '/brain-result',
       pageBuilder: (context, state) {
@@ -135,7 +120,7 @@ final GoRouter appRouter = GoRouter(
       },
     ),
 
-    // Trasa do Daily Loop – korzysta z realnego ekranu.
+    // Daily Loop (fullscreen flow)
     GoRoute(
       path: AppRoutes.dailyLoop,
       pageBuilder: (context, state) => _fadePage(const DailyLoopScreen()),
@@ -160,33 +145,3 @@ final GoRouter appRouter = GoRouter(
     ),
   ],
 );
-
-class _DailyLoopPlaceholderScreen extends StatelessWidget {
-  const _DailyLoopPlaceholderScreen();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Daily Loop')),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                'Daily Loop temporarily disabled during refactor.',
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 12),
-              FilledButton(
-                onPressed: () => context.go(AppRoutes.home),
-                child: const Text('Back Home'),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
