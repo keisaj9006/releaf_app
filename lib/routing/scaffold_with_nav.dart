@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/session/session_manager.dart';
+import '../features/relief/data/audio_catalog.dart';
+import 'app_routes.dart';
 
 class ScaffoldWithNavBar extends ConsumerWidget {
   const ScaffoldWithNavBar({super.key, required this.navigationShell});
@@ -42,6 +44,16 @@ class ScaffoldWithNavBar extends ConsumerWidget {
               ),
             ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        tooltip: 'Open Emergency Grounding',
+        onPressed: () {
+          context.push(
+            AppRoutes.reliefSessionFor(AudioCatalog.emergencySessionId),
+          );
+        },
+        icon: const Icon(Icons.health_and_safety_outlined),
+        label: const Text('Emergency'),
       ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: navigationShell.currentIndex,
