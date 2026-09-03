@@ -5,7 +5,6 @@ analyzer:
   exclude:
     - _archive/**
     - lib_backup/**
-    - lib/features/brain/**
     - build/**
     - .dart_tool/**
 
