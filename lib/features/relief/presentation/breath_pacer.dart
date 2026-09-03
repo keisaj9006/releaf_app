@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'breath_pacer.dart';
+
 import '../../../core/session/session_manager.dart';
 import '../../progress/data/leaves_repository.dart';
 import '../data/audio_catalog.dart';
@@ -94,11 +94,6 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
     super.dispose();
   }
 
-  Future<bool> _onWillPop() async {
-    await _finishSession(shouldAward: false);
-    return false;
-  }
-
   @override
   Widget build(BuildContext context) {
     final minutes = _remainingSeconds ~/ 60;
@@ -106,8 +101,11 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
     final timeString =
         '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
 
-    return WillPopScope(
-      onWillPop: _onWillPop,
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) _finishSession(shouldAward: false);
+      },
       child: Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(

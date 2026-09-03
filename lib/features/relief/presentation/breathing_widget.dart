@@ -125,7 +125,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
 
     return PopScope(
       canPop: false,
-      onPopInvoked: (didPop) {
+      onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
         _abortSession();
       },

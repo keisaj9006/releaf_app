@@ -24,7 +24,6 @@ class _MathRaceScreenState extends ConsumerState<MathRaceScreen> {
 
   int _level = 1;
   int _score = 0;
-  int _streak = 0;
 
   Difficulty _difficulty = Difficulty.easy;
   MathPuzzle? _puzzle;
@@ -51,7 +50,6 @@ class _MathRaceScreenState extends ConsumerState<MathRaceScreen> {
     _feedback = null;
     _level = 1;
     _score = 0;
-    _streak = 0;
 
     _nextPuzzle();
 
@@ -114,8 +112,6 @@ class _MathRaceScreenState extends ConsumerState<MathRaceScreen> {
 
     final correct = value == _puzzle!.correctAnswer;
     if (correct) {
-      _streak++;
-
       final speedBonus = (_timeLeft ~/ 15);
       final diffBonus = switch (_difficulty) {
         Difficulty.easy => 1,
@@ -135,7 +131,6 @@ class _MathRaceScreenState extends ConsumerState<MathRaceScreen> {
       _feedback = null;
       _nextPuzzle();
     } else {
-      _streak = 0;
       _feedback = 'Try again';
       setState(() {});
       await Future.delayed(const Duration(milliseconds: 300));
@@ -356,7 +351,7 @@ class _MathRaceScreenState extends ConsumerState<MathRaceScreen> {
                       label: 'Stats',
                       onTap: () async {
                         final best = await MathRaceStats.load();
-                        if (!mounted) return;
+                        if (!context.mounted) return;
                         showDialog(
                           context: context,
                           builder: (_) => AlertDialog(

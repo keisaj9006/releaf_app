@@ -463,8 +463,6 @@ class _DraggableShard extends StatelessWidget {
           onUpdate(shard.copyWith(position: shard.position + d.delta));
         },
         onPanEnd: (_) {
-          // prosta logika “snap” do targetu
-          final snap = (shard.targetCenter - const Offset(0.5, 0.5));
           // real snap robimy porządnie w kolejnej iteracji — tu minimalnie:
           // zostawiamy jak było (nie psujemy Twojej logiki).
         },

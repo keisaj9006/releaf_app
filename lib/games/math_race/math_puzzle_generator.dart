@@ -126,7 +126,9 @@ class MathPuzzleGenerator {
 
   int _intPow(int a, int b) {
     var r = 1;
-    for (var i = 0; i < b; i++) r *= a;
+    for (var i = 0; i < b; i++) {
+      r *= a;
+    }
     return r;
   }
 

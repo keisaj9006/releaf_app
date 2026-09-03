@@ -66,11 +66,10 @@ class LeavesNotifier extends StateNotifier<LeavesState> {
     return '$y-$m-$d';
   }
 
-  /// ✅ Normalizacja: dzisiejszy key zawsze jako NON-null String,
-  /// nawet jeśli todayProvider jest String?
+  /// ✅ Normalizacja: dzisiejszy key zawsze jako NON-null String.
   String _todayKey() {
     final fromProvider = ref.read(todayProvider);
-    if (fromProvider is String && fromProvider.isNotEmpty) return fromProvider;
+    if (fromProvider.isNotEmpty) return fromProvider;
     return _currentDateString();
   }
 

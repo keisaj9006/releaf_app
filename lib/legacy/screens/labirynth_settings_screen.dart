@@ -104,7 +104,7 @@ class _LabirynthSettingsScreenState extends State<LabirynthSettingsScreen> {
               child: ElevatedButton(
                 onPressed: () async {
                   await _saveSettings();
-                  Navigator.pop(context);
+                  if (context.mounted) Navigator.pop(context);
                 },
                 child: const Text('Save & Back', style: TextStyle(fontFamily: 'Poppins')),
               ),

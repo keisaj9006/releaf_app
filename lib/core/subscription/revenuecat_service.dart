@@ -50,7 +50,7 @@ class RevenueCatService {
     if (!_initialized) {
       throw StateError('RevenueCat is not configured.');
     }
-    final result = await Purchases.purchasePackage(package);
+    final result = await Purchases.purchase(PurchaseParams.package(package));
     return result.customerInfo;
   }
 
