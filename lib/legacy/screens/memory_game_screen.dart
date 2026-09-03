@@ -20,7 +20,7 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
     '🍀', '🌸', '🍄', '🌞', '🌻', '🪴', '🍎', '🥕', '🎈', '🚗', '🏀', '🎮',
   ];
 
-  late List<String> _shuffledCards;
+  List<String> _shuffledCards = [];
   List<bool> _cardFlipped = [];
   final List<int> _selectedIndices = [];
 
