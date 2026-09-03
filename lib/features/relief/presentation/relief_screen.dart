@@ -44,7 +44,7 @@ class ReliefScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final catalog = ref.watch(audioCatalogProvider);
-    final sessions = catalog.getSessions();
+    final sessions = catalog.getRegularSessions();
     final isPremiumUser = ref.watch(subscriptionControllerProvider).isPremium;
 
     return Scaffold(
