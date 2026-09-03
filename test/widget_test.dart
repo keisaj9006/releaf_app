@@ -1,22 +1,29 @@
-// Basic smoke test for app boot.
-//
-// Verifies that the app builds without errors and that a MaterialApp is present.
-
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:releaf_app/main.dart'; // <- poprawiona nazwa pakietu i import
+import 'package:releaf_app/core/providers.dart';
+import 'package:releaf_app/main.dart';
 
 void main() {
-  testWidgets('App boots and shows MaterialApp', (WidgetTester tester) async {
-    // Build the app
-    await tester.pumpWidget(const ReleafApp());
+  testWidgets('App boots with required provider overrides', (
+    WidgetTester tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({});
+    final prefs = await SharedPreferences.getInstance();
 
-    // Verify MaterialApp exists
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(prefs),
+        ],
+        child: const ReleafApp(),
+      ),
+    );
+    await tester.pump();
+
     expect(find.byType(MaterialApp), findsOneWidget);
-
-    // Optionally, check that DashboardScreen (home) is mounted by looking for AppBar title
-    // (jeśli masz inny tytuł, można to usunąć)
-    expect(find.text('Releaf'), findsNothing); // zostawiamy neutralnie
+    expect(find.text('Bring Releaf to your life.'), findsOneWidget);
   });
 }
