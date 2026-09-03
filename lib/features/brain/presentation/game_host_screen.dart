@@ -2,11 +2,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../routing/app_routes.dart';
-
-// Existing game screens (nie przenosimy na razie logiki — tylko odpalamy)
-import '../../../screens/memory_game_screen.dart';
-import '../../../screens/labirynth_game_screen.dart';
+import '../../../routing/app_routes.dart';
+import '../../../legacy/screens/memory_game_screen.dart';
+import '../../../legacy/screens/labirynth_game_screen.dart';
 import '../../../games/math_race/math_race_screen.dart';
 import '../../../legacy/screens/broken_mirror_game_screen.dart';
 
@@ -25,10 +23,7 @@ class GameHostScreen extends StatelessWidget {
     };
 
     return Scaffold(
-      // full-screen session
-      body: SafeArea(
-        child: child,
-      ),
+      body: SafeArea(child: child),
     );
   }
 }
