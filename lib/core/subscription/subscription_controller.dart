@@ -2,6 +2,7 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
+
 import 'revenuecat_service.dart';
 import 'subscription_state.dart';
 
@@ -21,7 +22,8 @@ class SubscriptionController extends StateNotifier<SubscriptionState> {
     try {
       final customerInfo = await _service.getCustomerInfoSafe();
       final offerings = await _service.getOfferingsSafe();
-      final isPremium = customerInfo != null ? _service.hasPremium(customerInfo) : false;
+      final isPremium =
+          customerInfo != null ? _service.hasPremium(customerInfo) : false;
 
       state = state.copyWith(
         isLoading: false,
@@ -29,8 +31,11 @@ class SubscriptionController extends StateNotifier<SubscriptionState> {
         offerings: offerings,
         isPremium: isPremium,
       );
-    } catch (e) {
-      state = state.copyWith(isLoading: false, error: 'Failed to sync subscriptions.');
+    } catch (_) {
+      state = state.copyWith(
+        isLoading: false,
+        error: 'Failed to sync subscriptions.',
+      );
     }
   }
 
@@ -53,6 +58,12 @@ class SubscriptionController extends StateNotifier<SubscriptionState> {
         state = state.copyWith(isLoading: false);
       }
       return false;
+    } catch (_) {
+      state = state.copyWith(
+        isLoading: false,
+        error: 'Purchases are unavailable right now.',
+      );
+      return false;
     }
   }
 
@@ -70,6 +81,12 @@ class SubscriptionController extends StateNotifier<SubscriptionState> {
       return isPremium;
     } on PlatformException catch (e) {
       state = state.copyWith(isLoading: false, error: e.message);
+      return false;
+    } catch (_) {
+      state = state.copyWith(
+        isLoading: false,
+        error: 'Restore purchases is unavailable right now.',
+      );
       return false;
     }
   }
