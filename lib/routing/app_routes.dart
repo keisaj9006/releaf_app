@@ -9,8 +9,10 @@ class AppRoutes {
   static const brainGame = 'game/:gameId';
   static const brainResult = 'result';
 
-  // Sub-route dla sesji relief
-  static const reliefSession = 'session/:sessionId';
+  static const reliefSession = '/relief/session/:sessionId';
+
+  static String reliefSessionFor(String sessionId) =>
+      '/relief/session/$sessionId';
 
   static const dashboardLegacy = '/';
   static const gamesLegacy = '/games';
