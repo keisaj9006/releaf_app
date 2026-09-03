@@ -5,7 +5,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show HapticFeedback;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../features/progress/data/leaves_repository.dart';
+import '../../features/progress/data/leaves_repository.dart';
 
 class BrokenMirrorGameScreen extends ConsumerStatefulWidget {
   const BrokenMirrorGameScreen({
@@ -13,11 +13,13 @@ class BrokenMirrorGameScreen extends ConsumerStatefulWidget {
     this.level = 1,
     this.enableTimer = false,
     this.seconds = 60,
+    this.onFinish,
   });
 
   final int level;
   final bool enableTimer;
   final int seconds;
+  final VoidCallback? onFinish;
 
   @override
   ConsumerState<BrokenMirrorGameScreen> createState() =>
@@ -154,17 +156,21 @@ class _BrokenMirrorGameScreenState extends ConsumerState<BrokenMirrorGameScreen>
 
     await HapticFeedback.mediumImpact();
 
-    // ✅ JEDYNY system nagród: Brain done (raz dziennie) + reward/bonus w repo
-    final result = await ref.read(leavesNotifierProvider.notifier).markBrainDone();
+    // Legacy entry points keep their existing reward. The canonical Brain host
+    // delegates the reward to GameResultScreen.
+    if (widget.onFinish == null) {
+      final result =
+          await ref.read(leavesNotifierProvider.notifier).markBrainDone();
 
-    if (mounted && result != null) {
-      final msg = result.hasBonus
-          ? '+${result.totalAdded} leaves • Perfect day bonus!'
-          : '+${result.totalAdded} leaves';
+      if (mounted && result != null) {
+        final msg = result.hasBonus
+            ? '+${result.totalAdded} leaves • Perfect day bonus!'
+            : '+${result.totalAdded} leaves';
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(msg)),
-      );
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(msg)),
+        );
+      }
     }
 
     if (!mounted) return;
@@ -175,7 +181,11 @@ class _BrokenMirrorGameScreenState extends ConsumerState<BrokenMirrorGameScreen>
     );
 
     if (!mounted) return;
-    Navigator.of(context).pop(); // wróć do listy gier / poprzedniego ekranu
+    if (widget.onFinish != null) {
+      widget.onFinish!();
+    } else {
+      Navigator.of(context).pop();
+    }
   }
 
   void _onFail() async {

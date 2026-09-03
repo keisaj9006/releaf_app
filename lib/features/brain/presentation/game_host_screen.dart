@@ -7,6 +7,30 @@ import '../../../legacy/screens/memory_game_screen.dart';
 import '../../../legacy/screens/labirynth_game_screen.dart';
 import '../../../games/math_race/math_race_screen.dart';
 import '../../../legacy/screens/broken_mirror_game_screen.dart';
+import 'game_result_screen.dart';
+
+const supportedBrainGameIds = <String>{
+  'memory',
+  'labyrinth',
+  'math_race',
+  'broken_mirror',
+};
+
+bool isSupportedBrainGame(String gameId) =>
+    supportedBrainGameIds.contains(gameId);
+
+Widget buildBrainGame({
+  required String gameId,
+  required ValueChanged<int?> onFinish,
+}) {
+  return switch (gameId) {
+    'memory' => MemoryGameScreen(onFinish: onFinish),
+    'labyrinth' => LabirynthGameScreen(onFinish: onFinish),
+    'math_race' => MathRaceScreen(onFinish: onFinish),
+    'broken_mirror' => BrokenMirrorGameScreen(onFinish: () => onFinish(null)),
+    _ => _UnknownGame(gameId: gameId),
+  };
+}
 
 class GameHostScreen extends StatelessWidget {
   const GameHostScreen({super.key, required this.gameId});
@@ -14,16 +38,21 @@ class GameHostScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Widget child = switch (gameId) {
-      'memory' => const MemoryGameScreen(),
-      'labyrinth' => const LabirynthGameScreen(),
-      'math_race' => const MathRaceScreen(),
-      'broken_mirror' => const BrokenMirrorGameScreen(),
-      _ => _UnknownGame(gameId: gameId),
-    };
+    final child = buildBrainGame(
+      gameId: gameId,
+      onFinish: (score) => _finish(context, score),
+    );
 
     return Scaffold(
       body: SafeArea(child: child),
+    );
+  }
+
+  void _finish(BuildContext context, int? score) {
+    if (!context.mounted) return;
+    context.go(
+      AppRoutes.brainResult,
+      extra: BrainGameResult(gameId: gameId, score: score),
     );
   }
 }

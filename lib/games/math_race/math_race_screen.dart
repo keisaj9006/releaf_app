@@ -9,7 +9,9 @@ import 'math_puzzle_generator.dart';
 import 'math_race_stats.dart';
 
 class MathRaceScreen extends ConsumerStatefulWidget {
-  const MathRaceScreen({super.key});
+  final ValueChanged<int>? onFinish;
+
+  const MathRaceScreen({super.key, this.onFinish});
 
   @override
   ConsumerState<MathRaceScreen> createState() => _MathRaceScreenState();
@@ -69,9 +71,13 @@ class _MathRaceScreenState extends ConsumerState<MathRaceScreen> {
     await MathRaceStats.saveBest(score: _score, level: _level);
 
     if (!mounted) return;
+    if (widget.onFinish != null) {
+      widget.onFinish!(_score);
+      return;
+    }
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (_) => GameResultScreen(score: _score),
+        builder: (_) => GameResultScreen(score: _score, completed: true),
       ),
     );
   }

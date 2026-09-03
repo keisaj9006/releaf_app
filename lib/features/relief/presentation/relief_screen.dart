@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/providers.dart';
 import '../application/relief_paywall_hooks.dart';
 import '../data/audio_catalog.dart';
+import 'relief_session_gate.dart';
 
 class ReliefScreen extends ConsumerWidget {
   const ReliefScreen({super.key});
@@ -16,7 +17,10 @@ class ReliefScreen extends ConsumerWidget {
     ReliefSession session,
     bool isPremiumUser,
   ) async {
-    if (session.isPremiumOnly && !isPremiumUser) {
+    if (!canAccessReliefSession(
+      session,
+      isPremiumUser: isPremiumUser,
+    )) {
       await maybeShowPaywall(context, ref, force: true);
       return;
     }
@@ -69,7 +73,10 @@ class ReliefScreen extends ConsumerWidget {
           separatorBuilder: (_, _) => const SizedBox(height: 16),
           itemBuilder: (context, index) {
             final session = sessions[index];
-            final locked = session.isPremiumOnly && !isPremiumUser;
+            final locked = !canAccessReliefSession(
+              session,
+              isPremiumUser: isPremiumUser,
+            );
 
             return _SessionCard(
               title: session.title,

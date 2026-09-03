@@ -7,8 +7,9 @@ import 'scaffold_with_nav.dart';
 import '../features/home/home_screen.dart';
 import '../features/habits/presentation/habits_screen.dart';
 import '../features/relief/presentation/relief_screen.dart';
-import '../features/relief/presentation/breathing_widget.dart';
-import '../legacy/screens/games_screen.dart';
+import '../features/relief/presentation/relief_session_gate.dart';
+import '../features/brain/presentation/brain_screen.dart';
+import '../features/brain/presentation/game_host_screen.dart';
 import '../features/brain/presentation/game_result_screen.dart';
 import '../features/home/daily_loop_screen.dart';
 
@@ -22,8 +23,8 @@ CustomTransitionPage<void> _fadePage(Widget child) {
   );
 }
 
-final GoRouter appRouter = GoRouter(
-  initialLocation: AppRoutes.home,
+GoRouter createAppRouter({String initialLocation = AppRoutes.home}) => GoRouter(
+  initialLocation: initialLocation,
   errorPageBuilder: (context, state) {
     return _fadePage(
       Scaffold(
@@ -78,7 +79,7 @@ final GoRouter appRouter = GoRouter(
           routes: [
             GoRoute(
               path: AppRoutes.brain,
-              pageBuilder: (context, state) => _fadePage(const GamesScreen()),
+              pageBuilder: (context, state) => _fadePage(const BrainScreen()),
             ),
           ],
         ),
@@ -89,15 +90,28 @@ final GoRouter appRouter = GoRouter(
       path: AppRoutes.reliefSession,
       pageBuilder: (context, state) {
         final sessionId = state.pathParameters['sessionId'] ?? '';
-        return _fadePage(BreathingWidget(sessionId: sessionId));
+        return _fadePage(ReliefSessionGate(sessionId: sessionId));
       },
     ),
 
     GoRoute(
-      path: '/brain-result',
+      path: AppRoutes.brainGame,
       pageBuilder: (context, state) {
-        final score = state.extra is int ? state.extra as int : null;
-        return _fadePage(GameResultScreen(score: score));
+        final gameId = state.pathParameters['gameId'] ?? '';
+        return _fadePage(GameHostScreen(gameId: gameId));
+      },
+    ),
+
+    GoRoute(
+      path: AppRoutes.brainResult,
+      pageBuilder: (context, state) {
+        final result = state.extra;
+        return _fadePage(
+          GameResultScreen(
+            score: result is BrainGameResult ? result.score : null,
+            completed: result is BrainGameResult,
+          ),
+        );
       },
     ),
 
@@ -124,3 +138,5 @@ final GoRouter appRouter = GoRouter(
     ),
   ],
 );
+
+final GoRouter appRouter = createAppRouter();

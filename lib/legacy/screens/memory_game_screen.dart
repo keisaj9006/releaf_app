@@ -151,9 +151,13 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
     countdownTimer?.cancel();
     final score = _calculateSessionScore(completed: completed);
 
-    // Jeśli uruchomione jako część Brain session → wołamy callback.
+    // Host Brain nagradza tylko faktycznie ukończoną sesję.
     if (widget.onFinish != null) {
-      widget.onFinish!(score);
+      if (completed) {
+        widget.onFinish!(score);
+      } else if (mounted) {
+        Navigator.of(context).maybePop();
+      }
       return;
     }
 

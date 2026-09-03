@@ -7,13 +7,26 @@ import 'package:go_router/go_router.dart';
 import '../../progress/data/leaves_repository.dart';
 import '../../../routing/app_routes.dart';
 
+class BrainGameResult {
+  final String gameId;
+  final int? score;
+
+  const BrainGameResult({required this.gameId, this.score});
+}
+
 /// Spójny ekran końca gry:
 /// - pokazuje score (lokalny wynik gry)
 /// - przyznaje dzienny bonus Brain tylko raz (przez LeavesNotifier)
 /// - daje jasne wyjście z flow
 class GameResultScreen extends ConsumerStatefulWidget {
   final int? score;
-  const GameResultScreen({super.key, this.score});
+  final bool completed;
+
+  const GameResultScreen({
+    super.key,
+    this.score,
+    this.completed = false,
+  });
 
   @override
   ConsumerState<GameResultScreen> createState() => _GameResultScreenState();
@@ -34,7 +47,7 @@ class _GameResultScreenState extends ConsumerState<GameResultScreen> {
   }
 
   Future<void> _awardBrainIfNeeded() async {
-    if (_awardHandled || !mounted) return;
+    if (_awardHandled || !mounted || !widget.completed) return;
     _awardHandled = true;
 
     final leavesNotifier = ref.read(leavesNotifierProvider.notifier);

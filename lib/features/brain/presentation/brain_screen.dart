@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../routing/app_routes.dart';
 import '../data/game_registry.dart';
+import 'game_host_screen.dart';
 
 class BrainScreen extends StatelessWidget {
   const BrainScreen({super.key});
@@ -25,12 +26,13 @@ class BrainScreen extends StatelessWidget {
             ),
             itemBuilder: (context, index) {
               final g = brainGames[index];
+              final enabled = g.enabled && isSupportedBrainGame(g.id);
               return _GameTile(
                 title: g.title,
                 icon: g.icon,
-                enabled: g.enabled,
-                onTap: g.enabled
-                    ? () => context.push('${AppRoutes.brain}/game/${g.id}')
+                enabled: enabled,
+                onTap: enabled
+                    ? () => context.push(AppRoutes.brainGameFor(g.id))
                     : null,
               );
             },

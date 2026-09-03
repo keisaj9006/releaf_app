@@ -11,7 +11,9 @@ import 'package:lottie/lottie.dart';
 import '../../features/brain/presentation/game_result_screen.dart';
 
 class LabirynthGameScreen extends StatefulWidget {
-  const LabirynthGameScreen({super.key});
+  final ValueChanged<int>? onFinish;
+
+  const LabirynthGameScreen({super.key, this.onFinish});
   @override
   State<LabirynthGameScreen> createState() => _LabirynthGameScreenState();
 }
@@ -455,11 +457,16 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen>
           if (_levelIndex < _levelsCount - 1) {
             setState(() => _levelIndex++);
             _loadLevel();
+          } else if (widget.onFinish != null) {
+            widget.onFinish!(_score);
           } else {
             // ✅ KONIEC SESJI — spójny result flow aplikacji
             Navigator.of(context).pushReplacement(
               MaterialPageRoute(
-                builder: (_) => GameResultScreen(score: _score),
+                builder: (_) => GameResultScreen(
+                  score: _score,
+                  completed: true,
+                ),
               ),
             );
           }

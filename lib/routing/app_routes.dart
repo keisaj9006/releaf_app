@@ -6,8 +6,10 @@ class AppRoutes {
   static const brain = '/brain';
   static const dailyLoop = '/daily-loop';
 
-  static const brainGame = 'game/:gameId';
-  static const brainResult = 'result';
+  static const brainGame = '/brain/game/:gameId';
+  static const brainResult = '/brain/result';
+
+  static String brainGameFor(String gameId) => '/brain/game/$gameId';
 
   static const reliefSession = '/relief/session/:sessionId';
 
