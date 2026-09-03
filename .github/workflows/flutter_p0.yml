@@ -1,0 +1,34 @@
+name: Flutter P0 Validation
+
+on:
+  push:
+    branches:
+      - releaf-development
+  pull_request:
+    branches:
+      - releaf-development
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Analyze
+        run: flutter analyze
+
+      - name: Test
+        run: flutter test
+
+      - name: Build Android debug APK
+        run: flutter build apk --debug
