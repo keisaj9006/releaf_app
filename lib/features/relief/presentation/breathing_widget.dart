@@ -32,7 +32,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final session = ref.read(audioCatalogProvider).getById(widget.sessionId);
       if (session == null) {
-        if (mounted) context.pop(false);
+        if (mounted) context.pop();
         return;
       }
 
@@ -75,8 +75,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
     HapticFeedback.mediumImpact();
     setState(() => _phase = SessionPhase.feedback);
 
-    // award only once, only on completion (timer finished)
-    if (_awarded) return;
+    if (_awarded || _session?.isEmergency == true) return;
     _awarded = true;
 
     final result = await ref.read(leavesNotifierProvider.notifier).markReliefDone();
@@ -95,7 +94,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
 
   void _abortSession() {
     _timer?.cancel();
-    if (mounted) context.pop(false);
+    if (mounted) context.pop();
   }
 
   void _submitFeedbackAndClose(bool helpedALot) {
