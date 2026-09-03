@@ -20,16 +20,16 @@ Future<void> reliefCompleted(WidgetRef ref, {required bool helpedALot}) async {
 }
 
 Future<void> maybeShowPaywall(
-    BuildContext context,
-    WidgetRef ref, {
-      bool softOffer = false,
-    }) async {
+  BuildContext context,
+  WidgetRef ref, {
+  bool softOffer = false,
+  bool force = false,
+}) async {
   final isPremium = ref.read(subscriptionControllerProvider).isPremium;
   if (isPremium) return;
 
   final trigger = ref.read(paywallTriggerProvider);
-  final shouldShow = trigger.shouldShowPaywall();
-  if (!shouldShow) return;
+  if (!force && !trigger.shouldShowPaywall()) return;
   if (!context.mounted) return;
 
   await showModalBottomSheet(
