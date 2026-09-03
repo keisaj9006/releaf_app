@@ -1,7 +1,5 @@
-// FILE: lib/features/relief/data/audio_catalog.dart
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// Provider dostarczający katalog sesji (ułatwia testowanie i mockowanie)
 final audioCatalogProvider = Provider<AudioCatalog>((ref) {
   return const AudioCatalog();
 });
@@ -12,6 +10,7 @@ class ReliefSession {
   final int durationSeconds;
   final List<String> instructions;
   final bool isPremiumOnly;
+  final bool isEmergency;
 
   const ReliefSession({
     required this.id,
@@ -19,13 +18,29 @@ class ReliefSession {
     required this.durationSeconds,
     required this.instructions,
     this.isPremiumOnly = false,
+    this.isEmergency = false,
   });
 }
 
 class AudioCatalog {
   const AudioCatalog();
 
+  static const emergencySessionId = 'emergency-grounding';
+
   List<ReliefSession> getSessions() => const [
+    ReliefSession(
+      id: emergencySessionId,
+      title: 'Emergency Grounding',
+      durationSeconds: 120,
+      isEmergency: true,
+      instructions: [
+        'Place both feet on the floor and notice the support beneath you.',
+        'Look around and name five things you can see.',
+        'Notice four things you can physically feel around you.',
+        'Listen for three sounds without trying to change them.',
+        'Continue at your own pace. You can stop at any time.',
+      ],
+    ),
     ReliefSession(
       id: '60s-grounding',
       title: '60s Grounding',
@@ -74,6 +89,10 @@ class AudioCatalog {
       ],
     ),
   ];
+
+  List<ReliefSession> getRegularSessions() {
+    return getSessions().where((session) => !session.isEmergency).toList();
+  }
 
   ReliefSession? getById(String id) {
     for (final session in getSessions()) {
