@@ -66,7 +66,7 @@ class ReliefScreen extends ConsumerWidget {
         child: ListView.separated(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           itemCount: sessions.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 16),
+          separatorBuilder: (_, _) => const SizedBox(height: 16),
           itemBuilder: (context, index) {
             final session = sessions[index];
             final locked = session.isPremiumOnly && !isPremiumUser;

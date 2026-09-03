@@ -123,7 +123,7 @@ class _AppBackground extends StatelessWidget {
         Positioned.fill(
           child: DecoratedBox(
             decoration: BoxDecoration(
-              color: const Color(0xFFF8F4E3).withOpacity(0.55),
+              color: const Color(0xFFF8F4E3).withValues(alpha: 0.55),
             ),
           ),
         ),

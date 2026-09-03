@@ -318,7 +318,9 @@ class _LeavesPill extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xFFEFF6EF),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: const Color(0xFF1E4D2B).withOpacity(0.15)),
+        border: Border.all(
+          color: const Color(0xFF1E4D2B).withValues(alpha: 0.15),
+        ),
       ),
       child: Row(
         children: [
@@ -348,7 +350,7 @@ class _TimerPill extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xFFFFF3F3),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: Colors.black.withOpacity(0.08)),
+        border: Border.all(color: Colors.black.withValues(alpha: 0.08)),
       ),
       child: Text(
         "${secondsLeft}s",
@@ -373,7 +375,7 @@ class _BoardFrame extends StatelessWidget {
           BoxShadow(
             blurRadius: 25,
             offset: const Offset(0, 10),
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withValues(alpha: 0.08),
           ),
         ],
       ),
@@ -422,7 +424,7 @@ class _TargetPainter extends CustomPainter {
     final paint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2
-      ..color = Colors.black.withOpacity(0.08);
+      ..color = Colors.black.withValues(alpha: 0.08);
 
     for (final s in shards) {
       final path = Path();
@@ -488,12 +490,12 @@ class _ShardPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
       ..style = PaintingStyle.fill
-      ..color = const Color(0xFF1E4D2B).withOpacity(0.12);
+      ..color = const Color(0xFF1E4D2B).withValues(alpha: 0.12);
 
     final border = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2
-      ..color = const Color(0xFF1E4D2B).withOpacity(0.35);
+      ..color = const Color(0xFF1E4D2B).withValues(alpha: 0.35);
 
     final path = Path();
     final first = shard.polygon.first;

@@ -108,19 +108,19 @@ final GoRouter appRouter = GoRouter(
 
     GoRoute(
       path: AppRoutes.dashboardLegacy,
-      redirect: (_, __) => AppRoutes.home,
+      redirect: (_, _) => AppRoutes.home,
     ),
     GoRoute(
       path: AppRoutes.gamesLegacy,
-      redirect: (_, __) => AppRoutes.brain,
+      redirect: (_, _) => AppRoutes.brain,
     ),
     GoRoute(
       path: AppRoutes.mathRaceLegacy,
-      redirect: (_, __) => AppRoutes.brain,
+      redirect: (_, _) => AppRoutes.brain,
     ),
     GoRoute(
       path: AppRoutes.labirynthStatsLegacy,
-      redirect: (_, __) => AppRoutes.brain,
+      redirect: (_, _) => AppRoutes.brain,
     ),
   ],
 );

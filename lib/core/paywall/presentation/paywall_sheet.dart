@@ -31,7 +31,7 @@ class PaywallSheet extends ConsumerWidget {
               width: 44,
               height: 5,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.25),
+                color: Colors.white.withValues(alpha: 0.25),
                 borderRadius: BorderRadius.circular(999),
               ),
             ),
@@ -59,7 +59,7 @@ class PaywallSheet extends ConsumerWidget {
               softOffer
                   ? 'You just completed a session — keep the streak going with Premium.'
                   : 'Get unlimited access and support the app.',
-              style: TextStyle(color: Colors.white.withOpacity(0.85)),
+              style: TextStyle(color: Colors.white.withValues(alpha: 0.85)),
             ),
             const SizedBox(height: 16),
 

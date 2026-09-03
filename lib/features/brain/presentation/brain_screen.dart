@@ -59,7 +59,7 @@ class _GameTile extends StatelessWidget {
     final opacity = enabled ? 1.0 : 0.45;
 
     return Material(
-      color: Colors.white.withOpacity(0.78),
+      color: Colors.white.withValues(alpha: 0.78),
       borderRadius: BorderRadius.circular(18),
       child: InkWell(
         borderRadius: BorderRadius.circular(18),
@@ -85,7 +85,7 @@ class _GameTile extends StatelessWidget {
                   enabled ? 'Play' : 'Soon',
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
-                    color: Colors.black.withOpacity(0.55),
+                    color: Colors.black.withValues(alpha: 0.55),
                   ),
                 ),
               ],

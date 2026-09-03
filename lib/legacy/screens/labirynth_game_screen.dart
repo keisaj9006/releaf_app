@@ -670,13 +670,13 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen>
                     height: goalRScreen * 2,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Colors.orangeAccent.withOpacity(0.95),
+                      color: Colors.orangeAccent.withValues(alpha: 0.95),
                       border: Border.all(width: 3, color: Colors.white),
                       boxShadow: [
                         BoxShadow(
                           blurRadius: 14,
                           spreadRadius: 5,
-                          color: Colors.orangeAccent.withOpacity(0.55),
+                          color: Colors.orangeAccent.withValues(alpha: 0.55),
                         ),
                       ],
                     ),
@@ -770,10 +770,10 @@ class _HudPill extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xE016191D),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: Colors.white.withOpacity(0.12)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.35),
+            color: Colors.black.withValues(alpha: 0.35),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -828,10 +828,10 @@ class _CircleIconBtn extends StatelessWidget {
         decoration: BoxDecoration(
           color: const Color(0xE016191D),
           shape: BoxShape.circle,
-          border: Border.all(color: Colors.white.withOpacity(0.12)),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.35),
+              color: Colors.black.withValues(alpha: 0.35),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -875,16 +875,16 @@ class _WalkerMarker extends StatelessWidget {
               height: size * 0.95,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: const Color(0xFF000000).withOpacity(0.01),
+                color: const Color(0xFF000000).withValues(alpha: 0.01),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(shadowOpacity),
+                    color: Colors.black.withValues(alpha: shadowOpacity),
                     blurRadius: size * 0.24,
                     spreadRadius: size * 0.02,
                     offset: Offset(0, size * 0.06),
                   ),
                   BoxShadow(
-                    color: const Color(0xFF7CFF78).withOpacity(glowOpacity),
+                    color: const Color(0xFF7CFF78).withValues(alpha: glowOpacity),
                     blurRadius: size * 0.30,
                     spreadRadius: size * 0.02,
                     offset: const Offset(0, 0),
@@ -943,7 +943,7 @@ class _PauseOrResultCard extends StatelessWidget {
         children: [
           Text(
             subtitle,
-            style: TextStyle(color: Colors.white.withOpacity(0.8)),
+            style: TextStyle(color: Colors.white.withValues(alpha: 0.8)),
           ),
           const SizedBox(height: 12),
           ...stats.map(

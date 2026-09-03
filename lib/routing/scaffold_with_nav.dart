@@ -87,7 +87,7 @@ class _ResumePill extends StatelessWidget {
     return Material(
       elevation: 6,
       borderRadius: BorderRadius.circular(18),
-      color: Colors.white.withOpacity(0.90),
+      color: Colors.white.withValues(alpha: 0.90),
       child: InkWell(
         borderRadius: BorderRadius.circular(18),
         onTap: onResume,
@@ -115,7 +115,7 @@ class _ResumePill extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
-                        color: Colors.black.withOpacity(0.55),
+                        color: Colors.black.withValues(alpha: 0.55),
                       ),
                     ),
                   ],

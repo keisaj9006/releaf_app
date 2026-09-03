@@ -170,7 +170,7 @@ class _MathRaceScreenState extends ConsumerState<MathRaceScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(.92),
+        color: Colors.white.withValues(alpha: .92),
         borderRadius: BorderRadius.circular(14),
         boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 6)],
       ),
@@ -247,7 +247,7 @@ class _MathRaceScreenState extends ConsumerState<MathRaceScreen> {
                       vertical: 22,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(.95),
+                      color: Colors.white.withValues(alpha: .95),
                       borderRadius: BorderRadius.circular(24),
                       boxShadow: const [
                         BoxShadow(

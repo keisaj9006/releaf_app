@@ -112,8 +112,8 @@ class DashboardScreen extends StatelessWidget {
             context,
             PageRouteBuilder(
               transitionDuration: const Duration(milliseconds: 400),
-              pageBuilder: (_, __, ___) => screen,
-              transitionsBuilder: (_, animation, __, child) {
+              pageBuilder: (_, _, _) => screen,
+              transitionsBuilder: (_, animation, _, child) {
                 return FadeTransition(opacity: animation, child: child);
               },
             ),
