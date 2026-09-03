@@ -28,6 +28,8 @@ class RewardResult {
 
 class LeavesNotifier extends StateNotifier<LeavesState> {
   final Ref ref;
+  late final Future<void> _ready;
+  Future<void> _operationQueue = Future<void>.value();
 
   LeavesNotifier(this.ref)
       : super(
@@ -39,7 +41,7 @@ class LeavesNotifier extends StateNotifier<LeavesState> {
       brainDone: false,
     ),
   ) {
-    _load();
+    _ready = _load();
   }
 
   // ---- Rewards (P0) ----
@@ -116,8 +118,7 @@ class LeavesNotifier extends StateNotifier<LeavesState> {
     if (state.todayKey == current) return;
 
     final prefs = ref.read(sharedPreferencesProvider);
-
-    state = state.copyWith(
+    final resetState = state.copyWith(
       todayKey: current,
       reliefDone: false,
       habitDone: false,
@@ -128,6 +129,7 @@ class LeavesNotifier extends StateNotifier<LeavesState> {
     await prefs.setBool(_kReliefDone, false);
     await prefs.setBool(_kHabitDone, false);
     await prefs.setBool(_kBrainDone, false);
+    state = resetState;
   }
 
   Future<void> _persistTotal(int total) async {
@@ -141,66 +143,63 @@ class LeavesNotifier extends StateNotifier<LeavesState> {
   }
 
   /// Narzędzie ogólne – UI nie powinno tego wołać zamiast "markXDone".
-  Future<void> addLeaves(int amount) async {
+  Future<void> addLeaves(int amount) => _runExclusive(() async {
     await _resetIfNewDay();
     final newTotal = state.totalLeaves + amount;
-    state = state.copyWith(totalLeaves: newTotal);
     await _persistTotal(newTotal);
-  }
+    state = state.copyWith(totalLeaves: newTotal);
+  });
 
   /// Relief: raz dziennie +1 (i bonus jeśli to 3/3)
-  Future<RewardResult?> markReliefDone() async {
-    return _complete(
+  Future<RewardResult?> markReliefDone() {
+    return _runExclusive(() => _complete(
       baseReward: _reliefReward,
-      isDone: state.reliefDone,
-      setDone: () async {
-        state = state.copyWith(reliefDone: true);
-        await _persistFlag(_kReliefDone, true);
-      },
-    );
+      isDone: (current) => current.reliefDone,
+      markDone: (current) => current.copyWith(reliefDone: true),
+      flagKey: _kReliefDone,
+    ));
   }
 
   /// Habits: raz dziennie +1 (i bonus jeśli to 3/3)
-  Future<RewardResult?> markHabitDone() async {
-    return _complete(
+  Future<RewardResult?> markHabitDone() {
+    return _runExclusive(() => _complete(
       baseReward: _habitReward,
-      isDone: state.habitDone,
-      setDone: () async {
-        state = state.copyWith(habitDone: true);
-        await _persistFlag(_kHabitDone, true);
-      },
-    );
+      isDone: (current) => current.habitDone,
+      markDone: (current) => current.copyWith(habitDone: true),
+      flagKey: _kHabitDone,
+    ));
   }
 
   /// Brain: raz dziennie +2 (i bonus jeśli to 3/3)
-  Future<RewardResult?> markBrainDone() async {
-    return _complete(
+  Future<RewardResult?> markBrainDone() {
+    return _runExclusive(() => _complete(
       baseReward: _brainReward,
-      isDone: state.brainDone,
-      setDone: () async {
-        state = state.copyWith(brainDone: true);
-        await _persistFlag(_kBrainDone, true);
-      },
-    );
+      isDone: (current) => current.brainDone,
+      markDone: (current) => current.copyWith(brainDone: true),
+      flagKey: _kBrainDone,
+    ));
   }
 
   Future<RewardResult?> _complete({
     required int baseReward,
-    required bool isDone,
-    required Future<void> Function() setDone,
+    required bool Function(LeavesState) isDone,
+    required LeavesState Function(LeavesState) markDone,
+    required String flagKey,
   }) async {
     await _resetIfNewDay();
-    if (isDone) return null;
+    if (isDone(state)) return null;
 
-    await setDone();
-
-    final completedNow = _completedCount(state);
+    final completedState = markDone(state);
+    final completedNow = _completedCount(completedState);
     final isThird = completedNow == 3;
     final bonus = isThird ? _bonusForThird(baseReward) : 0;
 
-    final newTotal = state.totalLeaves + baseReward + bonus;
-    state = state.copyWith(totalLeaves: newTotal);
+    final newTotal = completedState.totalLeaves + baseReward + bonus;
+    final nextState = completedState.copyWith(totalLeaves: newTotal);
+
+    await _persistFlag(flagKey, true);
     await _persistTotal(newTotal);
+    state = nextState;
 
     return RewardResult(
       added: baseReward,
@@ -208,5 +207,18 @@ class LeavesNotifier extends StateNotifier<LeavesState> {
       newTotal: newTotal,
       completedToday: completedNow,
     );
+  }
+
+  Future<T> _runExclusive<T>(Future<T> Function() operation) {
+    final result = _operationQueue.then<T>((_) async {
+      await _ready;
+      return operation();
+    });
+
+    _operationQueue = result.then<void>(
+      (_) {},
+      onError: (Object _, StackTrace _) {},
+    );
+    return result;
   }
 }
