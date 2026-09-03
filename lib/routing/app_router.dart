@@ -4,21 +4,12 @@ import 'package:go_router/go_router.dart';
 import 'app_routes.dart';
 import 'scaffold_with_nav.dart';
 
-// Main tabs
 import '../features/home/home_screen.dart';
 import '../features/habits/presentation/habits_screen.dart';
 import '../features/relief/presentation/relief_screen.dart';
-
-// Relief session screen
 import '../features/relief/presentation/breathing_widget.dart';
-
-// Brain tab = legacy działający ekran z 6 grami
 import '../legacy/screens/games_screen.dart';
-
-// Game result (legacy)
 import '../features/brain/presentation/game_result_screen.dart';
-
-// Daily Loop
 import '../features/home/daily_loop_screen.dart';
 
 CustomTransitionPage<void> _fadePage(Widget child) {
@@ -59,7 +50,6 @@ final GoRouter appRouter = GoRouter(
         return ScaffoldWithNavBar(navigationShell: navigationShell);
       },
       branches: [
-        // HOME
         StatefulShellBranch(
           routes: [
             GoRoute(
@@ -68,8 +58,6 @@ final GoRouter appRouter = GoRouter(
             ),
           ],
         ),
-
-        // HABITS
         StatefulShellBranch(
           routes: [
             GoRoute(
@@ -78,28 +66,14 @@ final GoRouter appRouter = GoRouter(
             ),
           ],
         ),
-
-        // RELIEF
         StatefulShellBranch(
           routes: [
             GoRoute(
               path: AppRoutes.relief,
               pageBuilder: (context, state) => _fadePage(const ReliefScreen()),
-              routes: [
-                // /relief/session/:sessionId
-                GoRoute(
-                  path: AppRoutes.reliefSession,
-                  pageBuilder: (context, state) {
-                    final sessionId = state.pathParameters['sessionId'] ?? '';
-                    return _fadePage(BreathingWidget(sessionId: sessionId));
-                  },
-                ),
-              ],
             ),
           ],
         ),
-
-        // BRAIN -> legacy GamesScreen
         StatefulShellBranch(
           routes: [
             GoRoute(
@@ -111,7 +85,14 @@ final GoRouter appRouter = GoRouter(
       ],
     ),
 
-    // Route do ekranu wyniku (legacy gry)
+    GoRoute(
+      path: AppRoutes.reliefSession,
+      pageBuilder: (context, state) {
+        final sessionId = state.pathParameters['sessionId'] ?? '';
+        return _fadePage(BreathingWidget(sessionId: sessionId));
+      },
+    ),
+
     GoRoute(
       path: '/brain-result',
       pageBuilder: (context, state) {
@@ -120,13 +101,11 @@ final GoRouter appRouter = GoRouter(
       },
     ),
 
-    // Daily Loop (fullscreen flow)
     GoRoute(
       path: AppRoutes.dailyLoop,
       pageBuilder: (context, state) => _fadePage(const DailyLoopScreen()),
     ),
 
-    // Legacy aliases
     GoRoute(
       path: AppRoutes.dashboardLegacy,
       redirect: (_, __) => AppRoutes.home,
