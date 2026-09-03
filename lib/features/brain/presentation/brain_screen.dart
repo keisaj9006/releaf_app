@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../routing/app_routes.dart';
+import '../../../routing/app_routes.dart';
 import '../data/game_registry.dart';
 
 class BrainScreen extends StatelessWidget {
