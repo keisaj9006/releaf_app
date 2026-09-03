@@ -1,179 +1,161 @@
 // FILE: lib/features/relief/presentation/relief_screen.dart
-// ACTION: UPDATE (Całkowite nadpisanie)
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../data/relief_repository.dart';
-import '../domain/models/content_item.dart';
+
+import '../../../core/providers.dart';
+import '../application/relief_paywall_hooks.dart';
+import '../data/audio_catalog.dart';
 
 class ReliefScreen extends ConsumerWidget {
   const ReliefScreen({super.key});
 
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final reliefState = ref.watch(reliefRepositoryProvider);
+  Future<void> _openSession(
+    BuildContext context,
+    WidgetRef ref,
+    ReliefSession session,
+    bool isPremiumUser,
+  ) async {
+    if (session.isPremiumOnly && !isPremiumUser) {
+      await maybeShowPaywall(context, ref, force: true);
+      return;
+    }
 
-    return Scaffold(
-      backgroundColor: Colors.white, // Dostosuj do AppTheme
-      appBar: AppBar(
-        title: const Text('Ulga i Regulacja', style: TextStyle(fontWeight: FontWeight.bold)),
-        elevation: 0,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-      ),
-      body: reliefState.when(
-        data: (items) => _buildContent(context, items),
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, stack) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error_outline, color: Colors.red, size: 48),
-              const SizedBox(height: 16),
-              Text('Wystąpił błąd: ${err.toString()}', textAlign: TextAlign.center),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () => ref.invalidate(reliefRepositoryProvider),
-                child: const Text('Spróbuj ponownie'),
-              ),
-            ],
-          ),
-        ),
-      ),
+    await reliefStarted(ref);
+
+    if (!context.mounted) return;
+    final helpedALot = await context.push<bool>(
+      '/relief/session/${session.id}',
     );
-  }
 
-  Widget _buildContent(BuildContext context, List<ContentItem> items) {
-    final emergencies = items.where((i) => i.type == ContentType.emergency).toList();
-    final regulars = items.where((i) => i.type != ContentType.emergency).toList();
+    if (helpedALot == null || !context.mounted) return;
 
-    return RefreshIndicator(
-      onRefresh: () async => ref.invalidate(reliefRepositoryProvider),
-      child: ListView(
-        padding: const EdgeInsets.all(16.0),
-        children: [
-          // Sekcja Emergency (Safety by design)
-          if (emergencies.isNotEmpty) ...[
-            const Text(
-              'Potrzebujesz szybkiej pomocy?',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.redAccent),
-            ),
-            const SizedBox(height: 12),
-            ...emergencies.map((item) => _buildEmergencyCard(context, item)),
-            const SizedBox(height: 32),
-          ],
+    await reliefCompleted(ref, helpedALot: helpedALot);
 
-          // Sekcja Biblioteki
-          const Text(
-            'Biblioteka Ćwiczeń',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 16),
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
-              childAspectRatio: 0.85,
-            ),
-            itemCount: regulars.length,
-            itemBuilder: (context, index) {
-              return _buildContentCard(context, regulars[index]);
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildEmergencyCard(BuildContext context, ContentItem item) {
-    return Semantics(
-      button: true,
-      label: 'Szybki ratunek: ${item.title}',
-      child: InkWell(
-        onTap: () => _navigateToPlayer(context, item),
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: Colors.red.withValues(alpha: 0.1),
-            border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Row(
-            children: [
-              const Icon(Icons.health_and_safety, color: Colors.red, size: 32),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(item.title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                    const SizedBox(height: 4),
-                    Text(item.oneLiner, style: TextStyle(color: Colors.grey[700], fontSize: 13)),
-                  ],
-                ),
-              ),
-              const Icon(Icons.arrow_forward_ios, color: Colors.red, size: 16),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildContentCard(BuildContext context, ContentItem item) {
-    final isPremium = item.accessTier == AccessTier.premium;
-
-    return Semantics(
-      button: true,
-      label: 'Ćwiczenie: ${item.title}',
-      child: InkWell(
-        onTap: () => _navigateToPlayer(context, item),
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.grey[100],
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Icon(_getIconForType(item.type), color: Colors.teal),
-                  if (isPremium) const Icon(Icons.lock, color: Colors.amber, size: 16),
-                ],
-              ),
-              const Spacer(),
-              Text(item.title, style: const TextStyle(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 4),
-              Text('${item.durationSec ~/ 60} min', style: const TextStyle(color: Colors.grey, fontSize: 12)),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  IconData _getIconForType(ContentType type) {
-    switch (type) {
-      case ContentType.breath: return Icons.air;
-      case ContentType.sound: return Icons.headphones;
-      case ContentType.noBreath: return Icons.self_improvement;
-      default: return Icons.spa;
+    if (context.mounted) {
+      await maybeShowPaywall(
+        context,
+        ref,
+        softOffer: helpedALot,
+      );
     }
   }
 
-  void _navigateToPlayer(BuildContext context, ContentItem item) {
-    // UWAGA: Tu w przyszłości dodasz logikę sprawdzania Paywalla.
-    // if (item.accessTier == AccessTier.premium && !userHasPremium) { showPaywall(); return; }
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final catalog = ref.watch(audioCatalogProvider);
+    final sessions = catalog.getSessions();
+    final isPremiumUser = ref.watch(subscriptionControllerProvider).isPremium;
 
-    context.push('/relief/play/${item.id}');
+    return Scaffold(
+      backgroundColor: const Color(0xFF121417),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF121417),
+        elevation: 0,
+        title: const Text(
+          'Fast Resets',
+          style: TextStyle(
+            color: Color(0xFFF0F2F5),
+            fontWeight: FontWeight.w600,
+            fontSize: 24,
+            letterSpacing: -0.5,
+          ),
+        ),
+      ),
+      body: SafeArea(
+        child: ListView.separated(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          itemCount: sessions.length,
+          separatorBuilder: (_, __) => const SizedBox(height: 16),
+          itemBuilder: (context, index) {
+            final session = sessions[index];
+            final locked = session.isPremiumOnly && !isPremiumUser;
+
+            return _SessionCard(
+              title: session.title,
+              durationMinutes: session.durationSeconds ~/ 60,
+              isLocked: locked,
+              onTap: () => _openSession(
+                context,
+                ref,
+                session,
+                isPremiumUser,
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class _SessionCard extends StatelessWidget {
+  final String title;
+  final int durationMinutes;
+  final bool isLocked;
+  final VoidCallback onTap;
+
+  const _SessionCard({
+    required this.title,
+    required this.durationMinutes,
+    required this.isLocked,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Ink(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1C1F24),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xFF2E323B)),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      color: Color(0xFFF0F2F5),
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    isLocked ? 'Premium Protocol' : '$durationMinutes min reset',
+                    style: TextStyle(
+                      color: isLocked
+                          ? const Color(0xFF686D7B)
+                          : const Color(0xFFA1A6B4),
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (isLocked)
+              const Icon(
+                Icons.lock_outline,
+                color: Color(0xFFE2C792),
+                size: 22,
+              )
+            else
+              const Icon(
+                Icons.play_circle_fill,
+                color: Color(0xFF6B9080),
+                size: 28,
+              ),
+          ],
+        ),
+      ),
+    );
   }
 }
