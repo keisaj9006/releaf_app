@@ -23,7 +23,6 @@ Future<void> main() async {
     systemNavigationBarIconBrightness: Brightness.dark,
   ));
 
-  // SharedPreferences -> Riverpod override.
   final prefs = await SharedPreferences.getInstance();
 
   final container = ProviderContainer(
@@ -32,10 +31,9 @@ Future<void> main() async {
     ],
   );
 
-  // IMPORTANT: Init RevenueCat before UI starts using subscription state.
-  // TODO: wstaw swój klucz (najlepiej z env/flavors, nie hardcode w repo).
+  final revenueCatApiKey = _revenueCatApiKeyForCurrentPlatform();
   await container.read(revenueCatServiceProvider).init(
-    apiKey: 'REVENUECAT_ANDROID_API_KEY',
+    apiKey: revenueCatApiKey,
     debug: kDebugMode,
   );
 
@@ -45,6 +43,19 @@ Future<void> main() async {
       child: const ReleafApp(),
     ),
   );
+}
+
+String _revenueCatApiKeyForCurrentPlatform() {
+  if (kIsWeb) return '';
+
+  switch (defaultTargetPlatform) {
+    case TargetPlatform.android:
+      return const String.fromEnvironment('REVENUECAT_ANDROID_API_KEY');
+    case TargetPlatform.iOS:
+      return const String.fromEnvironment('REVENUECAT_IOS_API_KEY');
+    default:
+      return '';
+  }
 }
 
 class ReleafApp extends StatelessWidget {
