@@ -4,9 +4,20 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:releaf_app/core/providers.dart';
+import 'package:releaf_app/core/subscription/revenuecat_service.dart';
 import 'package:releaf_app/main.dart';
 
 void main() {
+  test('RevenueCat accepts missing configuration without initialization', () async {
+    final service = RevenueCatService();
+
+    await service.init(apiKey: '', debug: false);
+
+    expect(service.isInitialized, isFalse);
+    expect(await service.getCustomerInfoSafe(), isNull);
+    expect(await service.getOfferingsSafe(), isNull);
+  });
+
   testWidgets('App boots with required provider overrides', (
     WidgetTester tester,
   ) async {
