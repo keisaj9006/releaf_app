@@ -8,7 +8,7 @@ import 'package:releaf_app/core/subscription/revenuecat_service.dart';
 import 'package:releaf_app/core/subscription/subscription_controller.dart';
 import 'package:releaf_app/core/subscription/subscription_state.dart';
 import 'package:releaf_app/features/progress/data/leaves_repository.dart';
-import 'package:releaf_app/features/relief/data/audio_catalog.dart';
+import 'package:releaf_app/features/relief/data/audio_catalog.dart' as legacy;
 import 'package:releaf_app/features/relief/data/reset_catalog.dart';
 import 'package:releaf_app/features/relief/presentation/relief_session_gate.dart';
 import 'package:releaf_app/routing/app_router.dart';
@@ -33,10 +33,12 @@ class _FixedSubscriptionController extends SubscriptionController {
 }
 
 void main() {
-  const catalog = AudioCatalog();
+  const catalog = legacy.AudioCatalog();
   final freeSession = catalog.getById('60s-grounding')!;
   final premiumSession = catalog.getById('3min-breath')!;
-  final emergencySession = catalog.getById(AudioCatalog.emergencySessionId)!;
+  final emergencySession = catalog.getById(
+    legacy.AudioCatalog.emergencySessionId,
+  )!;
 
   test('Relief access policy allows free and entitled sessions', () {
     expect(

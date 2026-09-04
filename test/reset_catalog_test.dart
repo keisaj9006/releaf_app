@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:releaf_app/features/relief/data/audio_catalog.dart';
+import 'package:releaf_app/features/relief/data/audio_catalog.dart' as legacy;
 import 'package:releaf_app/features/relief/data/relief_repository.dart';
 import 'package:releaf_app/features/relief/data/reset_catalog.dart';
 import 'package:releaf_app/features/relief/domain/models/reset_content.dart';
@@ -101,7 +101,7 @@ void main() {
   });
 
   test('legacy AudioCatalog resolves the canonical IDs and content', () {
-    const legacyCatalog = AudioCatalog();
+    const legacyCatalog = legacy.AudioCatalog();
 
     expect(
       legacyCatalog.getSessions().map((item) => item.id).toSet(),
