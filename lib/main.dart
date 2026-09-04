@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'core/providers.dart';
 import 'routing/app_router.dart';
+import 'theme/app_theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -63,41 +64,10 @@ class ReleafApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = ThemeData(
-      useMaterial3: true,
-      fontFamily: 'Poppins',
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: const Color(0xFF1E4D2B),
-        brightness: Brightness.light,
-      ),
-      scaffoldBackgroundColor: Colors.transparent,
-      appBarTheme: const AppBarTheme(
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-        surfaceTintColor: Colors.transparent,
-        foregroundColor: Color(0xFF1E4D2B),
-        centerTitle: true,
-        titleTextStyle: TextStyle(
-          fontFamily: 'Poppins',
-          fontWeight: FontWeight.w700,
-          fontSize: 20,
-          color: Color(0xFF1E4D2B),
-        ),
-      ),
-      cardTheme: const CardThemeData(
-        elevation: 0,
-        margin: EdgeInsets.zero,
-        surfaceTintColor: Colors.transparent,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(18)),
-        ),
-      ),
-    );
-
     return MaterialApp.router(
       title: 'Releaf',
       debugShowCheckedModeBanner: false,
-      theme: theme,
+      theme: AppTheme.light(),
       routerConfig: appRouter,
       builder: (context, child) {
         return _AppBackground(child: child ?? const SizedBox.shrink());
