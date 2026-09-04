@@ -101,6 +101,8 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 250));
 
+    await tester.ensureVisible(find.text(premiumSession.title));
+    await tester.pump();
     await tester.tap(find.text(premiumSession.title));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 250));

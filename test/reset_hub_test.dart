@@ -132,11 +132,8 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
 
-    await tester.scrollUntilVisible(
-      find.text('3 min Deep Reset'),
-      180,
-      scrollable: find.byKey(const Key('reset-scroll-view')),
-    );
+    await tester.ensureVisible(find.text('3 min Deep Reset'));
+    await tester.pump();
     await tester.tap(find.text('3 min Deep Reset'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
