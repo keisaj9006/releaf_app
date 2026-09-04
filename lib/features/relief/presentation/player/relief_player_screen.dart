@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../data/relief_repository.dart';
-import '../../domain/models/content_item.dart';
+import '../../domain/models/reset_content.dart';
 
 class ReliefPlayerScreen extends ConsumerWidget {
   final String contentId;
@@ -29,7 +29,7 @@ class ReliefPlayerScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildPlayerView(BuildContext context, ContentItem item) {
+  Widget _buildPlayerView(BuildContext context, ResetContent item) {
     return Column(
       children: [
         const SizedBox(height: 20),
@@ -46,9 +46,9 @@ class ReliefPlayerScreen extends ConsumerWidget {
 
         // Główne UI Playera (tutaj podmienisz na faktyczne animacje oddechu / audio)
         Icon(
-            item.type == ContentType.emergency ? Icons.health_and_safety : Icons.self_improvement,
+            item.isEmergency ? Icons.health_and_safety : Icons.self_improvement,
             size: 100,
-            color: item.type == ContentType.emergency ? Colors.redAccent : Colors.tealAccent
+            color: item.isEmergency ? Colors.redAccent : Colors.tealAccent
         ),
         const SizedBox(height: 32),
         Text(
@@ -57,7 +57,7 @@ class ReliefPlayerScreen extends ConsumerWidget {
         ),
         const SizedBox(height: 16),
         Text(
-          'Czas: ${item.durationSec ~/ 60} min',
+          'Czas: ${item.durationSeconds ~/ 60} min',
           style: const TextStyle(color: Colors.white70),
         ),
 

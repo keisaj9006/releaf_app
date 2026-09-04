@@ -5,8 +5,9 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/providers.dart';
 import '../application/relief_paywall_hooks.dart';
-import '../data/audio_catalog.dart';
-import 'relief_session_gate.dart';
+import '../data/reset_catalog.dart';
+import '../domain/models/reset_content.dart';
+import '../domain/reset_access_policy.dart';
 
 class ReliefScreen extends ConsumerWidget {
   const ReliefScreen({super.key});
@@ -14,12 +15,13 @@ class ReliefScreen extends ConsumerWidget {
   Future<void> _openSession(
     BuildContext context,
     WidgetRef ref,
-    ReliefSession session,
+    ResetContent session,
     bool isPremiumUser,
   ) async {
-    if (!canAccessReliefSession(
+    final accessPolicy = ref.read(resetAccessPolicyProvider);
+    if (!accessPolicy.canAccess(
       session,
-      isPremiumUser: isPremiumUser,
+      hasPremiumEntitlement: isPremiumUser,
     )) {
       await maybeShowPaywall(context, ref, force: true);
       return;
@@ -47,8 +49,9 @@ class ReliefScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final catalog = ref.watch(audioCatalogProvider);
-    final sessions = catalog.getRegularSessions();
+    final catalog = ref.watch(resetCatalogProvider);
+    final sessions = catalog.getRegularContent();
+    final accessPolicy = ref.watch(resetAccessPolicyProvider);
     final isPremiumUser = ref.watch(subscriptionControllerProvider).isPremium;
 
     return Scaffold(
@@ -73,9 +76,9 @@ class ReliefScreen extends ConsumerWidget {
           separatorBuilder: (_, _) => const SizedBox(height: 16),
           itemBuilder: (context, index) {
             final session = sessions[index];
-            final locked = !canAccessReliefSession(
+            final locked = !accessPolicy.canAccess(
               session,
-              isPremiumUser: isPremiumUser,
+              hasPremiumEntitlement: isPremiumUser,
             );
 
             return _SessionCard(

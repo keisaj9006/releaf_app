@@ -5,14 +5,19 @@ import 'package:go_router/go_router.dart';
 import '../../../core/providers.dart';
 import '../../../routing/app_routes.dart';
 import '../application/relief_paywall_hooks.dart';
-import '../data/audio_catalog.dart';
+import '../data/reset_catalog.dart';
+import '../domain/models/reset_content.dart';
+import '../domain/reset_access_policy.dart';
 import 'breathing_widget.dart';
 
 bool canAccessReliefSession(
-  ReliefSession session, {
+  ResetContent session, {
   required bool isPremiumUser,
 }) {
-  return session.isEmergency || !session.isPremiumOnly || isPremiumUser;
+  return const ResetAccessPolicy().canAccess(
+    session,
+    hasPremiumEntitlement: isPremiumUser,
+  );
 }
 
 class ReliefSessionGate extends ConsumerStatefulWidget {
@@ -31,7 +36,8 @@ class _ReliefSessionGateState extends ConsumerState<ReliefSessionGate> {
 
   @override
   Widget build(BuildContext context) {
-    final session = ref.watch(audioCatalogProvider).getById(widget.sessionId);
+    final session = ref.watch(resetCatalogProvider).getById(widget.sessionId);
+    final accessPolicy = ref.watch(resetAccessPolicyProvider);
 
     if (session == null) {
       _returnUnknownSessionToRelief();
@@ -39,16 +45,16 @@ class _ReliefSessionGateState extends ConsumerState<ReliefSessionGate> {
     }
 
     // Emergency and free sessions never read or depend on RevenueCat state.
-    if (session.isEmergency || !session.isPremiumOnly) {
+    if (!accessPolicy.requiresEntitlement(session)) {
       return BreathingWidget(sessionId: session.id);
     }
 
     final subscription = ref.watch(subscriptionControllerProvider);
     if (subscription.isLoading) return const _LoadingSession();
 
-    if (canAccessReliefSession(
+    if (accessPolicy.canAccess(
       session,
-      isPremiumUser: subscription.isPremium,
+      hasPremiumEntitlement: subscription.isPremium,
     )) {
       return BreathingWidget(sessionId: session.id);
     }

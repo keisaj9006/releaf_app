@@ -5,7 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../data/audio_catalog.dart';
+import '../data/reset_catalog.dart';
+import '../domain/models/reset_content.dart';
 import '../../progress/data/leaves_repository.dart';
 
 enum SessionPhase { running, feedback }
@@ -19,7 +20,7 @@ class BreathingWidget extends ConsumerStatefulWidget {
 }
 
 class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
-  ReliefSession? _session;
+  ResetContent? _session;
   int _remainingSeconds = 0;
   Timer? _timer;
   SessionPhase _phase = SessionPhase.running;
@@ -30,7 +31,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final session = ref.read(audioCatalogProvider).getById(widget.sessionId);
+      final session = ref.read(resetCatalogProvider).getById(widget.sessionId);
       if (session == null) {
         if (mounted) context.pop();
         return;

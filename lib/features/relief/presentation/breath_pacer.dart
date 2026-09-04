@@ -6,10 +6,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/session/session_manager.dart';
 import '../../progress/data/leaves_repository.dart';
-import '../data/audio_catalog.dart';
+import '../domain/models/reset_content.dart';
 
 class BreathingWidget extends ConsumerStatefulWidget {
-  final ReliefSession session;
+  final ResetContent session;
   const BreathingWidget({super.key, required this.session});
 
   @override
@@ -70,7 +70,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
 
     _timer?.cancel();
 
-    if (shouldAward) {
+    if (shouldAward && !widget.session.isEmergency) {
       final leavesNotifier = ref.read(leavesNotifierProvider.notifier);
       final result = await leavesNotifier.markReliefDone();
 

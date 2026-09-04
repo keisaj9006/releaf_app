@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/session/session_manager.dart';
-import '../features/relief/data/audio_catalog.dart';
+import '../features/relief/data/reset_catalog.dart';
 import 'app_routes.dart';
 
 class ScaffoldWithNavBar extends ConsumerWidget {
@@ -49,7 +49,7 @@ class ScaffoldWithNavBar extends ConsumerWidget {
         tooltip: 'Open Emergency Grounding',
         onPressed: () {
           context.push(
-            AppRoutes.reliefSessionFor(AudioCatalog.emergencySessionId),
+            AppRoutes.reliefSessionFor(ResetCatalog.emergencySessionId),
           );
         },
         icon: const Icon(Icons.health_and_safety_outlined),
