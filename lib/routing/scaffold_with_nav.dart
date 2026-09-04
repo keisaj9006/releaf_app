@@ -45,16 +45,18 @@ class ScaffoldWithNavBar extends ConsumerWidget {
             ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        tooltip: 'Open Emergency Grounding',
-        onPressed: () {
-          context.push(
-            AppRoutes.reliefSessionFor(ResetCatalog.emergencySessionId),
-          );
-        },
-        icon: const Icon(Icons.health_and_safety_outlined),
-        label: const Text('Emergency'),
-      ),
+      floatingActionButton: navigationShell.currentIndex == 2
+          ? null
+          : FloatingActionButton.extended(
+              tooltip: 'Open Emergency Grounding',
+              onPressed: () {
+                context.push(
+                  AppRoutes.reliefSessionFor(ResetCatalog.emergencySessionId),
+                );
+              },
+              icon: const Icon(Icons.health_and_safety_outlined),
+              label: const Text('Emergency'),
+            ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: navigationShell.currentIndex,
         onDestinationSelected: _onTap,

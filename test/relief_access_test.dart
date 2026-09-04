@@ -208,7 +208,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 250));
 
-    expect(find.text('Fast Resets'), findsOneWidget);
+    expect(find.text('Reset'), findsOneWidget);
     expect(find.text('Page Not Found'), findsNothing);
   });
 
@@ -247,7 +247,7 @@ void main() {
     final state = container.read(leavesNotifierProvider);
     expect(state.reliefDone, isFalse);
     expect(state.totalLeaves, 0);
-    expect(find.text('Fast Resets'), findsOneWidget);
+    expect(find.text('Reset'), findsOneWidget);
   });
 
   testWidgets('Completing 60s Grounding awards Relief once and shows feedback', (
