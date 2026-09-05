@@ -87,7 +87,7 @@ class _ReleafSensoryHaloState extends State<ReleafSensoryHalo>
             return CustomPaint(
               painter: _SensoryHaloPainter(
                 t: _controller.value,
-                activeCount: widget.activeCount.clamp(1, 5),
+                activeCount: widget.activeCount.clamp(1, 5).toInt(),
               ),
               child: Center(
                 child: AnimatedSwitcher(
