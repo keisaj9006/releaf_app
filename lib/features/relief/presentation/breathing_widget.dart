@@ -884,6 +884,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
                       const SizedBox(height: ReleafSpacing.sm),
                       if (widget.launchOptions.showGuidanceText)
                         Semantics(
+                          key: const Key('reset-active-session-guidance'),
                           liveRegion: true,
                           label: guidance,
                           child: AnimatedSwitcher(
@@ -897,7 +898,6 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
                               ),
                               textAlign: TextAlign.center,
                               style: ReleafTypography.body.copyWith(
-                                key: null,
                                 color: ReleafColors.textPrimary.withValues(
                                   alpha: 0.90,
                                 ),
