@@ -5,10 +5,10 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle, HapticFeedback;
-import 'package:lottie/lottie.dart';
 
 // ✅ Spójny result flow aplikacji (nagroda + powrót)
 import '../../features/brain/presentation/game_result_screen.dart';
+import '../../theme/releaf_design_tokens.dart';
 
 class LabirynthGameScreen extends StatefulWidget {
   final ValueChanged<int>? onFinish;
@@ -476,7 +476,7 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen>
           Navigator.of(context).pop();
           _loadLevel();
         },
-        tertiaryText: 'Home',
+        tertiaryText: 'Exit',
         onTertiary: () {
           Navigator.of(context).pop();      // zamknij dialog
           Navigator.of(context).maybePop(); // wyjdź z gry
@@ -491,7 +491,7 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen>
       barrierDismissible: false,
       builder: (_) => _PauseOrResultCard(
         title: 'Time up',
-        subtitle: 'Spróbuj jeszcze raz.',
+        subtitle: 'Try again.',
         stats: [
           _StatRow(label: 'Time', value: '${_timeSpent}s'),
           _StatRow(label: 'Wall hits', value: '$_wallHits'),
@@ -501,7 +501,7 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen>
           Navigator.of(context).pop();
           _loadLevel();
         },
-        secondaryText: 'Home',
+        secondaryText: 'Exit',
         onSecondary: () {
           Navigator.of(context).pop();      // zamknij dialog
           Navigator.of(context).maybePop(); // wyjdź z gry
@@ -592,7 +592,7 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen>
                     alignment: WrapAlignment.spaceBetween,
                     children: [
                       _HudPill(
-                        icon: Icons.eco,
+                        icon: Icons.bolt_rounded,
                         label: 'Score',
                         value: '$_score',
                         compact: isCompact,
@@ -623,7 +623,7 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen>
                                   barrierDismissible: false,
                                   builder: (_) => _PauseOrResultCard(
                                     title: 'Paused',
-                                    subtitle: 'Zatrzymano grę',
+                                    subtitle: 'Your route is paused.',
                                     stats: [
                                       _StatRow(
                                         label: 'Time',
@@ -644,7 +644,7 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen>
                                       Navigator.of(context).pop();
                                       _loadLevel();
                                     },
-                                    tertiaryText: 'Home',
+                                    tertiaryText: 'Exit',
                                     onTertiary: () {
                                       Navigator.of(context).pop();
                                       Navigator.of(context).maybePop();
@@ -677,13 +677,16 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen>
                     height: goalRScreen * 2,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Colors.orangeAccent.withValues(alpha: 0.95),
-                      border: Border.all(width: 3, color: Colors.white),
+                      color: const Color(0xFFE6C985).withValues(alpha: 0.96),
+                      border: Border.all(
+                        width: 2,
+                        color: const Color(0xFFFFF0C9).withValues(alpha: 0.82),
+                      ),
                       boxShadow: [
                         BoxShadow(
-                          blurRadius: 14,
-                          spreadRadius: 5,
-                          color: Colors.orangeAccent.withValues(alpha: 0.55),
+                          blurRadius: 18,
+                          spreadRadius: 4,
+                          color: const Color(0xFFE6C985).withValues(alpha: 0.34),
                         ),
                       ],
                     ),
@@ -775,27 +778,33 @@ class _HudPill extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: padH, vertical: padV),
       decoration: BoxDecoration(
-        color: const Color(0xE016191D),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+        color: const Color(0xE0121A1C),
+        borderRadius: BorderRadius.circular(ReleafRadii.pill),
+        border: Border.all(
+          color: const Color(0xFF6DC8B8).withValues(alpha: 0.18),
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.35),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+            color: Colors.black.withValues(alpha: 0.30),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: compact ? 14 : 16, color: Colors.white),
+          Icon(
+            icon,
+            size: compact ? 14 : 16,
+            color: const Color(0xFF6DC8B8),
+          ),
           const SizedBox(width: 6),
           Text(
             label,
             style: TextStyle(
-              fontWeight: FontWeight.w700,
-              color: Colors.white,
+              fontWeight: FontWeight.w600,
+              color: ReleafColors.textSecondary,
               fontSize: labelSize,
             ),
           ),
@@ -805,7 +814,7 @@ class _HudPill extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
               fontWeight: FontWeight.w800,
-              color: Colors.white,
+              color: ReleafColors.textPrimary,
               fontSize: valueSize,
             ),
           ),
@@ -833,18 +842,24 @@ class _CircleIconBtn extends StatelessWidget {
         width: size,
         height: size,
         decoration: BoxDecoration(
-          color: const Color(0xE016191D),
+          color: const Color(0xE0121A1C),
           shape: BoxShape.circle,
-          border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+          border: Border.all(
+            color: const Color(0xFF6DC8B8).withValues(alpha: 0.20),
+          ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.35),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
+              color: Colors.black.withValues(alpha: 0.30),
+              blurRadius: 10,
+              offset: const Offset(0, 3),
             ),
           ],
         ),
-        child: Icon(icon, size: size * 0.5, color: Colors.white),
+        child: Icon(
+          icon,
+          size: size * 0.5,
+          color: const Color(0xFFD7EEE9),
+        ),
       ),
     );
   }
@@ -864,52 +879,63 @@ class _WalkerMarker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final shadowOpacity = dimmed ? 0.25 : 0.35;
-    final glowOpacity = dimmed ? 0.25 : 0.45;
-    final lottieSize = size * 1.18;
-
     return Opacity(
-      opacity: dimmed ? 0.6 : 1,
+      opacity: dimmed ? 0.56 : 1,
       child: SizedBox(
         width: size,
         height: size,
-        child: Stack(
-          clipBehavior: Clip.none,
-          alignment: Alignment.center,
-          children: [
-            Container(
-              width: size * 0.95,
-              height: size * 0.95,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: const Color(0xFF000000).withValues(alpha: 0.01),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: shadowOpacity),
-                    blurRadius: size * 0.24,
-                    spreadRadius: size * 0.02,
-                    offset: Offset(0, size * 0.06),
+        child: AnimatedBuilder(
+          animation: controller,
+          builder: (context, child) {
+            final pulse =
+                (math.sin(controller.value * math.pi * 2) + 1) / 2;
+            return Stack(
+              clipBehavior: Clip.none,
+              alignment: Alignment.center,
+              children: [
+                Container(
+                  width: size * (0.88 + pulse * 0.05),
+                  height: size * (0.88 + pulse * 0.05),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: const Color(0xFF6DC8B8).withValues(alpha: 0.14),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF6DC8B8).withValues(
+                          alpha: 0.20 + pulse * 0.10,
+                        ),
+                        blurRadius: size * 0.34,
+                        spreadRadius: size * 0.04,
+                      ),
+                    ],
                   ),
-                  BoxShadow(
-                    color: const Color(0xFF7CFF78).withValues(alpha: glowOpacity),
-                    blurRadius: size * 0.30,
-                    spreadRadius: size * 0.02,
-                    offset: const Offset(0, 0),
+                ),
+                Transform.rotate(
+                  angle: math.pi / 4,
+                  child: Container(
+                    width: size * 0.48,
+                    height: size * 0.48,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFD9F2EC),
+                      borderRadius: BorderRadius.circular(size * 0.10),
+                      border: Border.all(
+                        color: const Color(0xFF6DC8B8),
+                        width: math.max(1, size * 0.04),
+                      ),
+                    ),
                   ),
-                ],
-              ),
-            ),
-            SizedBox(
-              width: lottieSize,
-              height: lottieSize,
-              child: Lottie.asset(
-                'assets/animations/leaf_walk.json',
-                controller: controller,
-                repeat: true,
-                fit: BoxFit.contain,
-              ),
-            ),
-          ],
+                ),
+                Container(
+                  width: size * 0.15,
+                  height: size * 0.15,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF0D1718),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ],
+            );
+          },
         ),
       ),
     );
@@ -943,14 +969,26 @@ class _PauseOrResultCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      backgroundColor: const Color(0xFF111214),
-      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w800)),
+      backgroundColor: const Color(0xFF11191A),
+      surfaceTintColor: Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(ReleafRadii.large),
+        side: BorderSide(
+          color: const Color(0xFF6DC8B8).withValues(alpha: 0.18),
+        ),
+      ),
+      title: Text(
+        title,
+        style: ReleafTypography.sectionTitle,
+      ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
             subtitle,
-            style: TextStyle(color: Colors.white.withValues(alpha: 0.8)),
+            style: ReleafTypography.body.copyWith(
+              color: ReleafColors.textSecondary,
+            ),
           ),
           const SizedBox(height: 12),
           ...stats.map(
