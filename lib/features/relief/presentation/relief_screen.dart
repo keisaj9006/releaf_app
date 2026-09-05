@@ -531,9 +531,9 @@ class _ResetHeader extends StatelessWidget {
                     ReleafRoundIconButton(
                       key: const Key('reset-emergency-action'),
                       icon: Icons.health_and_safety_outlined,
-                      tooltip: 'Open Emergency Grounding',
+                      tooltip: 'Open Emergency Calm',
                       onPressed: onEmergencyPressed,
-                      isWarm: true,
+                      isWarm: false,
                     ),
                   ],
                 ),
