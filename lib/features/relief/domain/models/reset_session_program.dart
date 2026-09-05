@@ -20,14 +20,12 @@ class ResetSessionProgram {
   const ResetSessionProgram.guided({
     required this.steps,
   }) : type = ResetProgramType.guidedSteps,
-       breathPattern = null,
-       assert(steps.length > 0);
+       breathPattern = null;
 
   const ResetSessionProgram.breathing({
     required this.breathPattern,
     required this.steps,
-  }) : type = ResetProgramType.pacedBreathing,
-       assert(steps.length > 0);
+  }) : type = ResetProgramType.pacedBreathing;
 
   final ResetProgramType type;
   final List<ResetSessionStep> steps;
