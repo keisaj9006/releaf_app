@@ -209,6 +209,69 @@ void main() {
     expect(find.text('Notice two things you can physically feel.'), findsOneWidget);
   });
 
+  testWidgets('Jaw and Shoulders uses the distinct Body Reset visual', (
+    WidgetTester tester,
+  ) async {
+    final preferences = await _preferences();
+    final router = createAppRouter(
+      initialLocation: AppRoutes.reliefSessionFor('jaw-shoulders'),
+    );
+    addTearDown(router.dispose);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(preferences),
+        ],
+        child: MaterialApp.router(routerConfig: router),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.byKey(const Key('reset-body-release-visual')), findsOneWidget);
+    expect(find.byKey(const Key('reset-living-form')), findsNothing);
+    expect(find.text('Notice'), findsOneWidget);
+    expect(find.text('01:30'), findsOneWidget);
+  });
+
+  testWidgets('Name the Thought uses the distinct thought-unhook visual', (
+    WidgetTester tester,
+  ) async {
+    final preferences = await _preferences();
+    final router = createAppRouter(
+      initialLocation: AppRoutes.reliefSessionFor('name-the-thought'),
+    );
+    addTearDown(router.dispose);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(preferences),
+        ],
+        child: MaterialApp.router(routerConfig: router),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.byKey(const Key('reset-thought-unhook-visual')), findsOneWidget);
+    expect(find.byKey(const Key('reset-living-form')), findsNothing);
+    expect(find.text('Notice'), findsOneWidget);
+    expect(find.text('02:00'), findsOneWidget);
+
+    await tester.pump(const Duration(seconds: 41));
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.text('Unhook'), findsOneWidget);
+    expect(
+      find.text(
+        'Try adding: “I am noticing the thought that…” before the sentence.',
+      ),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('A premium Relief preview cannot bypass the paywall', (
     WidgetTester tester,
   ) async {
