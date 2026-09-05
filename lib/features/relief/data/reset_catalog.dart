@@ -181,6 +181,118 @@ class ResetCatalog {
       ),
     ),
     ResetContent(
+      id: 'jaw-shoulders',
+      title: 'Jaw & Shoulders',
+      durationSeconds: 90,
+      level: ResetLevel.quick,
+      quickCategory: QuickResetCategory.noBreath,
+      modality: ResetModality.guidedPractice,
+      accessTier: ResetAccessTier.free,
+      visualType: ResetVisualType.bodyRelease,
+      instructions: [
+        'Notice your jaw and shoulders without changing anything yet.',
+        'Let your teeth separate slightly and let the tongue rest.',
+        'Gently lift your shoulders and hold for a moment.',
+        'Let your shoulders drop and notice the difference.',
+        'Lift gently once more, only as much as feels comfortable.',
+        'Release the shoulders again.',
+        'Notice what feels different now.',
+      ],
+      program: ResetSessionProgram.guided(
+        steps: [
+          ResetSessionStep(
+            label: 'Notice',
+            guidance:
+                'Notice your jaw and shoulders without changing anything yet.',
+            durationSeconds: 10,
+          ),
+          ResetSessionStep(
+            label: 'Jaw',
+            guidance:
+                'Let your teeth separate slightly. Let the tongue rest.',
+            durationSeconds: 15,
+          ),
+          ResetSessionStep(
+            label: 'Shoulders',
+            guidance:
+                'Gently lift your shoulders. Hold for a moment without straining.',
+            durationSeconds: 15,
+          ),
+          ResetSessionStep(
+            label: 'Release',
+            guidance: 'Let your shoulders drop. Notice the difference.',
+            durationSeconds: 15,
+          ),
+          ResetSessionStep(
+            label: 'Again',
+            guidance:
+                'Lift gently once more, only as much as feels comfortable.',
+            durationSeconds: 15,
+          ),
+          ResetSessionStep(
+            label: 'Let Go',
+            guidance: 'Release the shoulders again.',
+            durationSeconds: 10,
+          ),
+          ResetSessionStep(
+            label: 'Notice',
+            guidance: 'Notice what feels different now.',
+            durationSeconds: 10,
+          ),
+        ],
+      ),
+    ),
+    ResetContent(
+      id: 'name-the-thought',
+      title: 'Name the Thought',
+      durationSeconds: 120,
+      level: ResetLevel.quick,
+      quickCategory: QuickResetCategory.noBreath,
+      modality: ResetModality.guidedPractice,
+      accessTier: ResetAccessTier.free,
+      visualType: ResetVisualType.thoughtUnhook,
+      instructions: [
+        'Notice what your mind keeps returning to.',
+        'Put the thought into one short sentence in your mind.',
+        'Try adding: I am noticing the thought that...',
+        'Let the thought be there for a moment without trying to solve it.',
+        'Notice one thing you can see, one thing you can hear, and one thing you can feel.',
+      ],
+      program: ResetSessionProgram.guided(
+        steps: [
+          ResetSessionStep(
+            label: 'Notice',
+            guidance: 'Notice what your mind keeps returning to.',
+            durationSeconds: 20,
+          ),
+          ResetSessionStep(
+            label: 'Name',
+            guidance:
+                'Put the thought into one short sentence in your mind. You do not need to type or save it.',
+            durationSeconds: 20,
+          ),
+          ResetSessionStep(
+            label: 'Unhook',
+            guidance:
+                'Try adding: “I am noticing the thought that…” before the sentence.',
+            durationSeconds: 30,
+          ),
+          ResetSessionStep(
+            label: 'Space',
+            guidance:
+                'Let the thought be there for a moment. You do not have to solve it right now.',
+            durationSeconds: 25,
+          ),
+          ResetSessionStep(
+            label: 'Refocus',
+            guidance:
+                'Notice one thing you can see, one thing you can hear, and one thing you can feel.',
+            durationSeconds: 25,
+          ),
+        ],
+      ),
+    ),
+    ResetContent(
       id: '90s-calm-down',
       title: '90s Calm Down',
       durationSeconds: 90,
