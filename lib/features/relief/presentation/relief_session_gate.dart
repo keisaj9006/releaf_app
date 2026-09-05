@@ -7,6 +7,7 @@ import '../../../routing/app_routes.dart';
 import '../application/relief_paywall_hooks.dart';
 import '../data/reset_catalog.dart';
 import '../domain/models/reset_content.dart';
+import '../domain/models/reset_launch_options.dart';
 import '../domain/reset_access_policy.dart';
 import 'breathing_widget.dart';
 
@@ -22,8 +23,13 @@ bool canAccessReliefSession(
 
 class ReliefSessionGate extends ConsumerStatefulWidget {
   final String sessionId;
+  final ResetLaunchOptions launchOptions;
 
-  const ReliefSessionGate({super.key, required this.sessionId});
+  const ReliefSessionGate({
+    super.key,
+    required this.sessionId,
+    this.launchOptions = const ResetLaunchOptions(),
+  });
 
   @override
   ConsumerState<ReliefSessionGate> createState() =>
@@ -46,7 +52,10 @@ class _ReliefSessionGateState extends ConsumerState<ReliefSessionGate> {
 
     // Emergency and free sessions never read or depend on RevenueCat state.
     if (!accessPolicy.requiresEntitlement(session)) {
-      return BreathingWidget(sessionId: session.id);
+      return BreathingWidget(
+        sessionId: session.id,
+        launchOptions: widget.launchOptions,
+      );
     }
 
     final subscription = ref.watch(subscriptionControllerProvider);
@@ -56,7 +65,10 @@ class _ReliefSessionGateState extends ConsumerState<ReliefSessionGate> {
       session,
       hasPremiumEntitlement: subscription.isPremium,
     )) {
-      return BreathingWidget(sessionId: session.id);
+      return BreathingWidget(
+        sessionId: session.id,
+        launchOptions: widget.launchOptions,
+      );
     }
 
     _showPaywallAndReturnToRelief();
