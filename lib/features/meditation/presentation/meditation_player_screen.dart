@@ -10,6 +10,7 @@ import '../../../theme/app_theme.dart';
 import '../../../theme/releaf_design_tokens.dart';
 import '../../../theme/widgets/releaf_artwork.dart';
 import '../../../theme/widgets/releaf_components.dart';
+import '../../../theme/widgets/releaf_session_living_form.dart';
 import '../data/meditation_catalog.dart';
 import '../domain/meditation_content.dart';
 
@@ -93,9 +94,13 @@ class _MeditationPlayerScreenState
 
     final elapsed = item.durationSeconds - _remainingSeconds;
     final step = _stepAt(item, elapsed);
+    final stepIndex = _stepIndexAt(item, elapsed);
     final progress = item.durationSeconds <= 0
         ? 1.0
         : 1 - (_remainingSeconds / item.durationSeconds);
+    final reducedMotion =
+        MediaQuery.maybeOf(context)?.disableAnimations ?? false;
+    final artwork = _artworkFor(item.category);
 
     return Theme(
       data: AppTheme.premiumDark(),
@@ -105,7 +110,8 @@ class _MeditationPlayerScreenState
           children: [
             Positioned.fill(
               child: ReleafArtwork(
-                variant: _artworkFor(item.category),
+                variant: artwork,
+                intensity: 0.34,
               ),
             ),
             const Positioned.fill(
@@ -115,11 +121,11 @@ class _MeditationPlayerScreenState
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      Color(0xD6070D0B),
-                      Color(0xE30A100E),
+                      Color(0xC8070D0B),
+                      Color(0xE50A100E),
                       ReleafColors.background,
                     ],
-                    stops: [0, 0.50, 1],
+                    stops: [0, 0.46, 1],
                   ),
                 ),
               ),
@@ -128,111 +134,225 @@ class _MeditationPlayerScreenState
               child: Center(
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 720),
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(
-                      ReleafSpacing.screen,
-                      ReleafSpacing.lg,
-                      ReleafSpacing.screen,
-                      ReleafSpacing.xl,
-                    ),
-                    child: Column(
-                      children: [
-                        Row(
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final compactHeight = constraints.maxHeight < 680;
+                      final compactWidth = constraints.maxWidth < 360;
+                      final compact = compactHeight || compactWidth;
+
+                      return Padding(
+                        padding: EdgeInsets.fromLTRB(
+                          ReleafSpacing.screen,
+                          compact ? ReleafSpacing.sm : ReleafSpacing.lg,
+                          ReleafSpacing.screen,
+                          compact ? ReleafSpacing.md : ReleafSpacing.xl,
+                        ),
+                        child: Column(
                           children: [
-                            ReleafRoundIconButton(
-                              icon: Icons.close_rounded,
-                              tooltip: 'Exit meditation',
-                              onPressed: context.pop,
+                            Row(
+                              children: [
+                                ReleafRoundIconButton(
+                                  icon: Icons.close_rounded,
+                                  tooltip: 'Exit meditation',
+                                  onPressed: context.pop,
+                                ),
+                                const SizedBox(width: ReleafSpacing.md),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'MEDITATION',
+                                        style:
+                                            ReleafTypography.eyebrow.copyWith(
+                                          color: ReleafColors.sage,
+                                          letterSpacing: 1.8,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        item.title,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style:
+                                            ReleafTypography.cardTitle.copyWith(
+                                          fontSize: compact ? 14 : 16,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(width: ReleafSpacing.sm),
+                                _TimerPill(seconds: _remainingSeconds),
+                              ],
                             ),
-                            const SizedBox(width: ReleafSpacing.md),
+                            SizedBox(
+                              height: compact
+                                  ? ReleafSpacing.sm
+                                  : ReleafSpacing.lg,
+                            ),
                             Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'MEDITATION',
-                                    style: ReleafTypography.eyebrow.copyWith(
-                                      color: ReleafColors.sage,
+                              child: Center(
+                                child: _MeditationVisual(
+                                  progress: progress,
+                                  running: _running,
+                                  unguided: item.unguided,
+                                  variant: artwork,
+                                  phaseLabel:
+                                      item.unguided ? null : step.label,
+                                  reducedMotion: reducedMotion,
+                                  maxSize: compact ? 205 : 320,
+                                ),
+                              ),
+                            ),
+                            SizedBox(
+                              height: compact
+                                  ? ReleafSpacing.sm
+                                  : ReleafSpacing.lg,
+                            ),
+                            DecoratedBox(
+                              decoration: BoxDecoration(
+                                color: ReleafColors.surfaceSoft.withValues(
+                                  alpha: 0.78,
+                                ),
+                                borderRadius: BorderRadius.circular(
+                                  ReleafRadii.large,
+                                ),
+                                border: Border.all(
+                                  color: ReleafColors.borderSoft,
+                                ),
+                              ),
+                              child: Padding(
+                                padding: EdgeInsets.all(
+                                  compact
+                                      ? ReleafSpacing.md
+                                      : ReleafSpacing.lg,
+                                ),
+                                child: Column(
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        for (var index = 0;
+                                            index < item.steps.length;
+                                            index++) ...[
+                                          AnimatedContainer(
+                                            duration: reducedMotion
+                                                ? Duration.zero
+                                                : ReleafMotion.standard,
+                                            width:
+                                                index == stepIndex ? 22 : 7,
+                                            height: 7,
+                                            decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(
+                                                ReleafRadii.pill,
+                                              ),
+                                              color: index <= stepIndex
+                                                  ? ReleafColors.sage
+                                                      .withValues(
+                                                      alpha:
+                                                          index == stepIndex
+                                                              ? 0.88
+                                                              : 0.36,
+                                                    )
+                                                  : ReleafColors.border,
+                                            ),
+                                          ),
+                                          if (index != item.steps.length - 1)
+                                            const SizedBox(width: 6),
+                                        ],
+                                      ],
+                                    ),
+                                    const SizedBox(height: ReleafSpacing.sm),
+                                    if (!item.unguided) ...[
+                                      Text(
+                                        step.label.toUpperCase(),
+                                        style:
+                                            ReleafTypography.eyebrow.copyWith(
+                                          color: ReleafColors.sage,
+                                          fontSize: 10,
+                                        ),
+                                      ),
+                                      const SizedBox(
+                                        height: ReleafSpacing.xs,
+                                      ),
+                                      AnimatedSwitcher(
+                                        duration: reducedMotion
+                                            ? Duration.zero
+                                            : ReleafMotion.standard,
+                                        child: Text(
+                                          step.guidance,
+                                          key: ValueKey(step.label),
+                                          textAlign: TextAlign.center,
+                                          style:
+                                              ReleafTypography.body.copyWith(
+                                            color: ReleafColors.textPrimary
+                                                .withValues(alpha: 0.84),
+                                            fontSize: compact ? 14 : 16,
+                                            height: 1.48,
+                                          ),
+                                        ),
+                                      ),
+                                    ] else
+                                      Text(
+                                        'Stay with the practice in your own way.',
+                                        textAlign: TextAlign.center,
+                                        style:
+                                            ReleafTypography.body.copyWith(
+                                          color: ReleafColors.textPrimary
+                                              .withValues(alpha: 0.72),
+                                          fontSize: compact ? 14 : 16,
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            SizedBox(
+                              height: compact
+                                  ? ReleafSpacing.sm
+                                  : ReleafSpacing.lg,
+                            ),
+                            SizedBox(
+                              height: ReleafControlSizes.prominent,
+                              width: double.infinity,
+                              child: FilledButton.icon(
+                                key: const Key('meditation-primary-control'),
+                                onPressed: _remainingSeconds == 0
+                                    ? context.pop
+                                    : _togglePause,
+                                icon: Icon(
+                                  _remainingSeconds == 0
+                                      ? Icons.check_rounded
+                                      : _running
+                                          ? Icons.pause_rounded
+                                          : Icons.play_arrow_rounded,
+                                ),
+                                label: Text(
+                                  _remainingSeconds == 0
+                                      ? 'Finish'
+                                      : _running
+                                          ? 'Pause'
+                                          : 'Continue',
+                                ),
+                                style: FilledButton.styleFrom(
+                                  backgroundColor: ReleafColors.sage,
+                                  foregroundColor: ReleafColors.background,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(
+                                      ReleafRadii.pill,
                                     ),
                                   ),
-                                  Text(
-                                    item.title,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: ReleafTypography.cardTitle,
-                                  ),
-                                ],
+                                ),
                               ),
                             ),
-                            _TimerPill(seconds: _remainingSeconds),
                           ],
                         ),
-                        const Spacer(),
-                        _MeditationVisual(
-                          progress: progress,
-                          running: _running,
-                          unguided: item.unguided,
-                        ),
-                        const Spacer(),
-                        if (!item.unguided) ...[
-                          Text(
-                            step.label.toUpperCase(),
-                            style: ReleafTypography.eyebrow.copyWith(
-                              color: ReleafColors.sage,
-                            ),
-                          ),
-                          const SizedBox(height: ReleafSpacing.sm),
-                          AnimatedSwitcher(
-                            duration: ReleafMotion.standard,
-                            child: Text(
-                              step.guidance,
-                              key: ValueKey(step.label),
-                              textAlign: TextAlign.center,
-                              style: ReleafTypography.body.copyWith(
-                                color: ReleafColors.textPrimary.withValues(
-                                  alpha: 0.82,
-                                ),
-                                fontSize: 17,
-                                height: 1.5,
-                              ),
-                            ),
-                          ),
-                        ] else
-                          Text(
-                            'Stay with the practice in your own way.',
-                            textAlign: TextAlign.center,
-                            style: ReleafTypography.body.copyWith(
-                              color:
-                                  ReleafColors.textPrimary.withValues(alpha: 0.72),
-                            ),
-                          ),
-                        const SizedBox(height: ReleafSpacing.xl),
-                        FilledButton.icon(
-                          onPressed: _remainingSeconds == 0
-                              ? context.pop
-                              : _togglePause,
-                          icon: Icon(
-                            _remainingSeconds == 0
-                                ? Icons.check_rounded
-                                : _running
-                                    ? Icons.pause_rounded
-                                    : Icons.play_arrow_rounded,
-                          ),
-                          label: Text(
-                            _remainingSeconds == 0
-                                ? 'Finish'
-                                : _running
-                                    ? 'Pause'
-                                    : 'Continue',
-                          ),
-                          style: FilledButton.styleFrom(
-                            minimumSize: const Size.fromHeight(52),
-                            backgroundColor: ReleafColors.sage,
-                            foregroundColor: ReleafColors.background,
-                          ),
-                        ),
-                      ],
-                    ),
+                      );
+                    },
                   ),
                 ),
               ),
@@ -244,12 +364,16 @@ class _MeditationPlayerScreenState
   }
 
   MeditationStep _stepAt(MeditationContent item, int elapsed) {
+    return item.steps[_stepIndexAt(item, elapsed)];
+  }
+
+  int _stepIndexAt(MeditationContent item, int elapsed) {
     var cursor = 0;
-    for (final step in item.steps) {
-      cursor += step.durationSeconds;
-      if (elapsed < cursor) return step;
+    for (var index = 0; index < item.steps.length; index++) {
+      cursor += item.steps[index].durationSeconds;
+      if (elapsed < cursor) return index;
     }
-    return item.steps.last;
+    return item.steps.length - 1;
   }
 }
 
@@ -258,72 +382,91 @@ class _MeditationVisual extends StatelessWidget {
     required this.progress,
     required this.running,
     required this.unguided,
+    required this.variant,
+    required this.phaseLabel,
+    required this.reducedMotion,
+    required this.maxSize,
   });
 
   final double progress;
   final bool running;
   final bool unguided;
+  final ReleafArtworkVariant variant;
+  final String? phaseLabel;
+  final bool reducedMotion;
+  final double maxSize;
 
   @override
   Widget build(BuildContext context) {
-    final size = math.min(
-      MediaQuery.sizeOf(context).width * 0.62,
-      320.0,
-    );
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final size = math.min(
+          maxSize,
+          math.min(constraints.maxWidth, constraints.maxHeight),
+        ).clamp(150.0, maxSize).toDouble();
 
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0, end: running ? 1 : 0),
-      duration: const Duration(milliseconds: 900),
-      curve: Curves.easeInOut,
-      builder: (context, active, child) {
         return SizedBox(
+          key: const Key('meditation-living-form'),
           width: size,
           height: size,
           child: Stack(
             fit: StackFit.expand,
+            alignment: Alignment.center,
             children: [
-              CircularProgressIndicator(
-                value: progress.clamp(0.0, 1.0).toDouble(),
-                strokeWidth: 2.2,
-                backgroundColor:
-                    ReleafColors.borderSoft.withValues(alpha: 0.35),
-                valueColor: const AlwaysStoppedAnimation(
-                  ReleafColors.sage,
-                ),
+              ReleafSessionLivingForm(
+                variant: variant,
+                progress: progress,
+                breathing: false,
+                phaseLabel: phaseLabel,
+                reducedMotion: reducedMotion || !running,
               ),
-              Center(
-                child: AnimatedScale(
-                  scale: 0.95 + active * 0.05,
-                  duration: const Duration(milliseconds: 900),
-                  child: Container(
-                    width: size * 0.68,
-                    height: size * 0.68,
+              if (!running && progress < 1)
+                Center(
+                  child: DecoratedBox(
                     decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: ReleafColors.sage.withValues(alpha: 0.08),
+                      color: ReleafColors.background.withValues(alpha: 0.78),
+                      borderRadius: BorderRadius.circular(ReleafRadii.pill),
                       border: Border.all(
-                        color: ReleafColors.sage.withValues(alpha: 0.20),
+                        color: ReleafColors.sage.withValues(alpha: 0.28),
                       ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: ReleafColors.sage.withValues(
-                            alpha: 0.08 + active * 0.08,
-                          ),
-                          blurRadius: 34,
-                        ),
-                      ],
                     ),
-                    alignment: Alignment.center,
-                    child: Icon(
-                      unguided
-                          ? Icons.blur_on_rounded
-                          : Icons.self_improvement_rounded,
-                      size: 54,
-                      color: ReleafColors.textPrimary.withValues(alpha: 0.74),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 7,
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.pause_rounded,
+                            size: 15,
+                            color: ReleafColors.sage,
+                          ),
+                          const SizedBox(width: 5),
+                          Text(
+                            'PAUSED',
+                            style: ReleafTypography.eyebrow.copyWith(
+                              fontSize: 9,
+                              color: ReleafColors.sage,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
+              if (unguided)
+                Positioned(
+                  bottom: size * 0.10,
+                  child: Text(
+                    'UNGUIDED',
+                    style: ReleafTypography.eyebrow.copyWith(
+                      color: ReleafColors.textSecondary,
+                      fontSize: 9,
+                    ),
+                  ),
+                ),
             ],
           ),
         );
