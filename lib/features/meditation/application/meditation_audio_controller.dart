@@ -112,7 +112,8 @@ class MeditationAudioController extends StateNotifier<MeditationAudioState> {
   ) : super(
           MeditationAudioState(
             enabled: _prefs.getBool(_enabledKey) ?? true,
-            mix: (_prefs.getDouble(_mixKey) ?? 0.72).clamp(0.0, 1.0),
+            mix:
+                (_prefs.getDouble(_mixKey) ?? 0.72).clamp(0.0, 1.0).toDouble(),
           ),
         );
 
@@ -127,6 +128,7 @@ class MeditationAudioController extends StateNotifier<MeditationAudioState> {
   bool _hasStarted = false;
   String? _assetPath;
   double _sessionVolume = 0.20;
+  double _driverVolume = 0;
 
   double get _effectiveVolume =>
       (_sessionVolume * state.mix).clamp(0.0, 1.0).toDouble();
@@ -189,6 +191,7 @@ class MeditationAudioController extends StateNotifier<MeditationAudioState> {
 
     try {
       await _driver.setVolume(_effectiveVolume);
+      _driverVolume = _effectiveVolume;
     } catch (_) {
       // A failed volume change must not interrupt the meditation.
     }
@@ -222,6 +225,7 @@ class MeditationAudioController extends StateNotifier<MeditationAudioState> {
     }
 
     _hasStarted = false;
+    _driverVolume = 0;
     if (!mounted) return;
     state = state.copyWith(isPlaying: false);
   }
@@ -232,6 +236,7 @@ class MeditationAudioController extends StateNotifier<MeditationAudioState> {
 
     try {
       await _driver.playAsset(assetPath, volume: 0);
+      _driverVolume = 0;
       _hasStarted = true;
       if (!mounted) return;
       state = state.copyWith(isPlaying: true);
@@ -250,15 +255,18 @@ class MeditationAudioController extends StateNotifier<MeditationAudioState> {
     if (!_hasStarted) return;
 
     final safeTarget = target.clamp(0.0, 1.0).toDouble();
+    final start = _driverVolume;
     const steps = 4;
     final stepDuration = Duration(
       milliseconds: duration.inMilliseconds ~/ steps,
     );
 
     for (var step = 1; step <= steps; step++) {
-      final value = safeTarget * (step / steps);
+      final fraction = step / steps;
+      final value = start + ((safeTarget - start) * fraction);
       try {
         await _driver.setVolume(value);
+        _driverVolume = value;
       } catch (_) {
         return;
       }
