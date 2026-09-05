@@ -113,6 +113,9 @@ void main() {
     expect(find.text('90s Calm Down'), findsOneWidget);
 
     await _moveRailForward(tester, const Key('reset-session-rail'));
+    expect(find.text('Longer Exhale'), findsOneWidget);
+
+    await _moveRailForward(tester, const Key('reset-session-rail'));
     expect(find.text('5 min Focus Anchor'), findsOneWidget);
     expect(find.text('Premium'), findsWidgets);
 
