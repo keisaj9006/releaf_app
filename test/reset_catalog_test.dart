@@ -15,6 +15,7 @@ void main() {
   const currentSessionIds = <String>{
     'emergency-grounding',
     '60s-grounding',
+    'back-to-room',
     '90s-calm-down',
     'longer-exhale',
     '3min-breath',
@@ -92,6 +93,25 @@ void main() {
     expect(calmDown.quickCategory, QuickResetCategory.breath);
     expect(calmDown.modality, ResetModality.breathing);
     expect(calmDown.accessTier, ResetAccessTier.free);
+  });
+
+  test('Back to the Room exposes full and simplified sensory paths', () {
+    final session = catalog.getById('back-to-room')!;
+
+    expect(session.level, ResetLevel.quick);
+    expect(session.quickCategory, QuickResetCategory.noBreath);
+    expect(session.modality, ResetModality.grounding);
+    expect(session.accessTier, ResetAccessTier.free);
+    expect(session.visualType, ResetVisualType.sensoryHalo);
+    expect(session.durationSeconds, 180);
+    expect(session.program?.type, ResetProgramType.guidedSteps);
+    expect(session.program?.scriptedDurationSeconds, 180);
+    expect(session.program?.hasSimplifiedPath, isTrue);
+    expect(session.program?.simplifiedDurationSeconds, 60);
+    expect(
+      session.instructions.join(' ').toLowerCase(),
+      isNot(contains('breath')),
+    );
   });
 
   test('Longer Exhale uses the asymmetric 3–4 Wave 1 pattern', () {
