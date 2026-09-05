@@ -9,9 +9,11 @@ import 'package:go_router/go_router.dart';
 import '../../progress/data/leaves_repository.dart';
 import '../../../theme/releaf_design_tokens.dart';
 import '../../../theme/widgets/releaf_artwork.dart';
+import '../../../theme/widgets/releaf_body_release_visual.dart';
 import '../../../theme/widgets/releaf_components.dart';
 import '../../../theme/widgets/releaf_session_living_form.dart';
 import '../../../theme/widgets/releaf_sensory_halo.dart';
+import '../../../theme/widgets/releaf_thought_unhook_visual.dart';
 import '../data/reset_catalog.dart';
 import '../domain/models/breath_pattern.dart';
 import '../domain/models/reset_content.dart';
@@ -322,41 +324,53 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
                           child: SizedBox(
                             width: formSize,
                             height: formSize,
-                            child: session.visualType ==
-                                    ResetVisualType.sensoryHalo
-                                ? ReleafSensoryHalo(
-                                    progress: progress,
-                                    targetCount:
-                                        _sensoryTargetFor(phaseLabel),
-                                    completedCount:
-                                        _sensoryCompletedFor(session),
-                                    phaseLabel: phaseLabel ?? 'Notice',
-                                    onNotice:
-                                        _sensoryTargetFor(phaseLabel) > 0
-                                            ? _registerSensoryNotice
-                                            : null,
-                                    reducedMotion: reducedMotion,
-                                  )
-                                : ReleafSessionLivingForm(
-                                    variant: artwork,
-                                    progress: progress,
-                                    breathing: isPacedBreathing,
-                                    phaseLabel: phaseLabel,
-                                    inhaleSeconds:
-                                        breathPattern?.inhaleSeconds ?? 4,
-                                    holdAfterInhaleSeconds:
-                                        breathPattern
-                                                ?.holdAfterInhaleSeconds ??
-                                            0,
-                                    exhaleSeconds:
-                                        breathPattern?.exhaleSeconds ?? 4,
-                                    holdAfterExhaleSeconds:
-                                        breathPattern
-                                                ?.holdAfterExhaleSeconds ??
-                                            0,
-                                    showBreathPath: showBreathPath,
-                                    reducedMotion: reducedMotion,
-                                  ),
+                            child: switch (session.visualType) {
+                              ResetVisualType.sensoryHalo =>
+                                ReleafSensoryHalo(
+                                  progress: progress,
+                                  targetCount: _sensoryTargetFor(phaseLabel),
+                                  completedCount:
+                                      _sensoryCompletedFor(session),
+                                  phaseLabel: phaseLabel ?? 'Notice',
+                                  onNotice: _sensoryTargetFor(phaseLabel) > 0
+                                      ? _registerSensoryNotice
+                                      : null,
+                                  reducedMotion: reducedMotion,
+                                ),
+                              ResetVisualType.bodyRelease =>
+                                ReleafBodyReleaseVisual(
+                                  progress: progress,
+                                  phaseLabel: phaseLabel ?? 'Notice',
+                                  reducedMotion: reducedMotion,
+                                ),
+                              ResetVisualType.thoughtUnhook =>
+                                ReleafThoughtUnhookVisual(
+                                  progress: progress,
+                                  phaseLabel: phaseLabel ?? 'Notice',
+                                  reducedMotion: reducedMotion,
+                                ),
+                              ResetVisualType.livingForm =>
+                                ReleafSessionLivingForm(
+                                  variant: artwork,
+                                  progress: progress,
+                                  breathing: isPacedBreathing,
+                                  phaseLabel: phaseLabel,
+                                  inhaleSeconds:
+                                      breathPattern?.inhaleSeconds ?? 4,
+                                  holdAfterInhaleSeconds:
+                                      breathPattern
+                                              ?.holdAfterInhaleSeconds ??
+                                          0,
+                                  exhaleSeconds:
+                                      breathPattern?.exhaleSeconds ?? 4,
+                                  holdAfterExhaleSeconds:
+                                      breathPattern
+                                              ?.holdAfterExhaleSeconds ??
+                                          0,
+                                  showBreathPath: showBreathPath,
+                                  reducedMotion: reducedMotion,
+                                ),
+                            },
                           ),
                         ),
                       ),
@@ -802,10 +816,12 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
     if (session.program?.type == ResetProgramType.pacedBreathing) {
       return 'FOLLOW THE RHYTHM';
     }
-    if (session.visualType == ResetVisualType.sensoryHalo) {
-      return 'GROUND WITH YOUR SENSES';
-    }
-    return 'STAY WITH THE MOMENT';
+    return switch (session.visualType) {
+      ResetVisualType.sensoryHalo => 'GROUND WITH YOUR SENSES',
+      ResetVisualType.bodyRelease => 'RELEASE BODY TENSION',
+      ResetVisualType.thoughtUnhook => 'CREATE A LITTLE DISTANCE',
+      ResetVisualType.livingForm => 'STAY WITH THE MOMENT',
+    };
   }
 
   int _sensoryTargetFor(String? phaseLabel) {
@@ -837,6 +853,8 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
     return switch (session.id) {
       '60s-grounding' => ReleafArtworkVariant.grounding,
       'back-to-room' => ReleafArtworkVariant.noBreath,
+      'jaw-shoulders' => ReleafArtworkVariant.grounding,
+      'name-the-thought' => ReleafArtworkVariant.focus,
       '90s-calm-down' => ReleafArtworkVariant.calm,
       'longer-exhale' => ReleafArtworkVariant.breath,
       '5min-focus' => ReleafArtworkVariant.focus,
