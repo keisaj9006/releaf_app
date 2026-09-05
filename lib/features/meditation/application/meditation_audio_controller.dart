@@ -136,8 +136,9 @@ class MeditationAudioController extends StateNotifier<MeditationAudioState> {
   Future<void> start({
     required String? soundId,
     required double volume,
+    bool playImmediately = true,
   }) async {
-    _sessionRunning = true;
+    _sessionRunning = playImmediately;
     _sessionVolume = volume.clamp(0.0, 1.0).toDouble();
 
     final track = soundId == null ? null : _catalog.getById(soundId);
@@ -151,7 +152,7 @@ class MeditationAudioController extends StateNotifier<MeditationAudioState> {
       isPlaying: false,
     );
 
-    if (track == null || !state.enabled) return;
+    if (track == null || !state.enabled || !playImmediately) return;
     await _playFromStart();
   }
 

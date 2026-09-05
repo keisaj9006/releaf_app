@@ -6,6 +6,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/session/session_manager.dart';
+import '../../../routing/app_routes.dart';
 import '../../../theme/app_theme.dart';
 import '../../../theme/releaf_design_tokens.dart';
 import '../../../theme/widgets/releaf_artwork.dart';
@@ -15,14 +17,17 @@ import '../application/meditation_audio_controller.dart';
 import '../application/meditation_library_controller.dart';
 import '../data/meditation_catalog.dart';
 import '../domain/meditation_content.dart';
+import '../domain/meditation_resume_state.dart';
 
 class MeditationPlayerScreen extends ConsumerStatefulWidget {
   const MeditationPlayerScreen({
     super.key,
     required this.meditationId,
+    this.resumeState,
   });
 
   final String meditationId;
+  final MeditationResumeState? resumeState;
 
   @override
   ConsumerState<MeditationPlayerScreen> createState() =>
@@ -40,7 +45,12 @@ class _MeditationPlayerScreenState
     super.initState();
     final item =
         ref.read(meditationCatalogProvider).getById(widget.meditationId);
-    _remainingSeconds = item?.durationSeconds ?? 0;
+    final fullDuration = item?.durationSeconds ?? 0;
+    final resumed = widget.resumeState?.remainingSeconds;
+    _remainingSeconds = resumed == null
+        ? fullDuration
+        : resumed.clamp(1, fullDuration).toInt();
+    _running = widget.resumeState == null;
     _startTimer();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -50,10 +60,15 @@ class _MeditationPlayerScreenState
             .read(meditationLibraryControllerProvider.notifier)
             .markRecent(item.id),
       );
+      if (widget.resumeState != null) {
+        ref.read(sessionManagerProvider.notifier).clear();
+      }
+
       unawaited(
         ref.read(meditationAudioControllerProvider.notifier).start(
               soundId: item.backgroundSoundId,
               volume: item.backgroundSoundVolume,
+              playImmediately: _running,
             ),
       );
     });
@@ -78,6 +93,7 @@ class _MeditationPlayerScreenState
         final item =
             ref.read(meditationCatalogProvider).getById(widget.meditationId);
         if (item != null) {
+          ref.read(sessionManagerProvider.notifier).clear();
           unawaited(
             ref
                 .read(meditationLibraryControllerProvider.notifier)
@@ -108,6 +124,25 @@ class _MeditationPlayerScreenState
 
   Future<void> _exitMeditation() async {
     _timer?.cancel();
+
+    final item =
+        ref.read(meditationCatalogProvider).getById(widget.meditationId);
+    if (item != null &&
+        _remainingSeconds > 0 &&
+        _remainingSeconds < item.durationSeconds) {
+      ref.read(sessionManagerProvider.notifier).setPausedSession(
+            title: item.title,
+            subtitle:
+                'Meditation · ${_resumeTimeLabel(_remainingSeconds)} remaining',
+            resumeRoute: AppRoutes.meditationSessionFor(item.id),
+            extra: MeditationResumeState(
+              remainingSeconds: _remainingSeconds,
+            ),
+          );
+    } else if (_remainingSeconds == 0) {
+      ref.read(sessionManagerProvider.notifier).clear();
+    }
+
     await ref.read(meditationAudioControllerProvider.notifier).stop();
     if (mounted) context.pop();
   }
@@ -682,6 +717,14 @@ class _TimerPill extends StatelessWidget {
       ),
     );
   }
+}
+
+String _resumeTimeLabel(int seconds) {
+  final minutes = seconds ~/ 60;
+  final remainder = seconds % 60;
+  if (minutes == 0) return '${remainder}s';
+  if (remainder == 0) return '${minutes}m';
+  return '${minutes}m ${remainder}s';
 }
 
 ReleafArtworkVariant _artworkFor(MeditationCategory category) {

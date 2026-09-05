@@ -11,6 +11,8 @@ import 'package:releaf_app/features/meditation/application/meditation_audio_cont
 import 'package:releaf_app/features/meditation/application/meditation_library_controller.dart';
 import 'package:releaf_app/features/meditation/data/meditation_catalog.dart';
 import 'package:releaf_app/features/meditation/domain/meditation_content.dart';
+import 'package:releaf_app/features/meditation/domain/meditation_resume_state.dart';
+import 'package:releaf_app/features/meditation/presentation/meditation_player_screen.dart';
 import 'package:releaf_app/routing/app_router.dart';
 import 'package:releaf_app/routing/app_routes.dart';
 
@@ -268,6 +270,42 @@ void main() {
     await tester.tap(find.byKey(const Key('meditation-sound-toggle')));
     await tester.pump(const Duration(milliseconds: 300));
     expect(audioDriver.pauseCalls, 2);
+  });
+
+  testWidgets('Paused meditation resumes without auto-playing ambience', (
+    WidgetTester tester,
+  ) async {
+    final preferences = await _preferences();
+    final audioDriver = _FakeMeditationAudioDriver();
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(preferences),
+          meditationAudioDriverProvider.overrideWithValue(audioDriver),
+          subscriptionControllerProvider.overrideWith(
+            (ref) => _FixedSubscriptionController(isPremium: true),
+          ),
+        ],
+        child: const MaterialApp(
+          home: MeditationPlayerScreen(
+            meditationId: 'mindfulness-basics-2',
+            resumeState: MeditationResumeState(remainingSeconds: 45),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.text('00:45'), findsOneWidget);
+    expect(find.text('Continue'), findsOneWidget);
+    expect(audioDriver.playCalls, 0);
+
+    await tester.tap(find.text('Continue'));
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(audioDriver.playCalls, 1);
   });
 
   testWidgets('Meditation player stays overflow-free at 320px', (
