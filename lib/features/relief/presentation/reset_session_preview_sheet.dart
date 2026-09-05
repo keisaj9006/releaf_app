@@ -581,6 +581,7 @@ String _durationLabel(int durationSeconds) {
 String _previewSubtitle(ResetContent session) {
   return switch (session.id) {
     '60s-grounding' => 'A quick sensory reset for the present moment.',
+    'back-to-room' => 'A guided 5–4–3–2–1 grounding practice with a simpler 3–2–1 option.',
     '90s-calm-down' => 'A short breathing practice to slow the pace.',
     'longer-exhale' => 'A gentle paced-breathing reset with a slightly longer exhale.',
     '5min-focus' => 'A focused sensory anchor for scattered attention.',
@@ -592,6 +593,7 @@ String _previewSubtitle(ResetContent session) {
 String _sessionPurpose(ResetContent session) {
   return switch (session.id) {
     '60s-grounding' => 'Return attention to your body and immediate surroundings.',
+    'back-to-room' => 'Reconnect with the room through sight, touch, sound, smell and taste without focusing on breathing.',
     '90s-calm-down' => 'Slow the pace and soften tension with a brief breathing sequence.',
     'longer-exhale' => 'Use a gentle 3-count inhale and a slightly longer 4-count exhale without holding the breath.',
     '5min-focus' => 'Anchor attention through your senses and one clear point of focus.',
@@ -620,6 +622,7 @@ IconData _modalityIcon(ResetModality modality) {
 ReleafArtworkVariant _sessionArtwork(ResetContent session) {
   return switch (session.id) {
     '60s-grounding' => ReleafArtworkVariant.grounding,
+    'back-to-room' => ReleafArtworkVariant.noBreath,
     '90s-calm-down' => ReleafArtworkVariant.calm,
     'longer-exhale' => ReleafArtworkVariant.breath,
     '5min-focus' => ReleafArtworkVariant.focus,
