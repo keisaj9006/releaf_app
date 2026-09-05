@@ -310,7 +310,7 @@ class _SoundArtworkDisc extends StatelessWidget {
                   child: Icon(
                     isPlaying
                         ? Icons.graphic_eq_rounded
-                        : Icons.graphic_eq_outlined,
+                        : Icons.music_note_rounded,
                     size: size * 0.13,
                     color: ReleafColors.textPrimary.withValues(alpha: 0.84),
                   ),
