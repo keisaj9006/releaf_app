@@ -150,6 +150,13 @@ void main() {
   testWidgets('Every visible Brain game card routes to its real game', (
     WidgetTester tester,
   ) async {
+    tester.view.physicalSize = const Size(900, 1600);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
     final expectedTypes = <String, Type>{
       'memory': MemoryGameScreen,
       'labyrinth': LabirynthGameScreen,
