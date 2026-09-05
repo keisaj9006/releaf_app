@@ -49,12 +49,12 @@ class ScaffoldWithNavBar extends ConsumerWidget {
       floatingActionButton: navigationShell.currentIndex == 1
           ? null
           : FloatingActionButton.small(
-              tooltip: 'Open Emergency Grounding',
-              backgroundColor: ReleafColors.premiumSoft,
-              foregroundColor: ReleafColors.premium,
+              tooltip: 'Open Emergency Calm',
+              backgroundColor: ReleafColors.surfaceElevated,
+              foregroundColor: ReleafColors.sage,
               shape: CircleBorder(
                 side: BorderSide(
-                  color: ReleafColors.premium.withValues(alpha: 0.38),
+                  color: ReleafColors.sage.withValues(alpha: 0.34),
                 ),
               ),
               onPressed: () {
