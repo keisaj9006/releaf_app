@@ -3,6 +3,9 @@ import 'dart:async';
 import 'dart:math' show pi, max;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'memory_stats_screen.dart';
+import '../../theme/app_theme.dart';
+import '../../theme/releaf_design_tokens.dart';
+import '../../theme/widgets/releaf_brain_artwork.dart';
 
 class MemoryGameScreen extends StatefulWidget {
   /// Jeśli ten ekran jest uruchamiany jako “Brain session”
@@ -285,89 +288,258 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
   @override
   Widget build(BuildContext context) {
     final embedded = widget.onFinish != null;
+    const accent = Color(0xFF91A4EF);
 
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF154314),
-        title: const Text("Memory Game", style: TextStyle(color: Colors.white, fontFamily: 'Poppins')),
-        centerTitle: true,
-        actions: [
-          if (embedded)
-            IconButton(
-              tooltip: 'Finish session',
-              icon: const Icon(Icons.check_circle_outline, color: Colors.white),
-              onPressed: () => _finishSession(completed: _gameCompleted),
-            ),
-        ],
-      ),
-      body: Column(
-        children: [
-          const SizedBox(height: 10),
-          Text("⏱️ Time Left: $timeLeft sec", style: const TextStyle(fontSize: 18)),
-          const SizedBox(height: 10),
-          Expanded(
-            child: GridView.builder(
-              padding: const EdgeInsets.all(16),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 4,
-                crossAxisSpacing: 8,
-                mainAxisSpacing: 8,
+    return Theme(
+      data: AppTheme.premiumDark(),
+      child: Scaffold(
+        backgroundColor: ReleafColors.background,
+        appBar: AppBar(
+          toolbarHeight: 72,
+          backgroundColor: const Color(0xE90A1018),
+          surfaceTintColor: Colors.transparent,
+          titleSpacing: 20,
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'MEMORY',
+                style: ReleafTypography.eyebrow.copyWith(
+                  color: accent,
+                  letterSpacing: 1.8,
+                ),
               ),
-              itemCount: _shuffledCards.length,
-              itemBuilder: (context, index) {
-                if (_shuffledCards[index] == '') return const SizedBox.shrink();
+              const SizedBox(height: 2),
+              Text(
+                'Pattern Match',
+                style: ReleafTypography.cardTitle.copyWith(fontSize: 17),
+              ),
+            ],
+          ),
+          actions: [
+            if (embedded)
+              IconButton(
+                tooltip: 'Finish session',
+                icon: const Icon(Icons.close_rounded),
+                onPressed: () => _finishSession(completed: _gameCompleted),
+              ),
+          ],
+        ),
+        body: Stack(
+          children: [
+            const Positioned.fill(
+              child: ReleafBrainArtwork(
+                variant: ReleafBrainArtworkVariant.memory,
+                intensity: 0.30,
+              ),
+            ),
+            const Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Color(0xC5080E16),
+                      Color(0xEE09100D),
+                      ReleafColors.background,
+                    ],
+                    stops: [0, 0.45, 1],
+                  ),
+                ),
+              ),
+            ),
+            SafeArea(
+              top: false,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final compact = constraints.maxWidth < 360;
 
-                final isFlipped = _cardFlipped[index];
-
-                return GestureDetector(
-                  onTap: () => _handleTap(index),
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 300),
-                    transitionBuilder: (Widget child, Animation<double> animation) {
-                      final rotate = Tween(begin: pi, end: 0.0).animate(animation);
-                      return AnimatedBuilder(
-                        animation: rotate,
-                        child: child,
-                        builder: (context, child) {
-                          final isUnder = (ValueKey(isFlipped) != child!.key);
-                          final tilt = isUnder ? pi : 0.0;
-                          return Transform(
-                            transform: Matrix4.rotationY(tilt + rotate.value),
-                            alignment: Alignment.center,
-                            child: child,
-                          );
-                        },
-                      );
-                    },
-                    child: Card(
-                      key: ValueKey(isFlipped),
-                      color: isFlipped ? Colors.green.shade100 : Colors.grey.shade300,
-                      child: Center(
-                        child: Text(
-                          isFlipped ? _shuffledCards[index] : '',
-                          style: const TextStyle(fontSize: 28),
+                  return Column(
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.fromLTRB(
+                          ReleafSpacing.screen,
+                          compact ? ReleafSpacing.sm : ReleafSpacing.md,
+                          ReleafSpacing.screen,
+                          ReleafSpacing.sm,
+                        ),
+                        child: Wrap(
+                          spacing: ReleafSpacing.xs,
+                          runSpacing: ReleafSpacing.xs,
+                          children: [
+                            _MemoryStatusPill(
+                              icon: Icons.layers_outlined,
+                              label: 'Level $currentLevel',
+                              accent: accent,
+                            ),
+                            _MemoryStatusPill(
+                              icon: Icons.timer_outlined,
+                              label: '${timeLeft}s',
+                              accent: timeLeft <= 10
+                                  ? const Color(0xFFE1A184)
+                                  : accent,
+                            ),
+                            _MemoryStatusPill(
+                              icon: Icons.refresh_rounded,
+                              label: '${mistakes} mistakes',
+                              accent: ReleafColors.textSecondary,
+                            ),
+                          ],
                         ),
                       ),
+                      Expanded(
+                        child: Center(
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 620),
+                            child: GridView.builder(
+                              padding: const EdgeInsets.fromLTRB(
+                                ReleafSpacing.screen,
+                                ReleafSpacing.sm,
+                                ReleafSpacing.screen,
+                                ReleafSpacing.lg,
+                              ),
+                              gridDelegate:
+                                  SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 4,
+                                crossAxisSpacing: compact ? 7 : 10,
+                                mainAxisSpacing: compact ? 7 : 10,
+                              ),
+                              itemCount: _shuffledCards.length,
+                              itemBuilder: (context, index) {
+                                if (_shuffledCards[index] == '') {
+                                  return DecoratedBox(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(16),
+                                      border: Border.all(
+                                        color: accent.withValues(alpha: 0.07),
+                                      ),
+                                    ),
+                                  );
+                                }
+
+                                final isFlipped = _cardFlipped[index];
+
+                                return Semantics(
+                                  button: true,
+                                  label: isFlipped
+                                      ? 'Revealed memory card'
+                                      : 'Hidden memory card',
+                                  child: GestureDetector(
+                                    onTap: () => _handleTap(index),
+                                    child: AnimatedSwitcher(
+                                      duration:
+                                          const Duration(milliseconds: 260),
+                                      transitionBuilder: (
+                                        Widget child,
+                                        Animation<double> animation,
+                                      ) {
+                                        final rotate =
+                                            Tween(begin: pi, end: 0.0)
+                                                .animate(animation);
+                                        return AnimatedBuilder(
+                                          animation: rotate,
+                                          child: child,
+                                          builder: (context, child) {
+                                            final isUnder =
+                                                ValueKey(isFlipped) != child!.key;
+                                            final tilt = isUnder ? pi : 0.0;
+                                            return Transform(
+                                              transform: Matrix4.rotationY(
+                                                tilt + rotate.value,
+                                              ),
+                                              alignment: Alignment.center,
+                                              child: child,
+                                            );
+                                          },
+                                        );
+                                      },
+                                      child: Container(
+                                        key: ValueKey(isFlipped),
+                                        decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(16),
+                                          color: isFlipped
+                                              ? const Color(0xFF202A46)
+                                              : const Color(0xFF121A27),
+                                          border: Border.all(
+                                            color: isFlipped
+                                                ? accent.withValues(alpha: 0.68)
+                                                : accent.withValues(alpha: 0.18),
+                                          ),
+                                          boxShadow: isFlipped
+                                              ? [
+                                                  BoxShadow(
+                                                    color: accent.withValues(
+                                                      alpha: 0.15,
+                                                    ),
+                                                    blurRadius: 18,
+                                                  ),
+                                                ]
+                                              : null,
+                                        ),
+                                        alignment: Alignment.center,
+                                        child: isFlipped
+                                            ? Text(
+                                                _shuffledCards[index],
+                                                style: TextStyle(
+                                                  fontSize:
+                                                      compact ? 24 : 28,
+                                                ),
+                                              )
+                                            : Icon(
+                                                Icons.blur_on_rounded,
+                                                size: compact ? 19 : 22,
+                                                color: accent.withValues(
+                                                  alpha: 0.42,
+                                                ),
+                                              ),
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+        bottomNavigationBar: SafeArea(
+          top: false,
+          child: Container(
+            decoration: BoxDecoration(
+              color: const Color(0xF50B1119),
+              border: Border(
+                top: BorderSide(
+                  color: accent.withValues(alpha: 0.14),
+                ),
+              ),
+            ),
+            padding: const EdgeInsets.symmetric(
+              horizontal: ReleafSpacing.screen,
+              vertical: ReleafSpacing.xs,
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Match every pair before the timer ends.',
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: ReleafTypography.meta.copyWith(
+                      color: ReleafColors.textSecondary,
                     ),
                   ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-      bottomNavigationBar: Container(
-        color: Colors.grey.shade100,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text('Level $currentLevel', style: const TextStyle(fontSize: 16, fontFamily: 'Poppins')),
-            Row(
-              children: [
+                ),
                 IconButton(
-                  tooltip: 'Reset Level',
-                  icon: const Icon(Icons.restart_alt),
+                  tooltip: 'Reset level',
+                  icon: const Icon(Icons.restart_alt_rounded),
                   onPressed: () {
                     countdownTimer?.cancel();
                     _startLevel();
@@ -375,20 +547,61 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
                 ),
                 IconButton(
                   tooltip: 'Stats',
-                  icon: const Icon(Icons.bar_chart),
+                  icon: const Icon(Icons.bar_chart_rounded),
                   onPressed: () async {
                     countdownTimer?.cancel();
                     await Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (_) => const MemoryStatsScreen()),
+                      MaterialPageRoute(
+                        builder: (_) => const MemoryStatsScreen(),
+                      ),
                     );
                     _startTimer();
                   },
                 ),
               ],
             ),
-          ],
+          ),
         ),
+      ),
+    );
+  }
+}
+
+class _MemoryStatusPill extends StatelessWidget {
+  const _MemoryStatusPill({
+    required this.icon,
+    required this.label,
+    required this.accent,
+  });
+
+  final IconData icon;
+  final String label;
+  final Color accent;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+      decoration: BoxDecoration(
+        color: const Color(0xD9111823),
+        borderRadius: BorderRadius.circular(ReleafRadii.pill),
+        border: Border.all(color: accent.withValues(alpha: 0.20)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: accent),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: ReleafTypography.meta.copyWith(
+              color: ReleafColors.textPrimary,
+              fontWeight: FontWeight.w700,
+              fontSize: 10,
+            ),
+          ),
+        ],
       ),
     );
   }
