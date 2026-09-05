@@ -10,6 +10,7 @@ import 'package:releaf_app/core/subscription/subscription_state.dart';
 import 'package:releaf_app/features/meditation/application/meditation_audio_controller.dart';
 import 'package:releaf_app/features/meditation/application/meditation_library_controller.dart';
 import 'package:releaf_app/features/meditation/data/meditation_catalog.dart';
+import 'package:releaf_app/features/meditation/domain/meditation_content.dart';
 import 'package:releaf_app/routing/app_router.dart';
 import 'package:releaf_app/routing/app_routes.dart';
 
