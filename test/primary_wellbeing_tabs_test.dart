@@ -4,6 +4,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:releaf_app/core/providers.dart';
+import 'package:releaf_app/core/subscription/revenuecat_service.dart';
+import 'package:releaf_app/core/subscription/subscription_controller.dart';
+import 'package:releaf_app/core/subscription/subscription_state.dart';
 import 'package:releaf_app/routing/app_router.dart';
 import 'package:releaf_app/routing/app_routes.dart';
 
@@ -12,10 +15,24 @@ Future<SharedPreferences> _preferences() async {
   return SharedPreferences.getInstance();
 }
 
+class _FixedSubscriptionController extends SubscriptionController {
+  _FixedSubscriptionController({required bool isPremium})
+      : super(RevenueCatService()) {
+    state = SubscriptionState(isPremium: isPremium);
+  }
+
+  @override
+  Future<void> initAndRefresh() async {}
+
+  @override
+  Future<void> refresh() async {}
+}
+
 Future<void> _pumpRoute(
   WidgetTester tester, {
   required String location,
   required SharedPreferences preferences,
+  bool isPremium = false,
 }) async {
   final router = createAppRouter(initialLocation: location);
   addTearDown(router.dispose);
@@ -24,6 +41,9 @@ Future<void> _pumpRoute(
     ProviderScope(
       overrides: [
         sharedPreferencesProvider.overrideWithValue(preferences),
+        subscriptionControllerProvider.overrideWith(
+          (ref) => _FixedSubscriptionController(isPremium: isPremium),
+        ),
       ],
       child: MaterialApp.router(routerConfig: router),
     ),
@@ -142,6 +162,38 @@ void main() {
 
     expect(find.byKey(const Key('meditation-living-form')), findsOneWidget);
     expect(tester.takeException(), isNull);
+  });
+
+
+  testWidgets('Sleep premium affordances reflect the real entitlement', (
+    WidgetTester tester,
+  ) async {
+    await _pumpRoute(
+      tester,
+      location: AppRoutes.sleep,
+      preferences: await _preferences(),
+    );
+
+    expect(find.text('Unlock tonight'), findsOneWidget);
+
+    final premiumRouter = createAppRouter(initialLocation: AppRoutes.sleep);
+    addTearDown(premiumRouter.dispose);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(await _preferences()),
+          subscriptionControllerProvider.overrideWith(
+            (ref) => _FixedSubscriptionController(isPremium: true),
+          ),
+        ],
+        child: MaterialApp.router(routerConfig: premiumRouter),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.text('Start tonight'), findsOneWidget);
+    expect(find.text('Unlock tonight'), findsNothing);
   });
 
 }
