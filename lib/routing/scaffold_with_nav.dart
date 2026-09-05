@@ -67,7 +67,7 @@ class ScaffoldWithNavBar extends ConsumerWidget {
       bottomNavigationBar: Theme(
         data: Theme.of(context).copyWith(
           navigationBarTheme: NavigationBarThemeData(
-            height: 74,
+            height: 82,
             backgroundColor: ReleafColors.backgroundRaised,
             indicatorColor: ReleafColors.sage.withValues(alpha: 0.16),
             surfaceTintColor: Colors.transparent,
