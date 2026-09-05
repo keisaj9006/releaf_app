@@ -579,14 +579,16 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
 
     expect(find.text('EMERGENCY CALM'), findsOneWidget);
-    expect(find.text('Stay with this screen.'), findsOneWidget);
+    expect(find.text('One thing at a time.'), findsOneWidget);
     expect(find.byKey(const Key('emergency-calming-visual')), findsOneWidget);
+    expect(find.byKey(const Key('emergency-anchor-field')), findsOneWidget);
     expect(
       find.byKey(const Key('emergency-trainer-silhouette')),
-      findsOneWidget,
+      findsNothing,
     );
     expect(find.byKey(const Key('emergency-phase-label')), findsOneWidget);
-    expect(find.text('ARRIVE'), findsOneWidget);
+    expect(find.textContaining('ARRIVE'), findsOneWidget);
+    expect(find.byKey(const Key('emergency-advance-action')), findsOneWidget);
     expect(find.text('Unlock Premium'), findsNothing);
   });
 

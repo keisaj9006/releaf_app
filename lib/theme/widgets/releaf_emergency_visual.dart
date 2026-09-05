@@ -3,13 +3,12 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../releaf_design_tokens.dart';
-import 'releaf_artwork.dart';
-import 'releaf_session_living_form.dart';
 
-/// Calm, non-diagnostic visual language reserved for Emergency mode.
+/// Dedicated low-cognitive-load visual for Emergency mode.
 ///
-/// It deliberately avoids game-like progress, premium cues and fake controls.
-/// The small trainer silhouette is abstract rather than a realistic person.
+/// The visual intentionally avoids the Releaf Living Form, game-like progress
+/// and premium cues. It keeps one steady anchor in the centre while the icon
+/// changes with the current grounding cue.
 class ReleafEmergencyVisual extends StatefulWidget {
   const ReleafEmergencyVisual({
     super.key,
@@ -36,7 +35,7 @@ class _ReleafEmergencyVisualState extends State<ReleafEmergencyVisual>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 10),
+      duration: const Duration(seconds: 12),
     );
     _syncMotion();
   }
@@ -53,7 +52,7 @@ class _ReleafEmergencyVisualState extends State<ReleafEmergencyVisual>
     if (widget.reducedMotion) {
       _controller
         ..stop()
-        ..value = 0.32;
+        ..value = 0.34;
     } else if (!_controller.isAnimating) {
       _controller.repeat();
     }
@@ -67,87 +66,68 @@ class _ReleafEmergencyVisualState extends State<ReleafEmergencyVisual>
 
   @override
   Widget build(BuildContext context) {
-    final progress = widget.progress.clamp(0.0, 1.0).toDouble();
+    final safeProgress = widget.progress.clamp(0.0, 1.0).toDouble();
 
     return Semantics(
       container: true,
-      label: 'Emergency grounding visual. ${widget.phaseLabel}.',
+      label: 'Emergency grounding anchor. ${widget.phaseLabel}.',
       child: AnimatedBuilder(
         animation: _controller,
         builder: (context, child) {
-          final wave = widget.reducedMotion
-              ? 0.42
+          final pulse = widget.reducedMotion
+              ? 0.38
               : (math.sin(_controller.value * math.pi * 2) + 1) / 2;
-          final ringOpacity = 0.08 + (wave * 0.08);
-          final trainerScale = 0.985 + (wave * 0.025);
 
           return Stack(
             key: const Key('emergency-calming-visual'),
             fit: StackFit.expand,
             alignment: Alignment.center,
             children: [
-              Center(
-                child: FractionallySizedBox(
-                  widthFactor: 0.90,
-                  heightFactor: 0.90,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: ReleafColors.sage.withValues(
-                          alpha: ringOpacity,
-                        ),
-                      ),
-                    ),
-                  ),
+              CustomPaint(
+                key: const Key('emergency-anchor-field'),
+                painter: _EmergencyAnchorPainter(
+                  pulse: pulse,
+                  progress: safeProgress,
                 ),
               ),
               Center(
-                child: FractionallySizedBox(
-                  widthFactor: 0.72,
-                  heightFactor: 0.72,
-                  child: DecoratedBox(
+                child: AnimatedScale(
+                  scale: widget.reducedMotion ? 1 : 0.99 + pulse * 0.018,
+                  duration: widget.reducedMotion
+                      ? Duration.zero
+                      : ReleafMotion.standard,
+                  child: Container(
+                    width: 92,
+                    height: 92,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
+                      color: const Color(0xFF121714).withValues(alpha: 0.92),
                       border: Border.all(
-                        color: ReleafColors.sage.withValues(
-                          alpha: ringOpacity + 0.04,
+                        color: ReleafFeatureAccents.emergency.withValues(
+                          alpha: 0.34,
                         ),
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: ReleafColors.glowSage.withValues(
-                            alpha: 0.48 + (wave * 0.24),
+                          color: ReleafFeatureAccents.emergency.withValues(
+                            alpha: 0.08 + pulse * 0.06,
                           ),
-                          blurRadius: 72,
-                          spreadRadius: 8,
+                          blurRadius: 34,
+                          spreadRadius: 3,
                         ),
                       ],
                     ),
-                  ),
-                ),
-              ),
-              Center(
-                child: FractionallySizedBox(
-                  widthFactor: 0.70,
-                  heightFactor: 0.70,
-                  child: ReleafSessionLivingForm(
-                    variant: ReleafArtworkVariant.ambient,
-                    progress: progress,
-                    breathing: false,
-                    reducedMotion: widget.reducedMotion,
-                  ),
-                ),
-              ),
-              Center(
-                child: Transform.scale(
-                  scale: trainerScale,
-                  child: FractionallySizedBox(
-                    widthFactor: 0.30,
-                    heightFactor: 0.30,
-                    child: const CustomPaint(
-                      key: Key('emergency-trainer-silhouette'),
-                      painter: _EmergencyTrainerPainter(),
+                    alignment: Alignment.center,
+                    child: AnimatedSwitcher(
+                      duration: widget.reducedMotion
+                          ? Duration.zero
+                          : ReleafMotion.standard,
+                      child: Icon(
+                        _phaseIcon(widget.phaseLabel),
+                        key: ValueKey(widget.phaseLabel),
+                        size: 32,
+                        color: const Color(0xFFF0E8D8),
+                      ),
                     ),
                   ),
                 ),
@@ -160,78 +140,107 @@ class _ReleafEmergencyVisualState extends State<ReleafEmergencyVisual>
   }
 }
 
-class _EmergencyTrainerPainter extends CustomPainter {
-  const _EmergencyTrainerPainter();
+IconData _phaseIcon(String phaseLabel) {
+  return switch (phaseLabel.toLowerCase()) {
+    'arrive' => Icons.vertical_align_bottom_rounded,
+    'look' => Icons.visibility_outlined,
+    'feel' => Icons.touch_app_outlined,
+    'listen' => Icons.hearing_rounded,
+    'return' => Icons.my_location_rounded,
+    _ => Icons.adjust_rounded,
+  };
+}
+
+class _EmergencyAnchorPainter extends CustomPainter {
+  const _EmergencyAnchorPainter({
+    required this.pulse,
+    required this.progress,
+  });
+
+  final double pulse;
+  final double progress;
 
   @override
   void paint(Canvas canvas, Size size) {
     if (size.isEmpty) return;
 
-    final center = Offset(size.width / 2, size.height / 2);
+    final center = Offset(size.width / 2, size.height * 0.52);
     final short = size.shortestSide;
+    final accent = ReleafFeatureAccents.emergency;
 
-    final auraPaint = Paint()
-      ..color = ReleafColors.background.withValues(alpha: 0.68)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 12);
-    canvas.drawCircle(center, short * 0.34, auraPaint);
+    final glowRect = Rect.fromCenter(
+      center: center,
+      width: short * 1.10,
+      height: short * 0.72,
+    );
+    canvas.drawOval(
+      glowRect,
+      Paint()
+        ..shader = RadialGradient(
+          colors: [
+            accent.withValues(alpha: 0.10 + pulse * 0.04),
+            accent.withValues(alpha: 0.025),
+            Colors.transparent,
+          ],
+          stops: const [0, 0.55, 1],
+        ).createShader(glowRect),
+    );
 
-    final fill = Paint()
-      ..color = ReleafColors.textPrimary.withValues(alpha: 0.78)
-      ..style = PaintingStyle.fill;
-
-    final outline = Paint()
-      ..color = ReleafColors.sage.withValues(alpha: 0.40)
+    final horizonPaint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = math.max(1.2, short * 0.018)
-      ..strokeCap = StrokeCap.round;
+      ..strokeCap = StrokeCap.round
+      ..strokeWidth = 1.15;
 
-    final headRadius = short * 0.105;
-    final headCenter = Offset(center.dx, center.dy - short * 0.14);
-    canvas.drawCircle(headCenter, headRadius, fill);
+    for (var index = 0; index < 4; index++) {
+      final widthFactor = 0.42 + index * 0.16 + pulse * 0.015;
+      final heightFactor = 0.10 + index * 0.045;
+      canvas.drawOval(
+        Rect.fromCenter(
+          center: Offset(center.dx, center.dy + short * 0.10),
+          width: short * widthFactor,
+          height: short * heightFactor,
+        ),
+        horizonPaint
+          ..color = accent.withValues(alpha: 0.15 - index * 0.022),
+      );
+    }
 
-    final shoulderRect = Rect.fromCenter(
-      center: Offset(center.dx, center.dy + short * 0.105),
-      width: short * 0.45,
-      height: short * 0.28,
+    canvas.drawLine(
+      Offset(size.width * 0.12, center.dy + short * 0.11),
+      Offset(size.width * 0.88, center.dy + short * 0.11),
+      Paint()
+        ..strokeWidth = 1
+        ..color = ReleafColors.textSecondary.withValues(alpha: 0.10),
     );
-    final shoulderPath = Path()
-      ..moveTo(shoulderRect.left, shoulderRect.bottom)
-      ..quadraticBezierTo(
-        shoulderRect.left + short * 0.04,
-        shoulderRect.top + short * 0.02,
-        center.dx - short * 0.12,
-        shoulderRect.top,
-      )
-      ..quadraticBezierTo(
-        center.dx,
-        shoulderRect.top + short * 0.07,
-        center.dx + short * 0.12,
-        shoulderRect.top,
-      )
-      ..quadraticBezierTo(
-        shoulderRect.right - short * 0.04,
-        shoulderRect.top + short * 0.02,
-        shoulderRect.right,
-        shoulderRect.bottom,
-      )
-      ..close();
 
-    canvas.drawPath(shoulderPath, fill);
-    canvas.drawPath(shoulderPath, outline);
-
-    canvas.drawArc(
-      Rect.fromCenter(
-        center: Offset(center.dx, center.dy + short * 0.12),
-        width: short * 0.50,
-        height: short * 0.34,
-      ),
-      math.pi * 0.08,
-      math.pi * 0.84,
-      false,
-      outline,
+    final anchorRadius = short * 0.075;
+    canvas.drawCircle(
+      Offset(center.dx, center.dy + short * 0.11),
+      anchorRadius,
+      Paint()
+        ..color = accent.withValues(alpha: 0.10 + progress * 0.03)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 12),
     );
+
+    for (var index = 0; index < 8; index++) {
+      final angle = (math.pi * 2 / 8) * index;
+      final radius = short * (0.29 + (index.isEven ? 0.03 : 0));
+      canvas.drawCircle(
+        Offset(
+          center.dx + math.cos(angle) * radius,
+          center.dy + math.sin(angle) * radius * 0.68,
+        ),
+        index % 3 == 0 ? 1.4 : 0.75,
+        Paint()
+          ..color = ReleafColors.textPrimary.withValues(
+            alpha: index % 3 == 0 ? 0.18 : 0.07,
+          ),
+      );
+    }
   }
 
   @override
-  bool shouldRepaint(covariant _EmergencyTrainerPainter oldDelegate) => false;
+  bool shouldRepaint(covariant _EmergencyAnchorPainter oldDelegate) {
+    return oldDelegate.pulse != pulse || oldDelegate.progress != progress;
+  }
 }

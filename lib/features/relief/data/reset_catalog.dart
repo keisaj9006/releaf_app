@@ -36,28 +36,33 @@ class ResetCatalog {
             guidance:
                 'Place both feet on the floor and notice the support beneath you.',
             durationSeconds: 24,
+            advanceActionLabel: 'I can feel the support',
           ),
           ResetSessionStep(
             label: 'Look',
             guidance: 'Look around and name five things you can see.',
             durationSeconds: 24,
+            advanceActionLabel: 'I can see them',
           ),
           ResetSessionStep(
             label: 'Feel',
             guidance:
                 'Notice four things you can physically feel around you.',
             durationSeconds: 24,
+            advanceActionLabel: 'I can feel them',
           ),
           ResetSessionStep(
             label: 'Listen',
             guidance: 'Listen for three sounds without trying to change them.',
             durationSeconds: 24,
+            advanceActionLabel: 'I can hear them',
           ),
           ResetSessionStep(
             label: 'Return',
             guidance:
-                'Continue at your own pace. You can stop at any time.',
+                'Notice the room around you again. Stay here for a moment if you need to.',
             durationSeconds: 24,
+            advanceActionLabel: 'Finish',
           ),
         ],
       ),

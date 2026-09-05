@@ -701,6 +701,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
     final guidance = _currentGuidance(session);
     final steps = session.program?.steps ?? const <ResetSessionStep>[];
     final stepIndex = _sessionStepIndex(session);
+    final advanceLabel = _currentAdvanceActionLabel(session);
 
     return Stack(
       key: const ValueKey('running'),
@@ -712,26 +713,26 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                Color(0xFF0C1612),
-                ReleafColors.background,
-                Color(0xFF050907),
+                Color(0xFF12120F),
+                Color(0xFF0D110F),
+                Color(0xFF070907),
               ],
               stops: [0, 0.58, 1],
             ),
           ),
         ),
         Positioned(
-          top: -90,
-          right: -80,
-          width: 300,
-          height: 300,
+          top: -100,
+          right: -70,
+          width: 290,
+          height: 290,
           child: IgnorePointer(
             child: DecoratedBox(
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    ReleafColors.sage.withValues(alpha: 0.10),
+                    ReleafFeatureAccents.emergency.withValues(alpha: 0.08),
                     Colors.transparent,
                   ],
                 ),
@@ -746,8 +747,8 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
               builder: (context, constraints) {
                 final compactHeight = constraints.maxHeight < 620;
                 final visualSize = math.min(
-                  compactHeight ? 230.0 : 310.0,
-                  math.max(205.0, constraints.maxWidth * 0.76),
+                  compactHeight ? 205.0 : 285.0,
+                  math.max(178.0, constraints.maxWidth * 0.70),
                 );
 
                 return Padding(
@@ -755,7 +756,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
                     ReleafSpacing.screen,
                     ReleafSpacing.sm,
                     ReleafSpacing.screen,
-                    ReleafSpacing.lg,
+                    ReleafSpacing.md,
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -765,6 +766,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
                           ReleafRoundIconButton(
                             icon: Icons.close_rounded,
                             tooltip: 'Exit Emergency Calm',
+                            accentColor: ReleafFeatureAccents.emergency,
                             onPressed: _abortSession,
                           ),
                           const SizedBox(width: ReleafSpacing.md),
@@ -775,13 +777,13 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
                                 Text(
                                   'EMERGENCY CALM',
                                   style: ReleafTypography.eyebrow.copyWith(
-                                    color: ReleafColors.sage,
+                                    color: ReleafFeatureAccents.emergency,
                                     letterSpacing: 1.9,
                                   ),
                                 ),
                                 const SizedBox(height: 3),
                                 Text(
-                                  'Stay with this screen.',
+                                  'One thing at a time.',
                                   style: ReleafTypography.cardTitle.copyWith(
                                     fontSize: 17,
                                   ),
@@ -792,14 +794,15 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
                           if (widget.launchOptions.showSessionTimer)
                             DecoratedBox(
                               decoration: BoxDecoration(
-                                color: ReleafColors.surfaceSoft.withValues(
-                                  alpha: 0.82,
+                                color: const Color(0xFF171815).withValues(
+                                  alpha: 0.88,
                                 ),
                                 borderRadius: BorderRadius.circular(
                                   ReleafRadii.pill,
                                 ),
                                 border: Border.all(
-                                  color: ReleafColors.borderSoft,
+                                  color: ReleafFeatureAccents.emergency
+                                      .withValues(alpha: 0.18),
                                 ),
                               ),
                               child: Padding(
@@ -833,8 +836,8 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
                       ),
                       SizedBox(
                         height: compactHeight
-                            ? ReleafSpacing.md
-                            : ReleafSpacing.xl,
+                            ? ReleafSpacing.sm
+                            : ReleafSpacing.lg,
                       ),
                       Expanded(
                         child: Center(
@@ -851,18 +854,22 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
                       ),
                       SizedBox(
                         height: compactHeight
-                            ? ReleafSpacing.sm
-                            : ReleafSpacing.lg,
+                            ? ReleafSpacing.xs
+                            : ReleafSpacing.md,
                       ),
                       Center(
                         child: DecoratedBox(
                           decoration: BoxDecoration(
-                            color: ReleafColors.sage.withValues(alpha: 0.08),
+                            color: ReleafFeatureAccents.emergency.withValues(
+                              alpha: 0.07,
+                            ),
                             borderRadius: BorderRadius.circular(
                               ReleafRadii.pill,
                             ),
                             border: Border.all(
-                              color: ReleafColors.sage.withValues(alpha: 0.20),
+                              color: ReleafFeatureAccents.emergency.withValues(
+                                alpha: 0.19,
+                              ),
                             ),
                           ),
                           child: Padding(
@@ -871,11 +878,13 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
                               vertical: 7,
                             ),
                             child: Text(
-                              phaseLabel.toUpperCase(),
+                              steps.isEmpty
+                                  ? phaseLabel.toUpperCase()
+                                  : 'STEP ${stepIndex + 1} OF ${steps.length}  •  ${phaseLabel.toUpperCase()}',
                               key: const Key('emergency-phase-label'),
                               style: ReleafTypography.eyebrow.copyWith(
-                                fontSize: 10,
-                                color: ReleafColors.sage,
+                                fontSize: 9,
+                                color: ReleafFeatureAccents.emergency,
                               ),
                             ),
                           ),
@@ -899,10 +908,10 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
                               textAlign: TextAlign.center,
                               style: ReleafTypography.body.copyWith(
                                 color: ReleafColors.textPrimary.withValues(
-                                  alpha: 0.90,
+                                  alpha: 0.92,
                                 ),
                                 fontSize: compactHeight ? 15 : 17,
-                                height: 1.48,
+                                height: 1.46,
                               ),
                             ),
                           ),
@@ -912,43 +921,43 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
                           key: Key('reset-active-session-guidance-hidden'),
                           height: 1,
                         ),
-                      const SizedBox(height: ReleafSpacing.md),
-                      if (steps.isNotEmpty)
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            for (var index = 0;
-                                index < steps.length;
-                                index++) ...[
-                              AnimatedContainer(
-                                duration: reducedMotion
-                                    ? Duration.zero
-                                    : ReleafMotion.standard,
-                                width: index == stepIndex ? 22 : 7,
-                                height: 7,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(
-                                    ReleafRadii.pill,
-                                  ),
-                                  color: index <= stepIndex
-                                      ? ReleafColors.sage.withValues(
-                                          alpha:
-                                              index == stepIndex ? 0.88 : 0.38,
-                                        )
-                                      : ReleafColors.border,
-                                ),
+                      if (widget.launchOptions.showGuidanceText &&
+                          advanceLabel != null) ...[
+                        const SizedBox(height: ReleafSpacing.sm),
+                        Center(
+                          child: OutlinedButton.icon(
+                            key: const Key('emergency-advance-action'),
+                            onPressed: _advanceGuidedStep,
+                            icon: const Icon(
+                              Icons.arrow_forward_rounded,
+                              size: 17,
+                            ),
+                            label: Text(advanceLabel),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: ReleafColors.textPrimary,
+                              backgroundColor:
+                                  ReleafFeatureAccents.emergency.withValues(
+                                alpha: 0.06,
                               ),
-                              if (index != steps.length - 1)
-                                const SizedBox(width: 6),
-                            ],
-                          ],
+                              side: BorderSide(
+                                color: ReleafFeatureAccents.emergency
+                                    .withValues(alpha: 0.28),
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: ReleafSpacing.md,
+                                vertical: 10,
+                              ),
+                            ),
+                          ),
                         ),
-                      const SizedBox(height: ReleafSpacing.sm),
+                      ],
+                      const SizedBox(height: ReleafSpacing.xs),
                       Text(
-                        'Go at your own pace. You can stop at any time.',
+                        'Go at your own pace. Stop at any time.',
                         textAlign: TextAlign.center,
                         style: ReleafTypography.meta.copyWith(
                           color: ReleafColors.textMuted,
+                          fontSize: compactHeight ? 10 : 11,
                         ),
                       ),
                     ],
