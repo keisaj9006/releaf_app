@@ -325,86 +325,219 @@ class _PlayerBackdrop extends StatelessWidget {
   }
 }
 
-class _SoundArtworkDisc extends StatelessWidget {
+class _SoundArtworkDisc extends StatefulWidget {
   const _SoundArtworkDisc({
     required this.isPlaying,
     required this.progress,
     required this.variant,
+    required this.reducedMotion,
   });
 
   final bool isPlaying;
   final double progress;
   final ReleafArtworkVariant variant;
+  final bool reducedMotion;
+
+  @override
+  State<_SoundArtworkDisc> createState() => _SoundArtworkDiscState();
+}
+
+class _SoundArtworkDiscState extends State<_SoundArtworkDisc>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 6),
+    );
+    _sync();
+  }
+
+  @override
+  void didUpdateWidget(covariant _SoundArtworkDisc oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.isPlaying != widget.isPlaying ||
+        oldWidget.reducedMotion != widget.reducedMotion) {
+      _sync();
+    }
+  }
+
+  void _sync() {
+    if (widget.reducedMotion || !widget.isPlaying) {
+      _controller
+        ..stop()
+        ..value = 0.28;
+      return;
+    }
+    if (!_controller.isAnimating) {
+      _controller.repeat();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final size = math.min(
-      MediaQuery.sizeOf(context).width * 0.70,
-      MediaQuery.sizeOf(context).height * 0.40,
-    ).clamp(220.0, 360.0).toDouble();
+    final progress = widget.progress.clamp(0.0, 1.0).toDouble();
 
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0, end: isPlaying ? 1 : 0),
-      duration: const Duration(milliseconds: 900),
-      curve: Curves.easeInOut,
-      builder: (context, active, child) {
-        return SizedBox(
-          width: size,
-          height: size,
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              DecoratedBox(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: ReleafColors.sage.withValues(
-                        alpha: 0.10 + active * 0.12,
-                      ),
-                      blurRadius: 36 + active * 24,
-                      spreadRadius: 2,
-                    ),
-                  ],
-                ),
-              ),
-              ClipOval(
-                child: ReleafArtwork(variant: variant),
-              ),
-              CircularProgressIndicator(
-                value: progress,
-                strokeWidth: 2.4,
-                backgroundColor:
-                    ReleafColors.borderSoft.withValues(alpha: 0.35),
-                valueColor: const AlwaysStoppedAnimation(
-                  ReleafColors.sage,
-                ),
-              ),
-              Center(
-                child: Container(
-                  width: size * 0.31,
-                  height: size * 0.31,
+    return Semantics(
+      container: true,
+      label: widget.isPlaying
+          ? 'Ambient sound is playing.'
+          : 'Ambient sound is paused.',
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, child) {
+          final pulse = widget.isPlaying && !widget.reducedMotion
+              ? (math.sin(_controller.value * math.pi * 2) + 1) / 2
+              : 0.28;
+
+          return CustomPaint(
+            key: const Key('sound-immersive-visual'),
+            painter: _SoundPulsePainter(
+              t: _controller.value,
+              active: widget.isPlaying && !widget.reducedMotion,
+            ),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                DecoratedBox(
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: ReleafColors.background.withValues(alpha: 0.50),
-                    border: Border.all(
-                      color: ReleafColors.textPrimary.withValues(alpha: 0.16),
-                    ),
-                  ),
-                  child: Icon(
-                    isPlaying
-                        ? Icons.graphic_eq_rounded
-                        : Icons.music_note_rounded,
-                    size: size * 0.13,
-                    color: ReleafColors.textPrimary.withValues(alpha: 0.84),
+                    boxShadow: [
+                      BoxShadow(
+                        color: ReleafColors.sage.withValues(
+                          alpha: 0.10 + pulse * 0.11,
+                        ),
+                        blurRadius: 38 + pulse * 24,
+                        spreadRadius: 2,
+                      ),
+                    ],
                   ),
                 ),
-              ),
-            ],
-          ),
-        );
-      },
+                ClipOval(
+                  child: ReleafArtwork(
+                    variant: widget.variant,
+                    intensity: 0.86,
+                  ),
+                ),
+                const ClipOval(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: RadialGradient(
+                        center: Alignment(-0.20, -0.25),
+                        radius: 0.95,
+                        colors: [
+                          Color(0x12000000),
+                          Color(0x32000000),
+                          Color(0x8C000000),
+                        ],
+                        stops: [0, 0.62, 1],
+                      ),
+                    ),
+                  ),
+                ),
+                CircularProgressIndicator(
+                  value: progress,
+                  strokeWidth: 2.5,
+                  backgroundColor:
+                      ReleafColors.borderSoft.withValues(alpha: 0.42),
+                  valueColor: const AlwaysStoppedAnimation(
+                    ReleafColors.sage,
+                  ),
+                ),
+                Center(
+                  child: AnimatedScale(
+                    scale: 0.98 + pulse * 0.035,
+                    duration: widget.reducedMotion
+                        ? Duration.zero
+                        : ReleafMotion.standard,
+                    child: FractionallySizedBox(
+                      widthFactor: 0.32,
+                      heightFactor: 0.32,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color:
+                              ReleafColors.background.withValues(alpha: 0.62),
+                          border: Border.all(
+                            color: ReleafColors.textPrimary.withValues(
+                              alpha: 0.16,
+                            ),
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: ReleafColors.sage.withValues(
+                                alpha: 0.08 + pulse * 0.08,
+                              ),
+                              blurRadius: 22,
+                            ),
+                          ],
+                        ),
+                        child: Icon(
+                          widget.isPlaying
+                              ? Icons.graphic_eq_rounded
+                              : Icons.music_note_rounded,
+                          size: 34,
+                          color: ReleafColors.textPrimary.withValues(
+                            alpha: 0.86,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
     );
+  }
+}
+
+class _SoundPulsePainter extends CustomPainter {
+  const _SoundPulsePainter({
+    required this.t,
+    required this.active,
+  });
+
+  final double t;
+  final bool active;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (size.isEmpty) return;
+
+    final center = Offset(size.width / 2, size.height / 2);
+    final maxRadius = size.shortestSide * 0.47;
+
+    for (var index = 0; index < 3; index++) {
+      final phase = active ? (t + index * 0.29) % 1.0 : index * 0.24 + 0.18;
+      final radius = maxRadius * (0.68 + phase * 0.28);
+      final alpha = active ? (1 - phase) * 0.18 : 0.06;
+
+      canvas.drawCircle(
+        center,
+        radius,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.2
+          ..color = ReleafColors.sage.withValues(alpha: alpha),
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _SoundPulsePainter oldDelegate) {
+    return oldDelegate.t != t || oldDelegate.active != active;
   }
 }
 
