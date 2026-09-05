@@ -14,6 +14,7 @@ import '../../../theme/widgets/releaf_components.dart';
 import '../../../theme/widgets/releaf_session_living_form.dart';
 import '../../../theme/widgets/releaf_sensory_halo.dart';
 import '../../../theme/widgets/releaf_thought_unhook_visual.dart';
+import '../../../theme/widgets/releaf_wave2_visuals.dart';
 import '../data/reset_catalog.dart';
 import '../domain/models/breath_pattern.dart';
 import '../domain/models/reset_content.dart';
@@ -349,6 +350,30 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
                                   phaseLabel: phaseLabel ?? 'Notice',
                                   reducedMotion: reducedMotion,
                                 ),
+                              ResetVisualType.objectFocus =>
+                                ReleafObjectFocusVisual(
+                                  progress: progress,
+                                  phaseLabel: phaseLabel ?? 'Choose',
+                                  reducedMotion: reducedMotion,
+                                ),
+                              ResetVisualType.soundRipple =>
+                                ReleafSoundRippleVisual(
+                                  progress: progress,
+                                  phaseLabel: phaseLabel ?? 'Listen',
+                                  reducedMotion: reducedMotion,
+                                ),
+                              ResetVisualType.acceptanceSpace =>
+                                ReleafAcceptanceSpaceVisual(
+                                  progress: progress,
+                                  phaseLabel: phaseLabel ?? 'Notice',
+                                  reducedMotion: reducedMotion,
+                                ),
+                              ResetVisualType.nextStep =>
+                                ReleafNextStepVisual(
+                                  progress: progress,
+                                  phaseLabel: phaseLabel ?? 'Pause',
+                                  reducedMotion: reducedMotion,
+                                ),
                               ResetVisualType.livingForm =>
                                 ReleafSessionLivingForm(
                                   variant: artwork,
@@ -438,6 +463,43 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
                           key: Key('reset-active-session-guidance-hidden'),
                           height: 1,
                         ),
+                      if (_currentAdvanceActionLabel(session) != null) ...[
+                        const SizedBox(height: ReleafSpacing.sm),
+                        Center(
+                          child: OutlinedButton.icon(
+                            key: const Key('reset-step-advance-action'),
+                            onPressed: _advanceGuidedStep,
+                            icon: const Icon(
+                              Icons.arrow_forward_rounded,
+                              size: 17,
+                            ),
+                            label: Text(
+                              _currentAdvanceActionLabel(session)!,
+                              style: ReleafTypography.meta.copyWith(
+                                color: ReleafColors.textPrimary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: ReleafColors.sage,
+                              side: BorderSide(
+                                color: ReleafColors.sage.withValues(alpha: 0.30),
+                              ),
+                              backgroundColor: ReleafColors.sage.withValues(
+                                alpha: 0.06,
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: ReleafSpacing.md,
+                                vertical: 11,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius:
+                                    BorderRadius.circular(ReleafRadii.pill),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                       if (session.program?.hasSimplifiedPath == true) ...[
                         const SizedBox(height: ReleafSpacing.sm),
                         if (!_usingSimplifiedProgram)
@@ -798,6 +860,20 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
     return session.instructions[_sessionStepIndex(session)];
   }
 
+  String? _currentAdvanceActionLabel(ResetContent session) {
+    final program = session.program;
+    if (program == null || program.type != ResetProgramType.guidedSteps) {
+      return null;
+    }
+
+    return program
+        .stepAtElapsedSeconds(
+          _elapsedSeconds(session),
+          simplified: _usingSimplifiedProgram,
+        )
+        .advanceActionLabel;
+  }
+
   int _elapsedSeconds(ResetContent session) {
     return (_activeDurationSeconds - _remainingSeconds)
         .clamp(0, _activeDurationSeconds);
@@ -820,6 +896,10 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
       ResetVisualType.sensoryHalo => 'GROUND WITH YOUR SENSES',
       ResetVisualType.bodyRelease => 'RELEASE BODY TENSION',
       ResetVisualType.thoughtUnhook => 'CREATE A LITTLE DISTANCE',
+      ResetVisualType.objectFocus => 'FOCUS ON ONE REAL THING',
+      ResetVisualType.soundRipple => 'LISTEN TO WHAT IS HERE',
+      ResetVisualType.acceptanceSpace => 'MAKE ROOM WITHOUT FIGHTING',
+      ResetVisualType.nextStep => 'ONLY THE NEXT STEP',
       ResetVisualType.livingForm => 'STAY WITH THE MOMENT',
     };
   }
@@ -855,6 +935,12 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
       'back-to-room' => ReleafArtworkVariant.noBreath,
       'jaw-shoulders' => ReleafArtworkVariant.grounding,
       'name-the-thought' => ReleafArtworkVariant.focus,
+      'object-anchor' => ReleafArtworkVariant.grounding,
+      'sound-anchor' => ReleafArtworkVariant.ambient,
+      'press-release' => ReleafArtworkVariant.noBreath,
+      'make-room' => ReleafArtworkVariant.focus,
+      'one-small-next-step' => ReleafArtworkVariant.lifeUpgrade,
+      'equal-rhythm' => ReleafArtworkVariant.breath,
       '90s-calm-down' => ReleafArtworkVariant.calm,
       'longer-exhale' => ReleafArtworkVariant.breath,
       '5min-focus' => ReleafArtworkVariant.focus,
