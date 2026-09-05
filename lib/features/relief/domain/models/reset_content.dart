@@ -8,7 +8,16 @@ enum ResetModality { breathing, grounding, guidedPractice }
 
 enum ResetAccessTier { free, premium }
 
-enum ResetVisualType { livingForm, sensoryHalo, bodyRelease, thoughtUnhook }
+enum ResetVisualType {
+  livingForm,
+  sensoryHalo,
+  bodyRelease,
+  thoughtUnhook,
+  objectFocus,
+  soundRipple,
+  acceptanceSpace,
+  nextStep,
+}
 
 /// Describes whether the current content already fits the frozen Reset
 /// taxonomy or is being preserved temporarily during the migration.
