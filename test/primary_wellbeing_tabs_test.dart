@@ -8,6 +8,8 @@ import 'package:releaf_app/core/subscription/revenuecat_service.dart';
 import 'package:releaf_app/core/subscription/subscription_controller.dart';
 import 'package:releaf_app/core/subscription/subscription_state.dart';
 import 'package:releaf_app/features/meditation/application/meditation_audio_controller.dart';
+import 'package:releaf_app/features/meditation/application/meditation_library_controller.dart';
+import 'package:releaf_app/features/meditation/data/meditation_catalog.dart';
 import 'package:releaf_app/routing/app_router.dart';
 import 'package:releaf_app/routing/app_routes.dart';
 
@@ -93,6 +95,43 @@ Future<void> _pumpRoute(
 }
 
 void main() {
+  test('Meditation catalog exposes a real Foundations series', () {
+    const catalog = MeditationCatalog();
+    final foundations = catalog.getSeries(MeditationCatalog.foundationsSeriesId);
+
+    expect(foundations, hasLength(4));
+    expect(foundations.first.title, 'Mindfulness Basics');
+    expect(foundations.last.title, 'Open Awareness');
+    expect(
+      foundations.map((item) => item.seriesOrder),
+      orderedEquals([1, 2, 3, 4]),
+    );
+    expect(catalog.getByCategory(MeditationCategory.focus), isNotEmpty);
+  });
+
+  test('Meditation library stores favorites, recents and completion', () async {
+    SharedPreferences.setMockInitialValues({});
+    final preferences = await SharedPreferences.getInstance();
+    final container = ProviderContainer(
+      overrides: [
+        sharedPreferencesProvider.overrideWithValue(preferences),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    final controller =
+        container.read(meditationLibraryControllerProvider.notifier);
+
+    await controller.toggleFavorite('mindfulness-basics-2');
+    await controller.markRecent('mindfulness-basics-2');
+    await controller.markCompleted('mindfulness-basics-2');
+
+    final state = container.read(meditationLibraryControllerProvider);
+    expect(state.isFavorite('mindfulness-basics-2'), isTrue);
+    expect(state.recentIds.first, 'mindfulness-basics-2');
+    expect(state.isCompleted('mindfulness-basics-2'), isTrue);
+  });
+
   testWidgets('Meditate is a primary destination, not a nested page', (
     WidgetTester tester,
   ) async {

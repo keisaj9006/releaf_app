@@ -3,6 +3,7 @@ enum MeditationAccessTier { free, premium }
 enum MeditationCategory {
   startHere,
   anxiety,
+  focus,
   mind,
   body,
   everyday,
@@ -32,6 +33,8 @@ class MeditationContent {
     required this.steps,
     this.backgroundSoundId,
     this.backgroundSoundVolume = 0.20,
+    this.seriesId,
+    this.seriesOrder,
     this.unguided = false,
   }) : assert(
           backgroundSoundVolume >= 0 && backgroundSoundVolume <= 1,
@@ -51,6 +54,12 @@ class MeditationContent {
 
   /// Session-specific mix level for the ambient layer.
   final double backgroundSoundVolume;
+
+  /// Optional editorial collection/course identifier.
+  final String? seriesId;
+
+  /// One-based order inside an editorial collection/course.
+  final int? seriesOrder;
 
   final bool unguided;
 
