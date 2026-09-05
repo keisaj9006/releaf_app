@@ -112,6 +112,9 @@ void main() {
       ProviderScope(
         overrides: [
           sharedPreferencesProvider.overrideWithValue(await _preferences()),
+          subscriptionControllerProvider.overrideWith(
+            (ref) => _FixedSubscriptionController(isPremium: false),
+          ),
         ],
         child: MaterialApp.router(routerConfig: sleepRouter),
       ),
@@ -164,7 +167,6 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-
   testWidgets('Sleep premium affordances reflect the real entitlement', (
     WidgetTester tester,
   ) async {
@@ -195,5 +197,4 @@ void main() {
     expect(find.text('Start tonight'), findsOneWidget);
     expect(find.text('Unlock tonight'), findsNothing);
   });
-
 }
