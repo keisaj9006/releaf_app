@@ -463,7 +463,8 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
                           key: Key('reset-active-session-guidance-hidden'),
                           height: 1,
                         ),
-                      if (_currentAdvanceActionLabel(session) != null) ...[
+                      if (widget.launchOptions.showGuidanceText &&
+                          _currentAdvanceActionLabel(session) != null) ...[
                         const SizedBox(height: ReleafSpacing.sm),
                         Center(
                           child: OutlinedButton.icon(
