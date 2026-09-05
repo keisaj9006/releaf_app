@@ -1081,7 +1081,7 @@ class _SoundGatewayCard extends StatelessWidget {
         onPressed: onPressed,
         padding: EdgeInsets.zero,
         child: SizedBox(
-          height: 190,
+          height: MediaQuery.sizeOf(context).width < 360 ? 230 : 190,
           child: Stack(
             fit: StackFit.expand,
             children: [
