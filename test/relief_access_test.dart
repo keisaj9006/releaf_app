@@ -553,6 +553,76 @@ void main() {
     expect(container.read(leavesNotifierProvider).totalLeaves, 1);
   });
 
+  testWidgets('Emergency uses the dedicated calm visual without premium UI', (
+    WidgetTester tester,
+  ) async {
+    final preferences = await _preferences();
+    final router = createAppRouter(
+      initialLocation: AppRoutes.reliefSessionFor(
+        ResetCatalog.emergencySessionId,
+      ),
+    );
+    addTearDown(router.dispose);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(preferences),
+          subscriptionControllerProvider.overrideWith(
+            (ref) => throw StateError('Emergency must not read RevenueCat'),
+          ),
+        ],
+        child: MaterialApp.router(routerConfig: router),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.text('EMERGENCY CALM'), findsOneWidget);
+    expect(find.text('Stay with this screen.'), findsOneWidget);
+    expect(find.byKey(const Key('emergency-calming-visual')), findsOneWidget);
+    expect(
+      find.byKey(const Key('emergency-trainer-silhouette')),
+      findsOneWidget,
+    );
+    expect(find.byKey(const Key('emergency-phase-label')), findsOneWidget);
+    expect(find.text('ARRIVE'), findsOneWidget);
+    expect(find.text('Unlock Premium'), findsNothing);
+  });
+
+  testWidgets('Emergency remains overflow-free on a narrow phone', (
+    WidgetTester tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(320, 640));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final preferences = await _preferences();
+    final router = createAppRouter(
+      initialLocation: AppRoutes.reliefSessionFor(
+        ResetCatalog.emergencySessionId,
+      ),
+    );
+    addTearDown(router.dispose);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(preferences),
+          subscriptionControllerProvider.overrideWith(
+            (ref) => throw StateError('Emergency must not read RevenueCat'),
+          ),
+        ],
+        child: MaterialApp.router(routerConfig: router),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.byKey(const Key('emergency-calming-visual')), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+
   testWidgets('Completing Emergency gives no Leaves', (
     WidgetTester tester,
   ) async {
