@@ -14,7 +14,9 @@ import '../../../theme/widgets/releaf_components.dart';
 import '../application/relief_paywall_hooks.dart';
 import '../data/reset_catalog.dart';
 import '../domain/models/reset_content.dart';
+import '../domain/models/reset_launch_options.dart';
 import '../domain/reset_access_policy.dart';
+import 'reset_session_preview_sheet.dart';
 
 class ReliefScreen extends ConsumerStatefulWidget {
   const ReliefScreen({super.key});
@@ -126,19 +128,51 @@ class _ReliefScreenState extends ConsumerState<ReliefScreen> {
     bool isPremiumUser,
   ) async {
     final accessPolicy = ref.read(resetAccessPolicyProvider);
-    if (!accessPolicy.canAccess(
+    final canAccess = accessPolicy.canAccess(
       session,
       hasPremiumEntitlement: isPremiumUser,
+    );
+
+    final preview = await showResetSessionPreview(
+      context,
+      session: session,
+      isLocked: !canAccess,
+    );
+    if (preview == null || !context.mounted) return;
+
+    if (preview.action == ResetSessionPreviewAction.unlock) {
+      await maybeShowPaywall(context, ref, force: true);
+      return;
+    }
+
+    final latestPremiumState =
+        ref.read(subscriptionControllerProvider).isPremium;
+    if (!accessPolicy.canAccess(
+      session,
+      hasPremiumEntitlement: latestPremiumState,
     )) {
       await maybeShowPaywall(context, ref, force: true);
       return;
     }
 
+    await _launchSession(
+      context,
+      session,
+      preview.options,
+    );
+  }
+
+  Future<void> _launchSession(
+    BuildContext context,
+    ResetContent session,
+    ResetLaunchOptions options,
+  ) async {
     await reliefStarted(ref);
 
     if (!context.mounted) return;
     final helpedALot = await context.push<bool>(
       AppRoutes.reliefSessionFor(session.id),
+      extra: options,
     );
 
     if (helpedALot == null || !context.mounted) return;
