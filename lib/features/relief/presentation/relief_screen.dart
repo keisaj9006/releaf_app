@@ -371,8 +371,7 @@ class _ReliefScreenState extends ConsumerState<ReliefScreen> {
                               const SizedBox(height: ReleafSpacing.xs),
                               const _SectionPadding(
                                 child: Text(
-                                  'The current library begins with a focused '
-                                  '3-minute protocol.',
+                                  'Choose an 8-minute protocol for the state you are in.',
                                   style: ReleafTypography.meta,
                                 ),
                               ),
@@ -908,8 +907,8 @@ class _DeepResetCard extends StatelessWidget {
       button: true,
       enabled: true,
       onTap: onPressed,
-      label: '${session.title}. Current 3-minute Deep Reset protocol. '
-          'Premium, opens session preview.',
+      label: '${session.title}. ${_durationLabel(session.durationSeconds)} '
+          'Deep Reset protocol. Premium, opens session preview.',
       child: ReleafPressableCard(
         key: Key('reset-session-${session.id}'),
         onPressed: onPressed,
@@ -918,7 +917,7 @@ class _DeepResetCard extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            const ReleafArtwork(variant: ReleafArtworkVariant.deepReset),
+            ReleafArtwork(variant: _sessionArtwork(session)),
             const DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
@@ -988,7 +987,9 @@ class _DeepResetCard extends StatelessWidget {
                             ),
                             const SizedBox(height: ReleafSpacing.xxs),
                             Text(
-                              'Current 3-minute protocol',
+                              session.isLegacyCompatible
+                                  ? 'Current 3-minute protocol'
+                                  : '${_durationLabel(session.durationSeconds)} protocol',
                               style: ReleafTypography.meta.copyWith(
                                 color: ReleafColors.textSecondary,
                               ),
@@ -1140,6 +1141,12 @@ ReleafArtworkVariant _sessionArtwork(ResetContent session) {
     'social-pressure' => ReleafArtworkVariant.situational,
     'travel-stress' => ReleafArtworkVariant.ambient,
     'work-overwhelm' => ReleafArtworkVariant.lifeUpgrade,
+    'wired-steady' => ReleafArtworkVariant.breath,
+    'tension-body-scan' => ReleafArtworkVariant.grounding,
+    'overwhelm-stability' => ReleafArtworkVariant.lifeUpgrade,
+    'evening-unwind' => ReleafArtworkVariant.ambient,
+    'anger-release' => ReleafArtworkVariant.noBreath,
+    'overthinking-let-go' => ReleafArtworkVariant.focus,
     '90s-calm-down' => ReleafArtworkVariant.calm,
     'longer-exhale' => ReleafArtworkVariant.breath,
     '5min-focus' => ReleafArtworkVariant.focus,
@@ -1167,6 +1174,12 @@ String _sessionPurpose(ResetContent session) {
     'social-pressure' => 'Move attention away from self-monitoring and back to the room.',
     'travel-stress' => 'Ground in what is stable and focus on the next travel step.',
     'work-overwhelm' => 'Reduce the workload in your head to one visible next action.',
+    'wired-steady' => 'Move from wired energy toward a steadier breathing rhythm.',
+    'tension-body-scan' => 'Scan the body slowly and notice where effort can soften.',
+    'overwhelm-stability' => 'Separate the whole problem from the one action that matters now.',
+    'evening-unwind' => 'Set down the unfinished day without requiring perfect calm.',
+    'anger-release' => 'Give activation time to settle before choosing the next response.',
+    'overthinking-let-go' => 'Create distance from repetitive thinking and return to the present.',
     '90s-calm-down' => 'Slow the pace and soften tension.',
     'longer-exhale' => 'Settle into a slightly longer, gentler exhale.',
     '5min-focus' => 'Anchor attention through your senses.',
