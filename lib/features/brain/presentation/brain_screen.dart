@@ -260,13 +260,17 @@ class _SevenDayBadge extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 7),
-                Text(
-                  'SESSIONS · 7 DAYS',
-                  style: ReleafTypography.meta.copyWith(
-                    color: const Color(0xFF91A4EF),
-                    fontSize: 8,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 0.7,
+                Flexible(
+                  child: Text(
+                    'SESSIONS · 7 DAYS',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: ReleafTypography.meta.copyWith(
+                      color: const Color(0xFF91A4EF),
+                      fontSize: 8,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.7,
+                    ),
                   ),
                 ),
               ],
@@ -362,13 +366,17 @@ class _DailyWorkoutPanel extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        Text(
-                          'TODAY\'S WORKOUT',
-                          style: ReleafTypography.eyebrow.copyWith(
-                            color: const Color(0xFF9FB0F4),
+                        Expanded(
+                          child: Text(
+                            'TODAY\'S WORKOUT',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: ReleafTypography.eyebrow.copyWith(
+                              color: const Color(0xFF9FB0F4),
+                            ),
                           ),
                         ),
-                        const Spacer(),
+                        const SizedBox(width: ReleafSpacing.sm),
                         _ProgressBadge(
                           completed: completed,
                           total: games.length,
