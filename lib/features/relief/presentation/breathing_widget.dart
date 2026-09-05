@@ -233,6 +233,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
                               breathing:
                                   session.modality == ResetModality.breathing,
                               phaseLabel: phaseLabel,
+                              holdPhases: session.id == '3min-breath',
                               reducedMotion: reducedMotion,
                             ),
                           ),
