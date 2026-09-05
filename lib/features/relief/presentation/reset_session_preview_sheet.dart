@@ -582,6 +582,7 @@ String _previewSubtitle(ResetContent session) {
   return switch (session.id) {
     '60s-grounding' => 'A quick sensory reset for the present moment.',
     '90s-calm-down' => 'A short breathing practice to slow the pace.',
+    'longer-exhale' => 'A gentle paced-breathing reset with a slightly longer exhale.',
     '5min-focus' => 'A focused sensory anchor for scattered attention.',
     '3min-breath' => 'The current focused Deep Reset breathing protocol.',
     _ => session.summary ?? 'A guided reset for the present moment.',
@@ -592,6 +593,7 @@ String _sessionPurpose(ResetContent session) {
   return switch (session.id) {
     '60s-grounding' => 'Return attention to your body and immediate surroundings.',
     '90s-calm-down' => 'Slow the pace and soften tension with a brief breathing sequence.',
+    'longer-exhale' => 'Use a gentle 3-count inhale and a slightly longer 4-count exhale without holding the breath.',
     '5min-focus' => 'Anchor attention through your senses and one clear point of focus.',
     '3min-breath' => 'Use a steady breathing pattern to create a longer, more focused reset.',
     _ => session.summary ?? 'A guided reset for the present moment.',
@@ -619,6 +621,7 @@ ReleafArtworkVariant _sessionArtwork(ResetContent session) {
   return switch (session.id) {
     '60s-grounding' => ReleafArtworkVariant.grounding,
     '90s-calm-down' => ReleafArtworkVariant.calm,
+    'longer-exhale' => ReleafArtworkVariant.breath,
     '5min-focus' => ReleafArtworkVariant.focus,
     '3min-breath' => ReleafArtworkVariant.deepReset,
     _ => ReleafArtworkVariant.ambient,
