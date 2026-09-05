@@ -605,106 +605,132 @@ class _RecommendationHero extends StatelessWidget {
       onPressed: onPressed,
       warmAccent: recommendation.warm,
       padding: EdgeInsets.zero,
-      child: SizedBox(
-        height: 318,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            ReleafArtwork(variant: recommendation.artwork),
-            const DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Color(0x08000000),
-                    Color(0x34000000),
-                    Color(0xEF000000),
-                  ],
-                  stops: [0, 0.50, 1],
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final compact = constraints.maxWidth < 360;
+          final accent = recommendation.warm
+              ? ReleafColors.premium
+              : ReleafColors.sage;
+
+          final startButton = FilledButton.icon(
+            onPressed: onPressed,
+            icon: const Icon(Icons.play_arrow_rounded),
+            label: const Text('Start'),
+            style: FilledButton.styleFrom(
+              backgroundColor: accent,
+              foregroundColor: ReleafColors.background,
+              minimumSize: Size(
+                compact ? double.infinity : 0,
+                ReleafControlSizes.standard,
+              ),
+            ),
+          );
+
+          final reason = Text(
+            recommendation.reason,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            textAlign: compact ? TextAlign.center : TextAlign.start,
+            style: ReleafTypography.meta.copyWith(
+              color: ReleafColors.textMuted,
+            ),
+          );
+
+          return SizedBox(
+            height: compact ? 374 : 318,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                ReleafArtwork(variant: recommendation.artwork),
+                const DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Color(0x08000000),
+                        Color(0x34000000),
+                        Color(0xEF000000),
+                      ],
+                      stops: [0, 0.50, 1],
+                    ),
+                  ),
                 ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(ReleafSpacing.xl),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    recommendation.eyebrow,
-                    style: ReleafTypography.eyebrow.copyWith(
-                      color: recommendation.warm
-                          ? ReleafColors.premium
-                          : ReleafColors.sage,
-                    ),
+                Padding(
+                  padding: EdgeInsets.all(
+                    compact ? ReleafSpacing.lg : ReleafSpacing.xl,
                   ),
-                  const Spacer(),
-                  Text(
-                    recommendation.title,
-                    style: ReleafTypography.display.copyWith(
-                      fontSize: 28,
-                      letterSpacing: -0.7,
-                    ),
-                  ),
-                  const SizedBox(height: ReleafSpacing.xs),
-                  Text(
-                    recommendation.description,
-                    style: ReleafTypography.body.copyWith(
-                      color: ReleafColors.textPrimary.withValues(alpha: 0.80),
-                    ),
-                  ),
-                  const SizedBox(height: ReleafSpacing.sm),
-                  Row(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(
-                        recommendation.icon,
-                        size: 15,
-                        color: ReleafColors.textSecondary,
+                      Text(
+                        recommendation.eyebrow,
+                        style: ReleafTypography.eyebrow.copyWith(
+                          color: accent,
+                        ),
                       ),
-                      const SizedBox(width: 7),
-                      Expanded(
-                        child: Text(
-                          recommendation.meta,
-                          style: ReleafTypography.meta.copyWith(
+                      const Spacer(),
+                      Text(
+                        recommendation.title,
+                        style: ReleafTypography.display.copyWith(
+                          fontSize: compact ? 25 : 28,
+                          letterSpacing: -0.7,
+                        ),
+                      ),
+                      const SizedBox(height: ReleafSpacing.xs),
+                      Text(
+                        recommendation.description,
+                        style: ReleafTypography.body.copyWith(
+                          color: ReleafColors.textPrimary.withValues(
+                            alpha: 0.80,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: ReleafSpacing.sm),
+                      Row(
+                        children: [
+                          Icon(
+                            recommendation.icon,
+                            size: 15,
                             color: ReleafColors.textSecondary,
-                            fontWeight: FontWeight.w600,
                           ),
-                        ),
+                          const SizedBox(width: 7),
+                          Expanded(
+                            child: Text(
+                              recommendation.meta,
+                              style: ReleafTypography.meta.copyWith(
+                                color: ReleafColors.textSecondary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
+                      const SizedBox(height: ReleafSpacing.lg),
+                      if (compact)
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            startButton,
+                            const SizedBox(height: ReleafSpacing.xs),
+                            reason,
+                          ],
+                        )
+                      else
+                        Row(
+                          children: [
+                            startButton,
+                            const SizedBox(width: ReleafSpacing.md),
+                            Expanded(child: reason),
+                          ],
+                        ),
                     ],
                   ),
-                  const SizedBox(height: ReleafSpacing.lg),
-                  Row(
-                    children: [
-                      FilledButton.icon(
-                        onPressed: onPressed,
-                        icon: const Icon(Icons.play_arrow_rounded),
-                        label: const Text('Start'),
-                        style: FilledButton.styleFrom(
-                          backgroundColor: recommendation.warm
-                              ? ReleafColors.premium
-                              : ReleafColors.sage,
-                          foregroundColor: ReleafColors.background,
-                        ),
-                      ),
-                      const SizedBox(width: ReleafSpacing.md),
-                      Expanded(
-                        child: Text(
-                          recommendation.reason,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: ReleafTypography.meta.copyWith(
-                            color: ReleafColors.textMuted,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
