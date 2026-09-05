@@ -54,7 +54,7 @@ class SleepScreen extends ConsumerWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _Header(onBack: context.pop),
+                              const _Header(),
                               const SizedBox(height: ReleafSpacing.xxl),
                               if (tonight != null)
                                 _TonightCard(
@@ -134,36 +134,61 @@ class _SleepBackdrop extends StatelessWidget {
 }
 
 class _Header extends StatelessWidget {
-  const _Header({required this.onBack});
-
-  final VoidCallback onBack;
+  const _Header();
 
   @override
   Widget build(BuildContext context) {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        ReleafRoundIconButton(
-          icon: Icons.arrow_back_rounded,
-          tooltip: 'Back',
-          onPressed: onBack,
-        ),
-        const SizedBox(width: ReleafSpacing.md),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Sleep',
-                style: ReleafTypography.display.copyWith(fontSize: 30),
+                'NIGHT',
+                style: ReleafTypography.eyebrow.copyWith(
+                  color: ReleafColors.premium,
+                  letterSpacing: 1.9,
+                ),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 6),
+              Text(
+                'Sleep',
+                style: ReleafTypography.display.copyWith(fontSize: 32),
+              ),
+              const SizedBox(height: 6),
               Text(
                 'Reduce stimulation and make the evening simpler.',
-                style: ReleafTypography.meta.copyWith(
+                style: ReleafTypography.body.copyWith(
                   color: ReleafColors.textSecondary,
                 ),
               ),
             ],
+          ),
+        ),
+        const SizedBox(width: ReleafSpacing.md),
+        Container(
+          width: 52,
+          height: 52,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: ReleafColors.premium.withValues(alpha: 0.08),
+            border: Border.all(
+              color: ReleafColors.premium.withValues(alpha: 0.22),
+            ),
+            boxShadow: const [
+              BoxShadow(
+                color: ReleafColors.glowPremium,
+                blurRadius: 22,
+              ),
+            ],
+          ),
+          alignment: Alignment.center,
+          child: const Icon(
+            Icons.bedtime_outlined,
+            color: ReleafColors.premium,
+            size: 23,
           ),
         ),
       ],
