@@ -145,6 +145,48 @@ class ResetCatalog {
       ),
     ),
     ResetContent(
+      id: 'longer-exhale',
+      title: 'Longer Exhale',
+      durationSeconds: 120,
+      level: ResetLevel.quick,
+      quickCategory: QuickResetCategory.breath,
+      modality: ResetModality.breathing,
+      accessTier: ResetAccessTier.free,
+      instructions: [
+        'Let your shoulders soften and keep the breath gentle.',
+        'Breathe in for 3 seconds.',
+        'Breathe out for 4 seconds.',
+        'Let go of the count and return to a comfortable natural rhythm.',
+      ],
+      program: ResetSessionProgram.breathing(
+        breathPattern: BreathPattern(
+          inhaleSeconds: 3,
+          exhaleSeconds: 4,
+          label: 'Longer exhale 3–4',
+        ),
+        steps: [
+          ResetSessionStep(
+            label: 'Settle',
+            guidance:
+                'Let your shoulders soften. Keep the breath gentle and comfortable.',
+            durationSeconds: 12,
+          ),
+          ResetSessionStep(
+            label: 'Rhythm',
+            guidance:
+                'Follow the rhythm: a gentle 3-count in and a slightly longer 4-count out.',
+            durationSeconds: 98,
+          ),
+          ResetSessionStep(
+            label: 'Release',
+            guidance:
+                'Let go of the count and return to a comfortable natural rhythm.',
+            durationSeconds: 10,
+          ),
+        ],
+      ),
+    ),
+    ResetContent(
       id: '3min-breath',
       title: '3 min Deep Reset',
       durationSeconds: 180,
