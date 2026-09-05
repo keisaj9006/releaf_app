@@ -35,8 +35,8 @@ class _ReleafSensoryHaloState extends State<ReleafSensoryHalo>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
 
-  int get _target => widget.targetCount.clamp(0, 5);
-  int get _completed => widget.completedCount.clamp(0, _target);
+  int get _target => widget.targetCount.clamp(0, 5).toInt();
+  int get _completed => widget.completedCount.clamp(0, _target).toInt();
   int get _remaining => math.max(0, _target - _completed);
 
   @override
