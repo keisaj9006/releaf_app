@@ -165,6 +165,8 @@ void main() {
 
     expect(find.text('NIGHT'), findsOneWidget);
     expect(find.text('Sleep'), findsWidgets);
+    expect(find.text('SOUND FOR SLEEP'), findsOneWidget);
+    expect(find.text('WIND DOWN'), findsOneWidget);
     expect(find.byTooltip('Back'), findsNothing);
 
     final navigation = tester.widget<NavigationBar>(find.byType(NavigationBar));
