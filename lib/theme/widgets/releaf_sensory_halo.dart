@@ -98,7 +98,7 @@ class _ReleafSensoryHaloState extends State<ReleafSensoryHalo>
                     children: [
                       Text(
                         widget.activeCount.toString(),
-                        style: ReleafTypography.heroTitle.copyWith(
+                        style: ReleafTypography.display.copyWith(
                           fontSize: 54,
                           color: ReleafColors.textPrimary.withValues(alpha: 0.92),
                         ),
