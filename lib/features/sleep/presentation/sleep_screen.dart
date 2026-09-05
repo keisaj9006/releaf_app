@@ -286,46 +286,50 @@ class _TonightCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                Padding(
-                  padding: EdgeInsets.all(
-                    compact ? ReleafSpacing.lg : ReleafSpacing.xl,
+                Positioned(
+                  top: compact ? ReleafSpacing.lg : ReleafSpacing.xl,
+                  left: compact ? ReleafSpacing.lg : ReleafSpacing.xl,
+                  child: const _GlassTag(
+                    icon: Icons.dark_mode_outlined,
+                    label: 'TONIGHT',
                   ),
+                ),
+                Positioned(
+                  top: compact ? ReleafSpacing.lg : ReleafSpacing.xl,
+                  right: compact ? ReleafSpacing.lg : ReleafSpacing.xl,
+                  child: _GlassTag(
+                    icon: Icons.schedule_rounded,
+                    label: _durationLabel(session.durationSeconds),
+                  ),
+                ),
+                Positioned(
+                  left: compact ? ReleafSpacing.lg : ReleafSpacing.xl,
+                  right: compact ? ReleafSpacing.lg : ReleafSpacing.xl,
+                  bottom: compact ? ReleafSpacing.lg : ReleafSpacing.xl,
                   child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        children: [
-                          const _GlassTag(
-                            icon: Icons.dark_mode_outlined,
-                            label: 'TONIGHT',
-                          ),
-                          const Spacer(),
-                          _GlassTag(
-                            icon: Icons.schedule_rounded,
-                            label: _durationLabel(session.durationSeconds),
-                          ),
-                        ],
-                      ),
-                      const Spacer(),
                       Text(
                         session.title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                         style: ReleafTypography.display.copyWith(
                           fontSize: compact ? 27 : 31,
                           letterSpacing: -0.8,
                         ),
                       ),
                       const SizedBox(height: ReleafSpacing.xs),
-                      ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 510),
-                        child: Text(
-                          'A guided transition out of unfinished tasks and into a lower-stimulation evening.',
-                          style: ReleafTypography.body.copyWith(
-                            color:
-                                ReleafColors.textPrimary.withValues(alpha: 0.78),
-                          ),
+                      Text(
+                        'A guided transition out of unfinished tasks and into a lower-stimulation evening.',
+                        maxLines: compact ? 3 : 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: ReleafTypography.body.copyWith(
+                          color:
+                              ReleafColors.textPrimary.withValues(alpha: 0.78),
                         ),
                       ),
-                      const SizedBox(height: ReleafSpacing.lg),
+                      const SizedBox(height: ReleafSpacing.md),
                       SizedBox(
                         width: compact ? double.infinity : null,
                         height: ReleafControlSizes.standard,
@@ -478,16 +482,22 @@ class _SoundCard extends StatelessWidget {
                   ),
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.all(ReleafSpacing.md),
+              const Positioned(
+                top: ReleafSpacing.md,
+                left: ReleafSpacing.md,
+                child: _GlassTag(
+                  icon: Icons.graphic_eq_rounded,
+                  label: 'AMBIENT',
+                ),
+              ),
+              Positioned(
+                left: ReleafSpacing.md,
+                right: ReleafSpacing.md,
+                bottom: ReleafSpacing.md,
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const _GlassTag(
-                      icon: Icons.graphic_eq_rounded,
-                      label: 'AMBIENT',
-                    ),
-                    const Spacer(),
                     Text(
                       track.title,
                       maxLines: 1,
@@ -501,7 +511,7 @@ class _SoundCard extends StatelessWidget {
                         color: ReleafColors.textSecondary,
                       ),
                     ),
-                    const SizedBox(height: ReleafSpacing.sm),
+                    const SizedBox(height: ReleafSpacing.xs),
                     Row(
                       children: [
                         Text(
@@ -622,16 +632,22 @@ class _SleepResetCard extends StatelessWidget {
                   ),
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.all(ReleafSpacing.md),
+              Positioned(
+                top: ReleafSpacing.md,
+                left: ReleafSpacing.md,
+                child: _GlassTag(
+                  icon: _iconFor(session.id),
+                  label: _eyebrowFor(session.id),
+                ),
+              ),
+              Positioned(
+                left: ReleafSpacing.md,
+                right: ReleafSpacing.md,
+                bottom: ReleafSpacing.md,
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _GlassTag(
-                      icon: _iconFor(session.id),
-                      label: _eyebrowFor(session.id),
-                    ),
-                    const Spacer(),
                     Text(
                       session.title,
                       maxLines: 1,
@@ -645,7 +661,7 @@ class _SleepResetCard extends StatelessWidget {
                         color: ReleafColors.textSecondary,
                       ),
                     ),
-                    const SizedBox(height: ReleafSpacing.sm),
+                    const SizedBox(height: ReleafSpacing.xs),
                     Row(
                       children: [
                         Text(
