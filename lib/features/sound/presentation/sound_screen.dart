@@ -95,7 +95,7 @@ class SoundScreen extends ConsumerWidget {
                               const ReleafSectionHeading(
                                 title: 'Available Now',
                                 description:
-                                    'Real audio already bundled with Releaf.',
+                                    'Two ambient spaces, ready to loop.',
                               ),
                               const SizedBox(height: ReleafSpacing.md),
                               for (final track in tracks) ...[
@@ -105,8 +105,6 @@ class SoundScreen extends ConsumerWidget {
                                 ),
                                 const SizedBox(height: ReleafSpacing.sm),
                               ],
-                              const SizedBox(height: ReleafSpacing.section),
-                              const _SoundLibraryNote(),
                             ],
                           ),
                         ),
@@ -537,44 +535,6 @@ class _InScreenMiniPlayer extends ConsumerWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _SoundLibraryNote extends StatelessWidget {
-  const _SoundLibraryNote();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(ReleafSpacing.lg),
-      decoration: BoxDecoration(
-        color: ReleafColors.surfaceSoft,
-        borderRadius: BorderRadius.circular(ReleafRadii.lg),
-        border: Border.all(color: ReleafColors.borderSoft),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Icon(
-            Icons.library_music_outlined,
-            color: ReleafColors.sage,
-          ),
-          const SizedBox(width: ReleafSpacing.md),
-          Expanded(
-            child: Text(
-              'This first Sound library intentionally shows only audio that is '
-              'already bundled with Releaf. Rain, ocean, forest, noise layers '
-              'and stories will be added only with real owned or licensed audio.',
-              style: ReleafTypography.meta.copyWith(
-                color: ReleafColors.textSecondary,
-                height: 1.5,
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }
