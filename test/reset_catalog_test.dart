@@ -16,6 +16,8 @@ void main() {
     'emergency-grounding',
     '60s-grounding',
     'back-to-room',
+    'jaw-shoulders',
+    'name-the-thought',
     '90s-calm-down',
     'longer-exhale',
     '3min-breath',
@@ -108,6 +110,38 @@ void main() {
     expect(session.program?.scriptedDurationSeconds, 180);
     expect(session.program?.hasSimplifiedPath, isTrue);
     expect(session.program?.simplifiedDurationSeconds, 60);
+    expect(
+      session.instructions.join(' ').toLowerCase(),
+      isNot(contains('breath')),
+    );
+  });
+
+  test('Jaw and Shoulders is a free Body Reset guided practice', () {
+    final session = catalog.getById('jaw-shoulders')!;
+
+    expect(session.level, ResetLevel.quick);
+    expect(session.quickCategory, QuickResetCategory.noBreath);
+    expect(session.modality, ResetModality.guidedPractice);
+    expect(session.accessTier, ResetAccessTier.free);
+    expect(session.visualType, ResetVisualType.bodyRelease);
+    expect(session.durationSeconds, 90);
+    expect(session.program?.scriptedDurationSeconds, 90);
+    expect(
+      session.instructions.join(' ').toLowerCase(),
+      isNot(contains('breath')),
+    );
+  });
+
+  test('Name the Thought is a free thought-unhook guided practice', () {
+    final session = catalog.getById('name-the-thought')!;
+
+    expect(session.level, ResetLevel.quick);
+    expect(session.quickCategory, QuickResetCategory.noBreath);
+    expect(session.modality, ResetModality.guidedPractice);
+    expect(session.accessTier, ResetAccessTier.free);
+    expect(session.visualType, ResetVisualType.thoughtUnhook);
+    expect(session.durationSeconds, 120);
+    expect(session.program?.scriptedDurationSeconds, 120);
     expect(
       session.instructions.join(' ').toLowerCase(),
       isNot(contains('breath')),
