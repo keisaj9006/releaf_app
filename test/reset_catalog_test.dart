@@ -4,7 +4,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:releaf_app/features/relief/data/audio_catalog.dart' as legacy;
 import 'package:releaf_app/features/relief/data/relief_repository.dart';
 import 'package:releaf_app/features/relief/data/reset_catalog.dart';
+import 'package:releaf_app/features/relief/domain/models/breath_pattern.dart';
 import 'package:releaf_app/features/relief/domain/models/reset_content.dart';
+import 'package:releaf_app/features/relief/domain/models/reset_session_program.dart';
 import 'package:releaf_app/features/relief/domain/reset_access_policy.dart';
 
 void main() {
@@ -27,6 +29,38 @@ void main() {
     for (final id in currentSessionIds) {
       expect(catalog.getById(id)?.id, id);
     }
+  });
+
+  test('all active Reset content has a duration-matched typed program', () {
+    for (final item in catalog.getAll()) {
+      expect(item.program, isNotNull, reason: item.id);
+      expect(
+        item.program!.scriptedDurationSeconds,
+        item.durationSeconds,
+        reason: item.id,
+      );
+    }
+  });
+
+  test('current breathing sessions use canonical BreathPattern timings', () {
+    final calm = catalog.getById('90s-calm-down')!;
+    final deep = catalog.getById('3min-breath')!;
+
+    expect(calm.program?.type, ResetProgramType.pacedBreathing);
+    expect(calm.program?.breathPattern?.inhaleSeconds, 4);
+    expect(calm.program?.breathPattern?.holdAfterInhaleSeconds, 0);
+    expect(calm.program?.breathPattern?.exhaleSeconds, 4);
+    expect(calm.program?.breathPattern?.holdAfterExhaleSeconds, 0);
+    expect(
+      calm.program?.breathPattern?.frameAtElapsedSeconds(4).phase,
+      BreathPhase.exhale,
+    );
+
+    expect(deep.program?.type, ResetProgramType.pacedBreathing);
+    expect(deep.program?.breathPattern?.inhaleSeconds, 4);
+    expect(deep.program?.breathPattern?.holdAfterInhaleSeconds, 4);
+    expect(deep.program?.breathPattern?.exhaleSeconds, 4);
+    expect(deep.program?.breathPattern?.holdAfterExhaleSeconds, 4);
   });
 
   test('Emergency is classified as always-free emergency content', () {
