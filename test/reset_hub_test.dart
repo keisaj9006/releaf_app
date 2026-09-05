@@ -259,7 +259,11 @@ void main() {
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await _pumpResetHub(tester, preferences: await _preferences());
 
-    expect(tester.takeException(), isNull);
+    final initialException = tester.takeException();
+    if (initialException is FlutterError) {
+      debugPrint(initialException.toStringDeep());
+    }
+    expect(initialException, isNull);
 
     await tester.ensureVisible(find.byKey(const Key('reset-session-rail')));
     await tester.pumpAndSettle();
