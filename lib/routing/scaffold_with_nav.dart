@@ -45,7 +45,7 @@ class ScaffoldWithNavBar extends ConsumerWidget {
             ),
         ],
       ),
-      floatingActionButton: navigationShell.currentIndex == 2
+      floatingActionButton: navigationShell.currentIndex == 1
           ? null
           : FloatingActionButton.extended(
               tooltip: 'Open Emergency Grounding',
@@ -61,10 +61,26 @@ class ScaffoldWithNavBar extends ConsumerWidget {
         selectedIndex: navigationShell.currentIndex,
         onDestinationSelected: _onTap,
         destinations: const [
-          NavigationDestination(icon: Icon(Icons.home_outlined), label: 'Home'),
-          NavigationDestination(icon: Icon(Icons.checklist_outlined), label: 'Habits'),
-          NavigationDestination(icon: Icon(Icons.self_improvement_outlined), label: 'Relief'),
-          NavigationDestination(icon: Icon(Icons.extension_outlined), label: 'Brain'),
+          NavigationDestination(
+            icon: Icon(Icons.home_outlined),
+            label: 'Home',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.self_improvement_outlined),
+            label: 'Reset',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.extension_outlined),
+            label: 'Brain',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.spa_outlined),
+            label: 'Meditate',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.bedtime_outlined),
+            label: 'Sleep',
+          ),
         ],
       ),
     );
