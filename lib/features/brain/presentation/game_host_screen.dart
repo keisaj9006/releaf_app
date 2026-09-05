@@ -8,6 +8,10 @@ import '../../../legacy/screens/labirynth_game_screen.dart';
 import '../../../games/math_race/math_race_screen.dart';
 import '../../../legacy/screens/broken_mirror_game_screen.dart';
 import '../../../games/rule_shift/rule_shift_screen.dart';
+import '../../../games/sequence_echo/sequence_echo_screen.dart';
+import '../../../games/color_conflict/color_conflict_screen.dart';
+import '../../../games/pattern_logic/pattern_logic_screen.dart';
+import '../../../games/signal_scan/signal_scan_screen.dart';
 import 'game_result_screen.dart';
 
 const supportedBrainGameIds = <String>{
@@ -16,6 +20,10 @@ const supportedBrainGameIds = <String>{
   'math_race',
   'broken_mirror',
   'rule_shift',
+  'sequence_echo',
+  'color_conflict',
+  'pattern_logic',
+  'signal_scan',
 };
 
 bool isSupportedBrainGame(String gameId) =>
@@ -31,6 +39,10 @@ Widget buildBrainGame({
     'math_race' => MathRaceScreen(onFinish: onFinish),
     'broken_mirror' => BrokenMirrorGameScreen(onFinish: () => onFinish(null)),
     'rule_shift' => RuleShiftScreen(onFinish: onFinish),
+    'sequence_echo' => SequenceEchoScreen(onFinish: onFinish),
+    'color_conflict' => ColorConflictScreen(onFinish: onFinish),
+    'pattern_logic' => PatternLogicScreen(onFinish: onFinish),
+    'signal_scan' => SignalScanScreen(onFinish: onFinish),
     _ => _UnknownGame(gameId: gameId),
   };
 }

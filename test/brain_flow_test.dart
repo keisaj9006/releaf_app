@@ -12,6 +12,10 @@ import 'package:releaf_app/features/brain/presentation/game_result_screen.dart';
 import 'package:releaf_app/features/progress/data/leaves_repository.dart';
 import 'package:releaf_app/games/math_race/math_race_screen.dart';
 import 'package:releaf_app/games/rule_shift/rule_shift_screen.dart';
+import 'package:releaf_app/games/sequence_echo/sequence_echo_screen.dart';
+import 'package:releaf_app/games/color_conflict/color_conflict_screen.dart';
+import 'package:releaf_app/games/pattern_logic/pattern_logic_screen.dart';
+import 'package:releaf_app/games/signal_scan/signal_scan_screen.dart';
 import 'package:releaf_app/legacy/screens/broken_mirror_game_screen.dart';
 import 'package:releaf_app/legacy/screens/labirynth_game_screen.dart';
 import 'package:releaf_app/legacy/screens/memory_game_screen.dart';
@@ -41,6 +45,10 @@ void main() {
     expect(resolvedTypes['math_race'], MathRaceScreen);
     expect(resolvedTypes['broken_mirror'], BrokenMirrorGameScreen);
     expect(resolvedTypes['rule_shift'], RuleShiftScreen);
+    expect(resolvedTypes['sequence_echo'], SequenceEchoScreen);
+    expect(resolvedTypes['color_conflict'], ColorConflictScreen);
+    expect(resolvedTypes['pattern_logic'], PatternLogicScreen);
+    expect(resolvedTypes['signal_scan'], SignalScanScreen);
   });
 
   testWidgets('/brain renders the premium Brain hub with current games only', (
@@ -100,6 +108,10 @@ void main() {
     expect(find.text('CALCULATION'), findsWidgets);
     expect(find.text('VISUAL RECONSTRUCTION'), findsWidgets);
     expect(find.text('ATTENTION SWITCHING'), findsWidgets);
+    expect(find.text('WORKING MEMORY'), findsWidgets);
+    expect(find.text('INHIBITORY CONTROL'), findsWidgets);
+    expect(find.text('PATTERN REASONING'), findsWidgets);
+    expect(find.text('SELECTIVE ATTENTION'), findsWidgets);
 
     expect(find.text('72'), findsNothing);
     expect(find.text('64'), findsNothing);
@@ -238,6 +250,10 @@ void main() {
       'math_race': MathRaceScreen,
       'broken_mirror': BrokenMirrorGameScreen,
       'rule_shift': RuleShiftScreen,
+      'sequence_echo': SequenceEchoScreen,
+      'color_conflict': ColorConflictScreen,
+      'pattern_logic': PatternLogicScreen,
+      'signal_scan': SignalScanScreen,
     };
 
     for (final game in brainGames.where((game) => game.enabled)) {

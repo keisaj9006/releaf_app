@@ -322,6 +322,10 @@ ReleafBrainArtworkVariant _artworkForGame(String? gameId) {
     'math_race' => ReleafBrainArtworkVariant.mathRace,
     'broken_mirror' => ReleafBrainArtworkVariant.brokenMirror,
     'rule_shift' => ReleafBrainArtworkVariant.ruleShift,
+    'sequence_echo' => ReleafBrainArtworkVariant.sequenceEcho,
+    'color_conflict' => ReleafBrainArtworkVariant.colorConflict,
+    'pattern_logic' => ReleafBrainArtworkVariant.patternLogic,
+    'signal_scan' => ReleafBrainArtworkVariant.signalScan,
     _ => ReleafBrainArtworkVariant.hero,
   };
 }
@@ -333,6 +337,10 @@ Color _accentForGame(String? gameId) {
     'math_race' => const Color(0xFFE3A66A),
     'broken_mirror' => const Color(0xFFD490B9),
     'rule_shift' => const Color(0xFFB59AF4),
+    'sequence_echo' => const Color(0xFF8FA8E8),
+    'color_conflict' => const Color(0xFFE099B5),
+    'pattern_logic' => const Color(0xFFA9A0E8),
+    'signal_scan' => const Color(0xFF69C1B8),
     _ => const Color(0xFF91A4EF),
   };
 }
@@ -344,6 +352,10 @@ String _skillLabel(String? gameId) {
     'math_race' => 'CALCULATION',
     'broken_mirror' => 'VISUAL RECONSTRUCTION',
     'rule_shift' => 'ATTENTION SWITCHING',
+    'sequence_echo' => 'WORKING MEMORY',
+    'color_conflict' => 'INHIBITORY CONTROL',
+    'pattern_logic' => 'PATTERN REASONING',
+    'signal_scan' => 'SELECTIVE ATTENTION',
     _ => 'COGNITIVE PRACTICE',
   };
 }

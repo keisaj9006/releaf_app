@@ -6,12 +6,14 @@ class BrainGameMeta {
   final String title;
   final IconData icon;
   final bool enabled;
+  final bool hasDifficultyLevels;
 
   const BrainGameMeta({
     required this.id,
     required this.title,
     required this.icon,
     this.enabled = true,
+    this.hasDifficultyLevels = false,
   });
 }
 
@@ -27,5 +29,29 @@ const brainGames = <BrainGameMeta>[
     id: 'rule_shift',
     title: 'Rule Shift',
     icon: Icons.swap_horiz_rounded,
+  ),
+  BrainGameMeta(
+    id: 'sequence_echo',
+    title: 'Sequence Echo',
+    icon: Icons.scatter_plot_rounded,
+    hasDifficultyLevels: true,
+  ),
+  BrainGameMeta(
+    id: 'color_conflict',
+    title: 'Color Conflict',
+    icon: Icons.palette_outlined,
+    hasDifficultyLevels: true,
+  ),
+  BrainGameMeta(
+    id: 'pattern_logic',
+    title: 'Pattern Logic',
+    icon: Icons.extension_rounded,
+    hasDifficultyLevels: true,
+  ),
+  BrainGameMeta(
+    id: 'signal_scan',
+    title: 'Signal Scan',
+    icon: Icons.center_focus_strong_rounded,
+    hasDifficultyLevels: true,
   ),
 ];

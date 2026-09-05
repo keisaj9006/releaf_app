@@ -965,9 +965,22 @@ class _SkillGameCardState extends State<_SkillGameCard> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _SkillBadge(
-                          label: widget.presentation.skill,
-                          accent: widget.presentation.accent,
+                        Row(
+                          children: [
+                            Flexible(
+                              child: _SkillBadge(
+                                label: widget.presentation.skill,
+                                accent: widget.presentation.accent,
+                              ),
+                            ),
+                            if (widget.game.hasDifficultyLevels) ...[
+                              const SizedBox(width: 6),
+                              _SkillBadge(
+                                label: '3 LEVELS',
+                                accent: ReleafColors.textSecondary,
+                              ),
+                            ],
+                          ],
                         ),
                         const Spacer(),
                         Text(
@@ -1151,6 +1164,30 @@ _BrainGamePresentation _presentationFor(String gameId) {
             'Switch simple rules and respond without carrying the last one forward.',
         artwork: ReleafBrainArtworkVariant.ruleShift,
         accent: Color(0xFFB59AF4),
+      ),
+    'sequence_echo' => const _BrainGamePresentation(
+        skill: 'WORKING MEMORY',
+        benefit: 'Hold and reproduce increasingly demanding visual sequences.',
+        artwork: ReleafBrainArtworkVariant.sequenceEcho,
+        accent: Color(0xFF8FA8E8),
+      ),
+    'color_conflict' => const _BrainGamePresentation(
+        skill: 'INHIBITORY CONTROL',
+        benefit: 'Ignore conflicting word information and respond to ink color.',
+        artwork: ReleafBrainArtworkVariant.colorConflict,
+        accent: Color(0xFFE099B5),
+      ),
+    'pattern_logic' => const _BrainGamePresentation(
+        skill: 'PATTERN REASONING',
+        benefit: 'Detect repeating and interleaved rules in visual sequences.',
+        artwork: ReleafBrainArtworkVariant.patternLogic,
+        accent: Color(0xFFA9A0E8),
+      ),
+    'signal_scan' => const _BrainGamePresentation(
+        skill: 'SELECTIVE ATTENTION',
+        benefit: 'Find a target quickly among increasingly similar distractors.',
+        artwork: ReleafBrainArtworkVariant.signalScan,
+        accent: Color(0xFF69C1B8),
       ),
     _ => const _BrainGamePresentation(
         skill: 'TRAINING',
