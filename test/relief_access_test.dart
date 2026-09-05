@@ -257,7 +257,7 @@ void main() {
 
     expect(find.byKey(const Key('reset-thought-unhook-visual')), findsOneWidget);
     expect(find.byKey(const Key('reset-living-form')), findsNothing);
-    expect(find.text('Notice'), findsOneWidget);
+    expect(find.text('NOTICE'), findsOneWidget);
     expect(find.text('02:00'), findsOneWidget);
 
     await tester.pump(const Duration(seconds: 41));
