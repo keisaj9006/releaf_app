@@ -399,7 +399,7 @@ class _LeavesPill extends StatelessWidget {
           const Icon(Icons.eco_outlined, size: 15, color: ReleafColors.sage),
           const SizedBox(width: 5),
           Text(
-            '${total}',
+            '$total',
             style: ReleafTypography.meta.copyWith(
               color: ReleafColors.textPrimary,
               fontWeight: FontWeight.w700,
