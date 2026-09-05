@@ -10,6 +10,7 @@ enum ReleafBrainArtworkVariant {
   labyrinth,
   mathRace,
   brokenMirror,
+  ruleShift,
 }
 
 class ReleafBrainArtwork extends StatelessWidget {
@@ -75,6 +76,8 @@ class _ReleafBrainArtworkPainter extends CustomPainter {
         _drawMathPulse(canvas, size, palette, intensity);
       case ReleafBrainArtworkVariant.brokenMirror:
         _drawMirrorFragments(canvas, size, palette, intensity);
+      case ReleafBrainArtworkVariant.ruleShift:
+        _drawRuleShift(canvas, size, palette, intensity);
     }
 
     _drawStructuredParticles(canvas, size, palette, variant.index, intensity);
@@ -331,6 +334,72 @@ void _drawMirrorFragments(
   }
 }
 
+void _drawRuleShift(
+  Canvas canvas,
+  Size size,
+  _BrainPalette palette,
+  double intensity,
+) {
+  final centerY = size.height * 0.48;
+  final linePaint = Paint()
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = math.max(1.5, size.shortestSide * 0.008)
+    ..strokeCap = StrokeCap.round
+    ..color = palette.highlight.withValues(alpha: 0.64 * intensity);
+
+  final glowPaint = Paint()
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = math.max(8, size.shortestSide * 0.038)
+    ..strokeCap = StrokeCap.round
+    ..color = palette.primary.withValues(alpha: 0.14 * intensity)
+    ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 12);
+
+  final upper = Path()
+    ..moveTo(size.width * 0.36, centerY - size.height * 0.12)
+    ..cubicTo(
+      size.width * 0.52,
+      centerY - size.height * 0.12,
+      size.width * 0.57,
+      centerY + size.height * 0.10,
+      size.width * 0.76,
+      centerY + size.height * 0.10,
+    )
+    ..lineTo(size.width * 0.70, centerY + size.height * 0.04)
+    ..moveTo(size.width * 0.76, centerY + size.height * 0.10)
+    ..lineTo(size.width * 0.69, centerY + size.height * 0.16);
+
+  final lower = Path()
+    ..moveTo(size.width * 0.36, centerY + size.height * 0.15)
+    ..cubicTo(
+      size.width * 0.52,
+      centerY + size.height * 0.15,
+      size.width * 0.58,
+      centerY - size.height * 0.10,
+      size.width * 0.78,
+      centerY - size.height * 0.10,
+    )
+    ..lineTo(size.width * 0.71, centerY - size.height * 0.16)
+    ..moveTo(size.width * 0.78, centerY - size.height * 0.10)
+    ..lineTo(size.width * 0.71, centerY - size.height * 0.04);
+
+  canvas.drawPath(upper, glowPaint);
+  canvas.drawPath(lower, glowPaint);
+  canvas.drawPath(upper, linePaint);
+  canvas.drawPath(lower, linePaint);
+
+  for (final offset in <Offset>[
+    Offset(size.width * 0.36, centerY - size.height * 0.12),
+    Offset(size.width * 0.36, centerY + size.height * 0.15),
+  ]) {
+    canvas.drawCircle(
+      offset,
+      math.max(3, size.shortestSide * 0.017),
+      Paint()
+        ..color = palette.primary.withValues(alpha: 0.72 * intensity),
+    );
+  }
+}
+
 void _drawStructuredParticles(
   Canvas canvas,
   Size size,
@@ -418,6 +487,13 @@ _BrainPalette _paletteFor(ReleafBrainArtworkVariant variant) {
       primary: Color(0xFFB1886A),
       secondary: Color(0xFF647A86),
       highlight: Color(0xFFF0D7C6),
+    ),
+    ReleafBrainArtworkVariant.ruleShift => const _BrainPalette(
+      background: Color(0xFF171225),
+      backgroundEnd: Color(0xFF0A0B13),
+      primary: Color(0xFF9D83E0),
+      secondary: Color(0xFF5C86A7),
+      highlight: Color(0xFFE2DAFF),
     ),
   };
 }

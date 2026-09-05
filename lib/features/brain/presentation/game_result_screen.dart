@@ -321,6 +321,7 @@ ReleafBrainArtworkVariant _artworkForGame(String? gameId) {
     'labyrinth' => ReleafBrainArtworkVariant.labyrinth,
     'math_race' => ReleafBrainArtworkVariant.mathRace,
     'broken_mirror' => ReleafBrainArtworkVariant.brokenMirror,
+    'rule_shift' => ReleafBrainArtworkVariant.ruleShift,
     _ => ReleafBrainArtworkVariant.hero,
   };
 }
@@ -331,6 +332,7 @@ Color _accentForGame(String? gameId) {
     'labyrinth' => const Color(0xFF6DC8B8),
     'math_race' => const Color(0xFFE3A66A),
     'broken_mirror' => const Color(0xFFD490B9),
+    'rule_shift' => const Color(0xFFB59AF4),
     _ => const Color(0xFF91A4EF),
   };
 }
@@ -341,6 +343,7 @@ String _skillLabel(String? gameId) {
     'labyrinth' => 'SPATIAL PLANNING',
     'math_race' => 'CALCULATION',
     'broken_mirror' => 'VISUAL RECONSTRUCTION',
+    'rule_shift' => 'ATTENTION SWITCHING',
     _ => 'COGNITIVE PRACTICE',
   };
 }

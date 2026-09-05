@@ -11,6 +11,7 @@ import 'package:releaf_app/features/brain/presentation/game_host_screen.dart';
 import 'package:releaf_app/features/brain/presentation/game_result_screen.dart';
 import 'package:releaf_app/features/progress/data/leaves_repository.dart';
 import 'package:releaf_app/games/math_race/math_race_screen.dart';
+import 'package:releaf_app/games/rule_shift/rule_shift_screen.dart';
 import 'package:releaf_app/legacy/screens/broken_mirror_game_screen.dart';
 import 'package:releaf_app/legacy/screens/labirynth_game_screen.dart';
 import 'package:releaf_app/legacy/screens/memory_game_screen.dart';
@@ -39,6 +40,7 @@ void main() {
     expect(resolvedTypes['labyrinth'], LabirynthGameScreen);
     expect(resolvedTypes['math_race'], MathRaceScreen);
     expect(resolvedTypes['broken_mirror'], BrokenMirrorGameScreen);
+    expect(resolvedTypes['rule_shift'], RuleShiftScreen);
   });
 
   testWidgets('/brain renders the premium Brain hub with current games only', (
@@ -97,6 +99,7 @@ void main() {
     expect(find.text('SPATIAL PLANNING'), findsWidgets);
     expect(find.text('CALCULATION'), findsWidgets);
     expect(find.text('VISUAL RECONSTRUCTION'), findsWidgets);
+    expect(find.text('ATTENTION SWITCHING'), findsWidgets);
 
     expect(find.text('72'), findsNothing);
     expect(find.text('64'), findsNothing);
@@ -234,6 +237,7 @@ void main() {
       'labyrinth': LabirynthGameScreen,
       'math_race': MathRaceScreen,
       'broken_mirror': BrokenMirrorGameScreen,
+      'rule_shift': RuleShiftScreen,
     };
 
     for (final game in brainGames.where((game) => game.enabled)) {
@@ -266,6 +270,31 @@ void main() {
       await tester.pumpWidget(const SizedBox.shrink());
       await tester.pump();
     }
+  });
+
+  testWidgets('Rule Shift is a real playable Brain exercise', (
+    WidgetTester tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({});
+    final preferences = await SharedPreferences.getInstance();
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(preferences),
+        ],
+        child: const MaterialApp(
+          home: GameHostScreen(gameId: 'rule_shift'),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.byType(RuleShiftScreen), findsOneWidget);
+    expect(find.byKey(const Key('rule-shift-prompt')), findsOneWidget);
+    expect(find.byKey(const Key('rule-shift-yes')), findsOneWidget);
+    expect(find.byKey(const Key('rule-shift-no')), findsOneWidget);
+    expect(find.text('IS THE NUMBER ODD?'), findsOneWidget);
   });
 
   testWidgets('Opening a Brain game alone does not mark Brain complete', (

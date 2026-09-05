@@ -1145,6 +1145,13 @@ _BrainGamePresentation _presentationFor(String gameId) {
         artwork: ReleafBrainArtworkVariant.brokenMirror,
         accent: Color(0xFFD490B9),
       ),
+    'rule_shift' => const _BrainGamePresentation(
+        skill: 'ATTENTION SWITCHING',
+        benefit:
+            'Switch simple rules and respond without carrying the last one forward.',
+        artwork: ReleafBrainArtworkVariant.ruleShift,
+        accent: Color(0xFFB59AF4),
+      ),
     _ => const _BrainGamePresentation(
         skill: 'TRAINING',
         benefit: 'A focused cognitive challenge.',

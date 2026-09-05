@@ -23,4 +23,9 @@ const brainGames = <BrainGameMeta>[
 
   // Legacy (jeśli chcesz utrzymać tę grę zanim ją przeniesiemy na czysto)
   BrainGameMeta(id: 'broken_mirror', title: 'Broken Mirror', icon: Icons.auto_fix_high),
+  BrainGameMeta(
+    id: 'rule_shift',
+    title: 'Rule Shift',
+    icon: Icons.swap_horiz_rounded,
+  ),
 ];

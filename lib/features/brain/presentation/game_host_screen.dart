@@ -7,6 +7,7 @@ import '../../../legacy/screens/memory_game_screen.dart';
 import '../../../legacy/screens/labirynth_game_screen.dart';
 import '../../../games/math_race/math_race_screen.dart';
 import '../../../legacy/screens/broken_mirror_game_screen.dart';
+import '../../../games/rule_shift/rule_shift_screen.dart';
 import 'game_result_screen.dart';
 
 const supportedBrainGameIds = <String>{
@@ -14,6 +15,7 @@ const supportedBrainGameIds = <String>{
   'labyrinth',
   'math_race',
   'broken_mirror',
+  'rule_shift',
 };
 
 bool isSupportedBrainGame(String gameId) =>
@@ -28,6 +30,7 @@ Widget buildBrainGame({
     'labyrinth' => LabirynthGameScreen(onFinish: onFinish),
     'math_race' => MathRaceScreen(onFinish: onFinish),
     'broken_mirror' => BrokenMirrorGameScreen(onFinish: () => onFinish(null)),
+    'rule_shift' => RuleShiftScreen(onFinish: onFinish),
     _ => _UnknownGame(gameId: gameId),
   };
 }
