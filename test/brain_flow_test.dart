@@ -40,7 +40,7 @@ void main() {
     expect(resolvedTypes['broken_mirror'], BrokenMirrorGameScreen);
   });
 
-  testWidgets('/brain renders the canonical BrainScreen', (
+  testWidgets('/brain renders the premium Brain hub with current games only', (
     WidgetTester tester,
   ) async {
     SharedPreferences.setMockInitialValues({});
@@ -60,8 +60,132 @@ void main() {
     await tester.pump(const Duration(milliseconds: 250));
 
     expect(find.byType(BrainScreen), findsOneWidget);
+    expect(find.text('DAILY BRAIN WORKOUT'), findsOneWidget);
+    expect(find.text('Train your mind today.'), findsOneWidget);
+    expect(find.text('YOUR TRAINING'), findsOneWidget);
+    expect(find.text('GAMES'), findsOneWidget);
+
     for (final game in brainGames.where((game) => game.enabled)) {
-      expect(find.text(game.title), findsOneWidget);
+      expect(find.text(game.title), findsWidgets);
+      expect(find.byKey(Key('brain-game-card-${game.id}')), findsOneWidget);
+    }
+
+    expect(find.text('Laser'), findsNothing);
+    expect(find.text('Reactivator'), findsNothing);
+    expect(find.textContaining('Coming Soon'), findsNothing);
+  });
+
+  testWidgets('Brain does not fabricate numeric skill scores', (
+    WidgetTester tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({});
+    final preferences = await SharedPreferences.getInstance();
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(preferences),
+        ],
+        child: const MaterialApp(home: BrainScreen()),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('Memory'), findsWidgets);
+    expect(find.text('Spatial focus'), findsWidgets);
+    expect(find.text('Mental calculation'), findsWidgets);
+    expect(find.text('Visual patterns'), findsWidgets);
+
+    expect(find.text('72'), findsNothing);
+    expect(find.text('64'), findsNothing);
+    expect(find.text('81'), findsNothing);
+    expect(find.textContaining('%'), findsNothing);
+  });
+
+  testWidgets('Brain hub remains overflow-free at 320px width', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(320, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(const MaterialApp(home: BrainScreen()));
+    await tester.pump();
+
+    expect(find.byType(BrainScreen), findsOneWidget);
+    expect(find.text('DAILY BRAIN WORKOUT'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Daily Brain Workout starts with a real supported game', (
+    WidgetTester tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({});
+    final preferences = await SharedPreferences.getInstance();
+    final router = createAppRouter(initialLocation: AppRoutes.brain);
+    addTearDown(router.dispose);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(preferences),
+        ],
+        child: MaterialApp.router(routerConfig: router),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
+
+    expect(find.text('Start with Memory'), findsOneWidget);
+    await tester.tap(find.text('Start with Memory'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
+
+    expect(find.byType(MemoryGameScreen), findsOneWidget);
+  });
+
+  testWidgets('Every visible Brain game card routes to its real game', (
+    WidgetTester tester,
+  ) async {
+    final expectedTypes = <String, Type>{
+      'memory': MemoryGameScreen,
+      'labyrinth': LabirynthGameScreen,
+      'math_race': MathRaceScreen,
+      'broken_mirror': BrokenMirrorGameScreen,
+    };
+
+    for (final game in brainGames.where((game) => game.enabled)) {
+      SharedPreferences.setMockInitialValues({});
+      final preferences = await SharedPreferences.getInstance();
+      final router = createAppRouter(initialLocation: AppRoutes.brain);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            sharedPreferencesProvider.overrideWithValue(preferences),
+          ],
+          child: MaterialApp.router(routerConfig: router),
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 250));
+
+      final card = find.byKey(Key('brain-game-card-${game.id}'));
+      expect(card, findsOneWidget);
+      await tester.ensureVisible(card);
+      await tester.pumpAndSettle();
+      await tester.tap(card);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 250));
+
+      expect(find.byType(expectedTypes[game.id]!), findsOneWidget);
+
+      router.dispose();
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump();
     }
   });
 
