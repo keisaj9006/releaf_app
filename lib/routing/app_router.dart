@@ -12,6 +12,9 @@ import '../features/relief/domain/models/reset_launch_options.dart';
 import '../features/brain/presentation/brain_screen.dart';
 import '../features/sound/presentation/sound_screen.dart';
 import '../features/sound/presentation/sound_player_screen.dart';
+import '../features/meditation/presentation/meditation_screen.dart';
+import '../features/meditation/presentation/meditation_player_screen.dart';
+import '../features/sleep/presentation/sleep_screen.dart';
 import '../features/brain/presentation/game_host_screen.dart';
 import '../features/brain/presentation/game_result_screen.dart';
 import '../features/home/daily_loop_screen.dart';
@@ -87,6 +90,26 @@ GoRouter createAppRouter({String initialLocation = AppRoutes.home}) => GoRouter(
           ],
         ),
       ],
+    ),
+
+    GoRoute(
+      path: AppRoutes.meditate,
+      pageBuilder: (context, state) => _fadePage(const MeditationScreen()),
+    ),
+
+    GoRoute(
+      path: AppRoutes.meditationSession,
+      pageBuilder: (context, state) {
+        final meditationId = state.pathParameters['meditationId'] ?? '';
+        return _fadePage(
+          MeditationPlayerScreen(meditationId: meditationId),
+        );
+      },
+    ),
+
+    GoRoute(
+      path: AppRoutes.sleep,
+      pageBuilder: (context, state) => _fadePage(const SleepScreen()),
     ),
 
     GoRoute(
