@@ -1,3 +1,5 @@
+import 'reset_session_program.dart';
+
 enum ResetLevel { quick, deep, emergency }
 
 enum QuickResetCategory { situational, breath, noBreath, lifeUpgrade }
@@ -27,6 +29,7 @@ class ResetContent {
   final String? audioAsset;
   final String? summary;
   final ResetTaxonomyStatus taxonomyStatus;
+  final ResetSessionProgram? program;
 
   const ResetContent({
     required this.id,
@@ -40,6 +43,7 @@ class ResetContent {
     this.audioAsset,
     this.summary,
     this.taxonomyStatus = ResetTaxonomyStatus.canonical,
+    this.program,
   }) : assert(id != ''),
        assert(durationSeconds > 0),
        assert(
