@@ -379,7 +379,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 120));
 
     final board = find.byKey(const Key('broken-mirror-board'));
-    final shard = find.byKey(const Key('broken-mirror-shard-0'));
+    final shard = find.byKey(const Key('broken-mirror-shard-5'));
     expect(board, findsOneWidget);
     expect(shard, findsOneWidget);
     expect(tester.takeException(), isNull);
@@ -388,8 +388,8 @@ void main() {
     final shardRect = tester.getRect(shard);
     final target = boardRect.topLeft +
         Offset(
-          boardRect.width * 0.28,
-          boardRect.height * 0.18,
+          boardRect.width * 0.55,
+          boardRect.height * 0.68,
         );
 
     final gesture = await tester.startGesture(shardRect.center);
@@ -398,7 +398,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 120));
 
-    expect(find.byKey(const Key('broken-mirror-shard-0')), findsNothing);
+    expect(find.byKey(const Key('broken-mirror-shard-5')), findsNothing);
     expect(tester.takeException(), isNull);
   });
 
