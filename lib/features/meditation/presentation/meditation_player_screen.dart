@@ -11,6 +11,7 @@ import '../../../routing/app_routes.dart';
 import '../../../theme/app_theme.dart';
 import '../../../theme/releaf_design_tokens.dart';
 import '../../../theme/widgets/releaf_artwork.dart';
+import '../../../theme/widgets/releaf_meditation_artwork.dart';
 import '../../../theme/widgets/releaf_components.dart';
 import '../../../theme/widgets/releaf_session_living_form.dart';
 import '../application/meditation_audio_controller.dart';
@@ -187,9 +188,9 @@ class _MeditationPlayerScreenState
         body: Stack(
           children: [
             Positioned.fill(
-              child: ReleafArtwork(
-                variant: artwork,
-                intensity: 0.34,
+              child: ReleafMeditationArtwork(
+                variant: _meditationArtworkFor(item.category),
+                intensity: 0.64,
               ),
             ),
             const Positioned.fill(
@@ -725,6 +726,20 @@ String _resumeTimeLabel(int seconds) {
   if (minutes == 0) return '${remainder}s';
   if (remainder == 0) return '${minutes}m';
   return '${minutes}m ${remainder}s';
+}
+
+ReleafMeditationArtworkVariant _meditationArtworkFor(
+  MeditationCategory category,
+) {
+  return switch (category) {
+    MeditationCategory.startHere => ReleafMeditationArtworkVariant.editorial,
+    MeditationCategory.anxiety => ReleafMeditationArtworkVariant.anxiety,
+    MeditationCategory.focus => ReleafMeditationArtworkVariant.focus,
+    MeditationCategory.mind => ReleafMeditationArtworkVariant.compassion,
+    MeditationCategory.body => ReleafMeditationArtworkVariant.body,
+    MeditationCategory.everyday => ReleafMeditationArtworkVariant.everyday,
+    MeditationCategory.unguided => ReleafMeditationArtworkVariant.timer,
+  };
 }
 
 ReleafArtworkVariant _artworkFor(MeditationCategory category) {
