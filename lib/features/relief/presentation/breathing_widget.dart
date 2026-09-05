@@ -11,6 +11,7 @@ import '../../../theme/releaf_design_tokens.dart';
 import '../../../theme/widgets/releaf_artwork.dart';
 import '../../../theme/widgets/releaf_body_release_visual.dart';
 import '../../../theme/widgets/releaf_components.dart';
+import '../../../theme/widgets/releaf_emergency_visual.dart';
 import '../../../theme/widgets/releaf_session_living_form.dart';
 import '../../../theme/widgets/releaf_sensory_halo.dart';
 import '../../../theme/widgets/releaf_thought_unhook_visual.dart';
@@ -238,8 +239,8 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
             switchOutCurve: Curves.easeInCubic,
             child: _session!.isEmergency
                 ? (_phase == SessionPhase.running
-                    ? _buildLegacyEmergencyRunningState(timeString)
-                    : _buildLegacyEmergencyFeedbackState())
+                    ? _buildEmergencyRunningState(timeString)
+                    : _buildEmergencyFeedbackState())
                 : (_phase == SessionPhase.running
                     ? _buildPremiumRunningState(timeString)
                     : _buildPremiumFeedbackState()),
@@ -689,121 +690,404 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
     );
   }
 
-  Widget _buildLegacyEmergencyRunningState(String timeString) {
-    return Column(
+  Widget _buildEmergencyRunningState(String timeString) {
+    final session = _session!;
+    final reducedMotion =
+        MediaQuery.maybeOf(context)?.disableAnimations ?? false;
+    final progress = _activeDurationSeconds <= 0
+        ? 1.0
+        : 1 - (_remainingSeconds / _activeDurationSeconds);
+    final phaseLabel = _sessionPhaseLabel(session) ?? 'Arrive';
+    final guidance = _currentGuidance(session);
+    final steps = session.program?.steps ?? const <ResetSessionStep>[];
+    final stepIndex = _sessionStepIndex(session);
+
+    return Stack(
       key: const ValueKey('running'),
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+      fit: StackFit.expand,
       children: [
-        Align(
-          alignment: Alignment.topLeft,
-          child: IconButton(
-            icon: const Icon(Icons.close, color: Color(0xFF686D7B)),
-            onPressed: _abortSession,
+        const DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Color(0xFF0C1612),
+                ReleafColors.background,
+                Color(0xFF050907),
+              ],
+              stops: [0, 0.58, 1],
+            ),
           ),
         ),
-        const Spacer(flex: 2),
-        if (widget.launchOptions.showSessionTimer)
-          Text(
-            timeString,
-            key: const Key('reset-active-session-timer'),
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 64,
-              fontWeight: FontWeight.w300,
-              color: Color(0xFFF0F2F5),
-              letterSpacing: -1.5,
-            ),
-          )
-        else
-          Text(
-            _session!.title,
-            key: const Key('reset-active-session-title'),
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.w500,
-              color: Color(0xFFF0F2F5),
-              letterSpacing: -0.5,
-            ),
-          ),
-        const Spacer(flex: 3),
-        if (widget.launchOptions.showGuidanceText)
-          Padding(
-            key: const Key('reset-active-session-guidance'),
-            padding: const EdgeInsets.symmetric(horizontal: 40),
-            child: Text(
-              _session!.instructions.isNotEmpty
-                  ? _session!.instructions.first
-                  : 'Settle in.',
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 18,
-                color: Color(0xFFA1A6B4),
-                height: 1.4,
+        Positioned(
+          top: -90,
+          right: -80,
+          width: 300,
+          height: 300,
+          child: IgnorePointer(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    ReleafColors.sage.withValues(alpha: 0.10),
+                    Colors.transparent,
+                  ],
+                ),
               ),
             ),
-          )
-        else
-          const SizedBox(
-            key: Key('reset-active-session-guidance-hidden'),
-            height: 1,
           ),
-        const Spacer(flex: 2),
+        ),
+        Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 620),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final compactHeight = constraints.maxHeight < 620;
+                final visualSize = math.min(
+                  compactHeight ? 230.0 : 310.0,
+                  math.max(205.0, constraints.maxWidth * 0.76),
+                );
+
+                return Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    ReleafSpacing.screen,
+                    ReleafSpacing.sm,
+                    ReleafSpacing.screen,
+                    ReleafSpacing.lg,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Row(
+                        children: [
+                          ReleafRoundIconButton(
+                            icon: Icons.close_rounded,
+                            tooltip: 'Exit Emergency Calm',
+                            onPressed: _abortSession,
+                          ),
+                          const SizedBox(width: ReleafSpacing.md),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'EMERGENCY CALM',
+                                  style: ReleafTypography.eyebrow.copyWith(
+                                    color: ReleafColors.sage,
+                                    letterSpacing: 1.9,
+                                  ),
+                                ),
+                                const SizedBox(height: 3),
+                                Text(
+                                  'Stay with this screen.',
+                                  style: ReleafTypography.cardTitle.copyWith(
+                                    fontSize: 17,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          if (widget.launchOptions.showSessionTimer)
+                            DecoratedBox(
+                              decoration: BoxDecoration(
+                                color: ReleafColors.surfaceSoft.withValues(
+                                  alpha: 0.82,
+                                ),
+                                borderRadius: BorderRadius.circular(
+                                  ReleafRadii.pill,
+                                ),
+                                border: Border.all(
+                                  color: ReleafColors.borderSoft,
+                                ),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 8,
+                                ),
+                                child: Text(
+                                  timeString,
+                                  key: const Key(
+                                    'reset-active-session-timer',
+                                  ),
+                                  style: ReleafTypography.meta.copyWith(
+                                    color: ReleafColors.textPrimary,
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: 0.4,
+                                  ),
+                                ),
+                              ),
+                            )
+                          else
+                            Text(
+                              session.title,
+                              key: const Key('reset-active-session-title'),
+                              style: const TextStyle(
+                                fontSize: 0,
+                                color: Colors.transparent,
+                              ),
+                            ),
+                        ],
+                      ),
+                      SizedBox(
+                        height: compactHeight
+                            ? ReleafSpacing.md
+                            : ReleafSpacing.xl,
+                      ),
+                      Expanded(
+                        child: Center(
+                          child: SizedBox(
+                            width: visualSize,
+                            height: visualSize,
+                            child: ReleafEmergencyVisual(
+                              progress: progress,
+                              phaseLabel: phaseLabel,
+                              reducedMotion: reducedMotion,
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        height: compactHeight
+                            ? ReleafSpacing.sm
+                            : ReleafSpacing.lg,
+                      ),
+                      Center(
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            color: ReleafColors.sage.withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(
+                              ReleafRadii.pill,
+                            ),
+                            border: Border.all(
+                              color: ReleafColors.sage.withValues(alpha: 0.20),
+                            ),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 7,
+                            ),
+                            child: Text(
+                              phaseLabel.toUpperCase(),
+                              key: const Key('emergency-phase-label'),
+                              style: ReleafTypography.eyebrow.copyWith(
+                                fontSize: 10,
+                                color: ReleafColors.sage,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: ReleafSpacing.sm),
+                      if (widget.launchOptions.showGuidanceText)
+                        Semantics(
+                          liveRegion: true,
+                          label: guidance,
+                          child: AnimatedSwitcher(
+                            duration: reducedMotion
+                                ? Duration.zero
+                                : ReleafMotion.standard,
+                            child: Text(
+                              guidance,
+                              key: ValueKey(
+                                'emergency-guidance-$phaseLabel',
+                              ),
+                              textAlign: TextAlign.center,
+                              style: ReleafTypography.body.copyWith(
+                                key: null,
+                                color: ReleafColors.textPrimary.withValues(
+                                  alpha: 0.90,
+                                ),
+                                fontSize: compactHeight ? 15 : 17,
+                                height: 1.48,
+                              ),
+                            ),
+                          ),
+                        )
+                      else
+                        const SizedBox(
+                          key: Key('reset-active-session-guidance-hidden'),
+                          height: 1,
+                        ),
+                      const SizedBox(height: ReleafSpacing.md),
+                      if (steps.isNotEmpty)
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            for (var index = 0;
+                                index < steps.length;
+                                index++) ...[
+                              AnimatedContainer(
+                                duration: reducedMotion
+                                    ? Duration.zero
+                                    : ReleafMotion.standard,
+                                width: index == stepIndex ? 22 : 7,
+                                height: 7,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(
+                                    ReleafRadii.pill,
+                                  ),
+                                  color: index <= stepIndex
+                                      ? ReleafColors.sage.withValues(
+                                          alpha:
+                                              index == stepIndex ? 0.88 : 0.38,
+                                        )
+                                      : ReleafColors.border,
+                                ),
+                              ),
+                              if (index != steps.length - 1)
+                                const SizedBox(width: 6),
+                            ],
+                          ],
+                        ),
+                      const SizedBox(height: ReleafSpacing.sm),
+                      Text(
+                        'Go at your own pace. You can stop at any time.',
+                        textAlign: TextAlign.center,
+                        style: ReleafTypography.meta.copyWith(
+                          color: ReleafColors.textMuted,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
       ],
     );
   }
 
-  Widget _buildLegacyEmergencyFeedbackState() {
-    return Padding(
+  Widget _buildEmergencyFeedbackState() {
+    final reducedMotion =
+        MediaQuery.maybeOf(context)?.disableAnimations ?? false;
+
+    return Stack(
       key: const ValueKey('feedback'),
-      padding: const EdgeInsets.symmetric(horizontal: 32),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const Text(
-            'Did this help settle your nerves?',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFFF0F2F5),
+      fit: StackFit.expand,
+      children: [
+        const DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color(0xFF0E1914),
+                ReleafColors.background,
+                Color(0xFF060A08),
+              ],
             ),
           ),
-          const SizedBox(height: 48),
-          ElevatedButton(
-            onPressed: () => _submitFeedbackAndClose(true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF6B9080),
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 18),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
+        ),
+        Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(
+              horizontal: ReleafSpacing.screen,
+              vertical: ReleafSpacing.xl,
+            ),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 480),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Center(
+                    child: SizedBox(
+                      width: 180,
+                      height: 180,
+                      child: ReleafEmergencyVisual(
+                        progress: 1,
+                        phaseLabel: 'Return',
+                        reducedMotion: reducedMotion,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: ReleafSpacing.xl),
+                  Text(
+                    'YOU STAYED WITH IT',
+                    textAlign: TextAlign.center,
+                    style: ReleafTypography.eyebrow.copyWith(
+                      color: ReleafColors.sage,
+                    ),
+                  ),
+                  const SizedBox(height: ReleafSpacing.sm),
+                  const Text(
+                    'Did this help settle your nerves?',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 27,
+                      height: 1.2,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: -0.6,
+                      color: ReleafColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: ReleafSpacing.sm),
+                  Text(
+                    'Choose the answer that feels closest. There is no score here.',
+                    textAlign: TextAlign.center,
+                    style: ReleafTypography.body.copyWith(
+                      color: ReleafColors.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: ReleafSpacing.xxl),
+                  SizedBox(
+                    height: ReleafControlSizes.prominent,
+                    child: FilledButton(
+                      key: const Key('emergency-feedback-helped'),
+                      onPressed: () => _submitFeedbackAndClose(true),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: ReleafColors.sage,
+                        foregroundColor: ReleafColors.background,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                            ReleafRadii.pill,
+                          ),
+                        ),
+                      ),
+                      child: const Text(
+                        'A little steadier',
+                        style: TextStyle(
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: ReleafSpacing.sm),
+                  SizedBox(
+                    height: ReleafControlSizes.prominent,
+                    child: OutlinedButton(
+                      key: const Key('emergency-feedback-not-yet'),
+                      onPressed: () => _submitFeedbackAndClose(false),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: ReleafColors.textSecondary,
+                        side: const BorderSide(color: ReleafColors.border),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                            ReleafRadii.pill,
+                          ),
+                        ),
+                      ),
+                      child: const Text(
+                        'Not yet',
+                        style: TextStyle(
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-            child: const Text(
-              'Yes, much better',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
           ),
-          const SizedBox(height: 16),
-          OutlinedButton(
-            onPressed: () => _submitFeedbackAndClose(false),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: const Color(0xFFA1A6B4),
-              side: const BorderSide(color: Color(0xFF2E323B)),
-              padding: const EdgeInsets.symmetric(vertical: 18),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-            ),
-            child: const Text(
-              'Not really',
-              style: TextStyle(fontSize: 16),
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
