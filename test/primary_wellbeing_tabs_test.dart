@@ -143,6 +143,9 @@ void main() {
 
     expect(find.text('MEDITATION'), findsOneWidget);
     expect(find.text('Meditate'), findsWidgets);
+    expect(find.text('FOUNDATIONS'), findsOneWidget);
+    expect(find.text('QUICK PRACTICES'), findsOneWidget);
+    expect(find.text('EXPLORE BY INTENTION'), findsOneWidget);
     expect(find.byTooltip('Back'), findsNothing);
 
     final navigation = tester.widget<NavigationBar>(find.byType(NavigationBar));
@@ -181,7 +184,7 @@ void main() {
     );
     expect(tester.takeException(), isNull);
 
-    await tester.ensureVisible(find.text('CHOOSE A PRACTICE'));
+    await tester.ensureVisible(find.text('QUICK PRACTICES'));
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
 

@@ -12,6 +12,7 @@ import '../../../theme/widgets/releaf_artwork.dart';
 import '../../../theme/widgets/releaf_components.dart';
 import '../../../theme/widgets/releaf_session_living_form.dart';
 import '../application/meditation_audio_controller.dart';
+import '../application/meditation_library_controller.dart';
 import '../data/meditation_catalog.dart';
 import '../domain/meditation_content.dart';
 
@@ -45,6 +46,11 @@ class _MeditationPlayerScreenState
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || item == null) return;
       unawaited(
+        ref
+            .read(meditationLibraryControllerProvider.notifier)
+            .markRecent(item.id),
+      );
+      unawaited(
         ref.read(meditationAudioControllerProvider.notifier).start(
               soundId: item.backgroundSoundId,
               volume: item.backgroundSoundVolume,
@@ -69,6 +75,15 @@ class _MeditationPlayerScreenState
         unawaited(
           ref.read(meditationAudioControllerProvider.notifier).stop(),
         );
+        final item =
+            ref.read(meditationCatalogProvider).getById(widget.meditationId);
+        if (item != null) {
+          unawaited(
+            ref
+                .read(meditationLibraryControllerProvider.notifier)
+                .markCompleted(item.id),
+          );
+        }
         return;
       }
       setState(() => _remainingSeconds -= 1);
