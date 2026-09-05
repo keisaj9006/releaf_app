@@ -83,7 +83,7 @@ void main() {
     expect(find.text('Unlock Premium'), findsNothing);
   });
 
-  testWidgets('A premium Relief tile opens the paywall for a free user', (
+  testWidgets('A premium Relief preview cannot bypass the paywall', (
     WidgetTester tester,
   ) async {
     final preferences = await _preferences();
@@ -104,6 +104,17 @@ void main() {
     await tester.ensureVisible(find.text(premiumSession.title));
     await tester.pump();
     await tester.tap(find.text(premiumSession.title));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
+
+    expect(
+      find.byKey(const Key('reset-session-preview-sheet')),
+      findsOneWidget,
+    );
+    expect(find.byKey(const Key('reset-preview-unlock')), findsOneWidget);
+    expect(find.text('03:00'), findsNothing);
+
+    await tester.tap(find.byKey(const Key('reset-preview-unlock')));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 250));
 
@@ -242,6 +253,15 @@ void main() {
     await tester.tap(find.text(freeSession.title));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 250));
+    expect(
+      find.byKey(const Key('reset-session-preview-sheet')),
+      findsOneWidget,
+    );
+    expect(find.text('01:00'), findsNothing);
+
+    await tester.tap(find.byKey(const Key('reset-preview-start')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
     expect(find.text('01:00'), findsOneWidget);
 
     await tester.tap(find.byIcon(Icons.close));
@@ -280,6 +300,14 @@ void main() {
     await tester.ensureVisible(find.text(freeSession.title));
     await tester.pump();
     await tester.tap(find.text(freeSession.title));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
+    expect(
+      find.byKey(const Key('reset-session-preview-sheet')),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.byKey(const Key('reset-preview-start')));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 250));
     await tester.pump(const Duration(seconds: 60));
