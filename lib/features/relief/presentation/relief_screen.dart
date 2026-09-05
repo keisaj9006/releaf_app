@@ -461,8 +461,10 @@ class _ReliefScreenState extends ConsumerState<ReliefScreen> {
                   ),
                 ),
               ),
-            ],
-          ),
+                ],
+              ),
+            );
+          },
         ),
       ),
     );
@@ -1080,11 +1082,14 @@ class _SoundGatewayCard extends StatelessWidget {
         key: const Key('reset-sound-gateway'),
         onPressed: onPressed,
         padding: EdgeInsets.zero,
-        child: SizedBox(
-          height: MediaQuery.sizeOf(context).width < 360 ? 230 : 190,
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final compact = constraints.maxWidth < 360;
+            return SizedBox(
+              height: compact ? 230 : 190,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
               const ReleafArtwork(variant: ReleafArtworkVariant.ambient),
               const DecoratedBox(
                 decoration: BoxDecoration(
