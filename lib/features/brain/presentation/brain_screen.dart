@@ -70,10 +70,17 @@ class BrainScreen extends ConsumerWidget {
                               'Each game targets a different task type and keeps its own visual identity.',
                         ),
                         const SizedBox(height: ReleafSpacing.md),
-                        _SkillGameGrid(
-                          games: enabledGames,
-                          training: training,
-                        ),
+                        for (final group in BrainGameGroup.values) ...[
+                          _SkillGroupSection(
+                            group: group,
+                            games: enabledGames
+                                .where((game) => game.group == group)
+                                .toList(growable: false),
+                            training: training,
+                          ),
+                          if (group != BrainGameGroup.values.last)
+                            const SizedBox(height: ReleafSpacing.lg),
+                        ],
                         const SizedBox(height: ReleafSpacing.section),
                         const _EvidenceNote(),
                       ],
@@ -180,7 +187,7 @@ class _BrainHeader extends StatelessWidget {
         ),
         const SizedBox(height: 6),
         Text(
-          'Short, focused challenges for memory, planning, calculation and visual reconstruction.',
+          'Short, focused challenges across memory, attention, reasoning and spatial skills.',
           style: ReleafTypography.body.copyWith(
             color: ReleafColors.textSecondary,
           ),
@@ -834,6 +841,64 @@ class _ActivityBars extends StatelessWidget {
           ],
         ],
       ),
+    );
+  }
+}
+
+class _SkillGroupSection extends StatelessWidget {
+  const _SkillGroupSection({
+    required this.group,
+    required this.games,
+    required this.training,
+  });
+
+  final BrainGameGroup group;
+  final List<BrainGameMeta> games;
+  final BrainTrainingState training;
+
+  @override
+  Widget build(BuildContext context) {
+    if (games.isEmpty) return const SizedBox.shrink();
+
+    final (title, description) = switch (group) {
+      BrainGameGroup.memory => (
+          'Memory',
+          'Hold, recall and reproduce information.',
+        ),
+      BrainGameGroup.attention => (
+          'Attention & control',
+          'Filter distractions, switch rules and stay selective.',
+        ),
+      BrainGameGroup.reasoning => (
+          'Logic & reasoning',
+          'Work with calculation, patterns and changing rules.',
+        ),
+      BrainGameGroup.spatial => (
+          'Spatial & visual',
+          'Plan routes and reconstruct visual information.',
+        ),
+    };
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: ReleafTypography.cardTitle.copyWith(fontSize: 16),
+        ),
+        const SizedBox(height: 3),
+        Text(
+          description,
+          style: ReleafTypography.meta.copyWith(
+            color: ReleafColors.textMuted,
+          ),
+        ),
+        const SizedBox(height: ReleafSpacing.sm),
+        _SkillGameGrid(
+          games: games,
+          training: training,
+        ),
+      ],
     );
   }
 }

@@ -75,6 +75,10 @@ void main() {
     expect(find.text('Three focused challenges.'), findsOneWidget);
     expect(find.text('THIS WEEK'), findsOneWidget);
     expect(find.text('TRAIN BY SKILL'), findsOneWidget);
+    expect(find.text('Memory'), findsWidgets);
+    expect(find.text('Attention & control'), findsOneWidget);
+    expect(find.text('Logic & reasoning'), findsOneWidget);
+    expect(find.text('Spatial & visual'), findsOneWidget);
     expect(find.byKey(const Key('brain-weekly-activity')), findsOneWidget);
 
     for (final game in brainGames.where((game) => game.enabled)) {
