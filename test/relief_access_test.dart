@@ -158,6 +158,45 @@ void main() {
     expect(find.text('Arrive'), findsOneWidget);
   });
 
+  testWidgets('Back to the Room can switch to a simplified 3-2-1 path', (
+    WidgetTester tester,
+  ) async {
+    final preferences = await _preferences();
+    final router = createAppRouter(
+      initialLocation: AppRoutes.reliefSessionFor('back-to-room'),
+    );
+    addTearDown(router.dispose);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(preferences),
+        ],
+        child: MaterialApp.router(routerConfig: router),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.byKey(const Key('reset-sensory-halo')), findsOneWidget);
+    expect(find.byKey(const Key('reset-living-form')), findsNothing);
+    expect(find.text('03:00'), findsOneWidget);
+    expect(find.byKey(const Key('reset-simplify-action')), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('reset-simplify-action')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.text('01:00'), findsOneWidget);
+    expect(find.byKey(const Key('reset-simplified-active')), findsOneWidget);
+    expect(find.text('Notice three things you can see.'), findsOneWidget);
+
+    await tester.pump(const Duration(seconds: 21));
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.text('Notice two things you can physically feel.'), findsOneWidget);
+  });
+
   testWidgets('A premium Relief preview cannot bypass the paywall', (
     WidgetTester tester,
   ) async {
