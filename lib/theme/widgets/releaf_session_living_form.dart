@@ -16,6 +16,7 @@ class ReleafSessionLivingForm extends StatefulWidget {
     required this.progress,
     required this.breathing,
     this.phaseLabel,
+    this.holdPhases = false,
     this.reducedMotion = false,
   });
 
@@ -23,6 +24,7 @@ class ReleafSessionLivingForm extends StatefulWidget {
   final double progress;
   final bool breathing;
   final String? phaseLabel;
+  final bool holdPhases;
   final bool reducedMotion;
 
   @override
@@ -39,7 +41,9 @@ class _ReleafSessionLivingFormState extends State<ReleafSessionLivingForm>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: Duration(seconds: widget.breathing ? 8 : 12),
+      duration: Duration(
+        seconds: widget.holdPhases ? 16 : (widget.breathing ? 8 : 12),
+      ),
     );
     _syncAnimation();
   }
@@ -47,11 +51,15 @@ class _ReleafSessionLivingFormState extends State<ReleafSessionLivingForm>
   @override
   void didUpdateWidget(covariant ReleafSessionLivingForm oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.breathing != widget.breathing) {
-      _controller.duration = Duration(seconds: widget.breathing ? 8 : 12);
+    if (oldWidget.breathing != widget.breathing ||
+        oldWidget.holdPhases != widget.holdPhases) {
+      _controller.duration = Duration(
+        seconds: widget.holdPhases ? 16 : (widget.breathing ? 8 : 12),
+      );
     }
     if (oldWidget.reducedMotion != widget.reducedMotion ||
-        oldWidget.breathing != widget.breathing) {
+        oldWidget.breathing != widget.breathing ||
+        oldWidget.holdPhases != widget.holdPhases) {
       _syncAnimation();
     }
   }
@@ -83,17 +91,27 @@ class _ReleafSessionLivingFormState extends State<ReleafSessionLivingForm>
       child: AnimatedBuilder(
         animation: _controller,
         builder: (context, child) {
-          final wave = (math.sin(_controller.value * math.pi * 2) + 1) / 2;
+          final motion = _motionValue(_controller.value);
           final breathingScale = widget.breathing
-              ? 0.94 + (wave * 0.12)
-              : 0.975 + (wave * 0.045);
+              ? 0.94 + (motion * 0.12)
+              : 0.975 + (motion * 0.045);
           final glowOpacity = widget.breathing
-              ? 0.15 + (wave * 0.18)
-              : 0.10 + (wave * 0.10);
+              ? 0.15 + (motion * 0.18)
+              : 0.10 + (motion * 0.10);
 
-          return CustomPaint(
-            key: const Key('reset-living-form'),
-            painter: _SessionProgressPainter(progress: progress),
+          return TweenAnimationBuilder<double>(
+            tween: Tween<double>(end: progress),
+            duration: const Duration(milliseconds: 720),
+            curve: Curves.easeOutCubic,
+            builder: (context, animatedProgress, child) {
+              return CustomPaint(
+                key: const Key('reset-living-form'),
+                painter: _SessionProgressPainter(
+                  progress: animatedProgress,
+                ),
+                child: child,
+              );
+            },
             child: AspectRatio(
               aspectRatio: 1,
               child: Stack(
@@ -157,6 +175,21 @@ class _ReleafSessionLivingFormState extends State<ReleafSessionLivingForm>
         },
       ),
     );
+  }
+
+  double _motionValue(double t) {
+    if (!widget.breathing) {
+      return (math.sin(t * math.pi * 2) + 1) / 2;
+    }
+
+    if (!widget.holdPhases) {
+      return (1 - math.cos(t * math.pi * 2)) / 2;
+    }
+
+    if (t < 0.25) return t / 0.25;
+    if (t < 0.50) return 1;
+    if (t < 0.75) return 1 - ((t - 0.50) / 0.25);
+    return 0;
   }
 }
 
