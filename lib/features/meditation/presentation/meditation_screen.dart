@@ -404,50 +404,59 @@ class _FeaturedPractice extends StatelessWidget {
                     onPressed: onFavorite,
                   ),
                 ),
-                Padding(
-                  padding: EdgeInsets.all(
-                    compact ? ReleafSpacing.lg : ReleafSpacing.xl,
+                Positioned(
+                  top: compact ? ReleafSpacing.lg : ReleafSpacing.xl,
+                  left: compact ? ReleafSpacing.lg : ReleafSpacing.xl,
+                  right: 72,
+                  child: const Text(
+                    'FEATURED PRACTICE',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      color: Color(0xFFD8CFE0),
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 1.5,
+                    ),
                   ),
+                ),
+                Positioned(
+                  left: compact ? ReleafSpacing.lg : ReleafSpacing.xl,
+                  right: compact ? ReleafSpacing.lg : ReleafSpacing.xl,
+                  bottom: compact ? ReleafSpacing.lg : ReleafSpacing.xl,
                   child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'FEATURED PRACTICE',
-                        style: TextStyle(
-                          fontFamily: 'Poppins',
-                          color: Color(0xFFD8CFE0),
-                          fontSize: 10,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 1.5,
-                        ),
-                      ),
-                      const Spacer(),
                       Text(
                         item.title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                         style: ReleafTypography.display.copyWith(
                           fontSize: compact ? 27 : 31,
                           letterSpacing: -0.8,
                         ),
                       ),
                       const SizedBox(height: ReleafSpacing.xs),
-                      ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 500),
-                        child: Text(
-                          item.subtitle,
-                          style: ReleafTypography.body.copyWith(
-                            color:
-                                ReleafColors.textPrimary.withValues(alpha: 0.78),
-                          ),
+                      Text(
+                        item.subtitle,
+                        maxLines: compact ? 3 : 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: ReleafTypography.body.copyWith(
+                          color:
+                              ReleafColors.textPrimary.withValues(alpha: 0.78),
                         ),
                       ),
                       const SizedBox(height: ReleafSpacing.md),
-                      Row(
+                      Wrap(
+                        spacing: ReleafSpacing.xs,
+                        runSpacing: ReleafSpacing.xs,
                         children: [
                           _MetaPill(
                             icon: Icons.schedule_rounded,
                             label: _durationLabel(item),
                           ),
-                          const SizedBox(width: ReleafSpacing.xs),
                           _MetaPill(
                             icon: item.unguided
                                 ? Icons.timer_outlined
@@ -456,7 +465,7 @@ class _FeaturedPractice extends StatelessWidget {
                           ),
                         ],
                       ),
-                      const SizedBox(height: ReleafSpacing.lg),
+                      const SizedBox(height: ReleafSpacing.md),
                       SizedBox(
                         width: compact ? double.infinity : null,
                         height: ReleafControlSizes.standard,

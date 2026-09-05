@@ -656,22 +656,31 @@ class _RecommendationHero extends StatelessWidget {
                     ),
                   ),
                 ),
-                Padding(
-                  padding: EdgeInsets.all(
-                    compact ? ReleafSpacing.lg : ReleafSpacing.xl,
+                Positioned(
+                  top: compact ? ReleafSpacing.lg : ReleafSpacing.xl,
+                  left: compact ? ReleafSpacing.lg : ReleafSpacing.xl,
+                  right: compact ? ReleafSpacing.lg : ReleafSpacing.xl,
+                  child: Text(
+                    recommendation.eyebrow,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: ReleafTypography.eyebrow.copyWith(
+                      color: accent,
+                    ),
                   ),
+                ),
+                Positioned(
+                  left: compact ? ReleafSpacing.lg : ReleafSpacing.xl,
+                  right: compact ? ReleafSpacing.lg : ReleafSpacing.xl,
+                  bottom: compact ? ReleafSpacing.lg : ReleafSpacing.xl,
                   child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        recommendation.eyebrow,
-                        style: ReleafTypography.eyebrow.copyWith(
-                          color: accent,
-                        ),
-                      ),
-                      const Spacer(),
-                      Text(
                         recommendation.title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                         style: ReleafTypography.display.copyWith(
                           fontSize: compact ? 25 : 28,
                           letterSpacing: -0.7,
@@ -680,6 +689,8 @@ class _RecommendationHero extends StatelessWidget {
                       const SizedBox(height: ReleafSpacing.xs),
                       Text(
                         recommendation.description,
+                        maxLines: compact ? 3 : 2,
+                        overflow: TextOverflow.ellipsis,
                         style: ReleafTypography.body.copyWith(
                           color: ReleafColors.textPrimary.withValues(
                             alpha: 0.80,
@@ -698,6 +709,8 @@ class _RecommendationHero extends StatelessWidget {
                           Expanded(
                             child: Text(
                               recommendation.meta,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                               style: ReleafTypography.meta.copyWith(
                                 color: ReleafColors.textSecondary,
                                 fontWeight: FontWeight.w600,
@@ -706,7 +719,7 @@ class _RecommendationHero extends StatelessWidget {
                           ),
                         ],
                       ),
-                      const SizedBox(height: ReleafSpacing.lg),
+                      const SizedBox(height: ReleafSpacing.md),
                       if (compact)
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
