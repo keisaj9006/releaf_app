@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/providers.dart';
 import '../../../routing/app_routes.dart';
 import '../../../theme/app_theme.dart';
 import '../../../theme/releaf_design_tokens.dart';
@@ -14,7 +15,6 @@ class SleepScreen extends ConsumerWidget {
   const SleepScreen({super.key});
 
   static const _sleepResetIds = [
-    'evening-unwind',
     'overthinking-night',
     'tension-body-scan',
     'longer-exhale',
@@ -28,6 +28,8 @@ class SleepScreen extends ConsumerWidget {
         .whereType<ResetContent>()
         .toList();
     final tonight = catalog.getById('evening-unwind');
+    final hasPremiumEntitlement =
+        ref.watch(subscriptionControllerProvider).isPremium;
 
     return Theme(
       data: AppTheme.premiumDark(),
@@ -59,6 +61,9 @@ class SleepScreen extends ConsumerWidget {
                               if (tonight != null)
                                 _TonightCard(
                                   session: tonight,
+                                  isLocked:
+                                      tonight.isPremium &&
+                                      !hasPremiumEntitlement,
                                   onPressed: () => context.push(
                                     AppRoutes.reliefSessionFor(tonight.id),
                                   ),
@@ -73,6 +78,9 @@ class SleepScreen extends ConsumerWidget {
                               for (final session in sessions) ...[
                                 _SleepResetCard(
                                   session: session,
+                                  isLocked:
+                                      session.isPremium &&
+                                      !hasPremiumEntitlement,
                                   onPressed: () => context.push(
                                     AppRoutes.reliefSessionFor(session.id),
                                   ),
@@ -199,10 +207,12 @@ class _Header extends StatelessWidget {
 class _TonightCard extends StatelessWidget {
   const _TonightCard({
     required this.session,
+    required this.isLocked,
     required this.onPressed,
   });
 
   final ResetContent session;
+  final bool isLocked;
   final VoidCallback onPressed;
 
   @override
@@ -272,8 +282,14 @@ class _TonightCard extends StatelessWidget {
                         height: ReleafControlSizes.standard,
                         child: FilledButton.icon(
                           onPressed: onPressed,
-                          icon: const Icon(Icons.nights_stay_rounded),
-                          label: const Text('Start tonight'),
+                          icon: Icon(
+                            isLocked
+                                ? Icons.lock_outline_rounded
+                                : Icons.nights_stay_rounded,
+                          ),
+                          label: Text(
+                            isLocked ? 'Unlock tonight' : 'Start tonight',
+                          ),
                           style: FilledButton.styleFrom(
                             backgroundColor: ReleafColors.premium,
                             foregroundColor: ReleafColors.background,
@@ -295,10 +311,12 @@ class _TonightCard extends StatelessWidget {
 class _SleepResetCard extends StatelessWidget {
   const _SleepResetCard({
     required this.session,
+    required this.isLocked,
     required this.onPressed,
   });
 
   final ResetContent session;
+  final bool isLocked;
   final VoidCallback onPressed;
 
   @override
@@ -362,7 +380,7 @@ class _SleepResetCard extends StatelessWidget {
                   ),
                   const SizedBox(width: ReleafSpacing.md),
                   Icon(
-                    session.isPremium
+                    isLocked
                         ? Icons.lock_outline_rounded
                         : Icons.play_circle_outline_rounded,
                     color: session.isPremium
