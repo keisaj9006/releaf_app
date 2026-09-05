@@ -104,4 +104,44 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('Meditation player uses the signature Living Form and pauses', (
+    WidgetTester tester,
+  ) async {
+    await _pumpRoute(
+      tester,
+      location: AppRoutes.meditationSessionFor('mindfulness-basics-2'),
+      preferences: await _preferences(),
+    );
+
+    expect(find.byKey(const Key('meditation-living-form')), findsOneWidget);
+    expect(
+      find.byKey(const Key('meditation-primary-control')),
+      findsOneWidget,
+    );
+    expect(find.text('ARRIVE'), findsOneWidget);
+
+    await tester.tap(find.text('Pause'));
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.text('PAUSED'), findsOneWidget);
+    expect(find.text('Continue'), findsOneWidget);
+  });
+
+  testWidgets('Meditation player stays overflow-free at 320px', (
+    WidgetTester tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(320, 640));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await _pumpRoute(
+      tester,
+      location: AppRoutes.meditationSessionFor('mindfulness-basics-2'),
+      preferences: await _preferences(),
+    );
+
+    expect(find.byKey(const Key('meditation-living-form')), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
 }
