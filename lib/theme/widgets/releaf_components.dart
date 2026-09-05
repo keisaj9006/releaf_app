@@ -138,13 +138,15 @@ class _ReleafPressableCardState extends State<ReleafPressableCard> {
 
   @override
   Widget build(BuildContext context) {
+    final reducedMotion =
+        MediaQuery.maybeOf(context)?.disableAnimations ?? false;
     final accent = widget.warmAccent
         ? ReleafColors.premium
         : ReleafColors.sage;
 
     return AnimatedScale(
       scale: _pressed ? 0.992 : 1,
-      duration: ReleafMotion.quick,
+      duration: reducedMotion ? Duration.zero : ReleafMotion.quick,
       curve: ReleafMotion.emphasisCurve,
       child: DecoratedBox(
         decoration: BoxDecoration(
