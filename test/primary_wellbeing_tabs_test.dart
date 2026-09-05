@@ -189,7 +189,14 @@ void main() {
 
     await tester.ensureVisible(find.text('QUICK PRACTICES'));
     await tester.pumpAndSettle();
-    expect(tester.takeException(), isNull);
+    final meditationOverflow = tester.takeException();
+    if (meditationOverflow is FlutterError) {
+      debugPrint('MEDITATION_OVERFLOW_DIAGNOSTIC');
+      for (final diagnostic in meditationOverflow.diagnostics) {
+        debugPrint(diagnostic.toStringDeep());
+      }
+    }
+    expect(meditationOverflow, isNull);
 
     final sleepRouter = createAppRouter(initialLocation: AppRoutes.sleep);
     addTearDown(sleepRouter.dispose);
