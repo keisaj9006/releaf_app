@@ -635,6 +635,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
     return switch (session.id) {
       '60s-grounding' => ReleafArtworkVariant.grounding,
       '90s-calm-down' => ReleafArtworkVariant.calm,
+      'longer-exhale' => ReleafArtworkVariant.breath,
       '5min-focus' => ReleafArtworkVariant.focus,
       '3min-breath' => ReleafArtworkVariant.deepReset,
       _ => ReleafArtworkVariant.ambient,
