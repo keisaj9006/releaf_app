@@ -107,10 +107,16 @@ class _ReleafSessionLivingFormState extends State<ReleafSessionLivingForm>
             final motion = _motionValue(_controller.value);
             final breathingScale = widget.breathing
                 ? 0.94 + (motion * 0.12)
-                : 0.975 + (motion * 0.045);
+                : 0.955 + (motion * 0.075);
             final glowOpacity = widget.breathing
                 ? 0.15 + (motion * 0.18)
-                : 0.10 + (motion * 0.10);
+                : 0.12 + (motion * 0.13);
+            final driftX =
+                widget.breathing ? 0.0 : math.sin(_controller.value * math.pi * 2) * 5;
+            final driftY =
+                widget.breathing ? 0.0 : math.cos(_controller.value * math.pi * 2) * 3;
+            final rotation =
+                widget.breathing ? 0.0 : math.sin(_controller.value * math.pi * 2) * 0.018;
 
             return AspectRatio(
               aspectRatio: 1,
@@ -139,14 +145,20 @@ class _ReleafSessionLivingFormState extends State<ReleafSessionLivingForm>
                     ),
                   ),
                   Center(
-                    child: Transform.scale(
-                      scale: breathingScale,
-                      child: FractionallySizedBox(
-                        widthFactor: 0.78,
-                        heightFactor: 0.78,
-                        child: ReleafLivingForm(
-                          variant: widget.variant,
-                          opacity: 0.96,
+                    child: Transform.translate(
+                      offset: Offset(driftX, driftY),
+                      child: Transform.rotate(
+                        angle: rotation,
+                        child: Transform.scale(
+                          scale: breathingScale,
+                          child: FractionallySizedBox(
+                            widthFactor: 0.78,
+                            heightFactor: 0.78,
+                            child: ReleafLivingForm(
+                              variant: widget.variant,
+                              opacity: 0.96,
+                            ),
+                          ),
                         ),
                       ),
                     ),
