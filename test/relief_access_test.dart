@@ -158,7 +158,7 @@ void main() {
     expect(find.text('Arrive'), findsOneWidget);
   });
 
-  testWidgets('Back to the Room can switch to a simplified 3-2-1 path', (
+  testWidgets('Back to the Room is interactive and can switch to 3-2-1', (
     WidgetTester tester,
   ) async {
     final preferences = await _preferences();
@@ -176,12 +176,19 @@ void main() {
       ),
     );
     await tester.pump();
+    await tester.pump(const Duration(seconds: 16));
     await tester.pump(const Duration(milliseconds: 300));
 
     expect(find.byKey(const Key('reset-sensory-halo')), findsOneWidget);
     expect(find.byKey(const Key('reset-living-form')), findsNothing);
-    expect(find.text('03:00'), findsOneWidget);
+    expect(find.text('See'), findsOneWidget);
+    expect(find.byKey(const Key('reset-sensory-tap-hint')), findsOneWidget);
     expect(find.byKey(const Key('reset-simplify-action')), findsOneWidget);
+    expect(find.text('5'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('reset-sensory-halo')));
+    await tester.pump(const Duration(milliseconds: 120));
+    expect(find.text('4'), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('reset-simplify-action')));
     await tester.pump();
@@ -190,10 +197,15 @@ void main() {
     expect(find.text('01:00'), findsOneWidget);
     expect(find.byKey(const Key('reset-simplified-active')), findsOneWidget);
     expect(find.text('Notice three things you can see.'), findsOneWidget);
+    expect(find.text('3'), findsOneWidget);
 
-    await tester.pump(const Duration(seconds: 21));
-    await tester.pump(const Duration(milliseconds: 300));
+    for (var i = 0; i < 3; i++) {
+      await tester.tap(find.byKey(const Key('reset-sensory-halo')));
+      await tester.pump(const Duration(milliseconds: 120));
+    }
+    await tester.pump(const Duration(milliseconds: 500));
 
+    expect(find.text('Feel'), findsOneWidget);
     expect(find.text('Notice two things you can physically feel.'), findsOneWidget);
   });
 
