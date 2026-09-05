@@ -20,6 +20,7 @@ class ReleafSessionLivingForm extends StatefulWidget {
     this.holdAfterInhaleSeconds = 0,
     this.exhaleSeconds = 4,
     this.holdAfterExhaleSeconds = 0,
+    this.showBreathPath = false,
     this.reducedMotion = false,
   });
 
@@ -31,6 +32,7 @@ class ReleafSessionLivingForm extends StatefulWidget {
   final int holdAfterInhaleSeconds;
   final int exhaleSeconds;
   final int holdAfterExhaleSeconds;
+  final bool showBreathPath;
   final bool reducedMotion;
 
   @override
@@ -171,6 +173,21 @@ class _ReleafSessionLivingFormState extends State<ReleafSessionLivingForm>
                       ),
                     ),
                   ),
+                  if (widget.showBreathPath)
+                    Positioned.fill(
+                      child: CustomPaint(
+                        key: const Key('reset-breath-path'),
+                        painter: _BreathOrbitPainter(
+                          cycleValue: _controller.value,
+                          inhaleSeconds: widget.inhaleSeconds,
+                          holdAfterInhaleSeconds:
+                              widget.holdAfterInhaleSeconds,
+                          exhaleSeconds: widget.exhaleSeconds,
+                          holdAfterExhaleSeconds:
+                              widget.holdAfterExhaleSeconds,
+                        ),
+                      ),
+                    ),
                   Center(
                     child: AnimatedOpacity(
                       duration: ReleafMotion.standard,
@@ -285,5 +302,112 @@ class _SessionProgressPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _SessionProgressPainter oldDelegate) {
     return progress != oldDelegate.progress;
+  }
+}
+
+
+class _BreathOrbitPainter extends CustomPainter {
+  const _BreathOrbitPainter({
+    required this.cycleValue,
+    required this.inhaleSeconds,
+    required this.holdAfterInhaleSeconds,
+    required this.exhaleSeconds,
+    required this.holdAfterExhaleSeconds,
+  });
+
+  final double cycleValue;
+  final int inhaleSeconds;
+  final int holdAfterInhaleSeconds;
+  final int exhaleSeconds;
+  final int holdAfterExhaleSeconds;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (size.isEmpty) return;
+
+    final total = math.max(
+      1,
+      inhaleSeconds +
+          holdAfterInhaleSeconds +
+          exhaleSeconds +
+          holdAfterExhaleSeconds,
+    ).toDouble();
+    final elapsed = cycleValue * total;
+
+    final center = Offset(size.width / 2, size.height / 2);
+    final rect = Rect.fromCenter(
+      center: center,
+      width: size.width * 0.82,
+      height: size.height * 0.92,
+    );
+
+    final trackPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = math.max(1.0, size.shortestSide * 0.004)
+      ..strokeCap = StrokeCap.round
+      ..color = ReleafColors.borderSoft.withValues(alpha: 0.38);
+
+    canvas.drawOval(rect, trackPaint);
+
+    var cursor = 0.0;
+    late final double angle;
+    late final Color accent;
+
+    final inhaleEnd = cursor + inhaleSeconds;
+    if (elapsed < inhaleEnd) {
+      final p = inhaleSeconds == 0 ? 1.0 : (elapsed - cursor) / inhaleSeconds;
+      angle = (math.pi / 2) + (math.pi * p.clamp(0.0, 1.0));
+      accent = ReleafColors.sage;
+    } else {
+      cursor = inhaleEnd;
+      final holdInEnd = cursor + holdAfterInhaleSeconds;
+      if (holdAfterInhaleSeconds > 0 && elapsed < holdInEnd) {
+        angle = 3 * math.pi / 2;
+        accent = ReleafColors.premium;
+      } else {
+        cursor = holdInEnd;
+        final exhaleEnd = cursor + exhaleSeconds;
+        if (elapsed < exhaleEnd) {
+          final p = exhaleSeconds == 0 ? 1.0 : (elapsed - cursor) / exhaleSeconds;
+          angle = (3 * math.pi / 2) + (math.pi * p.clamp(0.0, 1.0));
+          accent = ReleafColors.sageStrong;
+        } else {
+          angle = math.pi / 2;
+          accent = ReleafColors.textSecondary;
+        }
+      }
+    }
+
+    final point = Offset(
+      center.dx + (rect.width / 2) * math.cos(angle),
+      center.dy + (rect.height / 2) * math.sin(angle),
+    );
+
+    canvas.drawCircle(
+      point,
+      math.max(10.0, size.shortestSide * 0.035),
+      Paint()
+        ..color = accent.withValues(alpha: 0.16)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8),
+    );
+    canvas.drawCircle(
+      point,
+      math.max(4.5, size.shortestSide * 0.014),
+      Paint()..color = accent,
+    );
+    canvas.drawCircle(
+      point.translate(-1.4, -1.4),
+      math.max(1.2, size.shortestSide * 0.004),
+      Paint()..color = ReleafColors.textPrimary.withValues(alpha: 0.74),
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _BreathOrbitPainter oldDelegate) {
+    return oldDelegate.cycleValue != cycleValue ||
+        oldDelegate.inhaleSeconds != inhaleSeconds ||
+        oldDelegate.holdAfterInhaleSeconds != holdAfterInhaleSeconds ||
+        oldDelegate.exhaleSeconds != exhaleSeconds ||
+        oldDelegate.holdAfterExhaleSeconds != holdAfterExhaleSeconds;
   }
 }
