@@ -582,6 +582,8 @@ String _previewSubtitle(ResetContent session) {
   return switch (session.id) {
     '60s-grounding' => 'A quick sensory reset for the present moment.',
     'back-to-room' => 'A guided 5–4–3–2–1 grounding practice with a simpler 3–2–1 option.',
+    'jaw-shoulders' => 'A short body reset for tension held around the jaw and shoulders.',
+    'name-the-thought' => 'A guided thought-unhooking practice for repetitive thinking.',
     '90s-calm-down' => 'A short breathing practice to slow the pace.',
     'longer-exhale' => 'A gentle paced-breathing reset with a slightly longer exhale.',
     '5min-focus' => 'A focused sensory anchor for scattered attention.',
@@ -594,6 +596,8 @@ String _sessionPurpose(ResetContent session) {
   return switch (session.id) {
     '60s-grounding' => 'Return attention to your body and immediate surroundings.',
     'back-to-room' => 'Reconnect with the room through sight, touch, sound, smell and taste without focusing on breathing.',
+    'jaw-shoulders' => 'Notice, gently lift and release tension without forcing movement or focusing on breathing.',
+    'name-the-thought' => 'Notice a recurring thought, name it, create a little distance, then return attention to the present.',
     '90s-calm-down' => 'Slow the pace and soften tension with a brief breathing sequence.',
     'longer-exhale' => 'Use a gentle 3-count inhale and a slightly longer 4-count exhale without holding the breath.',
     '5min-focus' => 'Anchor attention through your senses and one clear point of focus.',
@@ -623,6 +627,8 @@ ReleafArtworkVariant _sessionArtwork(ResetContent session) {
   return switch (session.id) {
     '60s-grounding' => ReleafArtworkVariant.grounding,
     'back-to-room' => ReleafArtworkVariant.noBreath,
+    'jaw-shoulders' => ReleafArtworkVariant.grounding,
+    'name-the-thought' => ReleafArtworkVariant.focus,
     '90s-calm-down' => ReleafArtworkVariant.calm,
     'longer-exhale' => ReleafArtworkVariant.breath,
     '5min-focus' => ReleafArtworkVariant.focus,
