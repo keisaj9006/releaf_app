@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../core/session/session_manager.dart';
 import '../features/relief/data/reset_catalog.dart';
+import '../theme/releaf_design_tokens.dart';
 import 'app_routes.dart';
 
 class ScaffoldWithNavBar extends ConsumerWidget {
@@ -27,7 +28,7 @@ class ScaffoldWithNavBar extends ConsumerWidget {
         children: [
           Positioned.fill(child: navigationShell),
 
-          if (session.hasActive)
+          if (session.hasActive && navigationShell.currentIndex != 0)
             Positioned(
               left: 12,
               right: 12,
@@ -47,20 +48,53 @@ class ScaffoldWithNavBar extends ConsumerWidget {
       ),
       floatingActionButton: navigationShell.currentIndex == 1
           ? null
-          : FloatingActionButton.extended(
+          : FloatingActionButton.small(
               tooltip: 'Open Emergency Grounding',
+              backgroundColor: ReleafColors.premiumSoft,
+              foregroundColor: ReleafColors.premium,
+              shape: CircleBorder(
+                side: BorderSide(
+                  color: ReleafColors.premium.withValues(alpha: 0.38),
+                ),
+              ),
               onPressed: () {
                 context.push(
                   AppRoutes.reliefSessionFor(ResetCatalog.emergencySessionId),
                 );
               },
-              icon: const Icon(Icons.health_and_safety_outlined),
-              label: const Text('Emergency'),
+              child: const Icon(Icons.health_and_safety_outlined),
             ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: navigationShell.currentIndex,
-        onDestinationSelected: _onTap,
-        destinations: const [
+      bottomNavigationBar: Theme(
+        data: Theme.of(context).copyWith(
+          navigationBarTheme: NavigationBarThemeData(
+            height: 74,
+            backgroundColor: ReleafColors.backgroundRaised,
+            indicatorColor: ReleafColors.sage.withValues(alpha: 0.16),
+            surfaceTintColor: Colors.transparent,
+            labelTextStyle: WidgetStateProperty.resolveWith((states) {
+              final selected = states.contains(WidgetState.selected);
+              return TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 10,
+                fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                color: selected
+                    ? ReleafColors.textPrimary
+                    : ReleafColors.textMuted,
+              );
+            }),
+            iconTheme: WidgetStateProperty.resolveWith((states) {
+              final selected = states.contains(WidgetState.selected);
+              return IconThemeData(
+                color: selected ? ReleafColors.sage : ReleafColors.textMuted,
+                size: 22,
+              );
+            }),
+          ),
+        ),
+        child: NavigationBar(
+          selectedIndex: navigationShell.currentIndex,
+          onDestinationSelected: _onTap,
+          destinations: const [
           NavigationDestination(
             icon: Icon(Icons.home_outlined),
             label: 'Home',
@@ -81,7 +115,8 @@ class ScaffoldWithNavBar extends ConsumerWidget {
             icon: Icon(Icons.bedtime_outlined),
             label: 'Sleep',
           ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -103,18 +138,45 @@ class _ResumePill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      elevation: 6,
-      borderRadius: BorderRadius.circular(18),
-      color: Colors.white.withValues(alpha: 0.90),
+      elevation: 0,
+      borderRadius: BorderRadius.circular(ReleafRadii.large),
+      color: ReleafColors.surfaceElevated.withValues(alpha: 0.97),
       child: InkWell(
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(ReleafRadii.large),
         onTap: onResume,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(ReleafRadii.large),
+            border: Border.all(color: ReleafColors.border),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x50000000),
+                blurRadius: 24,
+                offset: Offset(0, 12),
+              ),
+            ],
+          ),
+          padding: const EdgeInsets.symmetric(
+            horizontal: ReleafSpacing.md,
+            vertical: ReleafSpacing.sm,
+          ),
           child: Row(
             children: [
-              const Icon(Icons.play_circle_fill, size: 22),
-              const SizedBox(width: 10),
+              Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: ReleafColors.sage.withValues(alpha: 0.12),
+                ),
+                alignment: Alignment.center,
+                child: const Icon(
+                  Icons.play_arrow_rounded,
+                  size: 21,
+                  color: ReleafColors.sage,
+                ),
+              ),
+              const SizedBox(width: ReleafSpacing.sm),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -124,16 +186,19 @@ class _ResumePill extends StatelessWidget {
                       title,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontWeight: FontWeight.w800),
+                      style: ReleafTypography.meta.copyWith(
+                        color: ReleafColors.textPrimary,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       subtitle,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black.withValues(alpha: 0.55),
+                      style: ReleafTypography.meta.copyWith(
+                        color: ReleafColors.textSecondary,
+                        fontSize: 10,
                       ),
                     ),
                   ],
@@ -142,7 +207,11 @@ class _ResumePill extends StatelessWidget {
               IconButton(
                 tooltip: 'Dismiss',
                 onPressed: onDismiss,
-                icon: const Icon(Icons.close, size: 18),
+                icon: const Icon(
+                  Icons.close_rounded,
+                  size: 18,
+                  color: ReleafColors.textSecondary,
+                ),
               ),
             ],
           ),
