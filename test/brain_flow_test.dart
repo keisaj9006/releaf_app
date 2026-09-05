@@ -161,6 +161,64 @@ void main() {
     expect(find.byType(MemoryGameScreen), findsOneWidget);
   });
 
+  test('Brain weekly activity reports real active days and skill variety', () {
+    final now = DateTime.now();
+    final state = BrainTrainingState(
+      records: [
+        BrainSessionRecord(
+          gameId: 'memory',
+          completedAt: now,
+          score: 10,
+        ),
+        BrainSessionRecord(
+          gameId: 'labyrinth',
+          completedAt: now.subtract(const Duration(days: 1)),
+        ),
+        BrainSessionRecord(
+          gameId: 'memory',
+          completedAt: now.subtract(const Duration(days: 1)),
+          score: 8,
+        ),
+      ],
+    );
+
+    expect(state.sessionsLast7Days, 3);
+    expect(state.activeDaysLast7Days, 2);
+    expect(state.distinctGamesLast7Days, 2);
+  });
+
+  testWidgets('Daily Brain Workout favours less recently used skills', (
+    WidgetTester tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({});
+    final preferences = await SharedPreferences.getInstance();
+    final seedController = BrainTrainingController(preferences);
+    await seedController.recordCompletion(gameId: 'memory', score: 10);
+    seedController.dispose();
+
+    final router = createAppRouter(initialLocation: AppRoutes.brain);
+    addTearDown(router.dispose);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(preferences),
+        ],
+        child: MaterialApp.router(routerConfig: router),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
+
+    await tester.ensureVisible(find.byKey(const Key('brain-start-workout')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('brain-start-workout')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
+
+    expect(find.byType(LabirynthGameScreen), findsOneWidget);
+  });
+
   testWidgets('Every visible Brain game card routes to its real game', (
     WidgetTester tester,
   ) async {

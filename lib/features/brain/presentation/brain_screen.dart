@@ -19,7 +19,10 @@ class BrainScreen extends ConsumerWidget {
     final enabledGames = brainGames
         .where((game) => game.enabled && isSupportedBrainGame(game.id))
         .toList(growable: false);
-    final workoutGames = enabledGames.take(3).toList(growable: false);
+    final workoutGames = _selectWorkoutGames(
+      enabledGames,
+      training,
+    );
 
     return Theme(
       data: AppTheme.premiumDark(),
@@ -399,7 +402,7 @@ class _DailyWorkoutPanel extends StatelessWidget {
                       child: Text(
                         completeForToday
                             ? 'You can repeat a game or choose a different skill below.'
-                            : 'A short sequence using only games that are playable in Releaf today.',
+                            : 'A short sequence that favours skills you have used less recently.',
                         style: ReleafTypography.body.copyWith(
                           color: ReleafColors.textPrimary.withValues(alpha: 0.70),
                         ),
@@ -750,6 +753,17 @@ class _ActivitySummary extends StatelessWidget {
           Text(
             'Your activity will appear here after your first game.',
             style: ReleafTypography.meta.copyWith(fontSize: 10),
+          ),
+        ] else ...[
+          const SizedBox(height: ReleafSpacing.xs),
+          Text(
+            '${training.activeDaysLast7Days} active days · '
+            '${training.distinctGamesLast7Days} skills',
+            style: ReleafTypography.meta.copyWith(
+              color: const Color(0xFF91A4EF),
+              fontSize: 10,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ],
       ],
@@ -1138,6 +1152,35 @@ _BrainGamePresentation _presentationFor(String gameId) {
         accent: Color(0xFF91A4EF),
       ),
   };
+}
+
+List<BrainGameMeta> _selectWorkoutGames(
+  List<BrainGameMeta> games,
+  BrainTrainingState training,
+) {
+  if (games.length <= 3 || training.records.isEmpty) {
+    return games.take(3).toList(growable: false);
+  }
+
+  final originalOrder = <String, int>{
+    for (var index = 0; index < games.length; index++) games[index].id: index,
+  };
+  final sorted = [...games]
+    ..sort((a, b) {
+      final aLast = training.lastPlayedFor(a.id);
+      final bLast = training.lastPlayedFor(b.id);
+
+      if (aLast == null && bLast != null) return -1;
+      if (aLast != null && bLast == null) return 1;
+      if (aLast != null && bLast != null) {
+        final recency = aLast.compareTo(bLast);
+        if (recency != 0) return recency;
+      }
+
+      return originalOrder[a.id]!.compareTo(originalOrder[b.id]!);
+    });
+
+  return sorted.take(3).toList(growable: false);
 }
 
 String _weekdayLabel(int weekday) {

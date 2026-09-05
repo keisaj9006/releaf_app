@@ -44,6 +44,25 @@ class BrainTrainingState {
   int get sessionsLast7Days =>
       activityLast7Days.fold<int>(0, (total, value) => total + value);
 
+  int get activeDaysLast7Days =>
+      activityLast7Days.where((value) => value > 0).length;
+
+  int get distinctGamesLast7Days {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final start = today.subtract(const Duration(days: 6));
+
+    return records
+        .where((record) {
+          final local = record.completedAt.toLocal();
+          final day = DateTime(local.year, local.month, local.day);
+          return !day.isBefore(start) && !day.isAfter(today);
+        })
+        .map((record) => record.gameId)
+        .toSet()
+        .length;
+  }
+
   List<int> get activityLast7Days {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
@@ -82,6 +101,17 @@ class BrainTrainingState {
 
   bool hasCompleted(String gameId) =>
       records.any((record) => record.gameId == gameId);
+
+  DateTime? lastPlayedFor(String gameId) {
+    DateTime? latest;
+    for (final record in records) {
+      if (record.gameId != gameId) continue;
+      if (latest == null || record.completedAt.isAfter(latest)) {
+        latest = record.completedAt;
+      }
+    }
+    return latest;
+  }
 
   List<String> get recentGameIds {
     final seen = <String>{};
