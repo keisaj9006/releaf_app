@@ -213,9 +213,15 @@ class _BrokenMirrorGameScreenState extends ConsumerState<BrokenMirrorGameScreen>
   }
 
   Size _resolveBoardSize(BoxConstraints c) {
-    final w = c.maxWidth;
-    final h = c.maxHeight;
-    final size = math.min(w, h - 170);
+    final availableWidth = math.max(
+      180.0,
+      c.maxWidth - (ReleafSpacing.screen * 2) - 24,
+    );
+    final availableHeight = math.max(180.0, c.maxHeight - 220);
+    final size = math.min(
+      620.0,
+      math.min(availableWidth, availableHeight),
+    );
     return Size(size, size);
   }
 
@@ -313,35 +319,35 @@ class _BrokenMirrorGameScreenState extends ConsumerState<BrokenMirrorGameScreen>
                                 key: const Key('broken-mirror-board'),
                                 child: SizedBox(
                                   key: _boardKey,
-                                width: _boardSize.width,
-                                height: _boardSize.height,
-                                child: Stack(
-                                  clipBehavior: Clip.none,
-                                  children: [
-                                    Positioned.fill(
-                                      child: CustomPaint(
-                                        painter: _TargetPainter(_shards),
+                                  width: _boardSize.width,
+                                  height: _boardSize.height,
+                                  child: Stack(
+                                    clipBehavior: Clip.none,
+                                    children: [
+                                      Positioned.fill(
+                                        child: CustomPaint(
+                                          painter: _TargetPainter(_shards),
+                                        ),
                                       ),
-                                    ),
-                                    for (final shard in _shards)
-                                      _DraggableShard(
-                                        shard: shard,
-                                        pulse: _pulse,
-                                        boardSize: _boardSize,
-                                        onUpdate: (updated) {
-                                          setState(() {
-                                            final idx = _shards.indexWhere(
-                                              (s) => s.id == updated.id,
-                                            );
-                                            _shards[idx] = updated;
-                                          });
-                                          _checkWin();
-                                        },
-                                      ),
-                                  ],
+                                      for (final shard in _shards)
+                                        _DraggableShard(
+                                          shard: shard,
+                                          pulse: _pulse,
+                                          boardSize: _boardSize,
+                                          onUpdate: (updated) {
+                                            setState(() {
+                                              final idx = _shards.indexWhere(
+                                                (s) => s.id == updated.id,
+                                              );
+                                              _shards[idx] = updated;
+                                            });
+                                            _checkWin();
+                                          },
+                                        ),
+                                    ],
+                                  ),
                                 ),
                               ),
-                            ),
                             ),
                             const SizedBox(height: ReleafSpacing.lg),
                             Text(
