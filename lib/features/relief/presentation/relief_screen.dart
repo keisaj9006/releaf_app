@@ -190,14 +190,16 @@ class _ReliefScreenState extends ConsumerState<ReliefScreen> {
   }
 
   Future<void> _focusCategory(QuickResetCategory category) async {
+    final reducedMotion = MediaQuery.of(context).disableAnimations;
+
     if (_selectedCategory != category) {
       setState(() => _selectedCategory = category);
       await WidgetsBinding.instance.endOfFrame;
+      if (!mounted) return;
     }
 
-    final reducedMotion = MediaQuery.of(context).disableAnimations;
     final sectionContext = _availableNowKey.currentContext;
-    if (sectionContext != null) {
+    if (sectionContext != null && sectionContext.mounted) {
       await Scrollable.ensureVisible(
         sectionContext,
         alignment: 0.08,
