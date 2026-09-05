@@ -155,6 +155,9 @@ void main() {
           subscriptionControllerProvider.overrideWith(
             (ref) => _FixedSubscriptionController(isPremium: false),
           ),
+          meditationAudioDriverProvider.overrideWithValue(
+            _FakeMeditationAudioDriver(),
+          ),
         ],
         child: MaterialApp.router(routerConfig: sleepRouter),
       ),
@@ -249,6 +252,9 @@ void main() {
           sharedPreferencesProvider.overrideWithValue(await _preferences()),
           subscriptionControllerProvider.overrideWith(
             (ref) => _FixedSubscriptionController(isPremium: true),
+          ),
+          meditationAudioDriverProvider.overrideWithValue(
+            _FakeMeditationAudioDriver(),
           ),
         ],
         child: MaterialApp.router(routerConfig: premiumRouter),
