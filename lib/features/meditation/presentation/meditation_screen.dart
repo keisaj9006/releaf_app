@@ -228,66 +228,80 @@ class _FeaturedMeditation extends StatelessWidget {
     return ReleafPressableCard(
       onPressed: onPressed,
       padding: EdgeInsets.zero,
-      child: SizedBox(
-        height: 276,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            const ReleafArtwork(variant: ReleafArtworkVariant.focus),
-            const DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Color(0x08000000),
-                    Color(0x42000000),
-                    Color(0xE9000000),
-                  ],
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final compact = constraints.maxWidth < 360;
+
+          return SizedBox(
+            height: compact ? 334 : 276,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                const ReleafArtwork(variant: ReleafArtworkVariant.focus),
+                const DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Color(0x08000000),
+                        Color(0x42000000),
+                        Color(0xE9000000),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
+                Padding(
+                  padding: EdgeInsets.all(
+                    compact ? ReleafSpacing.lg : ReleafSpacing.xl,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'START HERE',
+                        style: ReleafTypography.eyebrow.copyWith(
+                          color: ReleafColors.sage,
+                        ),
+                      ),
+                      const Spacer(),
+                      Text(
+                        item.title,
+                        style: ReleafTypography.display.copyWith(
+                          fontSize: compact ? 26 : 29,
+                          letterSpacing: -0.8,
+                        ),
+                      ),
+                      const SizedBox(height: ReleafSpacing.xs),
+                      Text(
+                        item.subtitle,
+                        style: ReleafTypography.body.copyWith(
+                          color: ReleafColors.textPrimary.withValues(
+                            alpha: 0.78,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: ReleafSpacing.lg),
+                      SizedBox(
+                        width: compact ? double.infinity : null,
+                        height: ReleafControlSizes.standard,
+                        child: FilledButton.icon(
+                          onPressed: onPressed,
+                          icon: const Icon(Icons.play_arrow_rounded),
+                          label: const Text('Begin'),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: ReleafColors.sage,
+                            foregroundColor: ReleafColors.background,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-            Padding(
-              padding: const EdgeInsets.all(ReleafSpacing.xl),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'START HERE',
-                    style: ReleafTypography.eyebrow.copyWith(
-                      color: ReleafColors.sage,
-                    ),
-                  ),
-                  const Spacer(),
-                  Text(
-                    item.title,
-                    style: ReleafTypography.display.copyWith(
-                      fontSize: 29,
-                      letterSpacing: -0.8,
-                    ),
-                  ),
-                  const SizedBox(height: ReleafSpacing.xs),
-                  Text(
-                    item.subtitle,
-                    style: ReleafTypography.body.copyWith(
-                      color: ReleafColors.textPrimary.withValues(alpha: 0.78),
-                    ),
-                  ),
-                  const SizedBox(height: ReleafSpacing.lg),
-                  FilledButton.icon(
-                    onPressed: onPressed,
-                    icon: const Icon(Icons.play_arrow_rounded),
-                    label: const Text('Begin'),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: ReleafColors.sage,
-                      foregroundColor: ReleafColors.background,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
