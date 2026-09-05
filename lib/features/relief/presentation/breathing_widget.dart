@@ -12,8 +12,10 @@ import '../../../theme/widgets/releaf_artwork.dart';
 import '../../../theme/widgets/releaf_components.dart';
 import '../../../theme/widgets/releaf_session_living_form.dart';
 import '../data/reset_catalog.dart';
+import '../domain/models/breath_pattern.dart';
 import '../domain/models/reset_content.dart';
 import '../domain/models/reset_launch_options.dart';
+import '../domain/models/reset_session_program.dart';
 
 enum SessionPhase { running, feedback }
 
@@ -231,9 +233,27 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
                               variant: artwork,
                               progress: progress,
                               breathing:
-                                  session.modality == ResetModality.breathing,
+                                  session.program?.type ==
+                                  ResetProgramType.pacedBreathing,
                               phaseLabel: phaseLabel,
-                              holdPhases: session.id == '3min-breath',
+                              inhaleSeconds:
+                                  session.program?.breathPattern?.inhaleSeconds ??
+                                  4,
+                              holdAfterInhaleSeconds:
+                                  session
+                                      .program
+                                      ?.breathPattern
+                                      ?.holdAfterInhaleSeconds ??
+                                  0,
+                              exhaleSeconds:
+                                  session.program?.breathPattern?.exhaleSeconds ??
+                                  4,
+                              holdAfterExhaleSeconds:
+                                  session
+                                      .program
+                                      ?.breathPattern
+                                      ?.holdAfterExhaleSeconds ??
+                                  0,
                               reducedMotion: reducedMotion,
                             ),
                           ),
@@ -543,45 +563,29 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
   }
 
   String? _sessionPhaseLabel(ResetContent session) {
-    if (session.modality == ResetModality.breathing) {
-      final elapsed = (session.durationSeconds - _remainingSeconds)
-          .clamp(0, session.durationSeconds);
+    final program = session.program;
+    if (program == null) return null;
 
-      if (session.id == '3min-breath') {
-        return switch (elapsed % 16) {
-          < 4 => 'Inhale',
-          < 8 => 'Hold',
-          < 12 => 'Exhale',
-          _ => 'Rest',
-        };
-      }
+    final elapsed = _elapsedSeconds(session);
 
-      return elapsed % 8 < 4 ? 'Breathe in' : 'Breathe out';
+    if (program.type == ResetProgramType.pacedBreathing) {
+      final pattern = program.breathPattern;
+      if (pattern == null) return null;
+      final frame = pattern.frameAtElapsedSeconds(elapsed);
+      return _breathPhaseLabel(frame.phase);
     }
 
-    final step = _sessionStepIndex(session);
-    return switch (session.id) {
-      '60s-grounding' => switch (step) {
-          0 => 'Arrive',
-          1 => 'Feel',
-          2 => 'Notice',
-          _ => 'Release',
-        },
-      '5min-focus' => switch (step) {
-          0 => 'See',
-          1 => 'Touch',
-          2 => 'Hear',
-          3 => 'Smell',
-          _ => 'Taste',
-        },
-      _ => null,
-    };
+    return program.stepAtElapsedSeconds(elapsed).label;
   }
 
   int _sessionStepIndex(ResetContent session) {
+    final program = session.program;
+    if (program != null) {
+      return program.stepIndexAtElapsedSeconds(_elapsedSeconds(session));
+    }
+
     if (session.instructions.isEmpty || session.durationSeconds <= 0) return 0;
-    final elapsed = (session.durationSeconds - _remainingSeconds)
-        .clamp(0, session.durationSeconds);
+    final elapsed = _elapsedSeconds(session);
     final segment = session.durationSeconds / session.instructions.length;
     return math.min(
       session.instructions.length - 1,
@@ -590,15 +594,31 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
   }
 
   String _currentGuidance(ResetContent session) {
-    if (session.instructions.isEmpty) return 'Settle in.';
-    if (session.modality == ResetModality.breathing) {
-      return session.instructions.first;
+    final program = session.program;
+    if (program != null) {
+      return program.stepAtElapsedSeconds(_elapsedSeconds(session)).guidance;
     }
+
+    if (session.instructions.isEmpty) return 'Settle in.';
     return session.instructions[_sessionStepIndex(session)];
   }
 
+  int _elapsedSeconds(ResetContent session) {
+    return (session.durationSeconds - _remainingSeconds)
+        .clamp(0, session.durationSeconds);
+  }
+
+  String _breathPhaseLabel(BreathPhase phase) {
+    return switch (phase) {
+      BreathPhase.inhale => 'Breathe in',
+      BreathPhase.holdAfterInhale => 'Hold',
+      BreathPhase.exhale => 'Breathe out',
+      BreathPhase.holdAfterExhale => 'Rest',
+    };
+  }
+
   String _guidanceTitle(ResetContent session) {
-    if (session.modality == ResetModality.breathing) {
+    if (session.program?.type == ResetProgramType.pacedBreathing) {
       return 'FOLLOW THE RHYTHM';
     }
     return 'STAY WITH THE MOMENT';
