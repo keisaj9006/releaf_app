@@ -71,6 +71,7 @@ class SoundScreen extends ConsumerWidget {
                                 const SizedBox(height: ReleafSpacing.section),
                                 const ReleafSectionHeading(
                                   title: 'Recently Played',
+                                  accentColor: ReleafFeatureAccents.sound,
                                   description: 'Return to a space you used before.',
                                 ),
                                 const SizedBox(height: ReleafSpacing.md),
@@ -83,6 +84,7 @@ class SoundScreen extends ConsumerWidget {
                                 const SizedBox(height: ReleafSpacing.section),
                                 const ReleafSectionHeading(
                                   title: 'Favorites',
+                                  accentColor: ReleafFeatureAccents.sound,
                                   description: 'Your saved sound spaces.',
                                 ),
                                 const SizedBox(height: ReleafSpacing.md),
@@ -94,6 +96,7 @@ class SoundScreen extends ConsumerWidget {
                               const SizedBox(height: ReleafSpacing.section),
                               const ReleafSectionHeading(
                                 title: 'Available Now',
+                                accentColor: ReleafFeatureAccents.sound,
                                 description:
                                     'Two ambient spaces, ready to loop.',
                               ),
@@ -171,6 +174,7 @@ class _SoundHeader extends StatelessWidget {
         ReleafRoundIconButton(
           icon: Icons.arrow_back_rounded,
           tooltip: 'Back',
+          accentColor: ReleafFeatureAccents.sound,
           onPressed: onBack,
         ),
         const SizedBox(width: ReleafSpacing.md),
@@ -504,9 +508,11 @@ class _InScreenMiniPlayer extends ConsumerWidget {
         borderRadius: BorderRadius.circular(ReleafRadii.large),
         child: Ink(
           decoration: BoxDecoration(
-            color: const Color(0xF21B2722),
+            color: const Color(0xF2121D22),
             borderRadius: BorderRadius.circular(ReleafRadii.large),
-            border: Border.all(color: ReleafColors.border),
+            border: Border.all(
+              color: ReleafFeatureAccents.sound.withValues(alpha: 0.18),
+            ),
             boxShadow: const [
               BoxShadow(
                 color: Color(0x52000000),

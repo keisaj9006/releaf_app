@@ -37,6 +37,7 @@ class ScaffoldWithNavBar extends ConsumerWidget {
               child: _ResumePill(
                 title: session.title,
                 subtitle: session.subtitle,
+                accent: _accentForResumeRoute(session.resumeRoute),
                 onResume: () {
                   context.push(session.resumeRoute, extra: session.extra);
                 },
@@ -133,6 +134,22 @@ class ScaffoldWithNavBar extends ConsumerWidget {
   }
 }
 
+Color _accentForResumeRoute(String route) {
+  if (route.startsWith(AppRoutes.meditate)) {
+    return ReleafFeatureAccents.meditation;
+  }
+  if (route.startsWith(AppRoutes.sound)) {
+    return ReleafFeatureAccents.sound;
+  }
+  if (route.startsWith(AppRoutes.brain)) {
+    return ReleafFeatureAccents.brain;
+  }
+  if (route.startsWith(AppRoutes.sleep)) {
+    return ReleafFeatureAccents.sleep;
+  }
+  return ReleafFeatureAccents.reset;
+}
+
 Color _accentForIndex(int index) {
   return switch (index) {
     0 => ReleafFeatureAccents.home,
@@ -148,12 +165,14 @@ class _ResumePill extends StatelessWidget {
   const _ResumePill({
     required this.title,
     required this.subtitle,
+    required this.accent,
     required this.onResume,
     required this.onDismiss,
   });
 
   final String title;
   final String subtitle;
+  final Color accent;
   final VoidCallback onResume;
   final VoidCallback onDismiss;
 
@@ -169,7 +188,7 @@ class _ResumePill extends StatelessWidget {
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(ReleafRadii.large),
-            border: Border.all(color: ReleafColors.border),
+            border: Border.all(color: accent.withValues(alpha: 0.18)),
             boxShadow: const [
               BoxShadow(
                 color: Color(0x50000000),
@@ -189,13 +208,13 @@ class _ResumePill extends StatelessWidget {
                 height: 38,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: ReleafColors.sage.withValues(alpha: 0.12),
+                  color: accent.withValues(alpha: 0.12),
                 ),
                 alignment: Alignment.center,
-                child: const Icon(
+                child: Icon(
                   Icons.play_arrow_rounded,
                   size: 21,
-                  color: ReleafColors.sage,
+                  color: accent,
                 ),
               ),
               const SizedBox(width: ReleafSpacing.sm),
