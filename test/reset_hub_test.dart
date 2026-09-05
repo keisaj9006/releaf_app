@@ -180,7 +180,6 @@ void main() {
     WidgetTester tester,
   ) async {
     final semantics = tester.ensureSemantics();
-    addTearDown(semantics.dispose);
     await _pumpResetHub(tester, preferences: await _preferences());
 
     final breathNode = tester.getSemantics(
@@ -221,6 +220,7 @@ void main() {
     final unavailableData = unavailableNode.getSemanticsData();
     expect(unavailableData.hasAction(SemanticsAction.tap), isFalse);
     expect(unavailableData.label, contains('Not available yet.'));
+    semantics.dispose();
   });
 
   testWidgets('Reset free and Premium cards preserve access behavior', (
