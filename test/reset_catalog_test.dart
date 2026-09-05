@@ -16,6 +16,7 @@ void main() {
     'emergency-grounding',
     '60s-grounding',
     '90s-calm-down',
+    'longer-exhale',
     '3min-breath',
     '5min-focus',
   };
@@ -91,6 +92,21 @@ void main() {
     expect(calmDown.quickCategory, QuickResetCategory.breath);
     expect(calmDown.modality, ResetModality.breathing);
     expect(calmDown.accessTier, ResetAccessTier.free);
+  });
+
+  test('Longer Exhale uses the asymmetric 3–4 Wave 1 pattern', () {
+    final session = catalog.getById('longer-exhale')!;
+
+    expect(session.level, ResetLevel.quick);
+    expect(session.quickCategory, QuickResetCategory.breath);
+    expect(session.modality, ResetModality.breathing);
+    expect(session.accessTier, ResetAccessTier.free);
+    expect(session.durationSeconds, 120);
+    expect(session.program?.type, ResetProgramType.pacedBreathing);
+    expect(session.program?.breathPattern?.inhaleSeconds, 3);
+    expect(session.program?.breathPattern?.holdAfterInhaleSeconds, 0);
+    expect(session.program?.breathPattern?.exhaleSeconds, 4);
+    expect(session.program?.breathPattern?.holdAfterExhaleSeconds, 0);
   });
 
   test('3-minute Deep Reset remains a legacy-compatible premium mapping', () {
