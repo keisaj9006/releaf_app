@@ -309,8 +309,10 @@ class _BrokenMirrorGameScreenState extends ConsumerState<BrokenMirrorGameScreen>
                           children: [
                             _BoardFrame(
                               accent: accent,
-                              child: SizedBox(
-                                key: _boardKey,
+                              child: KeyedSubtree(
+                                key: const Key('broken-mirror-board'),
+                                child: SizedBox(
+                                  key: _boardKey,
                                 width: _boardSize.width,
                                 height: _boardSize.height,
                                 child: Stack(
@@ -339,6 +341,7 @@ class _BrokenMirrorGameScreenState extends ConsumerState<BrokenMirrorGameScreen>
                                   ],
                                 ),
                               ),
+                            ),
                             ),
                             const SizedBox(height: ReleafSpacing.lg),
                             Text(
@@ -562,6 +565,7 @@ class _DraggableShard extends StatelessWidget {
       left: shard.position.dx,
       top: shard.position.dy,
       child: GestureDetector(
+        key: ValueKey('broken-mirror-shard-${shard.id}'),
         onPanUpdate: (d) {
           onUpdate(shard.copyWith(position: shard.position + d.delta));
         },
