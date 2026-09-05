@@ -13,6 +13,7 @@ import 'package:releaf_app/features/meditation/data/meditation_catalog.dart';
 import 'package:releaf_app/features/meditation/domain/meditation_content.dart';
 import 'package:releaf_app/features/meditation/domain/meditation_resume_state.dart';
 import 'package:releaf_app/features/meditation/presentation/meditation_player_screen.dart';
+import 'package:releaf_app/features/sound/data/sound_catalog.dart';
 import 'package:releaf_app/routing/app_router.dart';
 import 'package:releaf_app/routing/app_routes.dart';
 
@@ -141,6 +142,36 @@ void main() {
     expect(state.isFavorite('mindfulness-basics-2'), isTrue);
     expect(state.recentIds.first, 'mindfulness-basics-2');
     expect(state.isCompleted('mindfulness-basics-2'), isTrue);
+  });
+
+  test('Meditation ambience mix persists and scales session audio', () async {
+    SharedPreferences.setMockInitialValues({});
+    final preferences = await SharedPreferences.getInstance();
+    final driver = _FakeMeditationAudioDriver();
+    final controller = MeditationAudioController(
+      const SoundCatalog(),
+      preferences,
+      driver,
+    );
+    addTearDown(controller.dispose);
+
+    await controller.start(
+      soundId: 'releaf-atmosphere-01',
+      volume: 0.20,
+    );
+    await controller.setMix(0.50);
+
+    expect(controller.state.mix, 0.50);
+    expect(driver.lastVolume, closeTo(0.10, 0.001));
+
+    final restored = MeditationAudioController(
+      const SoundCatalog(),
+      preferences,
+      _FakeMeditationAudioDriver(),
+    );
+    addTearDown(restored.dispose);
+
+    expect(restored.state.mix, 0.50);
   });
 
   testWidgets('Meditate is a primary destination, not a nested page', (
