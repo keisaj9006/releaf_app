@@ -74,7 +74,7 @@ class BrainScreen extends StatelessWidget {
                   const ReleafSectionHeading(
                     title: 'Games',
                     description:
-                        'Choose a focused challenge. Every game below is live and playable.',
+                        'Choose a focused challenge for memory, spatial focus, calculation or visual patterns.',
                   ),
                   const SizedBox(height: ReleafSpacing.md),
                   LayoutBuilder(
@@ -123,11 +123,6 @@ class BrainScreen extends StatelessWidget {
                         ),
                       );
                     },
-                  ),
-                  const SizedBox(height: ReleafSpacing.lg),
-                  Text(
-                    'Scores and richer skill progress will appear only when they can be calculated from real persisted game history.',
-                    style: ReleafTypography.meta,
                   ),
                 ],
               ),
@@ -182,7 +177,7 @@ class _DailyWorkoutHero extends StatelessWidget {
             borderRadius: BorderRadius.circular(ReleafRadii.extraLarge),
             child: Container(
               key: const Key('brain-daily-workout-hero'),
-              height: compact ? 330 : 305,
+              height: compact ? 430 : 305,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(ReleafRadii.extraLarge),
                 border: Border.all(
