@@ -48,6 +48,10 @@ void main() {
     expect(grounding.quickCategory, QuickResetCategory.noBreath);
     expect(grounding.modality, ResetModality.grounding);
     expect(grounding.accessTier, ResetAccessTier.free);
+    expect(
+      grounding.instructions.join(' ').toLowerCase(),
+      isNot(contains('breath')),
+    );
 
     expect(calmDown.level, ResetLevel.quick);
     expect(calmDown.quickCategory, QuickResetCategory.breath);
