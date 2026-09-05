@@ -177,7 +177,7 @@ class _DailyWorkoutHero extends StatelessWidget {
             borderRadius: BorderRadius.circular(ReleafRadii.extraLarge),
             child: Container(
               key: const Key('brain-daily-workout-hero'),
-              height: compact ? 430 : 305,
+              height: compact ? 540 : 305,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(ReleafRadii.extraLarge),
                 border: Border.all(
