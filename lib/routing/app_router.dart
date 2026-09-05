@@ -8,6 +8,7 @@ import '../features/home/home_screen.dart';
 import '../features/habits/presentation/habits_screen.dart';
 import '../features/relief/presentation/relief_screen.dart';
 import '../features/relief/presentation/relief_session_gate.dart';
+import '../features/relief/domain/models/reset_launch_options.dart';
 import '../features/brain/presentation/brain_screen.dart';
 import '../features/brain/presentation/game_host_screen.dart';
 import '../features/brain/presentation/game_result_screen.dart';
@@ -90,7 +91,15 @@ GoRouter createAppRouter({String initialLocation = AppRoutes.home}) => GoRouter(
       path: AppRoutes.reliefSession,
       pageBuilder: (context, state) {
         final sessionId = state.pathParameters['sessionId'] ?? '';
-        return _fadePage(ReliefSessionGate(sessionId: sessionId));
+        final options = state.extra is ResetLaunchOptions
+            ? state.extra! as ResetLaunchOptions
+            : const ResetLaunchOptions();
+        return _fadePage(
+          ReliefSessionGate(
+            sessionId: sessionId,
+            launchOptions: options,
+          ),
+        );
       },
     ),
 
