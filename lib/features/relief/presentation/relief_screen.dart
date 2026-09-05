@@ -803,7 +803,7 @@ class _QuickSessionCard extends StatelessWidget {
       label: '${session.title}. ${_sessionPurpose(session)} '
           '${_durationLabel(session.durationSeconds)}. '
           '${_sessionTypeLabel(session)}. '
-          '${session.isPremium ? 'Premium, opens access check.' : 'Free, starts session.'}',
+          '${session.isPremium ? 'Premium, opens session preview.' : 'Free, opens session preview.'}',
       child: ReleafPressableCard(
         key: Key('reset-session-${session.id}'),
         onPressed: onPressed,
@@ -909,7 +909,7 @@ class _DeepResetCard extends StatelessWidget {
       enabled: true,
       onTap: onPressed,
       label: '${session.title}. Current 3-minute Deep Reset protocol. '
-          'Premium, opens access check.',
+          'Premium, opens session preview.',
       child: ReleafPressableCard(
         key: Key('reset-session-${session.id}'),
         onPressed: onPressed,
