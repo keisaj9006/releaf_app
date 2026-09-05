@@ -648,6 +648,7 @@ ReleafArtworkVariant _artworkFor(MeditationCategory category) {
   return switch (category) {
     MeditationCategory.startHere => ReleafArtworkVariant.focus,
     MeditationCategory.anxiety => ReleafArtworkVariant.calm,
+    MeditationCategory.focus => ReleafArtworkVariant.focus,
     MeditationCategory.mind => ReleafArtworkVariant.focus,
     MeditationCategory.body => ReleafArtworkVariant.grounding,
     MeditationCategory.everyday => ReleafArtworkVariant.lifeUpgrade,
