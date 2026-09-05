@@ -297,6 +297,95 @@ void main() {
     expect(find.text('IS THE NUMBER ODD?'), findsOneWidget);
   });
 
+  testWidgets('Premium Brain game shells remain usable on a phone', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(360, 760);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    SharedPreferences.setMockInitialValues({});
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MemoryGameScreen(onFinish: (_) {}),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 120));
+
+    expect(find.text('Pattern Match'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: MathRaceScreen(),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 120));
+
+    expect(find.text('Math Race'), findsOneWidget);
+    expect(find.byKey(const Key('math-race-puzzle-card')), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
+  });
+
+  testWidgets('Broken Mirror snaps a dragged shard into its target', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(420, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    SharedPreferences.setMockInitialValues({});
+    final preferences = await SharedPreferences.getInstance();
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(preferences),
+        ],
+        child: MaterialApp(
+          home: BrokenMirrorGameScreen(onFinish: () {}),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 120));
+
+    final board = find.byKey(const Key('broken-mirror-board'));
+    final shard = find.byKey(const Key('broken-mirror-shard-0'));
+    expect(board, findsOneWidget);
+    expect(shard, findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    final boardRect = tester.getRect(board);
+    final shardRect = tester.getRect(shard);
+    final target = boardRect.topLeft +
+        Offset(
+          boardRect.width * 0.28,
+          boardRect.height * 0.18,
+        );
+
+    final gesture = await tester.startGesture(shardRect.center);
+    await gesture.moveTo(target);
+    await gesture.up();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 120));
+
+    expect(find.byKey(const Key('broken-mirror-shard-0')), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Opening a Brain game alone does not mark Brain complete', (
     WidgetTester tester,
   ) async {
