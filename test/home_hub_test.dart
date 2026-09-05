@@ -47,7 +47,8 @@ void main() {
     expect(find.text('DAILY ESSENTIALS'), findsOneWidget);
     expect(find.text('Your daily rhythm'), findsOneWidget);
     expect(find.text('0 Leaves collected'), findsOneWidget);
-    expect(find.text('0/3'), findsOneWidget);
+    expect(find.text('0/2'), findsOneWidget);
+    expect(find.text('Habit'), findsNothing);
   });
 
   testWidgets('Home recommendation reacts to the selected need', (

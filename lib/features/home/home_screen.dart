@@ -41,7 +41,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     final completedToday = [
       leaves.reliefDone,
-      leaves.habitDone,
       leaves.brainDone,
     ].where((done) => done).length;
 
@@ -144,9 +143,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 totalLeaves: leaves.totalLeaves,
                                 completedToday: completedToday,
                                 reliefDone: leaves.reliefDone,
-                                habitDone: leaves.habitDone,
                                 brainDone: leaves.brainDone,
-                                onHabit: () => context.push(AppRoutes.habits),
                               ),
                             ],
                           ),
@@ -942,17 +939,13 @@ class _ProgressCard extends StatelessWidget {
     required this.totalLeaves,
     required this.completedToday,
     required this.reliefDone,
-    required this.habitDone,
     required this.brainDone,
-    required this.onHabit,
   });
 
   final int totalLeaves;
   final int completedToday;
   final bool reliefDone;
-  final bool habitDone;
   final bool brainDone;
-  final VoidCallback onHabit;
 
   @override
   Widget build(BuildContext context) {
@@ -969,7 +962,7 @@ class _ProgressCard extends StatelessWidget {
               fit: StackFit.expand,
               children: [
                 CircularProgressIndicator(
-                  value: completedToday / 3,
+                  value: completedToday / 2,
                   strokeWidth: 6,
                   backgroundColor:
                       ReleafColors.borderSoft.withValues(alpha: 0.55),
@@ -979,7 +972,7 @@ class _ProgressCard extends StatelessWidget {
                 ),
                 Center(
                   child: Text(
-                    '$completedToday/3',
+                    '$completedToday/2',
                     style: ReleafTypography.sectionTitle.copyWith(
                       fontSize: 18,
                     ),
@@ -1016,11 +1009,6 @@ class _ProgressCard extends StatelessWidget {
                 runSpacing: 8,
                 children: [
                   _ProgressPill(label: 'Reset', done: reliefDone),
-                  _ProgressPill(
-                    label: 'Habit',
-                    done: habitDone,
-                    onPressed: habitDone ? null : onHabit,
-                  ),
                   _ProgressPill(label: 'Brain', done: brainDone),
                 ],
               ),
