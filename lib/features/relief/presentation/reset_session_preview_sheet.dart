@@ -77,114 +77,172 @@ class _ResetSessionPreviewSheetState
             top: Radius.circular(ReleafRadii.extraLarge),
           ),
           clipBehavior: Clip.antiAlias,
-          child: SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _PreviewArtworkHeader(
-                  session: session,
-                  compact: compact,
-                  onClose: () => Navigator.of(context).pop(),
-                ),
-                Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    compact ? ReleafSpacing.md : ReleafSpacing.xl,
-                    ReleafSpacing.lg,
-                    compact ? ReleafSpacing.md : ReleafSpacing.xl,
-                    ReleafSpacing.xl,
-                  ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  key: const Key('reset-preview-scroll'),
+                  physics: const BouncingScrollPhysics(),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      _PreviewMeta(session: session),
-                      const SizedBox(height: ReleafSpacing.lg),
-                      Text(
-                        _sessionPurpose(session),
-                        style: ReleafTypography.body.copyWith(
-                          color: ReleafColors.textPrimary,
-                          fontSize: 16,
-                          height: 1.5,
-                        ),
-                      ),
-                      const SizedBox(height: ReleafSpacing.lg),
-                      const Text(
-                        'WHAT TO EXPECT',
-                        style: ReleafTypography.eyebrow,
-                      ),
-                      const SizedBox(height: ReleafSpacing.sm),
-                      for (final instruction
-                          in session.instructions.take(2)) ...[
-                        _ExpectationRow(text: instruction),
-                        const SizedBox(height: ReleafSpacing.xs),
-                      ],
-                      if (!widget.isLocked) ...[
-                        const SizedBox(height: ReleafSpacing.lg),
-                        const Text(
-                          'SESSION SETUP',
-                          style: ReleafTypography.eyebrow,
-                        ),
-                        const SizedBox(height: ReleafSpacing.sm),
-                        _SessionPreferenceTile(
-                          key: const Key('reset-preview-guidance-toggle'),
-                          icon: Icons.subtitles_rounded,
-                          title: 'Guidance text',
-                          subtitle: 'Show the current step during the session.',
-                          value: _options.showGuidanceText,
-                          onChanged: (value) {
-                            setState(() {
-                              _options = _options.copyWith(
-                                showGuidanceText: value,
-                              );
-                            });
-                          },
-                        ),
-                        const SizedBox(height: ReleafSpacing.xs),
-                        _SessionPreferenceTile(
-                          key: const Key('reset-preview-timer-toggle'),
-                          icon: Icons.timer_outlined,
-                          title: 'Session timer',
-                          subtitle: 'Keep the countdown visible.',
-                          value: _options.showSessionTimer,
-                          onChanged: (value) {
-                            setState(() {
-                              _options = _options.copyWith(
-                                showSessionTimer: value,
-                              );
-                            });
-                          },
-                        ),
-                      ],
-                      const SizedBox(height: ReleafSpacing.xl),
-                      _PrimaryPreviewAction(
+                      _PreviewArtworkHeader(
                         session: session,
-                        isLocked: widget.isLocked,
-                        onPressed: () {
-                          Navigator.of(context).pop(
-                            ResetSessionPreviewResult(
-                              action: widget.isLocked
-                                  ? ResetSessionPreviewAction.unlock
-                                  : ResetSessionPreviewAction.start,
-                              options: _options,
-                            ),
-                          );
-                        },
+                        compact: compact,
+                        onClose: () => Navigator.of(context).pop(),
                       ),
-                      const SizedBox(height: ReleafSpacing.sm),
-                      Center(
-                        child: Text(
-                          'You can stop at any time.',
-                          style: ReleafTypography.meta.copyWith(
-                            color: ReleafColors.textMuted,
-                          ),
+                      Padding(
+                        padding: EdgeInsets.fromLTRB(
+                          compact ? ReleafSpacing.md : ReleafSpacing.xl,
+                          ReleafSpacing.lg,
+                          compact ? ReleafSpacing.md : ReleafSpacing.xl,
+                          ReleafSpacing.xl,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _PreviewMeta(session: session),
+                            const SizedBox(height: ReleafSpacing.lg),
+                            Text(
+                              _sessionPurpose(session),
+                              style: ReleafTypography.body.copyWith(
+                                color: ReleafColors.textPrimary,
+                                fontSize: 16,
+                                height: 1.5,
+                              ),
+                            ),
+                            const SizedBox(height: ReleafSpacing.lg),
+                            const Text(
+                              'WHAT TO EXPECT',
+                              style: ReleafTypography.eyebrow,
+                            ),
+                            const SizedBox(height: ReleafSpacing.sm),
+                            for (final instruction
+                                in session.instructions.take(2)) ...[
+                              _ExpectationRow(text: instruction),
+                              const SizedBox(height: ReleafSpacing.xs),
+                            ],
+                            if (!widget.isLocked) ...[
+                              const SizedBox(height: ReleafSpacing.lg),
+                              const Text(
+                                'SESSION SETUP',
+                                style: ReleafTypography.eyebrow,
+                              ),
+                              const SizedBox(height: ReleafSpacing.sm),
+                              _SessionPreferenceTile(
+                                key: const Key(
+                                  'reset-preview-guidance-toggle',
+                                ),
+                                icon: Icons.subtitles_rounded,
+                                title: 'Guidance text',
+                                subtitle:
+                                    'Show the current step during the session.',
+                                value: _options.showGuidanceText,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _options = _options.copyWith(
+                                      showGuidanceText: value,
+                                    );
+                                  });
+                                },
+                              ),
+                              const SizedBox(height: ReleafSpacing.xs),
+                              _SessionPreferenceTile(
+                                key: const Key('reset-preview-timer-toggle'),
+                                icon: Icons.timer_outlined,
+                                title: 'Session timer',
+                                subtitle: 'Keep the countdown visible.',
+                                value: _options.showSessionTimer,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _options = _options.copyWith(
+                                      showSessionTimer: value,
+                                    );
+                                  });
+                                },
+                              ),
+                            ],
+                          ],
                         ),
                       ),
                     ],
                   ),
                 ),
-              ],
-            ),
+              ),
+              _StickyPreviewAction(
+                session: session,
+                isLocked: widget.isLocked,
+                onPressed: () {
+                  Navigator.of(context).pop(
+                    ResetSessionPreviewResult(
+                      action: widget.isLocked
+                          ? ResetSessionPreviewAction.unlock
+                          : ResetSessionPreviewAction.start,
+                      options: _options,
+                    ),
+                  );
+                },
+              ),
+            ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _StickyPreviewAction extends StatelessWidget {
+  const _StickyPreviewAction({
+    required this.session,
+    required this.isLocked,
+    required this.onPressed,
+  });
+
+  final ResetContent session;
+  final bool isLocked;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: ReleafColors.backgroundRaised,
+        border: Border(
+          top: BorderSide(color: ReleafColors.borderSoft),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.24),
+            blurRadius: 22,
+            offset: const Offset(0, -8),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        top: false,
+        minimum: const EdgeInsets.fromLTRB(
+          ReleafSpacing.xl,
+          ReleafSpacing.sm,
+          ReleafSpacing.xl,
+          ReleafSpacing.sm,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _PrimaryPreviewAction(
+              session: session,
+              isLocked: isLocked,
+              onPressed: onPressed,
+            ),
+            const SizedBox(height: ReleafSpacing.xs),
+            Text(
+              'You can stop at any time.',
+              style: ReleafTypography.meta.copyWith(
+                color: ReleafColors.textMuted,
+              ),
+            ),
+          ],
         ),
       ),
     );
