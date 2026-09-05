@@ -200,7 +200,7 @@ void main() {
     );
     final sessionData = sessionNode.getSemanticsData();
     expect(sessionData.flagsCollection.isButton, isTrue);
-    expect(sessionData.label, contains('Free, starts session.'));
+    expect(sessionData.label, contains('Free, opens session preview.'));
 
     await tester.ensureVisible(
       find.byKey(const Key('reset-category-carousel')),
@@ -223,7 +223,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Reset free and Premium cards preserve access behavior', (
+  testWidgets('Reset cards open preview before launch or access check', (
     WidgetTester tester,
   ) async {
     await _pumpResetHub(tester, preferences: await _preferences());
@@ -233,8 +233,20 @@ void main() {
     await tester.tap(find.text('60s Grounding'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
+
+    expect(
+      find.byKey(const Key('reset-session-preview-sheet')),
+      findsOneWidget,
+    );
+    expect(find.text('WHAT TO EXPECT'), findsOneWidget);
+    expect(find.text('SESSION SETUP'), findsOneWidget);
+    expect(find.byKey(const Key('reset-preview-start')), findsOneWidget);
+    expect(find.text('01:00'), findsNothing);
+
+    await tester.tap(find.byKey(const Key('reset-preview-start')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
     expect(find.text('01:00'), findsOneWidget);
-    expect(find.text('Unlock Premium'), findsNothing);
 
     await tester.tap(find.byIcon(Icons.close));
     await tester.pump();
@@ -245,8 +257,76 @@ void main() {
     await tester.tap(find.text('3 min Deep Reset'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
+
+    expect(
+      find.byKey(const Key('reset-session-preview-sheet')),
+      findsOneWidget,
+    );
+    expect(find.byKey(const Key('reset-preview-unlock')), findsOneWidget);
+    expect(find.text('03:00'), findsNothing);
+
+    await tester.tap(find.byKey(const Key('reset-preview-unlock')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
     expect(find.text('Unlock Premium'), findsOneWidget);
     expect(find.text('03:00'), findsNothing);
+  });
+
+  testWidgets('Reset preview settings are applied to the active session', (
+    WidgetTester tester,
+  ) async {
+    await _pumpResetHub(tester, preferences: await _preferences());
+
+    await tester.ensureVisible(find.byKey(const Key('reset-session-rail')));
+    await tester.pump();
+    await tester.tap(find.text('60s Grounding'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    final guidanceTile = find.byKey(
+      const Key('reset-preview-guidance-toggle'),
+    );
+    final timerTile = find.byKey(
+      const Key('reset-preview-timer-toggle'),
+    );
+    expect(guidanceTile, findsOneWidget);
+    expect(timerTile, findsOneWidget);
+
+    await tester.tap(
+      find.descendant(
+        of: guidanceTile,
+        matching: find.byType(Switch),
+      ),
+    );
+    await tester.pump();
+    await tester.tap(
+      find.descendant(
+        of: timerTile,
+        matching: find.byType(Switch),
+      ),
+    );
+    await tester.pump();
+
+    await tester.tap(find.byKey(const Key('reset-preview-start')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(
+      find.byKey(const Key('reset-active-session-timer')),
+      findsNothing,
+    );
+    expect(
+      find.byKey(const Key('reset-active-session-title')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const Key('reset-active-session-guidance')),
+      findsNothing,
+    );
+    expect(
+      find.byKey(const Key('reset-active-session-guidance-hidden')),
+      findsOneWidget,
+    );
   });
 
   testWidgets('Reset header Emergency action opens the free session', (
@@ -289,6 +369,26 @@ void main() {
       tester.getSize(find.byKey(const Key('reset-content-column'))).width,
       320,
     );
+  });
+
+  testWidgets('Reset preview remains overflow-free at 320px width', (
+    WidgetTester tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(320, 640));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await _pumpResetHub(tester, preferences: await _preferences());
+
+    await tester.ensureVisible(find.byKey(const Key('reset-session-rail')));
+    await tester.pump();
+    await tester.tap(find.text('60s Grounding'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(
+      find.byKey(const Key('reset-session-preview-sheet')),
+      findsOneWidget,
+    );
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('Reset keeps editorial proportions on a large viewport', (
