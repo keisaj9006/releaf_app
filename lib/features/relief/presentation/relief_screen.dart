@@ -1124,6 +1124,8 @@ ReleafArtworkVariant _sessionArtwork(ResetContent session) {
   return switch (session.id) {
     '60s-grounding' => ReleafArtworkVariant.grounding,
     'back-to-room' => ReleafArtworkVariant.noBreath,
+    'jaw-shoulders' => ReleafArtworkVariant.grounding,
+    'name-the-thought' => ReleafArtworkVariant.focus,
     '90s-calm-down' => ReleafArtworkVariant.calm,
     'longer-exhale' => ReleafArtworkVariant.breath,
     '5min-focus' => ReleafArtworkVariant.focus,
@@ -1135,6 +1137,8 @@ String _sessionPurpose(ResetContent session) {
   return switch (session.id) {
     '60s-grounding' => 'Return attention to your body.',
     'back-to-room' => 'Ground attention through what you can see, feel and hear.',
+    'jaw-shoulders' => 'Release tension held around the jaw and shoulders.',
+    'name-the-thought' => 'Create a little distance from a looping thought.',
     '90s-calm-down' => 'Slow the pace and soften tension.',
     'longer-exhale' => 'Settle into a slightly longer, gentler exhale.',
     '5min-focus' => 'Anchor attention through your senses.',
