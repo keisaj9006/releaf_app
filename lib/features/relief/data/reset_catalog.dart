@@ -104,6 +104,83 @@ class ResetCatalog {
       ),
     ),
     ResetContent(
+      id: 'back-to-room',
+      title: 'Back to the Room',
+      durationSeconds: 180,
+      level: ResetLevel.quick,
+      quickCategory: QuickResetCategory.noBreath,
+      modality: ResetModality.grounding,
+      accessTier: ResetAccessTier.free,
+      visualType: ResetVisualType.sensoryHalo,
+      instructions: [
+        'Look around the space you are in.',
+        'Notice five things you can see.',
+        'Notice four things you can physically feel.',
+        'Listen for three different sounds.',
+        'Notice two things you can smell, or imagine two familiar scents.',
+        'Notice one taste, or imagine a familiar taste.',
+        'Notice the room around you again.',
+      ],
+      program: ResetSessionProgram.guided(
+        simplifyActionLabel: 'Too much right now? Try 3–2–1',
+        steps: [
+          ResetSessionStep(
+            label: 'Arrive',
+            guidance: 'Look around the space you are in.',
+            durationSeconds: 15,
+          ),
+          ResetSessionStep(
+            label: 'See',
+            guidance: 'Notice five things you can see.',
+            durationSeconds: 45,
+          ),
+          ResetSessionStep(
+            label: 'Feel',
+            guidance: 'Notice four things you can physically feel.',
+            durationSeconds: 40,
+          ),
+          ResetSessionStep(
+            label: 'Hear',
+            guidance: 'Listen for three different sounds.',
+            durationSeconds: 30,
+          ),
+          ResetSessionStep(
+            label: 'Smell',
+            guidance:
+                'Notice two things you can smell, or imagine two familiar scents.',
+            durationSeconds: 25,
+          ),
+          ResetSessionStep(
+            label: 'Taste',
+            guidance: 'Notice one taste, or imagine a familiar taste.',
+            durationSeconds: 15,
+          ),
+          ResetSessionStep(
+            label: 'Return',
+            guidance: 'Notice the room around you again.',
+            durationSeconds: 10,
+          ),
+        ],
+        simplifiedSteps: [
+          ResetSessionStep(
+            label: 'See',
+            guidance: 'Notice three things you can see.',
+            durationSeconds: 20,
+          ),
+          ResetSessionStep(
+            label: 'Feel',
+            guidance: 'Notice two things you can physically feel.',
+            durationSeconds: 20,
+          ),
+          ResetSessionStep(
+            label: 'Hear',
+            guidance: 'Notice one sound you can hear.',
+            durationSeconds: 20,
+          ),
+        ],
+      ),
+    ),
+    ResetContent(
       id: '90s-calm-down',
       title: '90s Calm Down',
       durationSeconds: 90,
