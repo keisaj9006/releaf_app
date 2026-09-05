@@ -1123,6 +1123,7 @@ ReleafArtworkVariant _categoryArtwork(QuickResetCategory category) {
 ReleafArtworkVariant _sessionArtwork(ResetContent session) {
   return switch (session.id) {
     '60s-grounding' => ReleafArtworkVariant.grounding,
+    'back-to-room' => ReleafArtworkVariant.noBreath,
     '90s-calm-down' => ReleafArtworkVariant.calm,
     'longer-exhale' => ReleafArtworkVariant.breath,
     '5min-focus' => ReleafArtworkVariant.focus,
@@ -1133,6 +1134,7 @@ ReleafArtworkVariant _sessionArtwork(ResetContent session) {
 String _sessionPurpose(ResetContent session) {
   return switch (session.id) {
     '60s-grounding' => 'Return attention to your body.',
+    'back-to-room' => 'Ground attention through what you can see, feel and hear.',
     '90s-calm-down' => 'Slow the pace and soften tension.',
     'longer-exhale' => 'Settle into a slightly longer, gentler exhale.',
     '5min-focus' => 'Anchor attention through your senses.',
