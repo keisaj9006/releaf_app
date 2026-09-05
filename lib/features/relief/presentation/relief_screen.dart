@@ -461,10 +461,8 @@ class _ReliefScreenState extends ConsumerState<ReliefScreen> {
                   ),
                 ),
               ),
-                ],
-              ),
-            );
-          },
+            ],
+          ),
         ),
       ),
     );
