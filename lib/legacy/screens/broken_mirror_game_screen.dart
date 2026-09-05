@@ -6,6 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show HapticFeedback;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../features/progress/data/leaves_repository.dart';
+import '../../theme/app_theme.dart';
+import '../../theme/releaf_design_tokens.dart';
+import '../../theme/widgets/releaf_brain_artwork.dart';
 
 class BrokenMirrorGameScreen extends ConsumerStatefulWidget {
   const BrokenMirrorGameScreen({
@@ -218,99 +221,156 @@ class _BrokenMirrorGameScreenState extends ConsumerState<BrokenMirrorGameScreen>
 
   @override
   Widget build(BuildContext context) {
+    final embedded = widget.onFinish != null;
     final leaves = ref.watch(leavesNotifierProvider).totalLeaves;
+    const accent = Color(0xFFD490B9);
 
-    return LayoutBuilder(
-      builder: (_, constraints) {
-        _boardSize = _resolveBoardSize(constraints);
+    return Theme(
+      data: AppTheme.premiumDark(),
+      child: LayoutBuilder(
+        builder: (_, constraints) {
+          _boardSize = _resolveBoardSize(constraints);
 
-        return Scaffold(
-          backgroundColor: const Color(0xFFEBF4EE),
-          appBar: AppBar(
-            backgroundColor: Colors.white,
-            elevation: 0.5,
-            title: Row(
-              children: [
-                const Text(
-                  "Broken Mirror",
-                  style: TextStyle(color: Colors.black),
+          return Scaffold(
+            backgroundColor: ReleafColors.background,
+            appBar: AppBar(
+              toolbarHeight: 72,
+              backgroundColor: const Color(0xE90E0C12),
+              surfaceTintColor: Colors.transparent,
+              titleSpacing: 20,
+              title: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'VISUAL RECONSTRUCTION',
+                    style: ReleafTypography.eyebrow.copyWith(
+                      color: accent,
+                      letterSpacing: 1.7,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'Broken Mirror',
+                    style: ReleafTypography.cardTitle.copyWith(fontSize: 17),
+                  ),
+                ],
+              ),
+              actions: [
+                if (!embedded) _LeavesPill(total: leaves),
+                if (widget.enableTimer) ...[
+                  const SizedBox(width: 6),
+                  _TimerPill(secondsLeft: _timeLeft),
+                ],
+                IconButton(
+                  tooltip: 'Exit Broken Mirror',
+                  icon: const Icon(Icons.close_rounded),
+                  onPressed: () => Navigator.of(context).maybePop(),
                 ),
-                const SizedBox(width: 10),
-
-                // ✅ spójny licznik liści
-                _LeavesPill(total: leaves),
-
-                const Spacer(),
-                if (widget.enableTimer) _TimerPill(secondsLeft: _timeLeft),
               ],
             ),
-            iconTheme: const IconThemeData(color: Colors.black),
-            actions: [
-              // P0 “minimize” = na razie po prostu wyjdź (resume zrobimy później)
-              IconButton(
-                tooltip: 'Minimize',
-                icon: const Icon(Icons.horizontal_rule),
-                onPressed: () => Navigator.of(context).maybePop(),
-              ),
-              IconButton(
-                tooltip: 'Close',
-                icon: const Icon(Icons.close),
-                onPressed: () => Navigator.of(context).maybePop(),
-              ),
-            ],
-          ),
-          body: Center(
-            child: Column(
+            body: Stack(
               children: [
-                const SizedBox(height: 12),
-                _BoardFrame(
-                  child: SizedBox(
-                    key: _boardKey,
-                    width: _boardSize.width,
-                    height: _boardSize.height,
-                    child: Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        // target board
-                        Positioned.fill(
-                          child: CustomPaint(
-                            painter: _TargetPainter(_shards),
-                          ),
-                        ),
-
-                        // draggable shards
-                        for (final shard in _shards)
-                          _DraggableShard(
-                            shard: shard,
-                            pulse: _pulse,
-                            onUpdate: (updated) {
-                              setState(() {
-                                final idx =
-                                _shards.indexWhere((s) => s.id == updated.id);
-                                _shards[idx] = updated;
-                              });
-                              _checkWin();
-                            },
-                          ),
-                      ],
+                const Positioned.fill(
+                  child: ReleafBrainArtwork(
+                    variant: ReleafBrainArtworkVariant.brokenMirror,
+                    intensity: 0.36,
+                  ),
+                ),
+                const Positioned.fill(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Color(0xB80E0C12),
+                          Color(0xEC0B0D0E),
+                          ReleafColors.background,
+                        ],
+                        stops: [0, 0.48, 1],
+                      ),
                     ),
                   ),
                 ),
-                const SizedBox(height: 16),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Text(
-                    widget.enableTimer
-                        ? "Place all shards before time runs out."
-                        : "Place all shards to fix the mirror.",
-                    style: const TextStyle(color: Colors.black87),
+                SafeArea(
+                  top: false,
+                  child: Center(
+                    child: SingleChildScrollView(
+                      physics: const BouncingScrollPhysics(),
+                      padding: const EdgeInsets.fromLTRB(
+                        ReleafSpacing.screen,
+                        ReleafSpacing.md,
+                        ReleafSpacing.screen,
+                        ReleafSpacing.xl,
+                      ),
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 680),
+                        child: Column(
+                          children: [
+                            _BoardFrame(
+                              accent: accent,
+                              child: SizedBox(
+                                key: _boardKey,
+                                width: _boardSize.width,
+                                height: _boardSize.height,
+                                child: Stack(
+                                  clipBehavior: Clip.none,
+                                  children: [
+                                    Positioned.fill(
+                                      child: CustomPaint(
+                                        painter: _TargetPainter(_shards),
+                                      ),
+                                    ),
+                                    for (final shard in _shards)
+                                      _DraggableShard(
+                                        shard: shard,
+                                        pulse: _pulse,
+                                        boardSize: _boardSize,
+                                        onUpdate: (updated) {
+                                          setState(() {
+                                            final idx = _shards.indexWhere(
+                                              (s) => s.id == updated.id,
+                                            );
+                                            _shards[idx] = updated;
+                                          });
+                                          _checkWin();
+                                        },
+                                      ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: ReleafSpacing.lg),
+                            Text(
+                              widget.enableTimer
+                                  ? 'Place every fragment before time runs out.'
+                                  : 'Drag each fragment into its matching place.',
+                              textAlign: TextAlign.center,
+                              style: ReleafTypography.body.copyWith(
+                                color: ReleafColors.textPrimary.withValues(
+                                  alpha: 0.82,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: ReleafSpacing.xs),
+                            Text(
+                              'Fragments lock into place when you are close enough.',
+                              textAlign: TextAlign.center,
+                              style: ReleafTypography.meta.copyWith(
+                                color: ReleafColors.textMuted,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ],
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }
@@ -324,23 +384,25 @@ class _LeavesPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      margin: const EdgeInsets.symmetric(vertical: 12),
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: const Color(0xFFEFF6EF),
-        borderRadius: BorderRadius.circular(999),
+        color: ReleafColors.sage.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(ReleafRadii.pill),
         border: Border.all(
-          color: const Color(0xFF1E4D2B).withValues(alpha: 0.15),
+          color: ReleafColors.sage.withValues(alpha: 0.18),
         ),
       ),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.eco, size: 16, color: Color(0xFF1E4D2B)),
-          const SizedBox(width: 6),
+          const Icon(Icons.eco_outlined, size: 15, color: ReleafColors.sage),
+          const SizedBox(width: 5),
           Text(
-            "$total",
-            style: const TextStyle(
+            '${total}',
+            style: ReleafTypography.meta.copyWith(
+              color: ReleafColors.textPrimary,
               fontWeight: FontWeight.w700,
-              color: Color(0xFF1E4D2B),
             ),
           ),
         ],
@@ -355,16 +417,24 @@ class _TimerPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final urgent = secondsLeft <= 10;
+    final accent =
+        urgent ? const Color(0xFFE1A184) : const Color(0xFFD490B9);
+
     return Container(
+      margin: const EdgeInsets.symmetric(vertical: 12),
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFF3F3),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: Colors.black.withValues(alpha: 0.08)),
+        color: accent.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(ReleafRadii.pill),
+        border: Border.all(color: accent.withValues(alpha: 0.20)),
       ),
       child: Text(
-        "${secondsLeft}s",
-        style: const TextStyle(fontWeight: FontWeight.w700),
+        '${secondsLeft}s',
+        style: ReleafTypography.meta.copyWith(
+          color: accent,
+          fontWeight: FontWeight.w700,
+        ),
       ),
     );
   }
@@ -372,20 +442,26 @@ class _TimerPill extends StatelessWidget {
 
 class _BoardFrame extends StatelessWidget {
   final Widget child;
-  const _BoardFrame({required this.child});
+  final Color accent;
+
+  const _BoardFrame({
+    required this.child,
+    required this.accent,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(22),
+        color: const Color(0xF0151319),
+        borderRadius: BorderRadius.circular(ReleafRadii.extraLarge),
+        border: Border.all(color: accent.withValues(alpha: 0.22)),
         boxShadow: [
           BoxShadow(
-            blurRadius: 25,
-            offset: const Offset(0, 10),
-            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 32,
+            offset: const Offset(0, 14),
+            color: accent.withValues(alpha: 0.08),
           ),
         ],
       ),
@@ -431,11 +507,6 @@ class _TargetPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2
-      ..color = Colors.black.withValues(alpha: 0.08);
-
     for (final s in shards) {
       final path = Path();
       final first = s.polygon.first;
@@ -444,7 +515,25 @@ class _TargetPainter extends CustomPainter {
         path.lineTo(p.dx * size.width, p.dy * size.height);
       }
       path.close();
-      canvas.drawPath(path, paint);
+
+      if (s.placed) {
+        canvas.drawPath(
+          path,
+          Paint()
+            ..style = PaintingStyle.fill
+            ..color = const Color(0xFFD490B9).withValues(alpha: 0.18),
+        );
+      }
+
+      canvas.drawPath(
+        path,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = s.placed ? 2.4 : 1.4
+          ..color = const Color(0xFFD490B9).withValues(
+            alpha: s.placed ? 0.62 : 0.16,
+          ),
+      );
     }
   }
 
@@ -456,11 +545,13 @@ class _DraggableShard extends StatelessWidget {
   const _DraggableShard({
     required this.shard,
     required this.pulse,
+    required this.boardSize,
     required this.onUpdate,
   });
 
   final _Shard shard;
   final AnimationController pulse;
+  final Size boardSize;
   final void Function(_Shard) onUpdate;
 
   @override
@@ -475,8 +566,25 @@ class _DraggableShard extends StatelessWidget {
           onUpdate(shard.copyWith(position: shard.position + d.delta));
         },
         onPanEnd: (_) {
-          // real snap robimy porządnie w kolejnej iteracji — tu minimalnie:
-          // zostawiamy jak było (nie psujemy Twojej logiki).
+          const shardSize = 120.0;
+          const half = shardSize / 2;
+          final target = Offset(
+            shard.targetCenter.dx * boardSize.width,
+            shard.targetCenter.dy * boardSize.height,
+          );
+          final currentCenter = shard.position + const Offset(half, half);
+          final snapDistance =
+              math.max(38.0, boardSize.shortestSide * 0.12);
+
+          if ((currentCenter - target).distance <= snapDistance) {
+            HapticFeedback.selectionClick();
+            onUpdate(
+              shard.copyWith(
+                position: target - const Offset(half, half),
+                placed: true,
+              ),
+            );
+          }
         },
         child: ScaleTransition(
           scale: Tween<double>(begin: 0.98, end: 1.02).animate(
@@ -500,12 +608,12 @@ class _ShardPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
       ..style = PaintingStyle.fill
-      ..color = const Color(0xFF1E4D2B).withValues(alpha: 0.12);
+      ..color = const Color(0xFFD490B9).withValues(alpha: 0.16);
 
     final border = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2
-      ..color = const Color(0xFF1E4D2B).withValues(alpha: 0.35);
+      ..color = const Color(0xFFD490B9).withValues(alpha: 0.54);
 
     final path = Path();
     final first = shard.polygon.first;
