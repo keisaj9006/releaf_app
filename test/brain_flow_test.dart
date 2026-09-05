@@ -313,6 +313,72 @@ void main() {
     expect(find.text('IS THE NUMBER ODD?'), findsOneWidget);
   });
 
+  testWidgets('New Brain difficulty levels materially change the task', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SequenceEchoScreen(onFinish: (_) {}),
+      ),
+    );
+    await tester.pump();
+
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('sequence-echo-length')),
+        matching: find.text('3'),
+      ),
+      findsOneWidget,
+    );
+    await tester.tap(find.byKey(const Key('brain-difficulty-hard')));
+    await tester.pump();
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('sequence-echo-length')),
+        matching: find.text('5'),
+      ),
+      findsOneWidget,
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ColorConflictScreen(onFinish: (_) {}),
+      ),
+    );
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('brain-difficulty-hard')));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('color-conflict-start')));
+    await tester.pump();
+    expect(find.byKey(const Key('color-conflict-answer-4')), findsOneWidget);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: PatternLogicScreen(onFinish: (_) {}),
+      ),
+    );
+    await tester.pump();
+    expect(find.byKey(const Key('pattern-logic-answer-3')), findsNothing);
+    await tester.tap(find.byKey(const Key('brain-difficulty-hard')));
+    await tester.pump();
+    expect(find.byKey(const Key('pattern-logic-answer-4')), findsOneWidget);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SignalScanScreen(onFinish: (_) {}),
+      ),
+    );
+    await tester.pump();
+    expect(find.byKey(const Key('signal-scan-cell-15')), findsOneWidget);
+    expect(find.byKey(const Key('signal-scan-cell-16')), findsNothing);
+    await tester.tap(find.byKey(const Key('brain-difficulty-hard')));
+    await tester.pump();
+    expect(find.byKey(const Key('signal-scan-cell-35')), findsOneWidget);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
+  });
+
   testWidgets('Premium Brain game shells remain usable on a phone', (
     WidgetTester tester,
   ) async {

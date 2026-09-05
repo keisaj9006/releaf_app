@@ -245,9 +245,12 @@ class _SequenceEchoScreenState extends State<SequenceEchoScreen> {
                               value: '$currentRound/$_totalRounds',
                             ),
                             const SizedBox(width: ReleafSpacing.xs),
-                            _SequenceStat(
-                              label: 'LENGTH',
-                              value: '$_sequenceLength',
+                            KeyedSubtree(
+                              key: const Key('sequence-echo-length'),
+                              child: _SequenceStat(
+                                label: 'LENGTH',
+                                value: '$_sequenceLength',
+                              ),
                             ),
                             const SizedBox(width: ReleafSpacing.xs),
                             _SequenceStat(
