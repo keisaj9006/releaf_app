@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../domain/models/breath_pattern.dart';
 import '../domain/models/reset_content.dart';
+import '../domain/models/reset_session_program.dart';
 
 final resetCatalogProvider = Provider<ResetCatalog>((ref) {
   return const ResetCatalog();
@@ -27,6 +29,38 @@ class ResetCatalog {
         'Listen for three sounds without trying to change them.',
         'Continue at your own pace. You can stop at any time.',
       ],
+      program: ResetSessionProgram.guided(
+        steps: [
+          ResetSessionStep(
+            label: 'Arrive',
+            guidance:
+                'Place both feet on the floor and notice the support beneath you.',
+            durationSeconds: 24,
+          ),
+          ResetSessionStep(
+            label: 'Look',
+            guidance: 'Look around and name five things you can see.',
+            durationSeconds: 24,
+          ),
+          ResetSessionStep(
+            label: 'Feel',
+            guidance:
+                'Notice four things you can physically feel around you.',
+            durationSeconds: 24,
+          ),
+          ResetSessionStep(
+            label: 'Listen',
+            guidance: 'Listen for three sounds without trying to change them.',
+            durationSeconds: 24,
+          ),
+          ResetSessionStep(
+            label: 'Return',
+            guidance:
+                'Continue at your own pace. You can stop at any time.',
+            durationSeconds: 24,
+          ),
+        ],
+      ),
     ),
     ResetContent(
       id: '60s-grounding',
@@ -42,6 +76,32 @@ class ResetCatalog {
         'Notice the sensations in your body and the contact with the chair.',
         'Let thoughts come and go without judgement.',
       ],
+      program: ResetSessionProgram.guided(
+        steps: [
+          ResetSessionStep(
+            label: 'Arrive',
+            guidance: 'Sit comfortably and place your feet on the ground.',
+            durationSeconds: 15,
+          ),
+          ResetSessionStep(
+            label: 'Feel',
+            guidance:
+                'Notice three physical sensations where your body meets the floor or chair.',
+            durationSeconds: 15,
+          ),
+          ResetSessionStep(
+            label: 'Notice',
+            guidance:
+                'Notice the sensations in your body and the contact with the chair.',
+            durationSeconds: 15,
+          ),
+          ResetSessionStep(
+            label: 'Release',
+            guidance: 'Let thoughts come and go without judgement.',
+            durationSeconds: 15,
+          ),
+        ],
+      ),
     ),
     ResetContent(
       id: '90s-calm-down',
@@ -52,11 +112,37 @@ class ResetCatalog {
       modality: ResetModality.breathing,
       accessTier: ResetAccessTier.free,
       instructions: [
-        'Close your eyes if you feel comfortable.',
-        'Breathe deeply, counting slowly to four on each inhale and exhale.',
-        'Relax your shoulders and unclench your jaw.',
-        'Imagine a peaceful place and allow your body to soften.',
+        'Let your breathing stay comfortable.',
+        'Follow a gentle four-count in and four-count out.',
+        'Keep the breath easy rather than making it bigger.',
+        'Let go of the count and return to your natural breathing.',
       ],
+      program: ResetSessionProgram.breathing(
+        breathPattern: BreathPattern(
+          inhaleSeconds: 4,
+          exhaleSeconds: 4,
+          label: 'Gentle 4–4',
+        ),
+        steps: [
+          ResetSessionStep(
+            label: 'Settle',
+            guidance:
+                'Let your breathing stay comfortable. There is no need to take a bigger breath.',
+            durationSeconds: 15,
+          ),
+          ResetSessionStep(
+            label: 'Rhythm',
+            guidance: 'Follow the rhythm. Keep the breath gentle and easy.',
+            durationSeconds: 60,
+          ),
+          ResetSessionStep(
+            label: 'Release',
+            guidance:
+                'Let go of the count and return to your natural breathing.',
+            durationSeconds: 15,
+          ),
+        ],
+      ),
     ),
     ResetContent(
       id: '3min-breath',
@@ -72,6 +158,33 @@ class ResetCatalog {
         'Exhale slowly through your mouth for 4 seconds.',
         'Pause for 4 seconds, then repeat.',
       ],
+      program: ResetSessionProgram.breathing(
+        breathPattern: BreathPattern(
+          inhaleSeconds: 4,
+          holdAfterInhaleSeconds: 4,
+          exhaleSeconds: 4,
+          holdAfterExhaleSeconds: 4,
+          label: 'Box 4–4–4–4',
+        ),
+        steps: [
+          ResetSessionStep(
+            label: 'Settle',
+            guidance: 'Let the breath stay comfortable as you find the rhythm.',
+            durationSeconds: 20,
+          ),
+          ResetSessionStep(
+            label: 'Rhythm',
+            guidance:
+                'Follow the four-part rhythm without forcing any phase.',
+            durationSeconds: 140,
+          ),
+          ResetSessionStep(
+            label: 'Release',
+            guidance: 'Let go of the count and return to a natural rhythm.',
+            durationSeconds: 20,
+          ),
+        ],
+      ),
     ),
     ResetContent(
       id: '5min-focus',
@@ -89,6 +202,35 @@ class ResetCatalog {
         'Name two things you can smell.',
         'Name one thing you can taste.',
       ],
+      program: ResetSessionProgram.guided(
+        steps: [
+          ResetSessionStep(
+            label: 'See',
+            guidance: 'Name five things you can see around you.',
+            durationSeconds: 60,
+          ),
+          ResetSessionStep(
+            label: 'Touch',
+            guidance: 'Name four things you can touch.',
+            durationSeconds: 60,
+          ),
+          ResetSessionStep(
+            label: 'Hear',
+            guidance: 'Name three things you can hear.',
+            durationSeconds: 60,
+          ),
+          ResetSessionStep(
+            label: 'Smell',
+            guidance: 'Name two things you can smell.',
+            durationSeconds: 60,
+          ),
+          ResetSessionStep(
+            label: 'Taste',
+            guidance: 'Name one thing you can taste.',
+            durationSeconds: 60,
+          ),
+        ],
+      ),
     ),
   ];
 
