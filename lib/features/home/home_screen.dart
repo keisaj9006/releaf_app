@@ -75,7 +75,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               const SizedBox(height: ReleafSpacing.xxl),
                               const ReleafSectionHeading(
                                 title: 'Right Now',
-                                description: 'What would help most in this moment?',
+                                description:
+                                    'Choose what would help. Releaf will narrow it to one next step.',
                               ),
                               const SizedBox(height: ReleafSpacing.md),
                               _NeedGrid(
@@ -288,163 +289,130 @@ class _NeedGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final twoColumns = constraints.maxWidth >= 520;
-        final gap = ReleafSpacing.sm;
-        final width = twoColumns
-            ? (constraints.maxWidth - gap) / 2
-            : constraints.maxWidth;
-
-        return Wrap(
-          spacing: gap,
-          runSpacing: gap,
-          children: [
-            _NeedCard(
-              width: width,
-              need: _HomeNeed.calm,
-              icon: Icons.waves_rounded,
-              title: 'Calm down',
-              subtitle: 'Ground or slow the pace.',
-              selected: selectedNeed == _HomeNeed.calm,
-              onPressed: onSelected,
-            ),
-            _NeedCard(
-              width: width,
-              need: _HomeNeed.clearMind,
-              icon: Icons.blur_on_rounded,
-              title: 'Clear my head',
-              subtitle: 'Step back from looping thoughts.',
-              selected: selectedNeed == _HomeNeed.clearMind,
-              onPressed: onSelected,
-            ),
-            _NeedCard(
-              width: width,
-              need: _HomeNeed.focus,
-              icon: Icons.center_focus_strong_rounded,
-              title: 'Focus',
-              subtitle: 'Shift into deliberate attention.',
-              selected: selectedNeed == _HomeNeed.focus,
-              onPressed: onSelected,
-            ),
-            _NeedCard(
-              width: width,
-              need: _HomeNeed.windDown,
-              icon: Icons.bedtime_outlined,
-              title: 'Wind down',
-              subtitle: 'Make the evening quieter.',
-              selected: selectedNeed == _HomeNeed.windDown,
-              onPressed: onSelected,
-            ),
-          ],
-        );
-      },
+    return Semantics(
+      container: true,
+      label: 'Choose what you need right now.',
+      child: Wrap(
+        spacing: ReleafSpacing.xs,
+        runSpacing: ReleafSpacing.xs,
+        children: [
+          _NeedChip(
+            need: _HomeNeed.calm,
+            icon: Icons.waves_rounded,
+            title: 'Calm down',
+            selected: selectedNeed == _HomeNeed.calm,
+            onPressed: onSelected,
+          ),
+          _NeedChip(
+            need: _HomeNeed.clearMind,
+            icon: Icons.blur_on_rounded,
+            title: 'Clear my head',
+            selected: selectedNeed == _HomeNeed.clearMind,
+            onPressed: onSelected,
+          ),
+          _NeedChip(
+            need: _HomeNeed.focus,
+            icon: Icons.center_focus_strong_rounded,
+            title: 'Focus',
+            selected: selectedNeed == _HomeNeed.focus,
+            onPressed: onSelected,
+          ),
+          _NeedChip(
+            need: _HomeNeed.windDown,
+            icon: Icons.bedtime_outlined,
+            title: 'Wind down',
+            selected: selectedNeed == _HomeNeed.windDown,
+            onPressed: onSelected,
+          ),
+        ],
+      ),
     );
   }
 }
 
-class _NeedCard extends StatelessWidget {
-  const _NeedCard({
-    required this.width,
+class _NeedChip extends StatelessWidget {
+  const _NeedChip({
     required this.need,
     required this.icon,
     required this.title,
-    required this.subtitle,
     required this.selected,
     required this.onPressed,
   });
 
-  final double width;
   final _HomeNeed need;
   final IconData icon;
   final String title;
-  final String subtitle;
   final bool selected;
   final ValueChanged<_HomeNeed> onPressed;
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: width,
-      child: Semantics(
-        button: true,
-        selected: selected,
-        label: '$title. $subtitle',
-        child: AnimatedContainer(
-          duration: ReleafMotion.standard,
-          curve: ReleafMotion.entranceCurve,
-          decoration: BoxDecoration(
-            color: selected
-                ? ReleafColors.sage.withValues(alpha: 0.10)
-                : ReleafColors.surfaceSoft.withValues(alpha: 0.86),
-            borderRadius: BorderRadius.circular(ReleafRadii.large),
-            border: Border.all(
-              color: selected
-                  ? ReleafColors.sage.withValues(alpha: 0.48)
-                  : ReleafColors.borderSoft,
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: title,
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(ReleafRadii.pill),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(ReleafRadii.pill),
+          onTap: () => onPressed(need),
+          child: AnimatedContainer(
+            duration: ReleafMotion.standard,
+            curve: ReleafMotion.entranceCurve,
+            padding: const EdgeInsets.symmetric(
+              horizontal: 14,
+              vertical: 11,
             ),
-            boxShadow: selected
-                ? const [
-                    BoxShadow(
-                      color: ReleafColors.glowSage,
-                      blurRadius: 24,
-                      offset: Offset(0, 10),
-                    ),
-                  ]
-                : null,
-          ),
-          child: Material(
-            color: Colors.transparent,
-            borderRadius: BorderRadius.circular(ReleafRadii.large),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(ReleafRadii.large),
-              onTap: () => onPressed(need),
-              child: Padding(
-                padding: const EdgeInsets.all(ReleafSpacing.md),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 44,
-                      height: 44,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: ReleafColors.sage.withValues(alpha: 0.09),
-                        border: Border.all(
-                          color: ReleafColors.sage.withValues(alpha: 0.20),
-                        ),
-                      ),
-                      alignment: Alignment.center,
-                      child: Icon(
-                        icon,
-                        color: ReleafColors.sage,
-                        size: 21,
-                      ),
-                    ),
-                    const SizedBox(width: ReleafSpacing.md),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(title, style: ReleafTypography.cardTitle),
-                          const SizedBox(height: 3),
-                          Text(
-                            subtitle,
-                            style: ReleafTypography.meta.copyWith(
-                              color: ReleafColors.textSecondary,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    if (selected)
-                      const Icon(
-                        Icons.check_circle_rounded,
-                        color: ReleafColors.sage,
-                        size: 20,
-                      ),
-                  ],
-                ),
+            decoration: BoxDecoration(
+              color: selected
+                  ? ReleafColors.sage.withValues(alpha: 0.13)
+                  : ReleafColors.surfaceSoft.withValues(alpha: 0.72),
+              borderRadius: BorderRadius.circular(ReleafRadii.pill),
+              border: Border.all(
+                color: selected
+                    ? ReleafColors.sage.withValues(alpha: 0.46)
+                    : ReleafColors.borderSoft,
               ),
+              boxShadow: selected
+                  ? const [
+                      BoxShadow(
+                        color: ReleafColors.glowSage,
+                        blurRadius: 20,
+                        spreadRadius: 1,
+                      ),
+                    ]
+                  : null,
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  icon,
+                  size: 17,
+                  color: selected
+                      ? ReleafColors.textPrimary
+                      : ReleafColors.sage,
+                ),
+                const SizedBox(width: 7),
+                Text(
+                  title,
+                  style: ReleafTypography.meta.copyWith(
+                    color: selected
+                        ? ReleafColors.textPrimary
+                        : ReleafColors.textSecondary,
+                    fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
+                  ),
+                ),
+                if (selected) ...[
+                  const SizedBox(width: 7),
+                  const Icon(
+                    Icons.check_rounded,
+                    size: 15,
+                    color: ReleafColors.sage,
+                  ),
+                ],
+              ],
             ),
           ),
         ),
