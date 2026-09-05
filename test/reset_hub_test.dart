@@ -186,10 +186,11 @@ void main() {
     final breathNode = tester.getSemantics(
       find.byKey(const Key('reset-category-breath')),
     );
-    expect(breathNode.hasFlag(SemanticsFlag.isButton), isTrue);
-    expect(breathNode.hasAction(SemanticsAction.tap), isTrue);
+    final breathData = breathNode.getSemanticsData();
+    expect(breathData.flagsCollection.isButton, isTrue);
+    expect(breathData.hasAction(SemanticsAction.tap), isTrue);
     expect(
-      breathNode.label,
+      breathData.label,
       contains('Use your breath to shift your state.'),
     );
 
@@ -198,8 +199,9 @@ void main() {
     final sessionNode = tester.getSemantics(
       find.byKey(const Key('reset-session-60s-grounding')),
     );
-    expect(sessionNode.hasFlag(SemanticsFlag.isButton), isTrue);
-    expect(sessionNode.label, contains('Free, starts session.'));
+    final sessionData = sessionNode.getSemanticsData();
+    expect(sessionData.flagsCollection.isButton, isTrue);
+    expect(sessionData.label, contains('Free, starts session.'));
 
     await tester.ensureVisible(
       find.byKey(const Key('reset-category-carousel')),
@@ -216,8 +218,9 @@ void main() {
     final unavailableNode = tester.getSemantics(
       find.byKey(const Key('reset-category-situational')),
     );
-    expect(unavailableNode.hasAction(SemanticsAction.tap), isFalse);
-    expect(unavailableNode.label, contains('Not available yet.'));
+    final unavailableData = unavailableNode.getSemanticsData();
+    expect(unavailableData.hasAction(SemanticsAction.tap), isFalse);
+    expect(unavailableData.label, contains('Not available yet.'));
   });
 
   testWidgets('Reset free and Premium cards preserve access behavior', (
