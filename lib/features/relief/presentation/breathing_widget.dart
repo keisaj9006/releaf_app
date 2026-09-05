@@ -7,13 +7,20 @@ import 'package:go_router/go_router.dart';
 
 import '../data/reset_catalog.dart';
 import '../domain/models/reset_content.dart';
+import '../domain/models/reset_launch_options.dart';
 import '../../progress/data/leaves_repository.dart';
 
 enum SessionPhase { running, feedback }
 
 class BreathingWidget extends ConsumerStatefulWidget {
   final String sessionId;
-  const BreathingWidget({super.key, required this.sessionId});
+  final ResetLaunchOptions launchOptions;
+
+  const BreathingWidget({
+    super.key,
+    required this.sessionId,
+    this.launchOptions = const ResetLaunchOptions(),
+  });
 
   @override
   ConsumerState<BreathingWidget> createState() => _BreathingWidgetState();
@@ -157,31 +164,52 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
           ),
         ),
         const Spacer(flex: 2),
-        Text(
-          timeString,
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            fontSize: 64,
-            fontWeight: FontWeight.w300,
-            color: Color(0xFFF0F2F5),
-            letterSpacing: -1.5,
-          ),
-        ),
-        const Spacer(flex: 3),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 40),
-          child: Text(
-            _session!.instructions.isNotEmpty
-                ? _session!.instructions.first
-                : 'Settle in.',
+        if (widget.launchOptions.showSessionTimer)
+          Text(
+            timeString,
+            key: const Key('reset-active-session-timer'),
             textAlign: TextAlign.center,
             style: const TextStyle(
-              fontSize: 18,
-              color: Color(0xFFA1A6B4),
-              height: 1.4,
+              fontSize: 64,
+              fontWeight: FontWeight.w300,
+              color: Color(0xFFF0F2F5),
+              letterSpacing: -1.5,
+            ),
+          )
+        else
+          Text(
+            _session!.title,
+            key: const Key('reset-active-session-title'),
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.w500,
+              color: Color(0xFFF0F2F5),
+              letterSpacing: -0.5,
             ),
           ),
-        ),
+        const Spacer(flex: 3),
+        if (widget.launchOptions.showGuidanceText)
+          Padding(
+            key: const Key('reset-active-session-guidance'),
+            padding: const EdgeInsets.symmetric(horizontal: 40),
+            child: Text(
+              _session!.instructions.isNotEmpty
+                  ? _session!.instructions.first
+                  : 'Settle in.',
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 18,
+                color: Color(0xFFA1A6B4),
+                height: 1.4,
+              ),
+            ),
+          )
+        else
+          const SizedBox(
+            key: Key('reset-active-session-guidance-hidden'),
+            height: 1,
+          ),
         const Spacer(flex: 2),
       ],
     );
