@@ -36,7 +36,9 @@ class _ReleafBodyReleaseVisualState extends State<ReleafBodyReleaseVisual>
 
   bool get _isTensionPhase {
     final label = widget.phaseLabel.toLowerCase();
-    return label.contains('shoulders') || label.contains('again');
+    return label.contains('shoulders') ||
+        label.contains('again') ||
+        label.contains('press');
   }
 
   @override
