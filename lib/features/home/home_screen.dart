@@ -1043,16 +1043,14 @@ class _ProgressPill extends StatelessWidget {
   const _ProgressPill({
     required this.label,
     required this.done,
-    this.onPressed,
   });
 
   final String label;
   final bool done;
-  final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {
-    final content = Container(
+    return Container(
       padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(ReleafRadii.pill),
@@ -1084,18 +1082,6 @@ class _ProgressPill extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-
-    if (onPressed == null) return content;
-
-    return Semantics(
-      button: true,
-      label: 'Open $label',
-      child: InkWell(
-        onTap: onPressed,
-        borderRadius: BorderRadius.circular(ReleafRadii.pill),
-        child: content,
       ),
     );
   }
