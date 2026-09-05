@@ -400,10 +400,11 @@ class _MeditationVisual extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final size = math.min(
-          maxSize,
-          math.min(constraints.maxWidth, constraints.maxHeight),
-        ).clamp(150.0, maxSize).toDouble();
+        final available = math.min(
+          constraints.maxWidth,
+          constraints.maxHeight,
+        );
+        final size = math.min(maxSize, available).clamp(0.0, maxSize).toDouble();
 
         return SizedBox(
           key: const Key('meditation-living-form'),
