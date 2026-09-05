@@ -39,6 +39,7 @@ class _ReliefScreenState extends ConsumerState<ReliefScreen> {
   PageController? _sessionController;
   PageController? _deepController;
   double? _configuredWidth;
+  QuickResetCategory? _selectedCategory;
 
   PageController get _categories => _categoryController!;
   PageController get _sessions => _sessionController!;
@@ -188,14 +189,11 @@ class _ReliefScreenState extends ConsumerState<ReliefScreen> {
     }
   }
 
-  Future<void> _focusCategory(
-    QuickResetCategory category,
-    List<ResetContent> quickSessions,
-  ) async {
-    final targetIndex = quickSessions.indexWhere(
-      (session) => session.quickCategory == category,
-    );
-    if (targetIndex < 0) return;
+  Future<void> _focusCategory(QuickResetCategory category) async {
+    if (_selectedCategory != category) {
+      setState(() => _selectedCategory = category);
+      await WidgetsBinding.instance.endOfFrame;
+    }
 
     final reducedMotion = MediaQuery.of(context).disableAnimations;
     final sectionContext = _availableNowKey.currentContext;
@@ -209,14 +207,15 @@ class _ReliefScreenState extends ConsumerState<ReliefScreen> {
     }
 
     if (!mounted || !_sessions.hasClients) return;
-    if (reducedMotion) {
-      _sessions.jumpToPage(targetIndex);
-    } else {
-      await _sessions.animateToPage(
-        targetIndex,
-        duration: ReleafMotion.standard,
-        curve: ReleafMotion.entranceCurve,
-      );
+    _sessions.jumpToPage(0);
+  }
+
+  Future<void> _clearCategoryFilter() async {
+    if (_selectedCategory == null) return;
+    setState(() => _selectedCategory = null);
+    await WidgetsBinding.instance.endOfFrame;
+    if (mounted && _sessions.hasClients) {
+      _sessions.jumpToPage(0);
     }
   }
 
@@ -224,9 +223,14 @@ class _ReliefScreenState extends ConsumerState<ReliefScreen> {
   Widget build(BuildContext context) {
     final catalog = ref.watch(resetCatalogProvider);
     final regularContent = catalog.getRegularContent();
-    final quickSessions = regularContent
+    final allQuickSessions = regularContent
         .where((session) => session.level == ResetLevel.quick)
         .toList();
+    final quickSessions = _selectedCategory == null
+        ? allQuickSessions
+        : allQuickSessions
+            .where((session) => session.quickCategory == _selectedCategory)
+            .toList();
     final deepSessions = regularContent
         .where((session) => session.level == ResetLevel.deep)
         .toList();
@@ -301,7 +305,7 @@ class _ReliefScreenState extends ConsumerState<ReliefScreen> {
                                 itemCount: _categoryOrder.length,
                                 itemBuilder: (context, index) {
                                   final category = _categoryOrder[index];
-                                  final count = quickSessions
+                                  final count = allQuickSessions
                                       .where(
                                         (session) =>
                                             session.quickCategory == category,
@@ -312,10 +316,7 @@ class _ReliefScreenState extends ConsumerState<ReliefScreen> {
                                     sessionCount: count,
                                     onPressed: count == 0
                                         ? null
-                                        : () => _focusCategory(
-                                            category,
-                                            quickSessions,
-                                          ),
+                                        : () => _focusCategory(category),
                                   );
                                 },
                               ),
@@ -329,12 +330,46 @@ class _ReliefScreenState extends ConsumerState<ReliefScreen> {
                               const SizedBox(height: ReleafSpacing.section),
                               _SectionPadding(
                                 key: _availableNowKey,
-                                child: const ReleafSectionHeading(
-                                  title: 'Available Now',
-                                  description:
-                                      'Small resets, ready when you are.',
+                                child: ReleafSectionHeading(
+                                  title: _selectedCategory == null
+                                      ? 'Available Now'
+                                      : _categoryLabel(_selectedCategory!),
+                                  description: _selectedCategory == null
+                                      ? 'Small resets, ready when you are.'
+                                      : _categoryDescription(
+                                          _selectedCategory!,
+                                        ),
                                 ),
                               ),
+                              if (_selectedCategory != null) ...[
+                                const SizedBox(height: ReleafSpacing.sm),
+                                _SectionPadding(
+                                  child: Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: ActionChip(
+                                      key: const Key(
+                                        'reset-clear-category-filter',
+                                      ),
+                                      avatar: const Icon(
+                                        Icons.close_rounded,
+                                        size: 15,
+                                      ),
+                                      label: const Text('Show all resets'),
+                                      onPressed: _clearCategoryFilter,
+                                      backgroundColor:
+                                          ReleafColors.surfaceSoft,
+                                      side: const BorderSide(
+                                        color: ReleafColors.borderSoft,
+                                      ),
+                                      labelStyle:
+                                          ReleafTypography.meta.copyWith(
+                                        color: ReleafColors.textPrimary,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
                               const SizedBox(height: ReleafSpacing.lg),
                               _EditorialRail(
                                 semanticsLabel:
