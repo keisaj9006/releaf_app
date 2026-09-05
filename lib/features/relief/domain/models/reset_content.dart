@@ -8,6 +8,8 @@ enum ResetModality { breathing, grounding, guidedPractice }
 
 enum ResetAccessTier { free, premium }
 
+enum ResetVisualType { livingForm, sensoryHalo, bodyRelease, thoughtUnhook }
+
 /// Describes whether the current content already fits the frozen Reset
 /// taxonomy or is being preserved temporarily during the migration.
 enum ResetTaxonomyStatus { canonical, legacyCompatible }
@@ -30,6 +32,7 @@ class ResetContent {
   final String? summary;
   final ResetTaxonomyStatus taxonomyStatus;
   final ResetSessionProgram? program;
+  final ResetVisualType visualType;
 
   const ResetContent({
     required this.id,
@@ -44,6 +47,7 @@ class ResetContent {
     this.summary,
     this.taxonomyStatus = ResetTaxonomyStatus.canonical,
     this.program,
+    this.visualType = ResetVisualType.livingForm,
   }) : assert(id != ''),
        assert(durationSeconds > 0),
        assert(
