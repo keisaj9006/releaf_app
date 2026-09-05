@@ -197,6 +197,7 @@ class _MeditationPlayerScreenState
                                 ReleafRoundIconButton(
                                   icon: Icons.close_rounded,
                                   tooltip: 'Exit meditation',
+                                  accentColor: ReleafFeatureAccents.meditation,
                                   onPressed: _exitMeditation,
                                 ),
                                 const SizedBox(width: ReleafSpacing.md),
@@ -209,7 +210,7 @@ class _MeditationPlayerScreenState
                                         'MEDITATION',
                                         style:
                                             ReleafTypography.eyebrow.copyWith(
-                                          color: ReleafColors.sage,
+                                          color: ReleafFeatureAccents.meditation,
                                           letterSpacing: 1.8,
                                         ),
                                       ),
@@ -294,7 +295,7 @@ class _MeditationPlayerScreenState
                                                 ReleafRadii.pill,
                                               ),
                                               color: index <= stepIndex
-                                                  ? ReleafColors.sage
+                                                  ? ReleafFeatureAccents.meditation
                                                       .withValues(
                                                       alpha:
                                                           index == stepIndex
@@ -315,7 +316,7 @@ class _MeditationPlayerScreenState
                                         step.label.toUpperCase(),
                                         style:
                                             ReleafTypography.eyebrow.copyWith(
-                                          color: ReleafColors.sage,
+                                          color: ReleafFeatureAccents.meditation,
                                           fontSize: 10,
                                         ),
                                       ),
@@ -358,7 +359,8 @@ class _MeditationPlayerScreenState
                                       ),
                                       _MeditationSoundControl(
                                         enabled: audioState.enabled,
-                                        onPressed: () {
+                                        mix: audioState.mix,
+                                        onToggle: () {
                                           unawaited(
                                             ref
                                                 .read(
@@ -366,6 +368,16 @@ class _MeditationPlayerScreenState
                                                       .notifier,
                                                 )
                                                 .toggleEnabled(),
+                                          );
+                                        },
+                                        onMixChanged: (value) {
+                                          unawaited(
+                                            ref
+                                                .read(
+                                                  meditationAudioControllerProvider
+                                                      .notifier,
+                                                )
+                                                .setMix(value),
                                           );
                                         },
                                       ),
@@ -402,7 +414,7 @@ class _MeditationPlayerScreenState
                                           : 'Continue',
                                 ),
                                 style: FilledButton.styleFrom(
-                                  backgroundColor: ReleafColors.sage,
+                                  backgroundColor: ReleafFeatureAccents.meditation,
                                   foregroundColor: ReleafColors.background,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(
@@ -491,7 +503,7 @@ class _MeditationVisual extends StatelessWidget {
                       color: ReleafColors.background.withValues(alpha: 0.78),
                       borderRadius: BorderRadius.circular(ReleafRadii.pill),
                       border: Border.all(
-                        color: ReleafColors.sage.withValues(alpha: 0.28),
+                        color: ReleafFeatureAccents.meditation.withValues(alpha: 0.28),
                       ),
                     ),
                     child: Padding(
@@ -505,14 +517,14 @@ class _MeditationVisual extends StatelessWidget {
                           const Icon(
                             Icons.pause_rounded,
                             size: 15,
-                            color: ReleafColors.sage,
+                            color: ReleafFeatureAccents.meditation,
                           ),
                           const SizedBox(width: 5),
                           Text(
                             'PAUSED',
                             style: ReleafTypography.eyebrow.copyWith(
                               fontSize: 9,
-                              color: ReleafColors.sage,
+                              color: ReleafFeatureAccents.meditation,
                             ),
                           ),
                         ],
@@ -542,72 +554,100 @@ class _MeditationVisual extends StatelessWidget {
 class _MeditationSoundControl extends StatelessWidget {
   const _MeditationSoundControl({
     required this.enabled,
-    required this.onPressed,
+    required this.mix,
+    required this.onToggle,
+    required this.onMixChanged,
   });
 
   final bool enabled;
-  final VoidCallback onPressed;
+  final double mix;
+  final VoidCallback onToggle;
+  final ValueChanged<double> onMixChanged;
 
   @override
   Widget build(BuildContext context) {
-    final semanticLabel =
-        enabled ? 'Mute ambient sound' : 'Play ambient sound';
+    final accent = ReleafFeatureAccents.meditation;
+    final percent = (mix * 100).round();
 
     return Semantics(
-      button: true,
-      label: semanticLabel,
-      child: Material(
-        color: ReleafColors.sage.withValues(alpha: enabled ? 0.09 : 0.035),
-        shape: StadiumBorder(
-          side: BorderSide(
-            color: ReleafColors.sage.withValues(alpha: enabled ? 0.28 : 0.14),
+      container: true,
+      label: enabled
+          ? 'Meditation ambience on at $percent percent.'
+          : 'Meditation ambience off.',
+      child: Container(
+        key: const Key('meditation-sound-control'),
+        padding: const EdgeInsets.fromLTRB(10, 3, 6, 3),
+        decoration: BoxDecoration(
+          color: accent.withValues(alpha: enabled ? 0.08 : 0.03),
+          borderRadius: BorderRadius.circular(ReleafRadii.pill),
+          border: Border.all(
+            color: accent.withValues(alpha: enabled ? 0.24 : 0.12),
           ),
         ),
-        child: InkWell(
-          key: const Key('meditation-sound-control'),
-          customBorder: const StadiumBorder(),
-          onTap: onPressed,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 11,
-              vertical: 7,
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
+        child: Row(
+          children: [
+            InkWell(
+              key: const Key('meditation-sound-toggle'),
+              customBorder: const CircleBorder(),
+              onTap: onToggle,
+              child: Padding(
+                padding: const EdgeInsets.all(6),
+                child: Icon(
                   enabled
                       ? Icons.graphic_eq_rounded
                       : Icons.volume_off_rounded,
-                  size: 15,
-                  color: enabled
-                      ? ReleafColors.sage
-                      : ReleafColors.textSecondary,
+                  size: 17,
+                  color: enabled ? accent : ReleafColors.textSecondary,
                 ),
-                const SizedBox(width: 6),
-                Text(
-                  'AMBIENCE',
-                  style: ReleafTypography.eyebrow.copyWith(
-                    color: enabled
-                        ? ReleafColors.sage
-                        : ReleafColors.textSecondary,
-                    fontSize: 9,
-                  ),
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  enabled ? 'ON' : 'OFF',
-                  style: ReleafTypography.meta.copyWith(
-                    color: enabled
-                        ? ReleafColors.textPrimary.withValues(alpha: 0.78)
-                        : ReleafColors.textSecondary,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
+            const SizedBox(width: 4),
+            Text(
+              enabled ? 'AMBIENCE' : 'MUTED',
+              style: ReleafTypography.eyebrow.copyWith(
+                color: enabled ? accent : ReleafColors.textSecondary,
+                fontSize: 8,
+              ),
+            ),
+            const SizedBox(width: 6),
+            Expanded(
+              child: SliderTheme(
+                data: SliderTheme.of(context).copyWith(
+                  trackHeight: 2,
+                  thumbShape: const RoundSliderThumbShape(
+                    enabledThumbRadius: 5,
+                  ),
+                  overlayShape: const RoundSliderOverlayShape(
+                    overlayRadius: 12,
+                  ),
+                  activeTrackColor: accent,
+                  inactiveTrackColor:
+                      ReleafColors.borderSoft.withValues(alpha: 0.85),
+                  thumbColor: accent,
+                  overlayColor: accent.withValues(alpha: 0.10),
+                ),
+                child: Slider(
+                  key: const Key('meditation-sound-mix'),
+                  value: mix.clamp(0.0, 1.0).toDouble(),
+                  onChanged: enabled ? onMixChanged : null,
+                ),
+              ),
+            ),
+            SizedBox(
+              width: 34,
+              child: Text(
+                '$percent%',
+                textAlign: TextAlign.right,
+                style: ReleafTypography.meta.copyWith(
+                  color: enabled
+                      ? ReleafColors.textSecondary
+                      : ReleafColors.textMuted,
+                  fontSize: 9,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

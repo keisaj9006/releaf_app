@@ -37,7 +37,9 @@ class _FakeMeditationAudioDriver implements MeditationAudioDriver {
   int pauseCalls = 0;
   int resumeCalls = 0;
   int stopCalls = 0;
+  int volumeCalls = 0;
   String? lastAssetPath;
+  double? lastVolume;
 
   @override
   Future<void> playAsset(
@@ -56,6 +58,12 @@ class _FakeMeditationAudioDriver implements MeditationAudioDriver {
   @override
   Future<void> resume() async {
     resumeCalls += 1;
+  }
+
+  @override
+  Future<void> setVolume(double volume) async {
+    volumeCalls += 1;
+    lastVolume = volume;
   }
 
   @override
@@ -252,7 +260,12 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
     expect(audioDriver.resumeCalls, 1);
 
-    await tester.tap(find.byKey(const Key('meditation-sound-control')));
+    expect(
+      find.byKey(const Key('meditation-sound-mix')),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.byKey(const Key('meditation-sound-toggle')));
     await tester.pump(const Duration(milliseconds: 300));
     expect(audioDriver.pauseCalls, 2);
   });

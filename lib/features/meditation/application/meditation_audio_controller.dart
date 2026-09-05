@@ -13,18 +13,21 @@ class MeditationAudioState {
     this.isPlaying = false,
     this.trackId,
     this.trackTitle,
+    this.mix = 0.72,
   });
 
   final bool enabled;
   final bool isPlaying;
   final String? trackId;
   final String? trackTitle;
+  final double mix;
 
   MeditationAudioState copyWith({
     bool? enabled,
     bool? isPlaying,
     String? trackId,
     String? trackTitle,
+    double? mix,
     bool clearTrack = false,
   }) {
     return MeditationAudioState(
@@ -32,6 +35,7 @@ class MeditationAudioState {
       isPlaying: isPlaying ?? this.isPlaying,
       trackId: clearTrack ? null : (trackId ?? this.trackId),
       trackTitle: clearTrack ? null : (trackTitle ?? this.trackTitle),
+      mix: mix ?? this.mix,
     );
   }
 }
@@ -45,6 +49,8 @@ abstract class MeditationAudioDriver {
   Future<void> pause();
 
   Future<void> resume();
+
+  Future<void> setVolume(double volume);
 
   Future<void> stop();
 
@@ -69,6 +75,9 @@ class AudioplayersMeditationAudioDriver implements MeditationAudioDriver {
 
   @override
   Future<void> resume() => _player.resume();
+
+  @override
+  Future<void> setVolume(double volume) => _player.setVolume(volume);
 
   @override
   Future<void> stop() => _player.stop();
@@ -103,10 +112,12 @@ class MeditationAudioController extends StateNotifier<MeditationAudioState> {
   ) : super(
           MeditationAudioState(
             enabled: _prefs.getBool(_enabledKey) ?? true,
+            mix: (_prefs.getDouble(_mixKey) ?? 0.72).clamp(0.0, 1.0),
           ),
         );
 
   static const _enabledKey = 'meditation.ambient_sound_enabled';
+  static const _mixKey = 'meditation.ambient_sound_mix';
 
   final SoundCatalog _catalog;
   final SharedPreferences _prefs;
@@ -115,14 +126,17 @@ class MeditationAudioController extends StateNotifier<MeditationAudioState> {
   bool _sessionRunning = false;
   bool _hasStarted = false;
   String? _assetPath;
-  double _volume = 0.20;
+  double _sessionVolume = 0.20;
+
+  double get _effectiveVolume =>
+      (_sessionVolume * state.mix).clamp(0.0, 1.0).toDouble();
 
   Future<void> start({
     required String? soundId,
     required double volume,
   }) async {
     _sessionRunning = true;
-    _volume = volume.clamp(0.0, 1.0).toDouble();
+    _sessionVolume = volume.clamp(0.0, 1.0).toDouble();
 
     final track = soundId == null ? null : _catalog.getById(soundId);
     _assetPath = track?.assetPath;
@@ -157,8 +171,26 @@ class MeditationAudioController extends StateNotifier<MeditationAudioState> {
       await _driver.resume();
       if (!mounted) return;
       state = state.copyWith(isPlaying: true);
+      await _fadeTo(
+        _effectiveVolume,
+        const Duration(milliseconds: 180),
+      );
     } catch (_) {
       await _playFromStart();
+    }
+  }
+
+  Future<void> setMix(double mix) async {
+    final safe = mix.clamp(0.0, 1.0).toDouble();
+    state = state.copyWith(mix: safe);
+    await _prefs.setDouble(_mixKey, safe);
+
+    if (!_hasStarted || !state.enabled) return;
+
+    try {
+      await _driver.setVolume(_effectiveVolume);
+    } catch (_) {
+      // A failed volume change must not interrupt the meditation.
     }
   }
 
@@ -182,6 +214,7 @@ class MeditationAudioController extends StateNotifier<MeditationAudioState> {
 
     if (_hasStarted) {
       try {
+        await _fadeTo(0, const Duration(milliseconds: 180));
         await _driver.stop();
       } catch (_) {
         // Audio failure must never block meditation navigation.
@@ -198,10 +231,14 @@ class MeditationAudioController extends StateNotifier<MeditationAudioState> {
     if (assetPath == null || !state.enabled) return;
 
     try {
-      await _driver.playAsset(assetPath, volume: _volume);
+      await _driver.playAsset(assetPath, volume: 0);
       _hasStarted = true;
       if (!mounted) return;
       state = state.copyWith(isPlaying: true);
+      await _fadeTo(
+        _effectiveVolume,
+        const Duration(milliseconds: 220),
+      );
     } catch (_) {
       _hasStarted = false;
       if (!mounted) return;
@@ -209,10 +246,33 @@ class MeditationAudioController extends StateNotifier<MeditationAudioState> {
     }
   }
 
+  Future<void> _fadeTo(double target, Duration duration) async {
+    if (!_hasStarted) return;
+
+    final safeTarget = target.clamp(0.0, 1.0).toDouble();
+    const steps = 4;
+    final stepDuration = Duration(
+      milliseconds: duration.inMilliseconds ~/ steps,
+    );
+
+    for (var step = 1; step <= steps; step++) {
+      final value = safeTarget * (step / steps);
+      try {
+        await _driver.setVolume(value);
+      } catch (_) {
+        return;
+      }
+      if (step != steps && stepDuration.inMilliseconds > 0) {
+        await Future<void>.delayed(stepDuration);
+      }
+    }
+  }
+
   Future<void> _pausePlayback() async {
     if (!_hasStarted || !state.isPlaying) return;
 
     try {
+      await _fadeTo(0, const Duration(milliseconds: 140));
       await _driver.pause();
     } catch (_) {
       // Keep the session usable even if the platform audio layer fails.
