@@ -88,31 +88,31 @@ class _ReleafSessionLivingFormState extends State<ReleafSessionLivingForm>
       label: widget.phaseLabel == null
           ? 'Releaf calming visual'
           : 'Releaf calming visual. ${widget.phaseLabel}',
-      child: AnimatedBuilder(
-        animation: _controller,
-        builder: (context, child) {
-          final motion = _motionValue(_controller.value);
-          final breathingScale = widget.breathing
-              ? 0.94 + (motion * 0.12)
-              : 0.975 + (motion * 0.045);
-          final glowOpacity = widget.breathing
-              ? 0.15 + (motion * 0.18)
-              : 0.10 + (motion * 0.10);
+      child: TweenAnimationBuilder<double>(
+        tween: Tween<double>(begin: 0, end: progress),
+        duration: const Duration(milliseconds: 720),
+        curve: Curves.easeOutCubic,
+        builder: (context, animatedProgress, child) {
+          return CustomPaint(
+            key: const Key('reset-living-form'),
+            painter: _SessionProgressPainter(
+              progress: animatedProgress,
+            ),
+            child: child,
+          );
+        },
+        child: AnimatedBuilder(
+          animation: _controller,
+          builder: (context, child) {
+            final motion = _motionValue(_controller.value);
+            final breathingScale = widget.breathing
+                ? 0.94 + (motion * 0.12)
+                : 0.975 + (motion * 0.045);
+            final glowOpacity = widget.breathing
+                ? 0.15 + (motion * 0.18)
+                : 0.10 + (motion * 0.10);
 
-          return TweenAnimationBuilder<double>(
-            tween: Tween<double>(end: progress),
-            duration: const Duration(milliseconds: 720),
-            curve: Curves.easeOutCubic,
-            builder: (context, animatedProgress, child) {
-              return CustomPaint(
-                key: const Key('reset-living-form'),
-                painter: _SessionProgressPainter(
-                  progress: animatedProgress,
-                ),
-                child: child,
-              );
-            },
-            child: AspectRatio(
+            return AspectRatio(
               aspectRatio: 1,
               child: Stack(
                 fit: StackFit.expand,
@@ -170,9 +170,9 @@ class _ReleafSessionLivingFormState extends State<ReleafSessionLivingForm>
                   ),
                 ],
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }
