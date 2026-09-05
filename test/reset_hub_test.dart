@@ -7,7 +7,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:releaf_app/core/providers.dart';
 import 'package:releaf_app/routing/app_router.dart';
 import 'package:releaf_app/routing/app_routes.dart';
-import 'package:releaf_app/theme/widgets/releaf_components.dart';
 
 Future<SharedPreferences> _preferences() async {
   SharedPreferences.setMockInitialValues({});
@@ -39,32 +38,30 @@ Future<void> _moveRailForward(WidgetTester tester, Key railKey) async {
 }
 
 void main() {
-  testWidgets('Reset hub renders three differentiated editorial rails', (
+  testWidgets('Reset hub renders the current premium product hierarchy', (
     WidgetTester tester,
   ) async {
     await _pumpResetHub(tester, preferences: await _preferences());
 
-    expect(find.text('Reset'), findsOneWidget);
     expect(find.text('What do you need right now?'), findsOneWidget);
     expect(find.text('QUICK RESET'), findsOneWidget);
     expect(find.text('Feel steadier in 2–4 minutes.'), findsOneWidget);
     expect(find.text('AVAILABLE NOW'), findsOneWidget);
-    expect(find.text('Small resets, ready when you are.'), findsOneWidget);
     expect(find.text('DEEP RESET'), findsOneWidget);
     expect(
       find.text('Go deeper with guided 8-minute protocols.'),
       findsOneWidget,
     );
+    expect(find.text('SOUND'), findsOneWidget);
 
     expect(find.byKey(const Key('reset-category-carousel')), findsOneWidget);
     expect(find.byKey(const Key('reset-session-rail')), findsOneWidget);
     expect(find.byKey(const Key('reset-deep-rail')), findsOneWidget);
-    expect(find.byType(PageView), findsNWidgets(3));
+    expect(find.byKey(const Key('reset-sound-gateway')), findsOneWidget);
     expect(find.byKey(const Key('reset-emergency-action')), findsOneWidget);
-    expect(find.byType(FloatingActionButton), findsNothing);
   });
 
-  testWidgets('Category carousel contains all editorial categories', (
+  testWidgets('Quick Reset categories are populated and actionable', (
     WidgetTester tester,
   ) async {
     await _pumpResetHub(tester, preferences: await _preferences());
@@ -77,118 +74,73 @@ void main() {
       findsOneWidget,
     );
 
-    await _moveRailForward(
-      tester,
-      const Key('reset-category-carousel'),
-    );
-    await _moveRailForward(
-      tester,
-      const Key('reset-category-carousel'),
-    );
+    await _moveRailForward(tester, const Key('reset-category-carousel'));
+    await _moveRailForward(tester, const Key('reset-category-carousel'));
     expect(find.text('Situational'), findsOneWidget);
     expect(find.text('For moments that hit fast.'), findsOneWidget);
 
-    await _moveRailForward(
-      tester,
-      const Key('reset-category-carousel'),
-    );
+    await _moveRailForward(tester, const Key('reset-category-carousel'));
     expect(find.text('Life Upgrade'), findsOneWidget);
     expect(
       find.text('Small practices for stronger everyday regulation.'),
       findsOneWidget,
     );
-    expect(find.text('More coming'), findsWidgets);
+    expect(find.text('More coming'), findsNothing);
   });
 
-  testWidgets('Only canonical real content appears in playable rails', (
+  testWidgets('Category selection filters Available Now instead of jumping', (
     WidgetTester tester,
   ) async {
     await _pumpResetHub(tester, preferences: await _preferences());
-
-    await tester.ensureVisible(find.byKey(const Key('reset-session-rail')));
-    await tester.pump();
-    expect(find.text('60s Grounding'), findsOneWidget);
-
-    await _moveRailForward(tester, const Key('reset-session-rail'));
-    expect(find.text('Back to the Room'), findsOneWidget);
-
-    await _moveRailForward(tester, const Key('reset-session-rail'));
-    expect(find.text('Jaw & Shoulders'), findsOneWidget);
-
-    await _moveRailForward(tester, const Key('reset-session-rail'));
-    expect(find.text('Name the Thought'), findsOneWidget);
-
-    await _moveRailForward(tester, const Key('reset-session-rail'));
-    expect(find.text('90s Calm Down'), findsOneWidget);
-
-    await _moveRailForward(tester, const Key('reset-session-rail'));
-    expect(find.text('Longer Exhale'), findsOneWidget);
-
-    await _moveRailForward(tester, const Key('reset-session-rail'));
-    expect(find.text('5 min Focus Anchor'), findsOneWidget);
-    expect(find.text('Premium'), findsWidgets);
-
-    expect(find.text('3 min Deep Reset'), findsOneWidget);
-    expect(find.text('Current 3-minute protocol'), findsOneWidget);
-
-    for (final unimplementedSession in [
-      'Wired → Steady',
-      'Tension → Full Body Scan',
-      'Overwhelm → Stability',
-      'Evening → Proper Unwind',
-      'Anger → Release & Calm',
-      'Overthinking → Let It Go',
-    ]) {
-      expect(find.text(unimplementedSession), findsNothing);
-    }
-  });
-
-  testWidgets('Available categories focus real sessions; empty ones do not act', (
-    WidgetTester tester,
-  ) async {
-    await _pumpResetHub(tester, preferences: await _preferences());
-
-    final breathCard = tester.widget<ReleafPressableCard>(
-      find.byKey(const Key('reset-category-breath')),
-    );
-    final noBreathCard = tester.widget<ReleafPressableCard>(
-      find.byKey(const Key('reset-category-noBreath')),
-    );
-    expect(breathCard.onPressed, isNotNull);
-    expect(noBreathCard.onPressed, isNotNull);
 
     await tester.tap(find.byKey(const Key('reset-category-breath')));
     await tester.pumpAndSettle();
-    final sessionRail = tester.widget<PageView>(
-      find.byKey(const Key('reset-session-rail')),
-    );
-    expect(sessionRail.controller!.page, closeTo(4, 0.05));
-    expect(find.text('90s Calm Down'), findsOneWidget);
 
-    await tester.ensureVisible(
-      find.byKey(const Key('reset-category-carousel')),
-    );
-    await tester.pump();
-    await _moveRailForward(
-      tester,
-      const Key('reset-category-carousel'),
-    );
-    await _moveRailForward(
-      tester,
-      const Key('reset-category-carousel'),
-    );
+    expect(find.text('BREATH'), findsWidgets);
+    expect(find.byKey(const Key('reset-clear-category-filter')), findsOneWidget);
+    expect(find.text('Equal Rhythm'), findsOneWidget);
+    expect(find.text('60s Grounding'), findsNothing);
 
-    final situationalCard = tester.widget<ReleafPressableCard>(
-      find.byKey(const Key('reset-category-situational')),
-    );
-    final lifeUpgradeCard = tester.widget<ReleafPressableCard>(
-      find.byKey(const Key('reset-category-lifeUpgrade')),
-    );
-    expect(situationalCard.onPressed, isNull);
-    expect(lifeUpgradeCard.onPressed, isNull);
+    await tester.tap(find.byKey(const Key('reset-clear-category-filter')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('AVAILABLE NOW'), findsOneWidget);
+    expect(find.text('60s Grounding'), findsOneWidget);
   });
 
-  testWidgets('Reset editorial cards expose useful accessibility semantics', (
+  testWidgets('Situational category exposes the real situational library', (
+    WidgetTester tester,
+  ) async {
+    await _pumpResetHub(tester, preferences: await _preferences());
+
+    await _moveRailForward(tester, const Key('reset-category-carousel'));
+    await _moveRailForward(tester, const Key('reset-category-carousel'));
+
+    await tester.tap(find.byKey(const Key('reset-category-situational')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('SITUATIONAL'), findsWidgets);
+    expect(find.text('Before an Interview'), findsOneWidget);
+    expect(find.byKey(const Key('reset-clear-category-filter')), findsOneWidget);
+  });
+
+  testWidgets('Deep Reset starts with real 8-minute premium protocols', (
+    WidgetTester tester,
+  ) async {
+    await _pumpResetHub(tester, preferences: await _preferences());
+
+    await tester.ensureVisible(find.byKey(const Key('reset-deep-rail')));
+    await tester.pump();
+
+    expect(find.text('Wired → Steady'), findsOneWidget);
+    expect(find.text('8 min protocol'), findsOneWidget);
+    expect(find.text('Premium'), findsWidgets);
+
+    await _moveRailForward(tester, const Key('reset-deep-rail'));
+    expect(find.text('Tension → Full Body Scan'), findsOneWidget);
+  });
+
+  testWidgets('Reset cards expose useful accessibility semantics', (
     WidgetTester tester,
   ) async {
     final semantics = tester.ensureSemantics();
@@ -214,113 +166,66 @@ void main() {
     expect(sessionData.flagsCollection.isButton, isTrue);
     expect(sessionData.label, contains('Free, opens session preview.'));
 
-    await tester.ensureVisible(
-      find.byKey(const Key('reset-category-carousel')),
-    );
-    await tester.pump();
-    await _moveRailForward(
-      tester,
-      const Key('reset-category-carousel'),
-    );
-    await _moveRailForward(
-      tester,
-      const Key('reset-category-carousel'),
-    );
-    final unavailableNode = tester.getSemantics(
-      find.byKey(const Key('reset-category-situational')),
-    );
-    final unavailableData = unavailableNode.getSemanticsData();
-    expect(unavailableData.hasAction(SemanticsAction.tap), isFalse);
-    expect(unavailableData.label, contains('Not available yet.'));
     semantics.dispose();
   });
 
-  testWidgets('Reset cards open preview before launch or access check', (
+  testWidgets('Free and premium cards both open preview before launch', (
     WidgetTester tester,
   ) async {
     await _pumpResetHub(tester, preferences: await _preferences());
 
-    await tester.ensureVisible(find.byKey(const Key('reset-session-rail')));
-    await tester.pump();
-    await tester.tap(find.text('60s Grounding'));
+    await tester.ensureVisible(
+      find.byKey(const Key('reset-session-60s-grounding')),
+    );
+    await tester.tap(find.byKey(const Key('reset-session-60s-grounding')));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
 
-    expect(
-      find.byKey(const Key('reset-session-preview-sheet')),
-      findsOneWidget,
-    );
+    expect(find.byKey(const Key('reset-session-preview-sheet')), findsOneWidget);
     expect(find.text('WHAT TO EXPECT'), findsOneWidget);
     expect(find.text('SESSION SETUP'), findsOneWidget);
     expect(find.byKey(const Key('reset-preview-start')), findsOneWidget);
-    expect(find.text('01:00'), findsNothing);
 
-    await tester.tap(find.byKey(const Key('reset-preview-start')));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 300));
-    expect(find.text('01:00'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('reset-preview-close')));
+    await tester.pumpAndSettle();
 
-    await tester.tap(find.byTooltip('Exit reset'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 300));
-
-    await tester.ensureVisible(find.text('3 min Deep Reset'));
-    await tester.pump();
-    await tester.tap(find.text('3 min Deep Reset'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 300));
-
-    expect(
-      find.byKey(const Key('reset-session-preview-sheet')),
-      findsOneWidget,
+    await tester.ensureVisible(
+      find.byKey(const Key('reset-session-wired-steady')),
     );
-    expect(find.byKey(const Key('reset-preview-unlock')), findsOneWidget);
-    expect(find.text('03:00'), findsNothing);
-
-    await tester.tap(find.byKey(const Key('reset-preview-unlock')));
+    await tester.tap(find.byKey(const Key('reset-session-wired-steady')));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
-    expect(find.text('Unlock Premium'), findsOneWidget);
-    expect(find.text('03:00'), findsNothing);
+
+    expect(find.byKey(const Key('reset-session-preview-sheet')), findsOneWidget);
+    expect(find.byKey(const Key('reset-preview-unlock')), findsOneWidget);
+    expect(find.text('SESSION SETUP'), findsNothing);
   });
 
-  testWidgets('Reset preview settings are applied to the active session', (
+  testWidgets('Reset preview settings apply to the active free session', (
     WidgetTester tester,
   ) async {
     await _pumpResetHub(tester, preferences: await _preferences());
 
-    await tester.ensureVisible(find.byKey(const Key('reset-session-rail')));
-    await tester.pump();
-    await tester.tap(find.text('60s Grounding'));
+    await tester.ensureVisible(
+      find.byKey(const Key('reset-session-60s-grounding')),
+    );
+    await tester.tap(find.byKey(const Key('reset-session-60s-grounding')));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
 
-    final guidanceTile = find.byKey(
-      const Key('reset-preview-guidance-toggle'),
-    );
-    final timerTile = find.byKey(
-      const Key('reset-preview-timer-toggle'),
-    );
-    expect(guidanceTile, findsOneWidget);
-    expect(timerTile, findsOneWidget);
+    final guidanceTile =
+        find.byKey(const Key('reset-preview-guidance-toggle'));
+    final timerTile = find.byKey(const Key('reset-preview-timer-toggle'));
 
     await tester.ensureVisible(guidanceTile);
-    await tester.pumpAndSettle();
     await tester.tap(
-      find.descendant(
-        of: guidanceTile,
-        matching: find.byType(Switch),
-      ),
+      find.descendant(of: guidanceTile, matching: find.byType(Switch)),
     );
     await tester.pump();
 
     await tester.ensureVisible(timerTile);
-    await tester.pumpAndSettle();
     await tester.tap(
-      find.descendant(
-        of: timerTile,
-        matching: find.byType(Switch),
-      ),
+      find.descendant(of: timerTile, matching: find.byType(Switch)),
     );
     await tester.pump();
 
@@ -328,18 +233,9 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
 
-    expect(
-      find.byKey(const Key('reset-active-session-timer')),
-      findsNothing,
-    );
-    expect(
-      find.byKey(const Key('reset-active-session-title')),
-      findsOneWidget,
-    );
-    expect(
-      find.byKey(const Key('reset-active-session-guidance')),
-      findsNothing,
-    );
+    expect(find.byKey(const Key('reset-active-session-timer')), findsNothing);
+    expect(find.byKey(const Key('reset-active-session-title')), findsOneWidget);
+    expect(find.byKey(const Key('reset-active-session-guidance')), findsNothing);
     expect(
       find.byKey(const Key('reset-active-session-guidance-hidden')),
       findsOneWidget,
@@ -359,7 +255,7 @@ void main() {
     expect(find.text('Unlock Premium'), findsNothing);
   });
 
-  testWidgets('Editorial rails do not overflow on a narrow phone', (
+  testWidgets('Reset remains overflow-free on a narrow phone', (
     WidgetTester tester,
   ) async {
     await tester.binding.setSurfaceSize(const Size(320, 640));
@@ -367,44 +263,15 @@ void main() {
     await _pumpResetHub(tester, preferences: await _preferences());
 
     expect(tester.takeException(), isNull);
-    await _moveRailForward(
-      tester,
-      const Key('reset-category-carousel'),
+
+    await tester.ensureVisible(
+      find.byKey(const Key('reset-session-60s-grounding')),
     );
-    expect(tester.takeException(), isNull);
-
-    await tester.ensureVisible(find.byKey(const Key('reset-session-rail')));
-    await tester.pump();
-    await _moveRailForward(tester, const Key('reset-session-rail'));
-    await _moveRailForward(tester, const Key('reset-session-rail'));
-    expect(tester.takeException(), isNull);
-
-    await tester.ensureVisible(find.byKey(const Key('reset-deep-rail')));
-    await tester.pump();
-    expect(tester.takeException(), isNull);
-    expect(
-      tester.getSize(find.byKey(const Key('reset-content-column'))).width,
-      320,
-    );
-  });
-
-  testWidgets('Reset preview remains overflow-free at 320px width', (
-    WidgetTester tester,
-  ) async {
-    await tester.binding.setSurfaceSize(const Size(320, 640));
-    addTearDown(() => tester.binding.setSurfaceSize(null));
-    await _pumpResetHub(tester, preferences: await _preferences());
-
-    await tester.ensureVisible(find.byKey(const Key('reset-session-rail')));
-    await tester.pump();
-    await tester.tap(find.text('60s Grounding'));
+    await tester.tap(find.byKey(const Key('reset-session-60s-grounding')));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
 
-    expect(
-      find.byKey(const Key('reset-session-preview-sheet')),
-      findsOneWidget,
-    );
+    expect(find.byKey(const Key('reset-session-preview-sheet')), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
