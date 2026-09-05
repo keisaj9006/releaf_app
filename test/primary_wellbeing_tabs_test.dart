@@ -178,6 +178,11 @@ void main() {
 
     expect(find.text('Unlock tonight'), findsOneWidget);
 
+    // Dispose the first ProviderScope so the premium override cannot reuse
+    // the free controller from the first half of this widget test.
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
+
     final premiumRouter = createAppRouter(initialLocation: AppRoutes.sleep);
     addTearDown(premiumRouter.dispose);
     await tester.pumpWidget(
