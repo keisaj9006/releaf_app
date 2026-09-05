@@ -3,6 +3,7 @@ class AppRoutes {
   static const home = '/home';
   static const habits = '/habits';
   static const relief = '/relief';
+  static const sound = '/sound';
   static const brain = '/brain';
   static const dailyLoop = '/daily-loop';
 
@@ -12,9 +13,12 @@ class AppRoutes {
   static String brainGameFor(String gameId) => '/brain/game/$gameId';
 
   static const reliefSession = '/relief/session/:sessionId';
+  static const soundPlayer = '/sound/:trackId';
 
   static String reliefSessionFor(String sessionId) =>
       '/relief/session/$sessionId';
+
+  static String soundPlayerFor(String trackId) => '/sound/$trackId';
 
   static const dashboardLegacy = '/';
   static const gamesLegacy = '/games';
