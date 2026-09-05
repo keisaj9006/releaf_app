@@ -169,7 +169,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
     final progress = session.durationSeconds <= 0
         ? 1.0
         : 1 - (_remainingSeconds / session.durationSeconds);
-    final phaseLabel = _breathingPhaseLabel(session);
+    final phaseLabel = _sessionPhaseLabel(session);
     final artwork = _artworkFor(session);
 
     return Stack(
@@ -260,17 +260,23 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
                                 ),
                               ),
                               const SizedBox(height: ReleafSpacing.xs),
-                              Text(
-                                session.instructions.isNotEmpty
-                                    ? session.instructions.first
-                                    : 'Settle in.',
-                                textAlign: TextAlign.center,
-                                style: ReleafTypography.body.copyWith(
-                                  color: ReleafColors.textPrimary.withValues(
-                                    alpha: 0.78,
+                              AnimatedSwitcher(
+                                duration: ReleafMotion.standard,
+                                switchInCurve: ReleafMotion.entranceCurve,
+                                switchOutCurve: Curves.easeInCubic,
+                                child: Text(
+                                  _currentGuidance(session),
+                                  key: ValueKey(
+                                    'guidance-${_sessionStepIndex(session)}',
                                   ),
-                                  fontSize: 16,
-                                  height: 1.45,
+                                  textAlign: TextAlign.center,
+                                  style: ReleafTypography.body.copyWith(
+                                    color: ReleafColors.textPrimary.withValues(
+                                      alpha: 0.78,
+                                    ),
+                                    fontSize: 16,
+                                    height: 1.45,
+                                  ),
                                 ),
                               ),
                             ],
@@ -536,22 +542,59 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
     );
   }
 
-  String? _breathingPhaseLabel(ResetContent session) {
-    if (session.modality != ResetModality.breathing) return null;
+  String? _sessionPhaseLabel(ResetContent session) {
+    if (session.modality == ResetModality.breathing) {
+      final elapsed = (session.durationSeconds - _remainingSeconds)
+          .clamp(0, session.durationSeconds);
 
-    final elapsed = (session.durationSeconds - _remainingSeconds)
-        .clamp(0, session.durationSeconds);
+      if (session.id == '3min-breath') {
+        return switch (elapsed % 16) {
+          < 4 => 'Inhale',
+          < 8 => 'Hold',
+          < 12 => 'Exhale',
+          _ => 'Rest',
+        };
+      }
 
-    if (session.id == '3min-breath') {
-      return switch (elapsed % 16) {
-        < 4 => 'Inhale',
-        < 8 => 'Hold',
-        < 12 => 'Exhale',
-        _ => 'Rest',
-      };
+      return elapsed % 8 < 4 ? 'Breathe in' : 'Breathe out';
     }
 
-    return elapsed % 8 < 4 ? 'Breathe in' : 'Breathe out';
+    final step = _sessionStepIndex(session);
+    return switch (session.id) {
+      '60s-grounding' => switch (step) {
+          0 => 'Arrive',
+          1 => 'Feel',
+          2 => 'Notice',
+          _ => 'Release',
+        },
+      '5min-focus' => switch (step) {
+          0 => 'See',
+          1 => 'Touch',
+          2 => 'Hear',
+          3 => 'Smell',
+          _ => 'Taste',
+        },
+      _ => null,
+    };
+  }
+
+  int _sessionStepIndex(ResetContent session) {
+    if (session.instructions.isEmpty || session.durationSeconds <= 0) return 0;
+    final elapsed = (session.durationSeconds - _remainingSeconds)
+        .clamp(0, session.durationSeconds);
+    final segment = session.durationSeconds / session.instructions.length;
+    return math.min(
+      session.instructions.length - 1,
+      (elapsed / segment).floor(),
+    );
+  }
+
+  String _currentGuidance(ResetContent session) {
+    if (session.instructions.isEmpty) return 'Settle in.';
+    if (session.modality == ResetModality.breathing) {
+      return session.instructions.first;
+    }
+    return session.instructions[_sessionStepIndex(session)];
   }
 
   String _guidanceTitle(ResetContent session) {
