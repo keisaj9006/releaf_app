@@ -275,6 +275,44 @@ void main() {
     expect(find.text('Reset'), findsOneWidget);
   });
 
+  testWidgets('60s Grounding advances through visible grounding steps', (
+    WidgetTester tester,
+  ) async {
+    final preferences = await _preferences();
+    final router = createAppRouter(
+      initialLocation: AppRoutes.reliefSessionFor(freeSession.id),
+    );
+    addTearDown(router.dispose);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(preferences),
+        ],
+        child: MaterialApp.router(routerConfig: router),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
+
+    expect(find.text('Arrive'), findsOneWidget);
+    expect(
+      find.text('Sit comfortably and place your feet on the ground.'),
+      findsOneWidget,
+    );
+
+    await tester.pump(const Duration(seconds: 16));
+    await tester.pump(const Duration(milliseconds: 350));
+
+    expect(find.text('Feel'), findsOneWidget);
+    expect(
+      find.text(
+        'Notice three physical sensations where your body meets the floor or chair.',
+      ),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('Completing 60s Grounding awards Relief once and shows feedback', (
     WidgetTester tester,
   ) async {
