@@ -56,7 +56,7 @@ class _MeditationScreenState extends ConsumerState<MeditationScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _Header(onBack: context.pop),
+                              const _Header(),
                               const SizedBox(height: ReleafSpacing.xxl),
                               _FeaturedMeditation(
                                 item: all.first,
@@ -152,36 +152,61 @@ class _MeditationBackdrop extends StatelessWidget {
 }
 
 class _Header extends StatelessWidget {
-  const _Header({required this.onBack});
-
-  final VoidCallback onBack;
+  const _Header();
 
   @override
   Widget build(BuildContext context) {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        ReleafRoundIconButton(
-          icon: Icons.arrow_back_rounded,
-          tooltip: 'Back',
-          onPressed: onBack,
-        ),
-        const SizedBox(width: ReleafSpacing.md),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Meditate',
-                style: ReleafTypography.display.copyWith(fontSize: 30),
+                'MEDITATION',
+                style: ReleafTypography.eyebrow.copyWith(
+                  color: ReleafColors.sage,
+                  letterSpacing: 1.9,
+                ),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 6),
+              Text(
+                'Meditate',
+                style: ReleafTypography.display.copyWith(fontSize: 32),
+              ),
+              const SizedBox(height: 6),
               Text(
                 'Practice attention without needing to empty your mind.',
-                style: ReleafTypography.meta.copyWith(
+                style: ReleafTypography.body.copyWith(
                   color: ReleafColors.textSecondary,
                 ),
               ),
             ],
+          ),
+        ),
+        const SizedBox(width: ReleafSpacing.md),
+        Container(
+          width: 52,
+          height: 52,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: ReleafColors.sage.withValues(alpha: 0.08),
+            border: Border.all(
+              color: ReleafColors.sage.withValues(alpha: 0.22),
+            ),
+            boxShadow: const [
+              BoxShadow(
+                color: ReleafColors.glowSage,
+                blurRadius: 22,
+              ),
+            ],
+          ),
+          alignment: Alignment.center,
+          child: const Icon(
+            Icons.spa_outlined,
+            color: ReleafColors.sage,
+            size: 23,
           ),
         ),
       ],
