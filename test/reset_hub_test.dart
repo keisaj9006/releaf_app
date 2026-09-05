@@ -248,7 +248,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
     expect(find.text('01:00'), findsOneWidget);
 
-    await tester.tap(find.byIcon(Icons.close));
+    await tester.tap(find.byTooltip('Exit reset'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
 
