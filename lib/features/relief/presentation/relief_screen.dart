@@ -600,11 +600,13 @@ class _EditorialRail extends StatelessWidget {
         child: LayoutBuilder(
           builder: (context, constraints) {
             final width = math.min(constraints.maxWidth, maxWidth);
+            final responsiveHeight =
+                MediaQuery.sizeOf(context).width < 360 ? height + 40 : height;
             return Align(
               alignment: Alignment.centerLeft,
               child: SizedBox(
                 width: width,
-                height: height,
+                height: responsiveHeight,
                 child: PageView.builder(
                   key: railKey,
                   controller: controller,
