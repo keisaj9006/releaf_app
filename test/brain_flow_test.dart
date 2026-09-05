@@ -383,6 +383,34 @@ void main() {
     await tester.pump();
   });
 
+  testWidgets('New Brain games stay overflow-free at 320px', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(320, 760);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    final games = <Widget>[
+      SequenceEchoScreen(onFinish: (_) {}),
+      ColorConflictScreen(onFinish: (_) {}),
+      PatternLogicScreen(onFinish: (_) {}),
+      SignalScanScreen(onFinish: (_) {}),
+    ];
+
+    for (final game in games) {
+      await tester.pumpWidget(MaterialApp(home: game));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 120));
+      expect(tester.takeException(), isNull);
+
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump();
+    }
+  });
+
   testWidgets('Premium Brain game shells remain usable on a phone', (
     WidgetTester tester,
   ) async {
