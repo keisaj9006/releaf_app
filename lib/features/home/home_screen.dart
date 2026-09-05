@@ -90,7 +90,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               const SizedBox(height: ReleafSpacing.lg),
                               _RecommendationHero(
                                 recommendation: recommendation,
-                                selectedNeed: _selectedNeed,
                                 onPressed: () =>
                                     context.push(recommendation.route),
                               ),
@@ -593,12 +592,10 @@ _HomeRecommendation _recommendationFor({
 class _RecommendationHero extends StatelessWidget {
   const _RecommendationHero({
     required this.recommendation,
-    required this.selectedNeed,
     required this.onPressed,
   });
 
   final _HomeRecommendation recommendation;
-  final _HomeNeed? selectedNeed;
   final VoidCallback onPressed;
 
   @override
