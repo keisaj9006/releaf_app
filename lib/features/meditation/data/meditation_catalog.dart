@@ -10,6 +10,7 @@ class MeditationCatalog {
   const MeditationCatalog();
 
   static const foundationsSeriesId = 'foundations';
+  static const deeperPracticeSeriesId = 'deeper-practice';
 
   static const List<MeditationContent> _content = [
     MeditationContent(
@@ -495,6 +496,212 @@ class MeditationCatalog {
           label: 'Return',
           guidance: 'Choose the first useful action when you return to work.',
           durationSeconds: 60,
+        ),
+      ],
+    ),
+    MeditationContent(
+      id: 'steady-attention-10',
+      title: 'Steady Attention',
+      subtitle: 'Ten minutes of returning to one anchor without forcing concentration.',
+      durationSeconds: 600,
+      category: MeditationCategory.focus,
+      accessTier: MeditationAccessTier.premium,
+      backgroundSoundId: 'releaf-atmosphere-01',
+      backgroundSoundVolume: 0.10,
+      seriesId: deeperPracticeSeriesId,
+      seriesOrder: 1,
+      steps: [
+        MeditationStep(
+          label: 'Arrive',
+          guidance:
+              'Settle into a stable position and notice where your body is supported.',
+          durationSeconds: 75,
+        ),
+        MeditationStep(
+          label: 'Anchor',
+          guidance:
+              'Choose one clear sensation and let it be the main place your attention returns to.',
+          durationSeconds: 120,
+        ),
+        MeditationStep(
+          label: 'Drift',
+          guidance:
+              'Notice the moment attention has moved into a thought, sound, or plan.',
+          durationSeconds: 90,
+        ),
+        MeditationStep(
+          label: 'Return',
+          guidance:
+              'Come back to the anchor without tightening around it or judging the distraction.',
+          durationSeconds: 120,
+        ),
+        MeditationStep(
+          label: 'Widen',
+          guidance:
+              'Keep the anchor present while allowing sounds and other sensations into awareness.',
+          durationSeconds: 105,
+        ),
+        MeditationStep(
+          label: 'Close',
+          guidance:
+              'Let the anchor go and notice the room before choosing what you will do next.',
+          durationSeconds: 90,
+        ),
+      ],
+    ),
+    MeditationContent(
+      id: 'sitting-with-uncertainty-8',
+      title: 'Sitting with Uncertainty',
+      subtitle: 'Practise making room for not knowing without solving the next moment.',
+      durationSeconds: 480,
+      category: MeditationCategory.anxiety,
+      accessTier: MeditationAccessTier.premium,
+      backgroundSoundId: 'releaf-atmosphere-02',
+      backgroundSoundVolume: 0.12,
+      seriesId: deeperPracticeSeriesId,
+      seriesOrder: 2,
+      steps: [
+        MeditationStep(
+          label: 'Orient',
+          guidance:
+              'Notice the room, the surface beneath you, and one ordinary sound around you.',
+          durationSeconds: 60,
+        ),
+        MeditationStep(
+          label: 'Name',
+          guidance:
+              'Notice that uncertainty is here without turning it into a prediction about what will happen.',
+          durationSeconds: 80,
+        ),
+        MeditationStep(
+          label: 'Body',
+          guidance:
+              'Find where the feeling shows up physically and describe the sensation simply.',
+          durationSeconds: 90,
+        ),
+        MeditationStep(
+          label: 'Allow',
+          guidance:
+              'See if the sensation can be present for this moment without needing to disappear first.',
+          durationSeconds: 90,
+        ),
+        MeditationStep(
+          label: 'Space',
+          guidance:
+              'Let thoughts come and go while keeping some attention with the body and the room.',
+          durationSeconds: 90,
+        ),
+        MeditationStep(
+          label: 'Return',
+          guidance:
+              'Finish by choosing one useful next action that does not require certainty.',
+          durationSeconds: 70,
+        ),
+      ],
+    ),
+    MeditationContent(
+      id: 'whole-body-scan-10',
+      title: 'Whole Body Scan',
+      subtitle: 'A slower scan through the body with time to notice each region.',
+      durationSeconds: 600,
+      category: MeditationCategory.body,
+      accessTier: MeditationAccessTier.premium,
+      backgroundSoundId: 'releaf-atmosphere-01',
+      backgroundSoundVolume: 0.13,
+      seriesId: deeperPracticeSeriesId,
+      seriesOrder: 3,
+      steps: [
+        MeditationStep(
+          label: 'Settle',
+          guidance:
+              'Notice the weight of the body and the points that are supported.',
+          durationSeconds: 60,
+        ),
+        MeditationStep(
+          label: 'Face & Neck',
+          guidance:
+              'Move attention through the face, jaw, neck, and the space around the eyes.',
+          durationSeconds: 90,
+        ),
+        MeditationStep(
+          label: 'Upper Body',
+          guidance:
+              'Notice shoulders, arms, hands, upper back, and any changing sensations there.',
+          durationSeconds: 100,
+        ),
+        MeditationStep(
+          label: 'Center',
+          guidance:
+              'Bring attention through the chest, ribs, abdomen, and lower back.',
+          durationSeconds: 100,
+        ),
+        MeditationStep(
+          label: 'Lower Body',
+          guidance:
+              'Notice hips, legs, knees, ankles, and feet without needing them to relax.',
+          durationSeconds: 100,
+        ),
+        MeditationStep(
+          label: 'Whole Body',
+          guidance:
+              'Let the whole body be present as one changing field of sensation.',
+          durationSeconds: 100,
+        ),
+        MeditationStep(
+          label: 'Close',
+          guidance:
+              'Widen attention to sounds and the room, then let the practice end.',
+          durationSeconds: 50,
+        ),
+      ],
+    ),
+    MeditationContent(
+      id: 'open-field-10',
+      title: 'Open Field',
+      subtitle: 'Stay with a wider field of sounds, sensations, and thoughts.',
+      durationSeconds: 600,
+      category: MeditationCategory.mind,
+      accessTier: MeditationAccessTier.premium,
+      backgroundSoundId: 'releaf-atmosphere-02',
+      backgroundSoundVolume: 0.11,
+      seriesId: deeperPracticeSeriesId,
+      seriesOrder: 4,
+      steps: [
+        MeditationStep(
+          label: 'Anchor',
+          guidance:
+              'Begin with one simple sensation until attention feels settled enough to widen.',
+          durationSeconds: 90,
+        ),
+        MeditationStep(
+          label: 'Sounds',
+          guidance:
+              'Let sounds arrive and leave without choosing which one should be present.',
+          durationSeconds: 100,
+        ),
+        MeditationStep(
+          label: 'Body',
+          guidance:
+              'Include sensations throughout the body without moving from one region to another.',
+          durationSeconds: 100,
+        ),
+        MeditationStep(
+          label: 'Thoughts',
+          guidance:
+              'Notice thoughts as events appearing in the same field rather than instructions to follow.',
+          durationSeconds: 100,
+        ),
+        MeditationStep(
+          label: 'Open',
+          guidance:
+              'Allow sounds, sensations, thoughts, and silence to share attention without holding one tightly.',
+          durationSeconds: 140,
+        ),
+        MeditationStep(
+          label: 'Close',
+          guidance:
+              'Narrow attention back to the body, then reconnect with the room.',
+          durationSeconds: 70,
         ),
       ],
     ),

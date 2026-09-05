@@ -32,6 +32,17 @@ class MeditationScreen extends ConsumerWidget {
       orElse: () => foundations.first,
     );
 
+    final deeperPractice =
+        catalog.getSeries(MeditationCatalog.deeperPracticeSeriesId);
+    final deeperIds = deeperPractice.map((item) => item.id);
+    final completedDeeper = library.completedInSeries(deeperIds);
+    final nextDeeper = deeperPractice.isEmpty
+        ? null
+        : deeperPractice.firstWhere(
+            (item) => !library.isCompleted(item.id),
+            orElse: () => deeperPractice.first,
+          );
+
     final featured = all.firstWhere(
       (item) => !library.isCompleted(item.id),
       orElse: () => all.first,
@@ -108,7 +119,13 @@ class MeditationScreen extends ConsumerWidget {
                                 onPressed: () => open(featured),
                               ),
                               const SizedBox(height: ReleafSpacing.section),
-                              _FoundationsCourseCard(
+                              _CourseCard(
+                                courseKey:
+                                    const Key('meditation-foundations-course'),
+                                eyebrow: 'FOUNDATIONS',
+                                title: 'Learn the basics in sequence.',
+                                icon: Icons.menu_book_rounded,
+                                accent: const Color(0xFFB8AFC2),
                                 completed: completedFoundations,
                                 total: foundations.length,
                                 nextItem: nextFoundation,
@@ -116,6 +133,23 @@ class MeditationScreen extends ConsumerWidget {
                                     nextFoundation.isPremium && !isPremium,
                                 onPressed: () => open(nextFoundation),
                               ),
+                              if (nextDeeper != null) ...[
+                                const SizedBox(height: ReleafSpacing.sm),
+                                _CourseCard(
+                                  courseKey:
+                                      const Key('meditation-deeper-course'),
+                                  eyebrow: 'DEEPER PRACTICE',
+                                  title: 'Stay longer with one practice.',
+                                  icon: Icons.hourglass_bottom_rounded,
+                                  accent: const Color(0xFFC7A9D2),
+                                  completed: completedDeeper,
+                                  total: deeperPractice.length,
+                                  nextItem: nextDeeper,
+                                  isLocked:
+                                      nextDeeper.isPremium && !isPremium,
+                                  onPressed: () => open(nextDeeper),
+                                ),
+                              ],
                               if (recent.isNotEmpty) ...[
                                 const SizedBox(height: ReleafSpacing.section),
                                 const _EditorialHeading(
@@ -498,8 +532,13 @@ class _FeaturedPractice extends StatelessWidget {
   }
 }
 
-class _FoundationsCourseCard extends StatelessWidget {
-  const _FoundationsCourseCard({
+class _CourseCard extends StatelessWidget {
+  const _CourseCard({
+    required this.courseKey,
+    required this.eyebrow,
+    required this.title,
+    required this.icon,
+    required this.accent,
     required this.completed,
     required this.total,
     required this.nextItem,
@@ -507,6 +546,11 @@ class _FoundationsCourseCard extends StatelessWidget {
     required this.onPressed,
   });
 
+  final Key courseKey;
+  final String eyebrow;
+  final String title;
+  final IconData icon;
+  final Color accent;
   final int completed;
   final int total;
   final MeditationContent nextItem;
@@ -518,37 +562,40 @@ class _FoundationsCourseCard extends StatelessWidget {
     final progress = total == 0 ? 0.0 : completed / total;
 
     return Container(
-      key: const Key('meditation-foundations-course'),
+      key: courseKey,
       padding: const EdgeInsets.all(ReleafSpacing.lg),
       decoration: BoxDecoration(
         color: const Color(0xE7111614),
         borderRadius: BorderRadius.circular(ReleafRadii.large),
-        border: Border.all(
-          color: const Color(0xFF9C8FA6).withValues(alpha: 0.22),
-        ),
+        border: Border.all(color: accent.withValues(alpha: 0.22)),
+        boxShadow: [
+          BoxShadow(
+            color: accent.withValues(alpha: 0.035),
+            blurRadius: 22,
+            offset: const Offset(0, 10),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Expanded(
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'FOUNDATIONS',
-                      style: TextStyle(
-                        fontFamily: 'Poppins',
-                        color: Color(0xFFB8AFC2),
+                      eyebrow,
+                      style: ReleafTypography.eyebrow.copyWith(
+                        color: accent,
                         fontSize: 10,
-                        fontWeight: FontWeight.w700,
                         letterSpacing: 1.5,
                       ),
                     ),
-                    SizedBox(height: 5),
+                    const SizedBox(height: 5),
                     Text(
-                      'Learn the basics in sequence.',
+                      title,
                       style: ReleafTypography.sectionTitle,
                     ),
                   ],
@@ -558,7 +605,7 @@ class _FoundationsCourseCard extends StatelessWidget {
               Text(
                 '$completed/$total',
                 style: ReleafTypography.cardTitle.copyWith(
-                  color: const Color(0xFFD7CDD9),
+                  color: accent.withValues(alpha: 0.92),
                 ),
               ),
             ],
@@ -570,9 +617,7 @@ class _FoundationsCourseCard extends StatelessWidget {
               minHeight: 6,
               value: progress,
               backgroundColor: const Color(0xFF24232A),
-              valueColor: const AlwaysStoppedAnimation<Color>(
-                Color(0xFF9C8FA6),
-              ),
+              valueColor: AlwaysStoppedAnimation<Color>(accent),
             ),
           ),
           const SizedBox(height: ReleafSpacing.md),
@@ -582,12 +627,15 @@ class _FoundationsCourseCard extends StatelessWidget {
                 width: 42,
                 height: 42,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF211E25),
+                  color: accent.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: accent.withValues(alpha: 0.14),
+                  ),
                 ),
-                child: const Icon(
-                  Icons.menu_book_rounded,
-                  color: Color(0xFFB8AFC2),
+                child: Icon(
+                  icon,
+                  color: accent,
                   size: 20,
                 ),
               ),
@@ -615,7 +663,8 @@ class _FoundationsCourseCard extends StatelessWidget {
               ),
               const SizedBox(width: ReleafSpacing.sm),
               IconButton.filledTonal(
-                tooltip: isLocked ? 'Unlock next practice' : 'Open next practice',
+                tooltip:
+                    isLocked ? 'Unlock next practice' : 'Open next practice',
                 onPressed: onPressed,
                 icon: Icon(
                   isLocked

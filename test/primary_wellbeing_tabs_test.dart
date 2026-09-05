@@ -107,6 +107,34 @@ Future<void> _pumpRoute(
 }
 
 void main() {
+  test('Meditation catalog keeps every session duration internally valid', () {
+    const catalog = MeditationCatalog();
+
+    for (final item in catalog.getAll()) {
+      final stepDuration = item.steps.fold<int>(
+        0,
+        (total, step) => total + step.durationSeconds,
+      );
+      expect(
+        stepDuration,
+        item.durationSeconds,
+        reason: '${item.id} steps must equal the declared session duration',
+      );
+    }
+  });
+
+  test('Meditation catalog exposes a premium Deeper Practice course', () {
+    const catalog = MeditationCatalog();
+    final course =
+        catalog.getSeries(MeditationCatalog.deeperPracticeSeriesId);
+
+    expect(course, hasLength(4));
+    expect(course.every((item) => item.isPremium), isTrue);
+    expect(course.first.title, 'Steady Attention');
+    expect(course.last.title, 'Open Field');
+    expect(course.every((item) => item.durationSeconds >= 480), isTrue);
+  });
+
   test('Meditation catalog exposes a real Foundations series', () {
     const catalog = MeditationCatalog();
     final foundations = catalog.getSeries(MeditationCatalog.foundationsSeriesId);
