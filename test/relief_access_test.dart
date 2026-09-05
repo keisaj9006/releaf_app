@@ -290,9 +290,11 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 250));
 
-    await tester.ensureVisible(find.text(premiumSession.title));
+    final premiumHubCard =
+        find.byKey(const Key('reset-session-wired-steady'));
+    await tester.ensureVisible(premiumHubCard);
     await tester.pump();
-    await tester.tap(find.text(premiumSession.title));
+    await tester.tap(premiumHubCard);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 250));
 
@@ -301,14 +303,14 @@ void main() {
       findsOneWidget,
     );
     expect(find.byKey(const Key('reset-preview-unlock')), findsOneWidget);
-    expect(find.text('03:00'), findsNothing);
+    expect(find.text('08:00'), findsNothing);
 
     await tester.tap(find.byKey(const Key('reset-preview-unlock')));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 250));
 
     expect(find.text('Unlock Premium'), findsOneWidget);
-    expect(find.text('03:00'), findsNothing);
+    expect(find.text('08:00'), findsNothing);
   });
 
   testWidgets('A direct premium route cannot bypass entitlement', (
@@ -410,7 +412,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 250));
 
-    expect(find.text('Reset'), findsOneWidget);
+    expect(find.text('What do you need right now?'), findsOneWidget);
     expect(find.text('Page Not Found'), findsNothing);
   });
 
@@ -461,7 +463,7 @@ void main() {
     final state = container.read(leavesNotifierProvider);
     expect(state.reliefDone, isFalse);
     expect(state.totalLeaves, 0);
-    expect(find.text('Reset'), findsOneWidget);
+    expect(find.text('What do you need right now?'), findsOneWidget);
   });
 
   testWidgets('60s Grounding advances through visible grounding steps', (
