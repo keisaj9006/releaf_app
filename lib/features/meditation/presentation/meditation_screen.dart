@@ -781,27 +781,33 @@ class _PracticeCardState extends State<_PracticeCard> {
                     compact: true,
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(ReleafSpacing.md),
+                Positioned(
+                  top: ReleafSpacing.md,
+                  left: ReleafSpacing.md,
+                  child: _CategoryPill(item: widget.item),
+                ),
+                Positioned(
+                  left: ReleafSpacing.md,
+                  right: ReleafSpacing.md,
+                  bottom: ReleafSpacing.md,
                   child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _CategoryPill(item: widget.item),
-                      const Spacer(),
                       Text(
                         widget.item.title,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: ReleafTypography.cardTitle.copyWith(fontSize: 17),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 3),
                       Text(
                         _durationLabel(widget.item),
                         style: ReleafTypography.meta.copyWith(
                           color: ReleafColors.textSecondary,
                         ),
                       ),
-                      const SizedBox(height: ReleafSpacing.sm),
+                      const SizedBox(height: ReleafSpacing.xs),
                       Row(
                         children: [
                           Text(
