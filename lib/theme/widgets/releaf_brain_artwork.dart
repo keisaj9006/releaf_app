@@ -11,6 +11,10 @@ enum ReleafBrainArtworkVariant {
   mathRace,
   brokenMirror,
   ruleShift,
+  sequenceEcho,
+  colorConflict,
+  patternLogic,
+  signalScan,
 }
 
 class ReleafBrainArtwork extends StatelessWidget {
@@ -78,6 +82,14 @@ class _ReleafBrainArtworkPainter extends CustomPainter {
         _drawMirrorFragments(canvas, size, palette, intensity);
       case ReleafBrainArtworkVariant.ruleShift:
         _drawRuleShift(canvas, size, palette, intensity);
+      case ReleafBrainArtworkVariant.sequenceEcho:
+        _drawSequenceEcho(canvas, size, palette, intensity);
+      case ReleafBrainArtworkVariant.colorConflict:
+        _drawColorConflict(canvas, size, palette, intensity);
+      case ReleafBrainArtworkVariant.patternLogic:
+        _drawPatternLogic(canvas, size, palette, intensity);
+      case ReleafBrainArtworkVariant.signalScan:
+        _drawSignalScan(canvas, size, palette, intensity);
     }
 
     _drawStructuredParticles(canvas, size, palette, variant.index, intensity);
@@ -400,6 +412,166 @@ void _drawRuleShift(
   }
 }
 
+void _drawSequenceEcho(
+  Canvas canvas,
+  Size size,
+  _BrainPalette palette,
+  double intensity,
+) {
+  final points = <Offset>[
+    Offset(size.width * 0.44, size.height * 0.34),
+    Offset(size.width * 0.61, size.height * 0.24),
+    Offset(size.width * 0.78, size.height * 0.38),
+    Offset(size.width * 0.70, size.height * 0.58),
+    Offset(size.width * 0.50, size.height * 0.64),
+  ];
+
+  for (var i = 0; i < points.length - 1; i++) {
+    canvas.drawLine(
+      points[i],
+      points[i + 1],
+      Paint()
+        ..color = palette.highlight.withValues(alpha: 0.38 * intensity)
+        ..strokeWidth = math.max(1.5, size.shortestSide * 0.008),
+    );
+  }
+
+  for (var i = 0; i < points.length; i++) {
+    final radius = math.max(5, size.shortestSide * (0.024 + i * 0.004));
+    canvas.drawCircle(
+      points[i],
+      radius * 2.2,
+      Paint()
+        ..color = palette.primary.withValues(alpha: 0.10 * intensity)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10),
+    );
+    canvas.drawCircle(
+      points[i],
+      radius,
+      Paint()
+        ..color = palette.highlight.withValues(alpha: 0.72 * intensity),
+    );
+  }
+}
+
+void _drawColorConflict(
+  Canvas canvas,
+  Size size,
+  _BrainPalette palette,
+  double intensity,
+) {
+  final rects = <Rect>[
+    Rect.fromLTWH(
+      size.width * 0.42,
+      size.height * 0.24,
+      size.width * 0.34,
+      size.height * 0.10,
+    ),
+    Rect.fromLTWH(
+      size.width * 0.52,
+      size.height * 0.40,
+      size.width * 0.28,
+      size.height * 0.10,
+    ),
+    Rect.fromLTWH(
+      size.width * 0.39,
+      size.height * 0.56,
+      size.width * 0.38,
+      size.height * 0.10,
+    ),
+  ];
+  final colors = [palette.primary, palette.secondary, palette.highlight];
+
+  for (var i = 0; i < rects.length; i++) {
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        rects[i],
+        Radius.circular(size.shortestSide * 0.04),
+      ),
+      Paint()
+        ..color = colors[i].withValues(alpha: 0.36 * intensity),
+    );
+    canvas.drawLine(
+      rects[i].topLeft + Offset(rects[i].width * 0.14, rects[i].height / 2),
+      rects[i].topRight - Offset(rects[i].width * 0.14, -rects[i].height / 2),
+      Paint()
+        ..color = palette.highlight.withValues(alpha: 0.56 * intensity)
+        ..strokeWidth = math.max(2, size.shortestSide * 0.012)
+        ..strokeCap = StrokeCap.round,
+    );
+  }
+}
+
+void _drawPatternLogic(
+  Canvas canvas,
+  Size size,
+  _BrainPalette palette,
+  double intensity,
+) {
+  final origin = Offset(size.width * 0.46, size.height * 0.28);
+  final cell = size.shortestSide * 0.11;
+
+  for (var row = 0; row < 3; row++) {
+    for (var col = 0; col < 3; col++) {
+      final center = origin + Offset(col * cell * 1.28, row * cell * 1.28);
+      final selected = row == 2 && col == 2;
+      canvas.drawCircle(
+        center,
+        cell * 0.36,
+        Paint()
+          ..style = selected ? PaintingStyle.stroke : PaintingStyle.fill
+          ..strokeWidth = 2
+          ..color = (selected ? palette.highlight : palette.primary)
+              .withValues(alpha: (selected ? 0.74 : 0.26) * intensity),
+      );
+      if ((row + col).isEven && !selected) {
+        canvas.drawCircle(
+          center,
+          cell * 0.12,
+          Paint()
+            ..color =
+                palette.highlight.withValues(alpha: 0.65 * intensity),
+        );
+      }
+    }
+  }
+}
+
+void _drawSignalScan(
+  Canvas canvas,
+  Size size,
+  _BrainPalette palette,
+  double intensity,
+) {
+  final origin = Offset(size.width * 0.43, size.height * 0.24);
+  final step = size.shortestSide * 0.085;
+
+  for (var row = 0; row < 5; row++) {
+    for (var col = 0; col < 5; col++) {
+      final point = origin + Offset(col * step, row * step);
+      final target = row == 3 && col == 2;
+      canvas.drawCircle(
+        point,
+        target ? step * 0.22 : step * 0.10,
+        Paint()
+          ..color = (target ? palette.highlight : palette.primary)
+              .withValues(alpha: (target ? 0.88 : 0.28) * intensity),
+      );
+      if (target) {
+        canvas.drawCircle(
+          point,
+          step * 0.42,
+          Paint()
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 1.4
+            ..color =
+                palette.secondary.withValues(alpha: 0.56 * intensity),
+        );
+      }
+    }
+  }
+}
+
 void _drawStructuredParticles(
   Canvas canvas,
   Size size,
@@ -494,6 +666,34 @@ _BrainPalette _paletteFor(ReleafBrainArtworkVariant variant) {
       primary: Color(0xFF9D83E0),
       secondary: Color(0xFF5C86A7),
       highlight: Color(0xFFE2DAFF),
+    ),
+    ReleafBrainArtworkVariant.sequenceEcho => const _BrainPalette(
+      background: Color(0xFF111A29),
+      backgroundEnd: Color(0xFF090E17),
+      primary: Color(0xFF6E8FD0),
+      secondary: Color(0xFF5CB7A8),
+      highlight: Color(0xFFDDE7FF),
+    ),
+    ReleafBrainArtworkVariant.colorConflict => const _BrainPalette(
+      background: Color(0xFF21151E),
+      backgroundEnd: Color(0xFF100B10),
+      primary: Color(0xFFD77A9D),
+      secondary: Color(0xFF6DB8B0),
+      highlight: Color(0xFFFFDDE8),
+    ),
+    ReleafBrainArtworkVariant.patternLogic => const _BrainPalette(
+      background: Color(0xFF181828),
+      backgroundEnd: Color(0xFF0A0A13),
+      primary: Color(0xFF8E86D7),
+      secondary: Color(0xFFB58B5A),
+      highlight: Color(0xFFE7E2FF),
+    ),
+    ReleafBrainArtworkVariant.signalScan => const _BrainPalette(
+      background: Color(0xFF0F1D20),
+      backgroundEnd: Color(0xFF081012),
+      primary: Color(0xFF55A6A0),
+      secondary: Color(0xFF6C7FC2),
+      highlight: Color(0xFFD9FFF8),
     ),
   };
 }
