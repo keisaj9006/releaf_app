@@ -43,7 +43,6 @@ Future<void> maybeShowPaywall(
     context: context,
     isScrollControlled: true,
     backgroundColor: ReleafColors.backgroundRaised,
-    surfaceTintColor: Colors.transparent,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(
         top: Radius.circular(ReleafRadii.extraLarge),
