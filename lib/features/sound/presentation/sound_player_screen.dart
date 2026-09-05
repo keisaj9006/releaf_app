@@ -72,131 +72,215 @@ class _SoundPlayerScreenState extends ConsumerState<SoundPlayerScreen> {
           children: [
             const Positioned.fill(child: _PlayerBackdrop()),
             SafeArea(
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 720),
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(
+              child: LayoutBuilder(
+                builder: (context, viewport) {
+                  final compact = viewport.maxHeight < 760 ||
+                      viewport.maxWidth < 360;
+                  final artSize = math.min(
+                    compact ? 190.0 : 320.0,
+                    viewport.maxWidth * (compact ? 0.68 : 0.62),
+                  );
+
+                  return SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    padding: EdgeInsets.fromLTRB(
                       ReleafSpacing.screen,
-                      ReleafSpacing.lg,
+                      compact ? ReleafSpacing.sm : ReleafSpacing.lg,
                       ReleafSpacing.screen,
-                      ReleafSpacing.xl,
+                      compact ? ReleafSpacing.md : ReleafSpacing.xl,
                     ),
-                    child: Column(
-                      children: [
-                        Row(
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 720),
+                        child: Column(
                           children: [
-                            ReleafRoundIconButton(
-                              icon: Icons.keyboard_arrow_down_rounded,
-                              tooltip: 'Close player',
-                              onPressed: context.pop,
+                            Row(
+                              children: [
+                                ReleafRoundIconButton(
+                                  icon: Icons.keyboard_arrow_down_rounded,
+                                  tooltip: 'Close player',
+                                  onPressed: context.pop,
+                                ),
+                                const Spacer(),
+                                Text(
+                                  'SOUND SPACE',
+                                  style: ReleafTypography.eyebrow.copyWith(
+                                    color: ReleafColors.sage,
+                                    letterSpacing: 1.8,
+                                  ),
+                                ),
+                                const Spacer(),
+                                ReleafRoundIconButton(
+                                  icon: favorite
+                                      ? Icons.favorite_rounded
+                                      : Icons.favorite_border_rounded,
+                                  tooltip: favorite
+                                      ? 'Remove favorite'
+                                      : 'Add favorite',
+                                  onPressed: () =>
+                                      controller.toggleFavorite(track.id),
+                                ),
+                              ],
                             ),
-                            const Spacer(),
+                            SizedBox(
+                              height: compact
+                                  ? ReleafSpacing.md
+                                  : ReleafSpacing.xxl,
+                            ),
+                            SizedBox(
+                              width: artSize,
+                              height: artSize,
+                              child: _SoundArtworkDisc(
+                                isPlaying: isPlaying,
+                                progress: _progress(position, duration),
+                                variant: track.id.endsWith('02')
+                                    ? ReleafArtworkVariant.focus
+                                    : ReleafArtworkVariant.ambient,
+                                reducedMotion: MediaQuery.maybeOf(context)
+                                        ?.disableAnimations ??
+                                    false,
+                              ),
+                            ),
+                            SizedBox(
+                              height: compact
+                                  ? ReleafSpacing.md
+                                  : ReleafSpacing.xl,
+                            ),
+                            DecoratedBox(
+                              decoration: BoxDecoration(
+                                color: ReleafColors.sage.withValues(alpha: 0.08),
+                                borderRadius:
+                                    BorderRadius.circular(ReleafRadii.pill),
+                                border: Border.all(
+                                  color: ReleafColors.sage.withValues(
+                                    alpha: 0.20,
+                                  ),
+                                ),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 11,
+                                  vertical: 6,
+                                ),
+                                child: Text(
+                                  isPlaying ? 'PLAYING' : 'PAUSED',
+                                  key: const Key('sound-player-state'),
+                                  style: ReleafTypography.eyebrow.copyWith(
+                                    fontSize: 9,
+                                    color: ReleafColors.sage,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: ReleafSpacing.sm),
                             Text(
-                              'SOUND',
-                              style: ReleafTypography.eyebrow.copyWith(
-                                color: ReleafColors.sage,
+                              track.title,
+                              textAlign: TextAlign.center,
+                              style: ReleafTypography.display.copyWith(
+                                fontSize: compact ? 25 : 28,
+                                letterSpacing: -0.7,
                               ),
                             ),
-                            const Spacer(),
-                            ReleafRoundIconButton(
-                              icon: favorite
-                                  ? Icons.favorite_rounded
-                                  : Icons.favorite_border_rounded,
-                              tooltip:
-                                  favorite ? 'Remove favorite' : 'Add favorite',
-                              onPressed: () =>
-                                  controller.toggleFavorite(track.id),
+                            const SizedBox(height: ReleafSpacing.xs),
+                            ConstrainedBox(
+                              constraints:
+                                  const BoxConstraints(maxWidth: 460),
+                              child: Text(
+                                track.subtitle,
+                                textAlign: TextAlign.center,
+                                style: ReleafTypography.meta.copyWith(
+                                  color: ReleafColors.textSecondary,
+                                  height: 1.45,
+                                ),
+                              ),
                             ),
+                            SizedBox(
+                              height: compact
+                                  ? ReleafSpacing.md
+                                  : ReleafSpacing.xl,
+                            ),
+                            _PositionSlider(
+                              position: position,
+                              duration: duration,
+                              onChanged: (value) {
+                                if (duration.inMilliseconds <= 0) return;
+                                controller.seekTo(
+                                  Duration(
+                                    milliseconds:
+                                        (duration.inMilliseconds * value)
+                                            .round(),
+                                  ),
+                                );
+                              },
+                            ),
+                            SizedBox(
+                              height: compact
+                                  ? ReleafSpacing.xs
+                                  : ReleafSpacing.md,
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                IconButton(
+                                  tooltip: 'Back 15 seconds',
+                                  onPressed: () => controller.seekRelative(
+                                    const Duration(seconds: -15),
+                                  ),
+                                  icon: const Icon(Icons.replay_10_rounded),
+                                  iconSize: compact ? 26 : 30,
+                                ),
+                                SizedBox(
+                                  width: compact
+                                      ? ReleafSpacing.md
+                                      : ReleafSpacing.lg,
+                                ),
+                                _PrimaryPlayButton(
+                                  isPlaying: isPlaying,
+                                  compact: compact,
+                                  onPressed: isCurrent
+                                      ? controller.togglePlayPause
+                                      : () => controller.play(track),
+                                ),
+                                SizedBox(
+                                  width: compact
+                                      ? ReleafSpacing.md
+                                      : ReleafSpacing.lg,
+                                ),
+                                IconButton(
+                                  tooltip: 'Forward 15 seconds',
+                                  onPressed: () => controller.seekRelative(
+                                    const Duration(seconds: 15),
+                                  ),
+                                  icon: const Icon(Icons.forward_10_rounded),
+                                  iconSize: compact ? 26 : 30,
+                                ),
+                              ],
+                            ),
+                            SizedBox(
+                              height: compact
+                                  ? ReleafSpacing.md
+                                  : ReleafSpacing.xl,
+                            ),
+                            _VolumeControl(
+                              volume: state.volume,
+                              onChanged: controller.setVolume,
+                            ),
+                            SizedBox(
+                              height: compact
+                                  ? ReleafSpacing.md
+                                  : ReleafSpacing.lg,
+                            ),
+                            _SleepTimer(
+                              selectedMinutes: state.sleepTimerMinutes,
+                              onSelected: controller.setSleepTimer,
+                            ),
+                            const SizedBox(height: ReleafSpacing.sm),
                           ],
                         ),
-                        const SizedBox(height: ReleafSpacing.xl),
-                        Expanded(
-                          child: Center(
-                            child: _SoundArtworkDisc(
-                              isPlaying: isPlaying,
-                              progress: _progress(position, duration),
-                              variant: track.id.endsWith('02')
-                                  ? ReleafArtworkVariant.focus
-                                  : ReleafArtworkVariant.ambient,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: ReleafSpacing.lg),
-                        Text(
-                          track.title,
-                          textAlign: TextAlign.center,
-                          style: ReleafTypography.display.copyWith(
-                            fontSize: 28,
-                            letterSpacing: -0.7,
-                          ),
-                        ),
-                        const SizedBox(height: ReleafSpacing.xs),
-                        Text(
-                          track.subtitle,
-                          textAlign: TextAlign.center,
-                          style: ReleafTypography.meta.copyWith(
-                            color: ReleafColors.textSecondary,
-                          ),
-                        ),
-                        const SizedBox(height: ReleafSpacing.xl),
-                        _PositionSlider(
-                          position: position,
-                          duration: duration,
-                          onChanged: (value) {
-                            if (duration.inMilliseconds <= 0) return;
-                            controller.seekTo(
-                              Duration(
-                                milliseconds:
-                                    (duration.inMilliseconds * value).round(),
-                              ),
-                            );
-                          },
-                        ),
-                        const SizedBox(height: ReleafSpacing.md),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            IconButton(
-                              tooltip: 'Back 15 seconds',
-                              onPressed: () => controller.seekRelative(
-                                const Duration(seconds: -15),
-                              ),
-                              icon: const Icon(Icons.replay_10_rounded),
-                              iconSize: 30,
-                            ),
-                            const SizedBox(width: ReleafSpacing.lg),
-                            _PrimaryPlayButton(
-                              isPlaying: isPlaying,
-                              onPressed: isCurrent
-                                  ? controller.togglePlayPause
-                                  : () => controller.play(track),
-                            ),
-                            const SizedBox(width: ReleafSpacing.lg),
-                            IconButton(
-                              tooltip: 'Forward 15 seconds',
-                              onPressed: () => controller.seekRelative(
-                                const Duration(seconds: 15),
-                              ),
-                              icon: const Icon(Icons.forward_10_rounded),
-                              iconSize: 30,
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: ReleafSpacing.xl),
-                        _VolumeControl(
-                          volume: state.volume,
-                          onChanged: controller.setVolume,
-                        ),
-                        const SizedBox(height: ReleafSpacing.lg),
-                        _SleepTimer(
-                          selectedMinutes: state.sleepTimerMinutes,
-                          onSelected: controller.setSleepTimer,
-                        ),
-                      ],
+                      ),
                     ),
-                  ),
-                ),
+                  );
+                },
               ),
             ),
           ],
@@ -368,10 +452,12 @@ class _PrimaryPlayButton extends StatelessWidget {
   const _PrimaryPlayButton({
     required this.isPlaying,
     required this.onPressed,
+    this.compact = false,
   });
 
   final bool isPlaying;
   final VoidCallback onPressed;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
@@ -379,8 +465,8 @@ class _PrimaryPlayButton extends StatelessWidget {
       onTap: onPressed,
       radius: 42,
       child: Container(
-        width: 76,
-        height: 76,
+        width: compact ? 66 : 76,
+        height: compact ? 66 : 76,
         decoration: const BoxDecoration(
           shape: BoxShape.circle,
           color: ReleafColors.sage,
@@ -395,7 +481,7 @@ class _PrimaryPlayButton extends StatelessWidget {
         alignment: Alignment.center,
         child: Icon(
           isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
-          size: 38,
+          size: compact ? 33 : 38,
           color: ReleafColors.background,
         ),
       ),
