@@ -262,6 +262,7 @@ void main() {
     final initialException = tester.takeException();
     if (initialException is FlutterError) {
       debugPrint(initialException.toStringDeep());
+      debugDumpRenderTree();
     }
     expect(initialException, isNull);
 
