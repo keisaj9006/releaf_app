@@ -436,6 +436,21 @@ class _ReliefScreenState extends ConsumerState<ReliefScreen> {
                                 },
                               ),
                               const SizedBox(height: ReleafSpacing.section),
+                              const _SectionPadding(
+                                child: ReleafSectionHeading(
+                                  title: 'Sound',
+                                  description:
+                                      'Ambient audio for quiet, focus and unwinding.',
+                                ),
+                              ),
+                              const SizedBox(height: ReleafSpacing.lg),
+                              _SectionPadding(
+                                child: _SoundGatewayCard(
+                                  onPressed: () =>
+                                      context.push(AppRoutes.sound),
+                                ),
+                              ),
+                              const SizedBox(height: ReleafSpacing.section),
                             ],
                           ),
                         ),
@@ -1040,6 +1055,101 @@ class _DeepResetCard extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SoundGatewayCard extends StatelessWidget {
+  const _SoundGatewayCard({required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      onTap: onPressed,
+      label: 'Open Sound. Ambient audio player and sound library.',
+      child: ReleafPressableCard(
+        key: const Key('reset-sound-gateway'),
+        onPressed: onPressed,
+        padding: EdgeInsets.zero,
+        child: SizedBox(
+          height: 190,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              const ReleafArtwork(variant: ReleafArtworkVariant.ambient),
+              const DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topRight,
+                    end: Alignment.bottomLeft,
+                    colors: [
+                      Color(0x10000000),
+                      Color(0x52000000),
+                      Color(0xEE000000),
+                    ],
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(ReleafSpacing.lg),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const _GlassLabel(
+                            label: 'AMBIENT AUDIO',
+                            isSage: true,
+                          ),
+                          const Spacer(),
+                          Text(
+                            'Sound Space',
+                            style: ReleafTypography.sectionTitle.copyWith(
+                              fontSize: 23,
+                              letterSpacing: -0.5,
+                            ),
+                          ),
+                          const SizedBox(height: ReleafSpacing.xxs),
+                          Text(
+                            'Play real bundled audio with looping, favorites '
+                            'and a sleep timer.',
+                            style: ReleafTypography.meta.copyWith(
+                              color: ReleafColors.textSecondary,
+                              height: 1.45,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: ReleafSpacing.md),
+                    Container(
+                      width: 50,
+                      height: 50,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: ReleafColors.sage.withValues(alpha: 0.10),
+                        border: Border.all(
+                          color: ReleafColors.sage.withValues(alpha: 0.30),
+                        ),
+                      ),
+                      alignment: Alignment.center,
+                      child: const Icon(
+                        Icons.graphic_eq_rounded,
+                        color: ReleafColors.sage,
+                        size: 24,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
