@@ -16,7 +16,10 @@ class ReleafSessionLivingForm extends StatefulWidget {
     required this.progress,
     required this.breathing,
     this.phaseLabel,
-    this.holdPhases = false,
+    this.inhaleSeconds = 4,
+    this.holdAfterInhaleSeconds = 0,
+    this.exhaleSeconds = 4,
+    this.holdAfterExhaleSeconds = 0,
     this.reducedMotion = false,
   });
 
@@ -24,7 +27,10 @@ class ReleafSessionLivingForm extends StatefulWidget {
   final double progress;
   final bool breathing;
   final String? phaseLabel;
-  final bool holdPhases;
+  final int inhaleSeconds;
+  final int holdAfterInhaleSeconds;
+  final int exhaleSeconds;
+  final int holdAfterExhaleSeconds;
   final bool reducedMotion;
 
   @override
@@ -41,9 +47,7 @@ class _ReleafSessionLivingFormState extends State<ReleafSessionLivingForm>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: Duration(
-        seconds: widget.holdPhases ? 16 : (widget.breathing ? 8 : 12),
-      ),
+      duration: Duration(seconds: _cycleSecondsFor(widget)),
     );
     _syncAnimation();
   }
@@ -52,14 +56,18 @@ class _ReleafSessionLivingFormState extends State<ReleafSessionLivingForm>
   void didUpdateWidget(covariant ReleafSessionLivingForm oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.breathing != widget.breathing ||
-        oldWidget.holdPhases != widget.holdPhases) {
-      _controller.duration = Duration(
-        seconds: widget.holdPhases ? 16 : (widget.breathing ? 8 : 12),
-      );
+        oldWidget.inhaleSeconds != widget.inhaleSeconds ||
+        oldWidget.holdAfterInhaleSeconds != widget.holdAfterInhaleSeconds ||
+        oldWidget.exhaleSeconds != widget.exhaleSeconds ||
+        oldWidget.holdAfterExhaleSeconds != widget.holdAfterExhaleSeconds) {
+      _controller.duration = Duration(seconds: _cycleSecondsFor(widget));
     }
     if (oldWidget.reducedMotion != widget.reducedMotion ||
         oldWidget.breathing != widget.breathing ||
-        oldWidget.holdPhases != widget.holdPhases) {
+        oldWidget.inhaleSeconds != widget.inhaleSeconds ||
+        oldWidget.holdAfterInhaleSeconds != widget.holdAfterInhaleSeconds ||
+        oldWidget.exhaleSeconds != widget.exhaleSeconds ||
+        oldWidget.holdAfterExhaleSeconds != widget.holdAfterExhaleSeconds) {
       _syncAnimation();
     }
   }
@@ -194,14 +202,35 @@ class _ReleafSessionLivingFormState extends State<ReleafSessionLivingForm>
       return (math.sin(t * math.pi * 2) + 1) / 2;
     }
 
-    if (!widget.holdPhases) {
-      return (1 - math.cos(t * math.pi * 2)) / 2;
-    }
+    final total = _cycleSecondsFor(widget).toDouble();
+    final inhaleEnd = widget.inhaleSeconds / total;
+    final holdInEnd =
+        (widget.inhaleSeconds + widget.holdAfterInhaleSeconds) / total;
+    final exhaleEnd =
+        (widget.inhaleSeconds +
+            widget.holdAfterInhaleSeconds +
+            widget.exhaleSeconds) /
+        total;
 
-    if (t < 0.25) return t / 0.25;
-    if (t < 0.50) return 1;
-    if (t < 0.75) return 1 - ((t - 0.50) / 0.25);
+    if (t < inhaleEnd) {
+      return inhaleEnd == 0 ? 1 : t / inhaleEnd;
+    }
+    if (t < holdInEnd) return 1;
+    if (t < exhaleEnd) {
+      final span = exhaleEnd - holdInEnd;
+      return span == 0 ? 0 : 1 - ((t - holdInEnd) / span);
+    }
     return 0;
+  }
+
+  static int _cycleSecondsFor(ReleafSessionLivingForm widget) {
+    if (!widget.breathing) return 12;
+    final total =
+        widget.inhaleSeconds +
+        widget.holdAfterInhaleSeconds +
+        widget.exhaleSeconds +
+        widget.holdAfterExhaleSeconds;
+    return math.max(1, total);
   }
 }
 
