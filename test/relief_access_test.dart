@@ -83,6 +83,56 @@ void main() {
     expect(find.text('Unlock Premium'), findsNothing);
   });
 
+  testWidgets('Paced breathing renders the Releaf Breath Path', (
+    WidgetTester tester,
+  ) async {
+    final preferences = await _preferences();
+    final router = createAppRouter(
+      initialLocation: AppRoutes.reliefSessionFor('90s-calm-down'),
+    );
+    addTearDown(router.dispose);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(preferences),
+        ],
+        child: MaterialApp.router(routerConfig: router),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.byKey(const Key('reset-living-form')), findsOneWidget);
+    expect(find.byKey(const Key('reset-breath-path')), findsOneWidget);
+    expect(find.text('Breathe in'), findsOneWidget);
+  });
+
+  testWidgets('Grounding stays breath-free and has no Breath Path', (
+    WidgetTester tester,
+  ) async {
+    final preferences = await _preferences();
+    final router = createAppRouter(
+      initialLocation: AppRoutes.reliefSessionFor('60s-grounding'),
+    );
+    addTearDown(router.dispose);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(preferences),
+        ],
+        child: MaterialApp.router(routerConfig: router),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.byKey(const Key('reset-living-form')), findsOneWidget);
+    expect(find.byKey(const Key('reset-breath-path')), findsNothing);
+    expect(find.text('Arrive'), findsOneWidget);
+  });
+
   testWidgets('A premium Relief preview cannot bypass the paywall', (
     WidgetTester tester,
   ) async {
