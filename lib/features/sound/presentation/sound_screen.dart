@@ -7,7 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../../../routing/app_routes.dart';
 import '../../../theme/app_theme.dart';
 import '../../../theme/releaf_design_tokens.dart';
-import '../../../theme/widgets/releaf_artwork.dart';
+import '../../../theme/widgets/releaf_sound_artwork.dart';
 import '../../../theme/widgets/releaf_components.dart';
 import '../application/sound_player_controller.dart';
 import '../data/sound_catalog.dart';
@@ -133,19 +133,28 @@ class _SoundBackdrop extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const DecoratedBox(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Color(0xFF0A1513),
-            ReleafColors.background,
-            Color(0xFF060A09),
-          ],
-          stops: [0, 0.46, 1],
+    return const Stack(
+      fit: StackFit.expand,
+      children: [
+        ReleafSoundArtwork(
+          variant: ReleafSoundArtworkVariant.field,
+          intensity: 0.72,
         ),
-      ),
+        DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color(0x9C061014),
+                Color(0xE4080F12),
+                ReleafColors.background,
+              ],
+              stops: [0, 0.50, 1],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -170,12 +179,20 @@ class _SoundHeader extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
+                'AMBIENT AUDIO',
+                style: ReleafTypography.eyebrow.copyWith(
+                  color: const Color(0xFF8FC3CC),
+                  letterSpacing: 1.7,
+                ),
+              ),
+              const SizedBox(height: 5),
+              Text(
                 'Sound',
                 style: ReleafTypography.display.copyWith(fontSize: 30),
               ),
               const SizedBox(height: 4),
               Text(
-                'A quieter layer for the moment you are in.',
+                'Long-form audio for focus, rest and lower-stimulation moments.',
                 style: ReleafTypography.meta.copyWith(
                   color: ReleafColors.textSecondary,
                 ),
@@ -201,97 +218,117 @@ class _FeaturedSound extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      onTap: onOpen,
-      label: '${track.title}. ${track.subtitle}',
-      child: ReleafPressableCard(
-        onPressed: onOpen,
-        padding: EdgeInsets.zero,
-        child: SizedBox(
-          height: 300,
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              const ReleafArtwork(variant: ReleafArtworkVariant.ambient),
-              const DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Color(0x08000000),
-                      Color(0x33000000),
-                      Color(0xE9000000),
-                    ],
-                    stops: [0, 0.52, 1],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact = constraints.maxWidth < 360;
+
+        return Semantics(
+          button: true,
+          onTap: onOpen,
+          label: '${track.title}. ${track.subtitle}',
+          child: ReleafPressableCard(
+            key: const Key('sound-featured-card'),
+            onPressed: onOpen,
+            padding: EdgeInsets.zero,
+            child: SizedBox(
+              height: compact ? 330 : 300,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  ReleafSoundArtwork(
+                    variant: _artworkForTrack(track.id),
+                    intensity: 0.96,
                   ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(ReleafSpacing.xl),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const _GlassTag(
+                  const DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Color(0x08000000),
+                          Color(0x33000000),
+                          Color(0xED03080A),
+                        ],
+                        stops: [0, 0.52, 1],
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    top: compact ? ReleafSpacing.lg : ReleafSpacing.xl,
+                    left: compact ? ReleafSpacing.lg : ReleafSpacing.xl,
+                    child: const _GlassTag(
                       icon: Icons.graphic_eq_rounded,
                       label: 'FEATURED SOUND',
                     ),
-                    const Spacer(),
-                    Text(
-                      track.title,
-                      style: ReleafTypography.display.copyWith(
-                        fontSize: 29,
-                        letterSpacing: -0.8,
-                      ),
-                    ),
-                    const SizedBox(height: ReleafSpacing.xs),
-                    ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 430),
-                      child: Text(
-                        track.subtitle,
-                        style: ReleafTypography.body.copyWith(
-                          color: ReleafColors.textPrimary.withValues(alpha: 0.76),
-                          height: 1.5,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: ReleafSpacing.lg),
-                    Row(
+                  ),
+                  Positioned(
+                    left: compact ? ReleafSpacing.lg : ReleafSpacing.xl,
+                    right: compact ? ReleafSpacing.lg : ReleafSpacing.xl,
+                    bottom: compact ? ReleafSpacing.lg : ReleafSpacing.xl,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        FilledButton.icon(
-                          onPressed: onOpen,
-                          icon: Icon(
-                            isPlaying
-                                ? Icons.equalizer_rounded
-                                : Icons.play_arrow_rounded,
-                          ),
-                          label: Text(
-                            isPlaying ? 'Playing now' : 'Open player',
-                          ),
-                          style: FilledButton.styleFrom(
-                            backgroundColor: ReleafColors.sage,
-                            foregroundColor: ReleafColors.background,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: ReleafSpacing.lg,
-                              vertical: 14,
-                            ),
+                        Text(
+                          track.title,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: ReleafTypography.display.copyWith(
+                            fontSize: compact ? 26 : 29,
+                            letterSpacing: -0.8,
                           ),
                         ),
-                        const SizedBox(width: ReleafSpacing.md),
-                        const _GlassTag(
-                          icon: Icons.all_inclusive_rounded,
-                          label: 'LOOPS',
+                        const SizedBox(height: ReleafSpacing.xs),
+                        Text(
+                          track.subtitle,
+                          maxLines: compact ? 3 : 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: ReleafTypography.body.copyWith(
+                            color:
+                                ReleafColors.textPrimary.withValues(alpha: 0.76),
+                            height: 1.45,
+                          ),
+                        ),
+                        const SizedBox(height: ReleafSpacing.md),
+                        Wrap(
+                          spacing: ReleafSpacing.sm,
+                          runSpacing: ReleafSpacing.xs,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          children: [
+                            FilledButton.icon(
+                              onPressed: onOpen,
+                              icon: Icon(
+                                isPlaying
+                                    ? Icons.equalizer_rounded
+                                    : Icons.play_arrow_rounded,
+                              ),
+                              label: Text(
+                                isPlaying ? 'Playing now' : 'Open player',
+                              ),
+                              style: FilledButton.styleFrom(
+                                backgroundColor: const Color(0xFFBFDDE2),
+                                foregroundColor: const Color(0xFF091216),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: ReleafSpacing.lg,
+                                  vertical: 14,
+                                ),
+                              ),
+                            ),
+                            const _GlassTag(
+                              icon: Icons.all_inclusive_rounded,
+                              label: 'LOOPS',
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
@@ -372,10 +409,9 @@ class _SoundTrackTile extends StatelessWidget {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          ReleafArtwork(
-            variant: track.id.endsWith('02')
-                ? ReleafArtworkVariant.focus
-                : ReleafArtworkVariant.ambient,
+          ReleafSoundArtwork(
+            variant: _artworkForTrack(track.id),
+            intensity: 0.84,
           ),
           const DecoratedBox(
             decoration: BoxDecoration(
@@ -561,7 +597,7 @@ class _GlassTag extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 13, color: ReleafColors.sage),
+            Icon(icon, size: 13, color: const Color(0xFF9CCBD3)),
             const SizedBox(width: 6),
             Text(
               label,
@@ -572,4 +608,11 @@ class _GlassTag extends StatelessWidget {
       ),
     );
   }
+}
+
+
+ReleafSoundArtworkVariant _artworkForTrack(String id) {
+  return id.endsWith('02')
+      ? ReleafSoundArtworkVariant.atmosphereTwo
+      : ReleafSoundArtworkVariant.atmosphereOne;
 }

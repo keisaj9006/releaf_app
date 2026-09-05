@@ -6,7 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../theme/app_theme.dart';
 import '../../../theme/releaf_design_tokens.dart';
-import '../../../theme/widgets/releaf_artwork.dart';
+import '../../../theme/widgets/releaf_sound_artwork.dart';
 import '../../../theme/widgets/releaf_components.dart';
 import '../application/sound_player_controller.dart';
 import '../data/sound_catalog.dart';
@@ -133,9 +133,7 @@ class _SoundPlayerScreenState extends ConsumerState<SoundPlayerScreen> {
                               child: _SoundArtworkDisc(
                                 isPlaying: isPlaying,
                                 progress: _progress(position, duration),
-                                variant: track.id.endsWith('02')
-                                    ? ReleafArtworkVariant.focus
-                                    : ReleafArtworkVariant.ambient,
+                                variant: _artworkForTrack(track.id),
                                 reducedMotion: MediaQuery.maybeOf(context)
                                         ?.disableAnimations ??
                                     false,
@@ -305,15 +303,18 @@ class _PlayerBackdrop extends StatelessWidget {
     return const Stack(
       fit: StackFit.expand,
       children: [
-        ReleafArtwork(variant: ReleafArtworkVariant.ambient),
+        ReleafSoundArtwork(
+          variant: ReleafSoundArtworkVariant.field,
+          intensity: 0.80,
+        ),
         DecoratedBox(
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                Color(0xC4070D0B),
-                Color(0xE90A100E),
+                Color(0xB8061014),
+                Color(0xE5070E12),
                 ReleafColors.background,
               ],
               stops: [0, 0.52, 1],
@@ -335,7 +336,7 @@ class _SoundArtworkDisc extends StatefulWidget {
 
   final bool isPlaying;
   final double progress;
-  final ReleafArtworkVariant variant;
+  final ReleafSoundArtworkVariant variant;
   final bool reducedMotion;
 
   @override
@@ -423,9 +424,9 @@ class _SoundArtworkDiscState extends State<_SoundArtworkDisc>
                   ),
                 ),
                 ClipOval(
-                  child: ReleafArtwork(
+                  child: ReleafSoundArtwork(
                     variant: widget.variant,
-                    intensity: 0.86,
+                    intensity: 0.92,
                   ),
                 ),
                 const ClipOval(
@@ -738,4 +739,11 @@ String _formatDuration(Duration duration) {
   final minutes = duration.inMinutes;
   final seconds = duration.inSeconds.remainder(60);
   return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+}
+
+
+ReleafSoundArtworkVariant _artworkForTrack(String id) {
+  return id.endsWith('02')
+      ? ReleafSoundArtworkVariant.atmosphereTwo
+      : ReleafSoundArtworkVariant.atmosphereOne;
 }
