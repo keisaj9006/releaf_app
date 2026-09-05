@@ -465,11 +465,11 @@ class _InScreenMiniPlayer extends ConsumerWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: () => context.push(AppRoutes.soundPlayerFor(track.id)),
-        borderRadius: BorderRadius.circular(ReleafRadii.lg),
+        borderRadius: BorderRadius.circular(ReleafRadii.large),
         child: Ink(
           decoration: BoxDecoration(
             color: const Color(0xF21B2722),
-            borderRadius: BorderRadius.circular(ReleafRadii.lg),
+            borderRadius: BorderRadius.circular(ReleafRadii.large),
             border: Border.all(color: ReleafColors.border),
             boxShadow: const [
               BoxShadow(
