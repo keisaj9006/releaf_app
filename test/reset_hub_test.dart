@@ -110,6 +110,9 @@ void main() {
     expect(find.text('60s Grounding'), findsOneWidget);
 
     await _moveRailForward(tester, const Key('reset-session-rail'));
+    expect(find.text('Back to the Room'), findsOneWidget);
+
+    await _moveRailForward(tester, const Key('reset-session-rail'));
     expect(find.text('90s Calm Down'), findsOneWidget);
 
     await _moveRailForward(tester, const Key('reset-session-rail'));
@@ -153,7 +156,7 @@ void main() {
     final sessionRail = tester.widget<PageView>(
       find.byKey(const Key('reset-session-rail')),
     );
-    expect(sessionRail.controller!.page, closeTo(1, 0.05));
+    expect(sessionRail.controller!.page, closeTo(2, 0.05));
     expect(find.text('90s Calm Down'), findsOneWidget);
 
     await tester.ensureVisible(
