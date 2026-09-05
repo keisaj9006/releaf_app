@@ -80,11 +80,7 @@ void main() {
 
     expect(find.text('Calm down'), findsOneWidget);
     expect(find.byKey(const Key('home-recommendation-card')), findsOneWidget);
-    final initialException = tester.takeException();
-    if (initialException is FlutterError) {
-      debugDumpRenderTree();
-    }
-    expect(initialException, isNull);
+    expect(tester.takeException(), isNull);
 
     await tester.ensureVisible(find.text('Your daily rhythm'));
     await tester.pumpAndSettle();
