@@ -160,75 +160,138 @@ class _BrainHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    final copy = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'COGNITIVE TRAINING',
-                style: ReleafTypography.eyebrow.copyWith(
-                  color: const Color(0xFF91A4EF),
-                  letterSpacing: 1.9,
-                ),
-              ),
-              const SizedBox(height: 7),
-              Text(
-                'Brain',
-                style: ReleafTypography.display.copyWith(fontSize: 34),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                'Short, focused challenges for memory, planning, calculation and visual reconstruction.',
-                style: ReleafTypography.body.copyWith(
-                  color: ReleafColors.textSecondary,
-                ),
-              ),
-            ],
+        Text(
+          'COGNITIVE TRAINING',
+          style: ReleafTypography.eyebrow.copyWith(
+            color: const Color(0xFF91A4EF),
+            letterSpacing: 1.9,
           ),
         ),
-        const SizedBox(width: ReleafSpacing.md),
-        Container(
-          width: 60,
-          height: 60,
-          decoration: BoxDecoration(
-            color: const Color(0xFF161C2B),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: const Color(0xFF91A4EF).withValues(alpha: 0.28),
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF7187E8).withValues(alpha: 0.12),
-                blurRadius: 28,
-              ),
-            ],
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                '${training.sessionsLast7Days}',
-                style: ReleafTypography.sectionTitle.copyWith(
-                  color: const Color(0xFFD8DEFF),
-                  fontSize: 20,
-                ),
-              ),
-              Text(
-                '7 DAYS',
-                style: ReleafTypography.meta.copyWith(
-                  color: const Color(0xFF91A4EF),
-                  fontSize: 8,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 0.8,
-                ),
-              ),
-            ],
+        const SizedBox(height: 7),
+        Text(
+          'Brain',
+          style: ReleafTypography.display.copyWith(fontSize: 34),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          'Short, focused challenges for memory, planning, calculation and visual reconstruction.',
+          style: ReleafTypography.body.copyWith(
+            color: ReleafColors.textSecondary,
           ),
         ),
       ],
+    );
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact = constraints.maxWidth < 360;
+
+        if (compact) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              copy,
+              const SizedBox(height: ReleafSpacing.md),
+              _SevenDayBadge(
+                sessions: training.sessionsLast7Days,
+                compact: true,
+              ),
+            ],
+          );
+        }
+
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(child: copy),
+            const SizedBox(width: ReleafSpacing.md),
+            _SevenDayBadge(
+              sessions: training.sessionsLast7Days,
+              compact: false,
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _SevenDayBadge extends StatelessWidget {
+  const _SevenDayBadge({
+    required this.sessions,
+    required this.compact,
+  });
+
+  final int sessions;
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: compact ? null : 60,
+      height: compact ? 38 : 60,
+      padding: compact
+          ? const EdgeInsets.symmetric(horizontal: 12)
+          : EdgeInsets.zero,
+      decoration: BoxDecoration(
+        color: const Color(0xFF161C2B),
+        borderRadius: BorderRadius.circular(compact ? 14 : 20),
+        border: Border.all(
+          color: const Color(0xFF91A4EF).withValues(alpha: 0.28),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF7187E8).withValues(alpha: 0.12),
+            blurRadius: 28,
+          ),
+        ],
+      ),
+      child: compact
+          ? Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  '$sessions',
+                  style: ReleafTypography.cardTitle.copyWith(
+                    color: const Color(0xFFD8DEFF),
+                  ),
+                ),
+                const SizedBox(width: 7),
+                Text(
+                  'SESSIONS · 7 DAYS',
+                  style: ReleafTypography.meta.copyWith(
+                    color: const Color(0xFF91A4EF),
+                    fontSize: 8,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.7,
+                  ),
+                ),
+              ],
+            )
+          : Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  '$sessions',
+                  style: ReleafTypography.sectionTitle.copyWith(
+                    color: const Color(0xFFD8DEFF),
+                    fontSize: 20,
+                  ),
+                ),
+                Text(
+                  '7 DAYS',
+                  style: ReleafTypography.meta.copyWith(
+                    color: const Color(0xFF91A4EF),
+                    fontSize: 8,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.8,
+                  ),
+                ),
+              ],
+            ),
     );
   }
 }

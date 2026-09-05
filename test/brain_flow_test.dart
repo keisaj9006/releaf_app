@@ -152,7 +152,9 @@ void main() {
     await tester.pump(const Duration(milliseconds: 250));
 
     expect(find.text('Start workout'), findsOneWidget);
-    await tester.tap(find.text('Start workout'));
+    await tester.ensureVisible(find.byKey(const Key('brain-start-workout')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('brain-start-workout')));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 250));
 
@@ -280,6 +282,8 @@ void main() {
     expect(training.totalSessions, 1);
     expect(training.bestScoreFor('memory'), 123);
 
+    await tester.ensureVisible(find.text('Back to Brain'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Back to Brain'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 250));
