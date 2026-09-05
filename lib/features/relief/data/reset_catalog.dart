@@ -17,7 +17,7 @@ class ResetCatalog {
   static const List<ResetContent> _activeContent = [
     ResetContent(
       id: emergencySessionId,
-      title: 'Emergency Grounding',
+      title: 'Emergency Calm',
       durationSeconds: 120,
       level: ResetLevel.emergency,
       modality: ResetModality.grounding,
