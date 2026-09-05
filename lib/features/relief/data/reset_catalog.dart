@@ -1095,6 +1095,338 @@ class ResetCatalog {
       ),
     ),
     ResetContent(
+      id: 'wired-steady',
+      title: 'Wired → Steady',
+      durationSeconds: 480,
+      level: ResetLevel.deep,
+      modality: ResetModality.breathing,
+      accessTier: ResetAccessTier.premium,
+      instructions: [
+        'Let the breath stay gentle and comfortable.',
+        'Follow a four-count in and five-count out.',
+        'Keep the exhale smooth rather than forceful.',
+        'Let the rhythm become quieter as the session continues.',
+        'Return to your natural breathing before you finish.',
+      ],
+      program: ResetSessionProgram.breathing(
+        breathPattern: BreathPattern(
+          inhaleSeconds: 4,
+          exhaleSeconds: 5,
+          label: 'Steady 4–5',
+        ),
+        steps: [
+          ResetSessionStep(
+            label: 'Settle',
+            guidance:
+                'Let the breath stay gentle and comfortable. There is no need to make it bigger.',
+            durationSeconds: 60,
+          ),
+          ResetSessionStep(
+            label: 'Rhythm',
+            guidance:
+                'Follow a four-count in and five-count out. Keep the exhale smooth rather than forceful.',
+            durationSeconds: 360,
+          ),
+          ResetSessionStep(
+            label: 'Release',
+            guidance:
+                'Let go of the count and return to your natural breathing.',
+            durationSeconds: 60,
+          ),
+        ],
+      ),
+    ),
+    ResetContent(
+      id: 'tension-body-scan',
+      title: 'Tension → Full Body Scan',
+      durationSeconds: 480,
+      level: ResetLevel.deep,
+      modality: ResetModality.guidedPractice,
+      accessTier: ResetAccessTier.premium,
+      visualType: ResetVisualType.bodyRelease,
+      instructions: [
+        'Notice the face and jaw.',
+        'Move attention through neck and shoulders.',
+        'Notice arms and hands.',
+        'Notice chest and upper back.',
+        'Notice abdomen and lower back.',
+        'Notice hips and legs.',
+        'Notice feet and points of support.',
+        'Finish by noticing the body as a whole.',
+      ],
+      program: ResetSessionProgram.guided(
+        steps: [
+          ResetSessionStep(
+            label: 'Face',
+            guidance:
+                'Notice the face and jaw. Let any unnecessary effort soften if it can.',
+            durationSeconds: 60,
+          ),
+          ResetSessionStep(
+            label: 'Shoulders',
+            guidance:
+                'Move attention through the neck and shoulders. Notice tension without forcing it away.',
+            durationSeconds: 60,
+          ),
+          ResetSessionStep(
+            label: 'Arms',
+            guidance: 'Notice the arms, hands, and fingers.',
+            durationSeconds: 60,
+          ),
+          ResetSessionStep(
+            label: 'Chest',
+            guidance: 'Notice the chest and upper back.',
+            durationSeconds: 60,
+          ),
+          ResetSessionStep(
+            label: 'Center',
+            guidance: 'Notice the abdomen and lower back.',
+            durationSeconds: 60,
+          ),
+          ResetSessionStep(
+            label: 'Legs',
+            guidance: 'Notice the hips, thighs, knees, and lower legs.',
+            durationSeconds: 60,
+          ),
+          ResetSessionStep(
+            label: 'Feet',
+            guidance:
+                'Notice the feet and the places where your body is supported.',
+            durationSeconds: 60,
+          ),
+          ResetSessionStep(
+            label: 'Whole Body',
+            guidance:
+                'Finish by noticing the body as a whole, exactly as it is right now.',
+            durationSeconds: 60,
+          ),
+        ],
+      ),
+    ),
+    ResetContent(
+      id: 'overwhelm-stability',
+      title: 'Overwhelm → Stability',
+      durationSeconds: 480,
+      level: ResetLevel.deep,
+      modality: ResetModality.guidedPractice,
+      accessTier: ResetAccessTier.premium,
+      visualType: ResetVisualType.nextStep,
+      instructions: [
+        'Stop trying to organise everything at once.',
+        'Notice what is physically supporting you.',
+        'Separate what needs attention now from what can wait.',
+        'Choose one useful priority.',
+        'Shrink it to one visible action.',
+        'Return to that action and leave the rest outside this moment.',
+      ],
+      program: ResetSessionProgram.guided(
+        steps: [
+          ResetSessionStep(
+            label: 'Pause',
+            guidance:
+                'Stop trying to organise everything at once. For this moment, nothing else has to be solved.',
+            durationSeconds: 80,
+          ),
+          ResetSessionStep(
+            label: 'Support',
+            guidance:
+                'Notice what is physically supporting you: floor, chair, wall, or another stable surface.',
+            durationSeconds: 80,
+          ),
+          ResetSessionStep(
+            label: 'Separate',
+            guidance:
+                'Separate what genuinely needs attention now from what can wait.',
+            durationSeconds: 80,
+            advanceActionLabel: 'I can separate them',
+          ),
+          ResetSessionStep(
+            label: 'Choose',
+            guidance: 'Choose one useful priority.',
+            durationSeconds: 80,
+            advanceActionLabel: 'I have one',
+          ),
+          ResetSessionStep(
+            label: 'Shrink',
+            guidance: 'Shrink it to one visible, realistic action.',
+            durationSeconds: 80,
+            advanceActionLabel: 'That feels doable',
+          ),
+          ResetSessionStep(
+            label: 'Return',
+            guidance:
+                'Return to that action and leave the rest outside this moment.',
+            durationSeconds: 80,
+          ),
+        ],
+      ),
+    ),
+    ResetContent(
+      id: 'evening-unwind',
+      title: 'Evening → Proper Unwind',
+      durationSeconds: 480,
+      level: ResetLevel.deep,
+      modality: ResetModality.guidedPractice,
+      accessTier: ResetAccessTier.premium,
+      visualType: ResetVisualType.acceptanceSpace,
+      instructions: [
+        'Notice what your mind is still carrying from the day.',
+        'Let unfinished things remain unfinished for this moment.',
+        'Notice where your body is supported.',
+        'Make room for any remaining tension without solving it.',
+        'Reduce attention to the room, bed, or chair around you.',
+        'Finish without needing to feel perfectly calm.',
+      ],
+      program: ResetSessionProgram.guided(
+        steps: [
+          ResetSessionStep(
+            label: 'Arrive',
+            guidance:
+                'Notice what your mind is still carrying from the day.',
+            durationSeconds: 80,
+          ),
+          ResetSessionStep(
+            label: 'Allow',
+            guidance:
+                'Let unfinished things remain unfinished for this moment.',
+            durationSeconds: 80,
+          ),
+          ResetSessionStep(
+            label: 'Support',
+            guidance: 'Notice where your body is supported.',
+            durationSeconds: 80,
+          ),
+          ResetSessionStep(
+            label: 'Room',
+            guidance:
+                'Make room for any remaining tension without trying to solve it.',
+            durationSeconds: 80,
+          ),
+          ResetSessionStep(
+            label: 'Quiet',
+            guidance:
+                'Reduce attention to the room, bed, or chair immediately around you.',
+            durationSeconds: 80,
+          ),
+          ResetSessionStep(
+            label: 'Finish',
+            guidance:
+                'Finish without needing to feel perfectly calm. Let this be enough for now.',
+            durationSeconds: 80,
+          ),
+        ],
+      ),
+    ),
+    ResetContent(
+      id: 'anger-release',
+      title: 'Anger → Release & Calm',
+      durationSeconds: 480,
+      level: ResetLevel.deep,
+      modality: ResetModality.guidedPractice,
+      accessTier: ResetAccessTier.premium,
+      visualType: ResetVisualType.bodyRelease,
+      instructions: [
+        'Notice where anger is showing up in your body.',
+        'Press your feet or hands gently into a stable surface.',
+        'Release the pressure fully.',
+        'Loosen the jaw and lower the shoulders.',
+        'Create space before deciding what to do next.',
+        'Choose the next action only after the body has had time to settle.',
+      ],
+      program: ResetSessionProgram.guided(
+        steps: [
+          ResetSessionStep(
+            label: 'Notice',
+            guidance: 'Notice where anger is showing up in your body.',
+            durationSeconds: 80,
+          ),
+          ResetSessionStep(
+            label: 'Press',
+            guidance:
+                'Press your feet or hands gently into a stable surface. Keep it comfortable and controlled.',
+            durationSeconds: 80,
+          ),
+          ResetSessionStep(
+            label: 'Release',
+            guidance: 'Release the pressure fully and notice the contrast.',
+            durationSeconds: 80,
+          ),
+          ResetSessionStep(
+            label: 'Soften',
+            guidance: 'Loosen the jaw and lower the shoulders.',
+            durationSeconds: 80,
+          ),
+          ResetSessionStep(
+            label: 'Space',
+            guidance:
+                'Create space before deciding what to do next. You do not need to act on the first impulse.',
+            durationSeconds: 80,
+          ),
+          ResetSessionStep(
+            label: 'Choose',
+            guidance:
+                'Choose the next action only after the body has had time to settle.',
+            durationSeconds: 80,
+          ),
+        ],
+      ),
+    ),
+    ResetContent(
+      id: 'overthinking-let-go',
+      title: 'Overthinking → Let It Go',
+      durationSeconds: 480,
+      level: ResetLevel.deep,
+      modality: ResetModality.guidedPractice,
+      accessTier: ResetAccessTier.premium,
+      visualType: ResetVisualType.thoughtUnhook,
+      instructions: [
+        'Notice the thought or problem your mind keeps reopening.',
+        'Put it into one short sentence.',
+        'Add: I am noticing the thought that...',
+        'Notice the difference between the thought and the room around you.',
+        'Let the thought remain without following every branch.',
+        'Return attention to one real thing you want to do next.',
+      ],
+      program: ResetSessionProgram.guided(
+        steps: [
+          ResetSessionStep(
+            label: 'Notice',
+            guidance:
+                'Notice the thought or problem your mind keeps reopening.',
+            durationSeconds: 80,
+          ),
+          ResetSessionStep(
+            label: 'Name',
+            guidance: 'Put it into one short sentence in your mind.',
+            durationSeconds: 80,
+          ),
+          ResetSessionStep(
+            label: 'Unhook',
+            guidance: 'Add: “I am noticing the thought that…”',
+            durationSeconds: 80,
+          ),
+          ResetSessionStep(
+            label: 'Distance',
+            guidance:
+                'Notice the difference between the thought and the room around you.',
+            durationSeconds: 80,
+          ),
+          ResetSessionStep(
+            label: 'Space',
+            guidance:
+                'Let the thought remain without following every branch.',
+            durationSeconds: 80,
+          ),
+          ResetSessionStep(
+            label: 'Return',
+            guidance:
+                'Return attention to one real thing you want to do next.',
+            durationSeconds: 80,
+          ),
+        ],
+      ),
+    ),
+    ResetContent(
       id: '3min-breath',
       title: '3 min Deep Reset',
       durationSeconds: 180,
