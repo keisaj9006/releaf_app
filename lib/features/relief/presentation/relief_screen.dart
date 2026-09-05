@@ -658,6 +658,7 @@ class _EditorialCategoryCard extends StatelessWidget {
       excludeSemantics: true,
       button: available,
       enabled: available,
+      onTap: onPressed,
       label: '${_categoryLabel(category)} category. '
           '${_categoryDescription(category)} $countLabel. '
           '${available ? 'Shows matching sessions.' : 'Not available yet.'}',
@@ -764,6 +765,7 @@ class _QuickSessionCard extends StatelessWidget {
       excludeSemantics: true,
       button: true,
       enabled: true,
+      onTap: onPressed,
       label: '${session.title}. ${_sessionPurpose(session)} '
           '${_durationLabel(session.durationSeconds)}. '
           '${_sessionTypeLabel(session)}. '
@@ -798,8 +800,15 @@ class _QuickSessionCard extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      _GlassLabel(label: _sessionTypeLabel(session)),
-                      const Spacer(),
+                      Expanded(
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: _GlassLabel(
+                            label: _sessionTypeLabel(session),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: ReleafSpacing.xs),
                       if (session.isPremium)
                         const ReleafPremiumBadge()
                       else
@@ -864,6 +873,7 @@ class _DeepResetCard extends StatelessWidget {
       excludeSemantics: true,
       button: true,
       enabled: true,
+      onTap: onPressed,
       label: '${session.title}. Current 3-minute Deep Reset protocol. '
           'Premium, opens access check.',
       child: ReleafPressableCard(
@@ -895,8 +905,16 @@ class _DeepResetCard extends StatelessWidget {
                 children: [
                   const Row(
                     children: [
-                      _GlassLabel(label: 'Deep Reset', isWarm: true),
-                      Spacer(),
+                      Expanded(
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: _GlassLabel(
+                            label: 'Deep Reset',
+                            isWarm: true,
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: ReleafSpacing.xs),
                       ReleafPremiumBadge(),
                     ],
                   ),

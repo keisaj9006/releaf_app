@@ -237,6 +237,8 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 250));
 
+    await tester.ensureVisible(find.text(freeSession.title));
+    await tester.pump();
     await tester.tap(find.text(freeSession.title));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 250));
@@ -275,6 +277,8 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 250));
 
+    await tester.ensureVisible(find.text(freeSession.title));
+    await tester.pump();
     await tester.tap(find.text(freeSession.title));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 250));
