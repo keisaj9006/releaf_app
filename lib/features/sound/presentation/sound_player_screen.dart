@@ -594,12 +594,16 @@ class _PrimaryPlayButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkResponse(
-      onTap: onPressed,
-      radius: 42,
-      child: Container(
-        width: compact ? 66 : 76,
-        height: compact ? 66 : 76,
+    return Semantics(
+      key: const Key('sound-primary-play'),
+      button: true,
+      label: isPlaying ? 'Pause sound' : 'Play sound',
+      child: InkResponse(
+        onTap: onPressed,
+        radius: 42,
+        child: Container(
+          width: compact ? 66 : 76,
+          height: compact ? 66 : 76,
         decoration: const BoxDecoration(
           shape: BoxShape.circle,
           color: ReleafColors.sage,
@@ -617,6 +621,7 @@ class _PrimaryPlayButton extends StatelessWidget {
           size: compact ? 33 : 38,
           color: ReleafColors.background,
         ),
+      ),
       ),
     );
   }
