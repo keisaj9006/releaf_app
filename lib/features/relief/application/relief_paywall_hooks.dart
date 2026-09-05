@@ -30,6 +30,12 @@ Future<void> maybeShowPaywall(
 
   final trigger = ref.read(paywallTriggerProvider);
   if (!force && !trigger.shouldShowPaywall()) return;
+
+  if (!force) {
+    final subscription = ref.read(subscriptionControllerProvider.notifier);
+    if (subscription.getOrderedPackages().isEmpty) return;
+  }
+
   if (!context.mounted) return;
 
   await showModalBottomSheet(
