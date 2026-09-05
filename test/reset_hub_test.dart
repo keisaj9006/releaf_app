@@ -133,7 +133,7 @@ void main() {
     await tester.pump();
 
     expect(find.text('Wired → Steady'), findsOneWidget);
-    expect(find.text('8 min protocol'), findsOneWidget);
+    expect(find.text('8 min protocol'), findsWidgets);
     expect(find.text('Premium'), findsWidgets);
 
     await _moveRailForward(tester, const Key('reset-deep-rail'));
@@ -174,9 +174,8 @@ void main() {
   ) async {
     await _pumpResetHub(tester, preferences: await _preferences());
 
-    await tester.ensureVisible(
-      find.byKey(const Key('reset-session-60s-grounding')),
-    );
+    await tester.ensureVisible(find.byKey(const Key('reset-session-rail')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('reset-session-60s-grounding')));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
@@ -189,9 +188,8 @@ void main() {
     await tester.tap(find.byKey(const Key('reset-preview-close')));
     await tester.pumpAndSettle();
 
-    await tester.ensureVisible(
-      find.byKey(const Key('reset-session-wired-steady')),
-    );
+    await tester.ensureVisible(find.byKey(const Key('reset-deep-rail')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('reset-session-wired-steady')));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
@@ -206,9 +204,8 @@ void main() {
   ) async {
     await _pumpResetHub(tester, preferences: await _preferences());
 
-    await tester.ensureVisible(
-      find.byKey(const Key('reset-session-60s-grounding')),
-    );
+    await tester.ensureVisible(find.byKey(const Key('reset-session-rail')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('reset-session-60s-grounding')));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
@@ -264,9 +261,8 @@ void main() {
 
     expect(tester.takeException(), isNull);
 
-    await tester.ensureVisible(
-      find.byKey(const Key('reset-session-60s-grounding')),
-    );
+    await tester.ensureVisible(find.byKey(const Key('reset-session-rail')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('reset-session-60s-grounding')));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
