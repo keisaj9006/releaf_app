@@ -550,7 +550,7 @@ class _TargetPainter extends CustomPainter {
   bool shouldRepaint(covariant _TargetPainter oldDelegate) => true;
 }
 
-class _DraggableShard extends StatelessWidget {
+class _DraggableShard extends StatefulWidget {
   const _DraggableShard({
     required this.shard,
     required this.pulse,
@@ -564,45 +564,94 @@ class _DraggableShard extends StatelessWidget {
   final void Function(_Shard) onUpdate;
 
   @override
+  State<_DraggableShard> createState() => _DraggableShardState();
+}
+
+class _DraggableShardState extends State<_DraggableShard> {
+  static const _shardSize = 120.0;
+
+  late Offset _position;
+  bool _dragging = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _position = widget.shard.position;
+  }
+
+  @override
+  void didUpdateWidget(covariant _DraggableShard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!_dragging && oldWidget.shard.position != widget.shard.position) {
+      _position = widget.shard.position;
+    }
+  }
+
+  void _updatePosition(Offset delta) {
+    final next = _position + delta;
+    setState(() => _position = next);
+    widget.onUpdate(widget.shard.copyWith(position: next));
+  }
+
+  void _finishDrag() {
+    _dragging = false;
+
+    const half = _shardSize / 2;
+    final target = Offset(
+      widget.shard.targetCenter.dx * widget.boardSize.width,
+      widget.shard.targetCenter.dy * widget.boardSize.height,
+    );
+    final currentCenter = _position + const Offset(half, half);
+    final snapDistance =
+        math.max(38.0, widget.boardSize.shortestSide * 0.12);
+
+    if ((currentCenter - target).distance <= snapDistance) {
+      HapticFeedback.selectionClick();
+      widget.onUpdate(
+        widget.shard.copyWith(
+          position: target - const Offset(half, half),
+          placed: true,
+        ),
+      );
+      return;
+    }
+
+    widget.onUpdate(widget.shard.copyWith(position: _position));
+  }
+
+  @override
   Widget build(BuildContext context) {
-    if (shard.placed) return const SizedBox.shrink();
+    if (widget.shard.placed) return const SizedBox.shrink();
 
     return Positioned(
-      left: shard.position.dx,
-      top: shard.position.dy,
+      left: _position.dx,
+      top: _position.dy,
       child: GestureDetector(
-        key: ValueKey('broken-mirror-shard-${shard.id}'),
-        onPanUpdate: (d) {
-          onUpdate(shard.copyWith(position: shard.position + d.delta));
-        },
-        onPanEnd: (_) {
-          const shardSize = 120.0;
-          const half = shardSize / 2;
-          final target = Offset(
-            shard.targetCenter.dx * boardSize.width,
-            shard.targetCenter.dy * boardSize.height,
-          );
-          final currentCenter = shard.position + const Offset(half, half);
-          final snapDistance =
-              math.max(38.0, boardSize.shortestSide * 0.12);
-
-          if ((currentCenter - target).distance <= snapDistance) {
-            HapticFeedback.selectionClick();
-            onUpdate(
-              shard.copyWith(
-                position: target - const Offset(half, half),
-                placed: true,
+        key: ValueKey('broken-mirror-shard-${widget.shard.id}'),
+        onPanStart: (_) => _dragging = true,
+        onPanUpdate: (details) => _updatePosition(details.delta),
+        onPanEnd: (_) => _finishDrag(),
+        onPanCancel: _finishDrag,
+        child: AnimatedBuilder(
+          animation: widget.pulse,
+          builder: (_, child) {
+            final glow = 0.10 + widget.pulse.value * 0.14;
+            return DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(18),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFFD490B9).withValues(alpha: glow),
+                    blurRadius: 18,
+                  ),
+                ],
               ),
+              child: child,
             );
-          }
-        },
-        child: ScaleTransition(
-          scale: Tween<double>(begin: 0.98, end: 1.02).animate(
-            CurvedAnimation(parent: pulse, curve: Curves.easeInOut),
-          ),
+          },
           child: CustomPaint(
-            painter: _ShardPainter(shard),
-            size: const Size(120, 120),
+            size: const Size.square(_shardSize),
+            painter: _ShardPainter(widget.shard),
           ),
         ),
       ),
