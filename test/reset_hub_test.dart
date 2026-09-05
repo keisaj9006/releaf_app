@@ -292,6 +292,8 @@ void main() {
     expect(guidanceTile, findsOneWidget);
     expect(timerTile, findsOneWidget);
 
+    await tester.ensureVisible(guidanceTile);
+    await tester.pumpAndSettle();
     await tester.tap(
       find.descendant(
         of: guidanceTile,
@@ -299,6 +301,9 @@ void main() {
       ),
     );
     await tester.pump();
+
+    await tester.ensureVisible(timerTile);
+    await tester.pumpAndSettle();
     await tester.tap(
       find.descendant(
         of: timerTile,
