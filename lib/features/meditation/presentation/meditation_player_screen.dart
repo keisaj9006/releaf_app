@@ -16,6 +16,7 @@ import '../../../theme/widgets/releaf_components.dart';
 import '../../../theme/widgets/releaf_session_living_form.dart';
 import '../application/meditation_audio_controller.dart';
 import '../application/meditation_library_controller.dart';
+import '../../sound/application/sound_player_controller.dart';
 import '../data/meditation_catalog.dart';
 import '../domain/meditation_content.dart';
 import '../domain/meditation_resume_state.dart';
@@ -54,8 +55,15 @@ class _MeditationPlayerScreenState
     _running = widget.resumeState == null;
     _startTimer();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted || item == null) return;
+
+      final soundState = ref.read(soundPlayerControllerProvider);
+      if (soundState.isPlaying) {
+        await ref.read(soundPlayerControllerProvider.notifier).pause();
+        if (!mounted) return;
+      }
+
       unawaited(
         ref
             .read(meditationLibraryControllerProvider.notifier)

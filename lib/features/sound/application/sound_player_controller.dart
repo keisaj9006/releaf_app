@@ -136,6 +136,11 @@ class SoundPlayerController extends StateNotifier<SoundPlayerState> {
     }
   }
 
+  Future<void> pause() async {
+    if (state.currentTrackId == null || !state.isPlaying) return;
+    await _player.pause();
+  }
+
   Future<void> seekRelative(Duration delta) async {
     if (state.currentTrackId == null) return;
 
