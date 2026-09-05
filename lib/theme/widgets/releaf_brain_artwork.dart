@@ -437,7 +437,7 @@ void _drawSequenceEcho(
   }
 
   for (var i = 0; i < points.length; i++) {
-    final radius = math.max(5, size.shortestSide * (0.024 + i * 0.004));
+    final radius = math.max(5.0, size.shortestSide * (0.024 + i * 0.004));
     canvas.drawCircle(
       points[i],
       radius * 2.2,
