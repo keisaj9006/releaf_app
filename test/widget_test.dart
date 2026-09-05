@@ -35,6 +35,7 @@ void main() {
     await tester.pump();
 
     expect(find.byType(MaterialApp), findsOneWidget);
-    expect(find.text('Bring Releaf to your life.'), findsOneWidget);
+    expect(find.text('RELEAF'), findsOneWidget);
+    expect(find.text('RIGHT NOW'), findsOneWidget);
   });
 }
