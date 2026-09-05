@@ -302,7 +302,7 @@ class _BrokenMirrorGameScreenState extends ConsumerState<BrokenMirrorGameScreen>
                   top: false,
                   child: Center(
                     child: SingleChildScrollView(
-                      physics: const BouncingScrollPhysics(),
+                      physics: const NeverScrollableScrollPhysics(),
                       padding: const EdgeInsets.fromLTRB(
                         ReleafSpacing.screen,
                         ReleafSpacing.md,
