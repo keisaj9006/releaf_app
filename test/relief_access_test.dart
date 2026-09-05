@@ -181,7 +181,7 @@ void main() {
 
     expect(find.byKey(const Key('reset-sensory-halo')), findsOneWidget);
     expect(find.byKey(const Key('reset-living-form')), findsNothing);
-    expect(find.text('See'), findsOneWidget);
+    expect(find.text('SEE'), findsOneWidget);
     expect(find.byKey(const Key('reset-sensory-tap-hint')), findsOneWidget);
     expect(find.byKey(const Key('reset-simplify-action')), findsOneWidget);
     expect(find.text('5'), findsOneWidget);
@@ -205,7 +205,7 @@ void main() {
     }
     await tester.pump(const Duration(milliseconds: 500));
 
-    expect(find.text('Feel'), findsOneWidget);
+    expect(find.text('FEEL'), findsOneWidget);
     expect(find.text('Notice two things you can physically feel.'), findsOneWidget);
   });
 
