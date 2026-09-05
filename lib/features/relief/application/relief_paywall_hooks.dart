@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/providers.dart';
 import '../../../core/paywall/presentation/paywall_sheet.dart';
+import '../../../theme/releaf_design_tokens.dart';
 
 Future<void> reliefStarted(WidgetRef ref) async {
   final isPremium = ref.read(subscriptionControllerProvider).isPremium;
@@ -41,9 +42,12 @@ Future<void> maybeShowPaywall(
   await showModalBottomSheet(
     context: context,
     isScrollControlled: true,
-    backgroundColor: const Color(0xFF1C1F24),
+    backgroundColor: ReleafColors.backgroundRaised,
+    surfaceTintColor: Colors.transparent,
     shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      borderRadius: BorderRadius.vertical(
+        top: Radius.circular(ReleafRadii.extraLarge),
+      ),
     ),
     builder: (_) => PaywallSheet(softOffer: softOffer),
   );
