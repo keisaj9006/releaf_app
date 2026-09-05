@@ -38,7 +38,7 @@ class ResetCatalog {
       accessTier: ResetAccessTier.free,
       instructions: [
         'Sit comfortably and place your feet on the ground.',
-        'Take a deep breath in through your nose and exhale slowly.',
+        'Notice three physical sensations where your body meets the floor or chair.',
         'Notice the sensations in your body and the contact with the chair.',
         'Let thoughts come and go without judgement.',
       ],
