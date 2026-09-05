@@ -1,278 +1,387 @@
-// FILE: lib/features/brain/presentation/brain_screen.dart
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../routing/app_routes.dart';
+import '../../../theme/app_theme.dart';
 import '../../../theme/releaf_design_tokens.dart';
 import '../../../theme/widgets/releaf_brain_artwork.dart';
-import '../../../theme/widgets/releaf_components.dart';
+import '../application/brain_training_controller.dart';
 import '../data/game_registry.dart';
 import 'game_host_screen.dart';
 
-class BrainScreen extends StatelessWidget {
+class BrainScreen extends ConsumerWidget {
   const BrainScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final training = ref.watch(brainTrainingControllerProvider);
     final enabledGames = brainGames
         .where((game) => game.enabled && isSupportedBrainGame(game.id))
         .toList(growable: false);
     final workoutGames = enabledGames.take(3).toList(growable: false);
 
-    return Scaffold(
-      backgroundColor: ReleafColors.background,
-      body: SafeArea(
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 720),
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(
-                ReleafSpacing.screen,
-                ReleafSpacing.xl,
-                ReleafSpacing.screen,
-                120,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const _BrainHeader(),
-                  const SizedBox(height: ReleafSpacing.xxl),
-                  _DailyWorkoutHero(games: workoutGames),
-                  const SizedBox(height: ReleafSpacing.section),
-                  const ReleafSectionHeading(
-                    title: 'Your training',
-                    description:
-                        'Focused practice across the skills your current games actually train.',
-                  ),
-                  const SizedBox(height: ReleafSpacing.md),
-                  const Wrap(
-                    spacing: ReleafSpacing.xs,
-                    runSpacing: ReleafSpacing.xs,
-                    children: [
-                      _TrainingAreaChip(
-                        icon: Icons.grid_view_rounded,
-                        label: 'Memory',
-                      ),
-                      _TrainingAreaChip(
-                        icon: Icons.route_rounded,
-                        label: 'Spatial focus',
-                      ),
-                      _TrainingAreaChip(
-                        icon: Icons.calculate_rounded,
-                        label: 'Mental calculation',
-                      ),
-                      _TrainingAreaChip(
-                        icon: Icons.auto_fix_high_rounded,
-                        label: 'Visual patterns',
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: ReleafSpacing.section),
-                  const ReleafSectionHeading(
-                    title: 'Games',
-                    description:
-                        'Choose a focused challenge for memory, spatial focus, calculation or visual patterns.',
-                  ),
-                  const SizedBox(height: ReleafSpacing.md),
-                  LayoutBuilder(
-                    builder: (context, constraints) {
-                      final cardWidth = math.min(
-                        420.0,
-                        math.max(244.0, constraints.maxWidth * 0.78),
-                      );
-
-                      return SingleChildScrollView(
-                        key: const Key('brain-games-rail'),
-                        scrollDirection: Axis.horizontal,
-                        physics: const BouncingScrollPhysics(),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            for (var index = 0;
-                                index < enabledGames.length;
-                                index++) ...[
-                              SizedBox(
-                                width: cardWidth,
-                                child: _BrainGameCard(
-                                  key: Key(
-                                    'brain-game-card-${enabledGames[index].id}',
-                                  ),
-                                  game: enabledGames[index],
-                                  presentation:
-                                      _presentationFor(enabledGames[index].id),
-                                  onPressed: () => context.push(
-                                    AppRoutes.brainGameFor(
-                                      enabledGames[index].id,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              if (index != enabledGames.length - 1)
-                                const SizedBox(width: ReleafSpacing.sm),
-                            ],
-                            SizedBox(
-                              width: math.max(
-                                ReleafSpacing.screen,
-                                constraints.maxWidth - cardWidth - 20,
-                              ),
-                            ),
-                          ],
+    return Theme(
+      data: AppTheme.premiumDark(),
+      child: Scaffold(
+        backgroundColor: ReleafColors.background,
+        body: Stack(
+          children: [
+            const Positioned.fill(child: _BrainBackdrop()),
+            SafeArea(
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 760),
+                  child: SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    padding: const EdgeInsets.fromLTRB(
+                      ReleafSpacing.screen,
+                      ReleafSpacing.lg,
+                      ReleafSpacing.screen,
+                      120,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _BrainHeader(training: training),
+                        const SizedBox(height: ReleafSpacing.xxl),
+                        _DailyWorkoutPanel(
+                          games: workoutGames,
+                          training: training,
                         ),
-                      );
-                    },
+                        const SizedBox(height: ReleafSpacing.section),
+                        const _SectionLabel(
+                          eyebrow: 'THIS WEEK',
+                          title: 'Build a training rhythm.',
+                          description:
+                              'Real activity from completed games — no invented cognitive score.',
+                        ),
+                        const SizedBox(height: ReleafSpacing.md),
+                        _WeeklyActivity(training: training),
+                        const SizedBox(height: ReleafSpacing.section),
+                        const _SectionLabel(
+                          eyebrow: 'TRAIN BY SKILL',
+                          title: 'Choose what to practise.',
+                          description:
+                              'Each game targets a different task type and keeps its own visual identity.',
+                        ),
+                        const SizedBox(height: ReleafSpacing.md),
+                        _SkillGameGrid(
+                          games: enabledGames,
+                          training: training,
+                        ),
+                        const SizedBox(height: ReleafSpacing.section),
+                        const _EvidenceNote(),
+                      ],
+                    ),
                   ),
-                ],
+                ),
               ),
             ),
-          ),
+          ],
         ),
       ),
     );
   }
 }
 
-class _BrainHeader extends StatelessWidget {
-  const _BrainHeader();
+class _BrainBackdrop extends StatelessWidget {
+  const _BrainBackdrop();
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
+    return Stack(
+      fit: StackFit.expand,
+      children: const [
+        DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Color(0xFF070B12),
+                Color(0xFF0B1118),
+                ReleafColors.background,
+              ],
+              stops: [0, 0.52, 1],
+            ),
+          ),
+        ),
+        CustomPaint(painter: _BrainBackdropPainter()),
+      ],
+    );
+  }
+}
+
+class _BrainBackdropPainter extends CustomPainter {
+  const _BrainBackdropPainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final linePaint = Paint()
+      ..color = const Color(0xFF8D9CE8).withValues(alpha: 0.035)
+      ..strokeWidth = 1;
+
+    const step = 46.0;
+    for (double x = -step; x < size.width + step; x += step) {
+      canvas.drawLine(Offset(x, 0), Offset(x + 150, size.height), linePaint);
+    }
+    for (double y = 60; y < size.height; y += step) {
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), linePaint);
+    }
+
+    final glow = Paint()
+      ..shader = const RadialGradient(
+        colors: [
+          Color(0x225F72D8),
+          Color(0x1056B6A8),
+          Colors.transparent,
+        ],
+        stops: [0, 0.42, 1],
+      ).createShader(
+        Rect.fromCircle(
+          center: Offset(size.width * 0.78, size.height * 0.10),
+          radius: size.width * 0.75,
+        ),
+      );
+
+    canvas.drawRect(Offset.zero & size, glow);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class _BrainHeader extends StatelessWidget {
+  const _BrainHeader({required this.training});
+
+  final BrainTrainingState training;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Brain', style: ReleafTypography.display),
-        SizedBox(height: ReleafSpacing.xs),
-        Text(
-          'Train your mind with focused, repeatable challenges.',
-          style: ReleafTypography.body,
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'COGNITIVE TRAINING',
+                style: ReleafTypography.eyebrow.copyWith(
+                  color: const Color(0xFF91A4EF),
+                  letterSpacing: 1.9,
+                ),
+              ),
+              const SizedBox(height: 7),
+              Text(
+                'Brain',
+                style: ReleafTypography.display.copyWith(fontSize: 34),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'Short, focused challenges for memory, planning, calculation and visual reconstruction.',
+                style: ReleafTypography.body.copyWith(
+                  color: ReleafColors.textSecondary,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: ReleafSpacing.md),
+        Container(
+          width: 60,
+          height: 60,
+          decoration: BoxDecoration(
+            color: const Color(0xFF161C2B),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: const Color(0xFF91A4EF).withValues(alpha: 0.28),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF7187E8).withValues(alpha: 0.12),
+                blurRadius: 28,
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                '${training.sessionsLast7Days}',
+                style: ReleafTypography.sectionTitle.copyWith(
+                  color: const Color(0xFFD8DEFF),
+                  fontSize: 20,
+                ),
+              ),
+              Text(
+                '7 DAYS',
+                style: ReleafTypography.meta.copyWith(
+                  color: const Color(0xFF91A4EF),
+                  fontSize: 8,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.8,
+                ),
+              ),
+            ],
+          ),
         ),
       ],
     );
   }
 }
 
-class _DailyWorkoutHero extends StatelessWidget {
-  const _DailyWorkoutHero({required this.games});
+class _DailyWorkoutPanel extends StatelessWidget {
+  const _DailyWorkoutPanel({
+    required this.games,
+    required this.training,
+  });
 
   final List<BrainGameMeta> games;
+  final BrainTrainingState training;
 
   @override
   Widget build(BuildContext context) {
     if (games.isEmpty) return const SizedBox.shrink();
 
-    final first = games.first;
-    final reducedMotion =
-        MediaQuery.maybeOf(context)?.disableAnimations ?? false;
+    final completed = games.where((game) => training.playedToday(game.id)).length;
+    final nextGame = games.firstWhere(
+      (game) => !training.playedToday(game.id),
+      orElse: () => games.first,
+    );
+    final completeForToday = completed == games.length;
 
     return Semantics(
       container: true,
       label:
-          'Daily Brain Workout. A focused three-game set using current playable games.',
+          'Today\'s workout. $completed of ${games.length} challenges completed.',
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final compact = constraints.maxWidth < 360;
-          return ClipRRect(
-            borderRadius: BorderRadius.circular(ReleafRadii.extraLarge),
-            child: Container(
-              key: const Key('brain-daily-workout-hero'),
-              height: compact ? 540 : 305,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(ReleafRadii.extraLarge),
-                border: Border.all(
-                  color: ReleafColors.sage.withValues(alpha: 0.18),
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: ReleafColors.glowSage.withValues(alpha: 0.42),
-                    blurRadius: 34,
-                    offset: const Offset(0, 16),
-                  ),
+          final compact = constraints.maxWidth < 430;
+
+          return Container(
+            key: const Key('brain-daily-workout-hero'),
+            padding: EdgeInsets.all(
+              compact ? ReleafSpacing.lg : ReleafSpacing.xl,
+            ),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(ReleafRadii.extraLarge),
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFF1A2034),
+                  Color(0xFF101B21),
                 ],
               ),
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  const ReleafBrainArtwork(
-                    variant: ReleafBrainArtworkVariant.hero,
-                  ),
-                  DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.transparent,
-                          ReleafColors.background.withValues(alpha: 0.16),
-                          ReleafColors.background.withValues(alpha: 0.88),
-                        ],
-                        stops: const [0.08, 0.52, 1],
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(ReleafSpacing.xl),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+              border: Border.all(
+                color: const Color(0xFF8EA2F1).withValues(alpha: 0.22),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF6479DA).withValues(alpha: 0.12),
+                  blurRadius: 34,
+                  offset: const Offset(0, 16),
+                ),
+              ],
+            ),
+            child: Stack(
+              children: [
+                const Positioned(
+                  right: -30,
+                  top: -54,
+                  child: _WorkoutOrb(),
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
                       children: [
-                        const Text(
-                          'DAILY BRAIN WORKOUT',
-                          style: ReleafTypography.eyebrow,
+                        Text(
+                          'TODAY\'S WORKOUT',
+                          style: ReleafTypography.eyebrow.copyWith(
+                            color: const Color(0xFF9FB0F4),
+                          ),
                         ),
                         const Spacer(),
-                        Text(
-                          'Train your mind today.',
-                          style: ReleafTypography.display.copyWith(
-                            fontSize: compact ? 27 : 30,
-                          ),
-                        ),
-                        const SizedBox(height: ReleafSpacing.xs),
-                        Text(
-                          'A focused 3-game set built only from your current training library.',
-                          style: ReleafTypography.body.copyWith(
-                            color: ReleafColors.textPrimary.withValues(
-                              alpha: 0.78,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: ReleafSpacing.md),
-                        Wrap(
-                          spacing: ReleafSpacing.xs,
-                          runSpacing: ReleafSpacing.xs,
-                          children: [
-                            for (final game in games)
-                              _WorkoutGamePill(title: game.title),
-                          ],
-                        ),
-                        const SizedBox(height: ReleafSpacing.md),
-                        FilledButton.icon(
-                          onPressed: () => context.push(
-                            AppRoutes.brainGameFor(first.id),
-                          ),
-                          icon: const Icon(Icons.play_arrow_rounded, size: 20),
-                          label: Text('Start with ${first.title}'),
-                          style: FilledButton.styleFrom(
-                            backgroundColor: ReleafColors.sage,
-                            foregroundColor: ReleafColors.background,
-                            minimumSize: const Size(0, 48),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: ReleafSpacing.lg,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                ReleafRadii.pill,
-                              ),
-                            ),
-                            animationDuration:
-                                reducedMotion ? Duration.zero : ReleafMotion.quick,
-                          ),
+                        _ProgressBadge(
+                          completed: completed,
+                          total: games.length,
                         ),
                       ],
                     ),
-                  ),
-                ],
-              ),
+                    const SizedBox(height: ReleafSpacing.lg),
+                    Text(
+                      completeForToday
+                          ? 'Workout complete.'
+                          : 'Three focused challenges.',
+                      style: ReleafTypography.display.copyWith(
+                        fontSize: compact ? 25 : 29,
+                        letterSpacing: -0.7,
+                      ),
+                    ),
+                    const SizedBox(height: ReleafSpacing.xs),
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 500),
+                      child: Text(
+                        completeForToday
+                            ? 'You can repeat a game or choose a different skill below.'
+                            : 'A short sequence using only games that are playable in Releaf today.',
+                        style: ReleafTypography.body.copyWith(
+                          color: ReleafColors.textPrimary.withValues(alpha: 0.70),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: ReleafSpacing.lg),
+                    for (var index = 0; index < games.length; index++) ...[
+                      _WorkoutStep(
+                        index: index + 1,
+                        game: games[index],
+                        completed: training.playedToday(games[index].id),
+                      ),
+                      if (index != games.length - 1)
+                        const SizedBox(height: ReleafSpacing.xs),
+                    ],
+                    const SizedBox(height: ReleafSpacing.lg),
+                    SizedBox(
+                      width: compact ? double.infinity : null,
+                      child: FilledButton.icon(
+                        key: const Key('brain-start-workout'),
+                        onPressed: () => context.push(
+                          AppRoutes.brainGameFor(nextGame.id),
+                        ),
+                        icon: Icon(
+                          completeForToday
+                              ? Icons.replay_rounded
+                              : Icons.play_arrow_rounded,
+                        ),
+                        label: Text(
+                          completeForToday
+                              ? 'Train again'
+                              : completed == 0
+                                  ? 'Start workout'
+                                  : 'Continue workout',
+                        ),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: const Color(0xFFD4DBFF),
+                          foregroundColor: const Color(0xFF101526),
+                          minimumSize: const Size(0, 50),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: ReleafSpacing.lg,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(ReleafRadii.pill),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           );
         },
@@ -281,96 +390,436 @@ class _DailyWorkoutHero extends StatelessWidget {
   }
 }
 
-class _WorkoutGamePill extends StatelessWidget {
-  const _WorkoutGamePill({required this.title});
-
-  final String title;
+class _WorkoutOrb extends StatelessWidget {
+  const _WorkoutOrb();
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: ReleafColors.background.withValues(alpha: 0.50),
-        borderRadius: BorderRadius.circular(ReleafRadii.pill),
-        border: Border.all(
-          color: ReleafColors.textPrimary.withValues(alpha: 0.12),
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-        child: Text(
-          title,
-          style: ReleafTypography.meta.copyWith(
-            color: ReleafColors.textPrimary.withValues(alpha: 0.84),
-            fontWeight: FontWeight.w600,
-          ),
+    return ExcludeSemantics(
+      child: SizedBox(
+        width: 190,
+        height: 190,
+        child: CustomPaint(
+          painter: _WorkoutOrbPainter(),
         ),
       ),
     );
   }
 }
 
-class _TrainingAreaChip extends StatelessWidget {
-  const _TrainingAreaChip({
-    required this.icon,
-    required this.label,
+class _WorkoutOrbPainter extends CustomPainter {
+  const _WorkoutOrbPainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+
+    for (var i = 0; i < 4; i++) {
+      final radius = 24.0 + i * 22;
+      canvas.drawCircle(
+        center,
+        radius,
+        Paint()
+          ..color = const Color(0xFF9AAAF0).withValues(
+            alpha: 0.13 - i * 0.022,
+          )
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.2,
+      );
+    }
+
+    final points = <Offset>[
+      center + const Offset(-42, -18),
+      center + const Offset(-8, -42),
+      center + const Offset(34, -24),
+      center + const Offset(48, 18),
+      center + const Offset(3, 42),
+      center + const Offset(-38, 30),
+    ];
+
+    final line = Paint()
+      ..color = const Color(0xFFB6C2FF).withValues(alpha: 0.23)
+      ..strokeWidth = 1;
+
+    for (var i = 0; i < points.length; i++) {
+      canvas.drawLine(points[i], points[(i + 1) % points.length], line);
+      canvas.drawCircle(
+        points[i],
+        2.5,
+        Paint()
+          ..color = const Color(0xFFE2E6FF).withValues(alpha: 0.56),
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class _ProgressBadge extends StatelessWidget {
+  const _ProgressBadge({
+    required this.completed,
+    required this.total,
   });
 
-  final IconData icon;
-  final String label;
+  final int completed;
+  final int total;
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      label: 'Training area: $label',
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: ReleafColors.surfaceSoft,
-          borderRadius: BorderRadius.circular(ReleafRadii.pill),
-          border: Border.all(color: ReleafColors.borderSoft),
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0D1322).withValues(alpha: 0.74),
+        borderRadius: BorderRadius.circular(ReleafRadii.pill),
+        border: Border.all(
+          color: const Color(0xFF9FB0F4).withValues(alpha: 0.18),
         ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: ReleafSpacing.sm,
-            vertical: 10,
+      ),
+      child: Text(
+        '$completed/$total',
+        style: ReleafTypography.meta.copyWith(
+          color: const Color(0xFFDDE3FF),
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
+}
+
+class _WorkoutStep extends StatelessWidget {
+  const _WorkoutStep({
+    required this.index,
+    required this.game,
+    required this.completed,
+  });
+
+  final int index;
+  final BrainGameMeta game;
+  final bool completed;
+
+  @override
+  Widget build(BuildContext context) {
+    final presentation = _presentationFor(game.id);
+
+    return Row(
+      children: [
+        AnimatedContainer(
+          duration: ReleafMotion.standard,
+          width: 34,
+          height: 34,
+          decoration: BoxDecoration(
+            color: completed
+                ? presentation.accent.withValues(alpha: 0.22)
+                : const Color(0xFF0D1322).withValues(alpha: 0.72),
+            borderRadius: BorderRadius.circular(11),
+            border: Border.all(
+              color: completed
+                  ? presentation.accent.withValues(alpha: 0.72)
+                  : const Color(0xFF9FB0F4).withValues(alpha: 0.14),
+            ),
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
+          alignment: Alignment.center,
+          child: completed
+              ? Icon(
+                  Icons.check_rounded,
+                  size: 18,
+                  color: presentation.accent,
+                )
+              : Text(
+                  '$index',
+                  style: ReleafTypography.meta.copyWith(
+                    color: ReleafColors.textPrimary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+        ),
+        const SizedBox(width: ReleafSpacing.sm),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(icon, size: 16, color: ReleafColors.sage),
-              const SizedBox(width: 7),
+              Text(game.title, style: ReleafTypography.cardTitle),
+              const SizedBox(height: 1),
               Text(
-                label,
+                presentation.skill,
                 style: ReleafTypography.meta.copyWith(
-                  color: ReleafColors.textSecondary,
-                  fontWeight: FontWeight.w600,
+                  color: presentation.accent,
                 ),
               ),
             ],
           ),
         ),
+      ],
+    );
+  }
+}
+
+class _SectionLabel extends StatelessWidget {
+  const _SectionLabel({
+    required this.eyebrow,
+    required this.title,
+    required this.description,
+  });
+
+  final String eyebrow;
+  final String title;
+  final String description;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          eyebrow,
+          style: ReleafTypography.eyebrow.copyWith(
+            color: const Color(0xFF91A4EF),
+          ),
+        ),
+        const SizedBox(height: ReleafSpacing.xs),
+        Text(title, style: ReleafTypography.sectionTitle),
+        const SizedBox(height: 4),
+        Text(description, style: ReleafTypography.body),
+      ],
+    );
+  }
+}
+
+class _WeeklyActivity extends StatelessWidget {
+  const _WeeklyActivity({required this.training});
+
+  final BrainTrainingState training;
+
+  @override
+  Widget build(BuildContext context) {
+    final values = training.activityLast7Days;
+    final days = training.activityDaysLast7Days;
+    final maxValue = values.fold<int>(
+      1,
+      (best, value) => value > best ? value : best,
+    );
+
+    return Container(
+      key: const Key('brain-weekly-activity'),
+      padding: const EdgeInsets.all(ReleafSpacing.lg),
+      decoration: BoxDecoration(
+        color: const Color(0xFF101620).withValues(alpha: 0.94),
+        borderRadius: BorderRadius.circular(ReleafRadii.large),
+        border: Border.all(
+          color: const Color(0xFF56647E).withValues(alpha: 0.28),
+        ),
+      ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final compact = constraints.maxWidth < 360;
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (compact) ...[
+                _ActivitySummary(training: training),
+                const SizedBox(height: ReleafSpacing.lg),
+                _ActivityBars(
+                  values: values,
+                  days: days,
+                  maxValue: maxValue,
+                ),
+              ] else
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    SizedBox(
+                      width: 150,
+                      child: _ActivitySummary(training: training),
+                    ),
+                    const SizedBox(width: ReleafSpacing.lg),
+                    Expanded(
+                      child: _ActivityBars(
+                        values: values,
+                        days: days,
+                        maxValue: maxValue,
+                      ),
+                    ),
+                  ],
+                ),
+            ],
+          );
+        },
       ),
     );
   }
 }
 
-class _BrainGameCard extends StatefulWidget {
-  const _BrainGameCard({
+class _ActivitySummary extends StatelessWidget {
+  const _ActivitySummary({required this.training});
+
+  final BrainTrainingState training;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '${training.sessionsLast7Days}',
+          style: ReleafTypography.display.copyWith(
+            fontSize: 31,
+            color: const Color(0xFFDDE3FF),
+          ),
+        ),
+        Text(
+          training.sessionsLast7Days == 1
+              ? 'completed session'
+              : 'completed sessions',
+          style: ReleafTypography.meta.copyWith(
+            color: ReleafColors.textSecondary,
+          ),
+        ),
+        if (training.totalSessions == 0) ...[
+          const SizedBox(height: ReleafSpacing.xs),
+          Text(
+            'Your activity will appear here after your first game.',
+            style: ReleafTypography.meta.copyWith(fontSize: 10),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _ActivityBars extends StatelessWidget {
+  const _ActivityBars({
+    required this.values,
+    required this.days,
+    required this.maxValue,
+  });
+
+  final List<int> values;
+  final List<DateTime> days;
+  final int maxValue;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 92,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          for (var index = 0; index < values.length; index++) ...[
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  AnimatedContainer(
+                    duration: ReleafMotion.standard,
+                    height: values[index] == 0
+                        ? 8
+                        : 14 + 42 * (values[index] / maxValue),
+                    width: 16,
+                    decoration: BoxDecoration(
+                      color: values[index] == 0
+                          ? const Color(0xFF273042)
+                          : const Color(0xFF8FA2ED),
+                      borderRadius: BorderRadius.circular(8),
+                      boxShadow: values[index] == 0
+                          ? null
+                          : [
+                              BoxShadow(
+                                color: const Color(0xFF7187E8)
+                                    .withValues(alpha: 0.20),
+                                blurRadius: 12,
+                              ),
+                            ],
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    _weekdayLabel(days[index].weekday),
+                    style: ReleafTypography.meta.copyWith(
+                      color: index == values.length - 1
+                          ? const Color(0xFFDDE3FF)
+                          : ReleafColors.textMuted,
+                      fontSize: 9,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (index != values.length - 1) const SizedBox(width: 4),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _SkillGameGrid extends StatelessWidget {
+  const _SkillGameGrid({
+    required this.games,
+    required this.training,
+  });
+
+  final List<BrainGameMeta> games;
+  final BrainTrainingState training;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final columns = constraints.maxWidth >= 360 ? 2 : 1;
+        final gap = ReleafSpacing.sm;
+        final width = columns == 1
+            ? constraints.maxWidth
+            : (constraints.maxWidth - gap) / 2;
+
+        return Wrap(
+          spacing: gap,
+          runSpacing: gap,
+          children: [
+            for (final game in games)
+              SizedBox(
+                width: width,
+                child: _SkillGameCard(
+                  key: Key('brain-game-card-${game.id}'),
+                  game: game,
+                  presentation: _presentationFor(game.id),
+                  bestScore: training.bestScoreFor(game.id),
+                  hasCompleted: training.hasCompleted(game.id),
+                  onPressed: () => context.push(
+                    AppRoutes.brainGameFor(game.id),
+                  ),
+                ),
+              ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _SkillGameCard extends StatefulWidget {
+  const _SkillGameCard({
     super.key,
     required this.game,
     required this.presentation,
+    required this.bestScore,
+    required this.hasCompleted,
     required this.onPressed,
   });
 
   final BrainGameMeta game;
   final _BrainGamePresentation presentation;
+  final int? bestScore;
+  final bool hasCompleted;
   final VoidCallback onPressed;
 
   @override
-  State<_BrainGameCard> createState() => _BrainGameCardState();
+  State<_SkillGameCard> createState() => _SkillGameCardState();
 }
 
-class _BrainGameCardState extends State<_BrainGameCard> {
+class _SkillGameCardState extends State<_SkillGameCard> {
   bool _pressed = false;
 
   @override
@@ -381,111 +830,119 @@ class _BrainGameCardState extends State<_BrainGameCard> {
     return Semantics(
       button: true,
       label:
-          '${widget.game.title}. ${widget.presentation.benefit}. Play game.',
+          '${widget.game.title}. ${widget.presentation.skill}. ${widget.presentation.benefit}.',
       child: AnimatedScale(
-        scale: _pressed ? 0.988 : 1,
+        scale: _pressed ? 0.985 : 1,
         duration: reducedMotion ? Duration.zero : ReleafMotion.quick,
-        curve: ReleafMotion.emphasisCurve,
-        child: SizedBox(
-          height: 258,
-          child: Material(
-            color: Colors.transparent,
-            borderRadius: BorderRadius.circular(ReleafRadii.extraLarge),
-            clipBehavior: Clip.antiAlias,
-            child: InkWell(
-              onTap: widget.onPressed,
-              onHighlightChanged: (value) => setState(() => _pressed = value),
-              child: Ink(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(ReleafRadii.extraLarge),
-                  border: Border.all(
-                    color: ReleafColors.borderSoft.withValues(alpha: 0.92),
-                  ),
+        child: Material(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(ReleafRadii.large),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: widget.onPressed,
+            onHighlightChanged: (value) => setState(() => _pressed = value),
+            child: Ink(
+              height: 214,
+              decoration: BoxDecoration(
+                color: const Color(0xFF0F151D),
+                borderRadius: BorderRadius.circular(ReleafRadii.large),
+                border: Border.all(
+                  color: widget.presentation.accent.withValues(alpha: 0.25),
                 ),
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    ReleafBrainArtwork(
+              ),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: 102,
+                    child: ReleafBrainArtwork(
                       variant: widget.presentation.artwork,
+                      intensity: 0.78,
                     ),
-                    DecoratedBox(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Colors.transparent,
-                            ReleafColors.background.withValues(alpha: 0.10),
-                            ReleafColors.background.withValues(alpha: 0.94),
-                          ],
-                          stops: const [0.18, 0.55, 1],
-                        ),
+                  ),
+                  const DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.transparent,
+                          Color(0xBA0F151D),
+                          Color(0xFF0F151D),
+                        ],
+                        stops: [0.08, 0.45, 0.72],
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(ReleafSpacing.md),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _SkillLabel(label: widget.presentation.skill),
-                          const Spacer(),
-                          Text(
-                            widget.game.title,
-                            style: ReleafTypography.sectionTitle.copyWith(
-                              fontSize: 21,
-                            ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(ReleafSpacing.md),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _SkillBadge(
+                          label: widget.presentation.skill,
+                          accent: widget.presentation.accent,
+                        ),
+                        const Spacer(),
+                        Text(
+                          widget.game.title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: ReleafTypography.sectionTitle.copyWith(
+                            fontSize: 18,
                           ),
-                          const SizedBox(height: 5),
-                          Text(
-                            widget.presentation.benefit,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: ReleafTypography.body.copyWith(
-                              color: ReleafColors.textPrimary.withValues(
-                                alpha: 0.72,
-                              ),
-                            ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          widget.presentation.benefit,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: ReleafTypography.meta.copyWith(
+                            color: ReleafColors.textSecondary,
+                            height: 1.4,
                           ),
-                          const SizedBox(height: ReleafSpacing.sm),
-                          Row(
-                            children: [
-                              const Text(
-                                'Play',
-                                style: TextStyle(
-                                  fontFamily: 'Poppins',
-                                  color: ReleafColors.textPrimary,
-                                  fontSize: 13,
+                        ),
+                        const SizedBox(height: ReleafSpacing.sm),
+                        Row(
+                          children: [
+                            if (widget.bestScore != null)
+                              Text(
+                                'Best ${widget.bestScore}',
+                                style: ReleafTypography.meta.copyWith(
+                                  color: widget.presentation.accent,
                                   fontWeight: FontWeight.w700,
                                 ),
-                              ),
-                              const Spacer(),
-                              Container(
-                                width: 40,
-                                height: 40,
-                                decoration: BoxDecoration(
-                                  color: ReleafColors.sage.withValues(
-                                    alpha: 0.11,
-                                  ),
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: ReleafColors.sage.withValues(
-                                      alpha: 0.24,
-                                    ),
-                                  ),
+                              )
+                            else if (widget.hasCompleted)
+                              Text(
+                                'Completed',
+                                style: ReleafTypography.meta.copyWith(
+                                  color: widget.presentation.accent,
+                                  fontWeight: FontWeight.w700,
                                 ),
-                                child: const Icon(
-                                  Icons.play_arrow_rounded,
-                                  color: ReleafColors.sage,
-                                  size: 22,
+                              )
+                            else
+                              Text(
+                                'Not played yet',
+                                style: ReleafTypography.meta.copyWith(
+                                  color: ReleafColors.textMuted,
                                 ),
                               ),
-                            ],
-                          ),
-                        ],
-                      ),
+                            const Spacer(),
+                            Icon(
+                              Icons.arrow_forward_rounded,
+                              size: 18,
+                              color: widget.presentation.accent,
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -495,30 +952,71 @@ class _BrainGameCardState extends State<_BrainGameCard> {
   }
 }
 
-class _SkillLabel extends StatelessWidget {
-  const _SkillLabel({required this.label});
+class _SkillBadge extends StatelessWidget {
+  const _SkillBadge({
+    required this.label,
+    required this.accent,
+  });
 
   final String label;
+  final Color accent;
 
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: ReleafColors.background.withValues(alpha: 0.58),
+        color: const Color(0xFF090D14).withValues(alpha: 0.76),
         borderRadius: BorderRadius.circular(ReleafRadii.pill),
-        border: Border.all(
-          color: ReleafColors.textPrimary.withValues(alpha: 0.10),
-        ),
+        border: Border.all(color: accent.withValues(alpha: 0.32)),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
         child: Text(
           label,
           style: ReleafTypography.meta.copyWith(
-            color: ReleafColors.textPrimary.withValues(alpha: 0.82),
+            color: accent,
+            fontSize: 9,
             fontWeight: FontWeight.w700,
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _EvidenceNote extends StatelessWidget {
+  const _EvidenceNote();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(ReleafSpacing.md),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0C1218),
+        borderRadius: BorderRadius.circular(ReleafRadii.medium),
+        border: Border.all(
+          color: const Color(0xFF52606F).withValues(alpha: 0.22),
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(
+            Icons.info_outline_rounded,
+            size: 18,
+            color: Color(0xFF8FA2ED),
+          ),
+          const SizedBox(width: ReleafSpacing.sm),
+          Expanded(
+            child: Text(
+              'Game results describe performance inside these exercises. Releaf does not present them as IQ, diagnosis or a medical measure.',
+              style: ReleafTypography.meta.copyWith(
+                color: ReleafColors.textSecondary,
+                height: 1.5,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -529,39 +1027,59 @@ class _BrainGamePresentation {
     required this.skill,
     required this.benefit,
     required this.artwork,
+    required this.accent,
   });
 
   final String skill;
   final String benefit;
   final ReleafBrainArtworkVariant artwork;
+  final Color accent;
 }
 
 _BrainGamePresentation _presentationFor(String gameId) {
   return switch (gameId) {
     'memory' => const _BrainGamePresentation(
-        skill: 'Memory',
-        benefit: 'Train recall and pattern recognition.',
+        skill: 'MEMORY',
+        benefit: 'Recall positions and recognise visual patterns.',
         artwork: ReleafBrainArtworkVariant.memory,
+        accent: Color(0xFF91A4EF),
       ),
     'labyrinth' => const _BrainGamePresentation(
-        skill: 'Spatial focus',
-        benefit: 'Strengthen spatial focus and route planning.',
+        skill: 'SPATIAL PLANNING',
+        benefit: 'Navigate routes and keep spatial goals in mind.',
         artwork: ReleafBrainArtworkVariant.labyrinth,
+        accent: Color(0xFF6DC8B8),
       ),
     'math_race' => const _BrainGamePresentation(
-        skill: 'Mental calculation',
-        benefit: 'Practice speed and mental calculation.',
+        skill: 'CALCULATION',
+        benefit: 'Practise quick mental arithmetic under time pressure.',
         artwork: ReleafBrainArtworkVariant.mathRace,
+        accent: Color(0xFFE3A66A),
       ),
     'broken_mirror' => const _BrainGamePresentation(
-        skill: 'Visual patterns',
-        benefit: 'Rebuild visual patterns under pressure.',
+        skill: 'VISUAL RECONSTRUCTION',
+        benefit: 'Rebuild a fragmented image from visual information.',
         artwork: ReleafBrainArtworkVariant.brokenMirror,
+        accent: Color(0xFFD490B9),
       ),
     _ => const _BrainGamePresentation(
-        skill: 'Training',
-        benefit: 'Focused cognitive practice.',
+        skill: 'TRAINING',
+        benefit: 'A focused cognitive challenge.',
         artwork: ReleafBrainArtworkVariant.hero,
+        accent: Color(0xFF91A4EF),
       ),
+  };
+}
+
+String _weekdayLabel(int weekday) {
+  return switch (weekday) {
+    DateTime.monday => 'M',
+    DateTime.tuesday => 'T',
+    DateTime.wednesday => 'W',
+    DateTime.thursday => 'T',
+    DateTime.friday => 'F',
+    DateTime.saturday => 'S',
+    DateTime.sunday => 'S',
+    _ => '',
   };
 }

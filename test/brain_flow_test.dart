@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:releaf_app/core/providers.dart';
+import 'package:releaf_app/features/brain/application/brain_training_controller.dart';
 import 'package:releaf_app/features/brain/data/game_registry.dart';
 import 'package:releaf_app/features/brain/presentation/brain_screen.dart';
 import 'package:releaf_app/features/brain/presentation/game_host_screen.dart';
@@ -60,10 +61,11 @@ void main() {
     await tester.pump(const Duration(milliseconds: 250));
 
     expect(find.byType(BrainScreen), findsOneWidget);
-    expect(find.text('DAILY BRAIN WORKOUT'), findsOneWidget);
-    expect(find.text('Train your mind today.'), findsOneWidget);
-    expect(find.text('YOUR TRAINING'), findsOneWidget);
-    expect(find.text('GAMES'), findsOneWidget);
+    expect(find.text("TODAY'S WORKOUT"), findsOneWidget);
+    expect(find.text('Three focused challenges.'), findsOneWidget);
+    expect(find.text('THIS WEEK'), findsOneWidget);
+    expect(find.text('TRAIN BY SKILL'), findsOneWidget);
+    expect(find.byKey(const Key('brain-weekly-activity')), findsOneWidget);
 
     for (final game in brainGames.where((game) => game.enabled)) {
       expect(find.text(game.title), findsWidgets);
@@ -91,10 +93,10 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.text('Memory'), findsWidgets);
-    expect(find.text('Spatial focus'), findsWidgets);
-    expect(find.text('Mental calculation'), findsWidgets);
-    expect(find.text('Visual patterns'), findsWidgets);
+    expect(find.text('MEMORY'), findsWidgets);
+    expect(find.text('SPATIAL PLANNING'), findsWidgets);
+    expect(find.text('CALCULATION'), findsWidgets);
+    expect(find.text('VISUAL RECONSTRUCTION'), findsWidgets);
 
     expect(find.text('72'), findsNothing);
     expect(find.text('64'), findsNothing);
@@ -112,11 +114,21 @@ void main() {
       tester.view.resetDevicePixelRatio();
     });
 
-    await tester.pumpWidget(const MaterialApp(home: BrainScreen()));
+    SharedPreferences.setMockInitialValues({});
+    final preferences = await SharedPreferences.getInstance();
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(preferences),
+        ],
+        child: const MaterialApp(home: BrainScreen()),
+      ),
+    );
     await tester.pump();
 
     expect(find.byType(BrainScreen), findsOneWidget);
-    expect(find.text('DAILY BRAIN WORKOUT'), findsOneWidget);
+    expect(find.text("TODAY'S WORKOUT"), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -139,8 +151,8 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 250));
 
-    expect(find.text('Start with Memory'), findsOneWidget);
-    await tester.tap(find.text('Start with Memory'));
+    expect(find.text('Start workout'), findsOneWidget);
+    await tester.tap(find.text('Start workout'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 250));
 
@@ -263,6 +275,10 @@ void main() {
     expect(find.text('123'), findsOneWidget);
     expect(container.read(leavesNotifierProvider).brainDone, isTrue);
     expect(container.read(leavesNotifierProvider).totalLeaves, 2);
+
+    final training = container.read(brainTrainingControllerProvider);
+    expect(training.totalSessions, 1);
+    expect(training.bestScoreFor('memory'), 123);
 
     await tester.tap(find.text('Back to Brain'));
     await tester.pump();

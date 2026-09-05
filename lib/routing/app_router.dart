@@ -159,6 +159,7 @@ GoRouter createAppRouter({String initialLocation = AppRoutes.home}) => GoRouter(
         final result = state.extra;
         return _fadePage(
           GameResultScreen(
+            gameId: result is BrainGameResult ? result.gameId : null,
             score: result is BrainGameResult ? result.score : null,
             completed: result is BrainGameResult,
           ),
