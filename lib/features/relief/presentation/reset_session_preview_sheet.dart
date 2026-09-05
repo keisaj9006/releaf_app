@@ -118,49 +118,41 @@ class _ResetSessionPreviewSheetState
                         _ExpectationRow(text: instruction),
                         const SizedBox(height: ReleafSpacing.xs),
                       ],
-                      const SizedBox(height: ReleafSpacing.lg),
-                      const Text(
-                        'SESSION SETUP',
-                        style: ReleafTypography.eyebrow,
-                      ),
-                      const SizedBox(height: ReleafSpacing.sm),
-                      _SessionPreferenceTile(
-                        key: const Key('reset-preview-guidance-toggle'),
-                        icon: Icons.subtitles_rounded,
-                        title: 'Guidance text',
-                        subtitle: 'Show the current step during the session.',
-                        value: _options.showGuidanceText,
-                        onChanged: (value) {
-                          setState(() {
-                            _options = _options.copyWith(
-                              showGuidanceText: value,
-                            );
-                          });
-                        },
-                      ),
-                      const SizedBox(height: ReleafSpacing.xs),
-                      _SessionPreferenceTile(
-                        key: const Key('reset-preview-timer-toggle'),
-                        icon: Icons.timer_outlined,
-                        title: 'Session timer',
-                        subtitle: 'Keep the countdown visible.',
-                        value: _options.showSessionTimer,
-                        onChanged: (value) {
-                          setState(() {
-                            _options = _options.copyWith(
-                              showSessionTimer: value,
-                            );
-                          });
-                        },
-                      ),
-                      if (session.audioAsset == null) ...[
+                      if (!widget.isLocked) ...[
+                        const SizedBox(height: ReleafSpacing.lg),
+                        const Text(
+                          'SESSION SETUP',
+                          style: ReleafTypography.eyebrow,
+                        ),
                         const SizedBox(height: ReleafSpacing.sm),
-                        Text(
-                          'Voice guidance will be added with the guided-audio player. '
-                          'This preview only shows controls that work today.',
-                          style: ReleafTypography.meta.copyWith(
-                            color: ReleafColors.textMuted,
-                          ),
+                        _SessionPreferenceTile(
+                          key: const Key('reset-preview-guidance-toggle'),
+                          icon: Icons.subtitles_rounded,
+                          title: 'Guidance text',
+                          subtitle: 'Show the current step during the session.',
+                          value: _options.showGuidanceText,
+                          onChanged: (value) {
+                            setState(() {
+                              _options = _options.copyWith(
+                                showGuidanceText: value,
+                              );
+                            });
+                          },
+                        ),
+                        const SizedBox(height: ReleafSpacing.xs),
+                        _SessionPreferenceTile(
+                          key: const Key('reset-preview-timer-toggle'),
+                          icon: Icons.timer_outlined,
+                          title: 'Session timer',
+                          subtitle: 'Keep the countdown visible.',
+                          value: _options.showSessionTimer,
+                          onChanged: (value) {
+                            setState(() {
+                              _options = _options.copyWith(
+                                showSessionTimer: value,
+                              );
+                            });
+                          },
                         ),
                       ],
                       const SizedBox(height: ReleafSpacing.xl),
