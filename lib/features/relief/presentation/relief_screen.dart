@@ -179,11 +179,11 @@ class _ReliefScreenState extends ConsumerState<ReliefScreen> {
 
     await reliefCompleted(ref, helpedALot: helpedALot);
 
-    if (context.mounted) {
+    if (context.mounted && helpedALot) {
       await maybeShowPaywall(
         context,
         ref,
-        softOffer: helpedALot,
+        softOffer: true,
       );
     }
   }
