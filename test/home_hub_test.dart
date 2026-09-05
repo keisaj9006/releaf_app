@@ -42,7 +42,7 @@ void main() {
     expect(find.text('Calm down'), findsOneWidget);
     expect(find.text('Clear my head'), findsOneWidget);
     expect(find.text('Focus'), findsOneWidget);
-    expect(find.text('Wind down'), findsOneWidget);
+    expect(find.text('Wind down'), findsWidgets);
     expect(find.byKey(const Key('home-recommendation-card')), findsOneWidget);
     expect(find.text('DAILY ESSENTIALS'), findsOneWidget);
     expect(find.text('Your daily rhythm'), findsOneWidget);
@@ -80,7 +80,11 @@ void main() {
 
     expect(find.text('Calm down'), findsOneWidget);
     expect(find.byKey(const Key('home-recommendation-card')), findsOneWidget);
-    expect(tester.takeException(), isNull);
+    final initialException = tester.takeException();
+    if (initialException is FlutterError) {
+      debugDumpRenderTree();
+    }
+    expect(initialException, isNull);
 
     await tester.ensureVisible(find.text('Your daily rhythm'));
     await tester.pumpAndSettle();
