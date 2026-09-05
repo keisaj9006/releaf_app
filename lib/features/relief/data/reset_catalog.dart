@@ -293,6 +293,310 @@ class ResetCatalog {
       ),
     ),
     ResetContent(
+      id: 'object-anchor',
+      title: 'Object Anchor',
+      durationSeconds: 90,
+      level: ResetLevel.quick,
+      quickCategory: QuickResetCategory.noBreath,
+      modality: ResetModality.grounding,
+      accessTier: ResetAccessTier.free,
+      visualType: ResetVisualType.objectFocus,
+      instructions: [
+        'Choose one ordinary object near you.',
+        'Notice its shape and edges.',
+        'Notice its texture or surface.',
+        'Notice temperature, weight, or pressure if you are holding it.',
+        'Find one small detail you had not noticed before.',
+        'Return your attention to the room.',
+      ],
+      program: ResetSessionProgram.guided(
+        steps: [
+          ResetSessionStep(
+            label: 'Choose',
+            guidance: 'Choose one ordinary object near you.',
+            durationSeconds: 15,
+            advanceActionLabel: 'I have one',
+          ),
+          ResetSessionStep(
+            label: 'Shape',
+            guidance: 'Notice its shape, edges, and outline.',
+            durationSeconds: 18,
+            advanceActionLabel: 'I see it',
+          ),
+          ResetSessionStep(
+            label: 'Texture',
+            guidance: 'Notice its texture or surface.',
+            durationSeconds: 18,
+            advanceActionLabel: 'I notice it',
+          ),
+          ResetSessionStep(
+            label: 'Contact',
+            guidance:
+                'If you are holding it, notice temperature, weight, or pressure.',
+            durationSeconds: 18,
+            advanceActionLabel: 'Got it',
+          ),
+          ResetSessionStep(
+            label: 'Detail',
+            guidance: 'Find one small detail you had not noticed before.',
+            durationSeconds: 12,
+            advanceActionLabel: 'Found one',
+          ),
+          ResetSessionStep(
+            label: 'Return',
+            guidance: 'Return your attention to the room around you.',
+            durationSeconds: 9,
+          ),
+        ],
+      ),
+    ),
+    ResetContent(
+      id: 'sound-anchor',
+      title: 'Sound Anchor',
+      durationSeconds: 90,
+      level: ResetLevel.quick,
+      quickCategory: QuickResetCategory.noBreath,
+      modality: ResetModality.grounding,
+      accessTier: ResetAccessTier.free,
+      visualType: ResetVisualType.soundRipple,
+      instructions: [
+        'Let your attention move toward the sounds already around you.',
+        'Notice one sound that feels close.',
+        'Notice one sound that feels farther away.',
+        'See if you can notice more than one layer of sound at once.',
+        'Return to the room without needing the sounds to change.',
+      ],
+      program: ResetSessionProgram.guided(
+        steps: [
+          ResetSessionStep(
+            label: 'Listen',
+            guidance:
+                'Let your attention move toward the sounds already around you.',
+            durationSeconds: 12,
+          ),
+          ResetSessionStep(
+            label: 'Near',
+            guidance: 'Notice one sound that feels close.',
+            durationSeconds: 18,
+            advanceActionLabel: 'Found one',
+          ),
+          ResetSessionStep(
+            label: 'Far',
+            guidance: 'Notice one sound that feels farther away.',
+            durationSeconds: 18,
+            advanceActionLabel: 'Found one',
+          ),
+          ResetSessionStep(
+            label: 'Layers',
+            guidance:
+                'See if you can notice more than one layer of sound at once.',
+            durationSeconds: 20,
+            advanceActionLabel: 'I can hear them',
+          ),
+          ResetSessionStep(
+            label: 'Return',
+            guidance:
+                'Return to the room without needing the sounds to change.',
+            durationSeconds: 22,
+          ),
+        ],
+      ),
+    ),
+    ResetContent(
+      id: 'press-release',
+      title: 'Press & Release',
+      durationSeconds: 90,
+      level: ResetLevel.quick,
+      quickCategory: QuickResetCategory.noBreath,
+      modality: ResetModality.guidedPractice,
+      accessTier: ResetAccessTier.free,
+      visualType: ResetVisualType.bodyRelease,
+      instructions: [
+        'Notice where your body is supported.',
+        'Press your feet or hands gently into a stable surface.',
+        'Release the pressure and notice the change.',
+        'Press gently once more without straining.',
+        'Release again.',
+        'Notice what feels different now.',
+      ],
+      program: ResetSessionProgram.guided(
+        steps: [
+          ResetSessionStep(
+            label: 'Arrive',
+            guidance: 'Notice where your body is supported.',
+            durationSeconds: 10,
+          ),
+          ResetSessionStep(
+            label: 'Press',
+            guidance:
+                'Press your feet or hands gently into a stable surface. Keep it comfortable.',
+            durationSeconds: 15,
+          ),
+          ResetSessionStep(
+            label: 'Release',
+            guidance: 'Release the pressure and notice the change.',
+            durationSeconds: 15,
+          ),
+          ResetSessionStep(
+            label: 'Again',
+            guidance: 'Press gently once more without straining.',
+            durationSeconds: 15,
+          ),
+          ResetSessionStep(
+            label: 'Let Go',
+            guidance: 'Release again and let the effort stop.',
+            durationSeconds: 15,
+          ),
+          ResetSessionStep(
+            label: 'Notice',
+            guidance: 'Notice what feels different now.',
+            durationSeconds: 20,
+          ),
+        ],
+      ),
+    ),
+    ResetContent(
+      id: 'make-room',
+      title: 'Make Room',
+      durationSeconds: 120,
+      level: ResetLevel.quick,
+      quickCategory: QuickResetCategory.noBreath,
+      modality: ResetModality.guidedPractice,
+      accessTier: ResetAccessTier.free,
+      visualType: ResetVisualType.acceptanceSpace,
+      instructions: [
+        'Notice the feeling or thought that is here right now.',
+        'See if you can let it be present without fixing it for this moment.',
+        'Imagine making a little more room around the experience.',
+        'Let it come with you without letting it choose your next action.',
+        'Return attention to what is around you now.',
+      ],
+      program: ResetSessionProgram.guided(
+        steps: [
+          ResetSessionStep(
+            label: 'Notice',
+            guidance: 'Notice the feeling or thought that is here right now.',
+            durationSeconds: 20,
+          ),
+          ResetSessionStep(
+            label: 'Allow',
+            guidance:
+                'See if you can let it be present without fixing it for this moment.',
+            durationSeconds: 25,
+          ),
+          ResetSessionStep(
+            label: 'Room',
+            guidance:
+                'Imagine making a little more room around the experience.',
+            durationSeconds: 30,
+          ),
+          ResetSessionStep(
+            label: 'Carry',
+            guidance:
+                'Let it come with you without letting it choose your next action.',
+            durationSeconds: 25,
+          ),
+          ResetSessionStep(
+            label: 'Return',
+            guidance: 'Return attention to what is around you now.',
+            durationSeconds: 20,
+          ),
+        ],
+      ),
+    ),
+    ResetContent(
+      id: 'one-small-next-step',
+      title: 'One Small Next Step',
+      durationSeconds: 120,
+      level: ResetLevel.quick,
+      quickCategory: QuickResetCategory.lifeUpgrade,
+      modality: ResetModality.guidedPractice,
+      accessTier: ResetAccessTier.free,
+      visualType: ResetVisualType.nextStep,
+      instructions: [
+        'Pause and name what needs your attention next.',
+        'Choose one action that would move things forward a little.',
+        'Make the action smaller until it feels realistically doable.',
+        'Picture the first physical step.',
+        'Keep only that next step for now.',
+      ],
+      program: ResetSessionProgram.guided(
+        steps: [
+          ResetSessionStep(
+            label: 'Pause',
+            guidance: 'Pause and name what needs your attention next.',
+            durationSeconds: 15,
+          ),
+          ResetSessionStep(
+            label: 'Choose',
+            guidance:
+                'Choose one action that would move things forward a little.',
+            durationSeconds: 30,
+            advanceActionLabel: 'I have one',
+          ),
+          ResetSessionStep(
+            label: 'Shrink',
+            guidance:
+                'Make the action smaller until it feels realistically doable.',
+            durationSeconds: 30,
+            advanceActionLabel: 'That feels doable',
+          ),
+          ResetSessionStep(
+            label: 'Start',
+            guidance: 'Picture the first physical step.',
+            durationSeconds: 25,
+            advanceActionLabel: 'I know the first step',
+          ),
+          ResetSessionStep(
+            label: 'Commit',
+            guidance: 'Keep only that next step for now.',
+            durationSeconds: 20,
+          ),
+        ],
+      ),
+    ),
+    ResetContent(
+      id: 'equal-rhythm',
+      title: 'Equal Rhythm',
+      durationSeconds: 120,
+      level: ResetLevel.quick,
+      quickCategory: QuickResetCategory.breath,
+      modality: ResetModality.breathing,
+      accessTier: ResetAccessTier.free,
+      instructions: [
+        'Let the breath stay easy and comfortable.',
+        'Follow an even five-count in and five-count out.',
+        'Keep the breath smooth rather than deep.',
+        'Let go of the count and return to your natural rhythm.',
+      ],
+      program: ResetSessionProgram.breathing(
+        breathPattern: BreathPattern(
+          inhaleSeconds: 5,
+          exhaleSeconds: 5,
+          label: 'Equal 5–5',
+        ),
+        steps: [
+          ResetSessionStep(
+            label: 'Settle',
+            guidance:
+                'Let the breath stay easy and comfortable. There is no need to make it bigger.',
+            durationSeconds: 15,
+          ),
+          ResetSessionStep(
+            label: 'Rhythm',
+            guidance: 'Follow an even five-count in and five-count out.',
+            durationSeconds: 90,
+          ),
+          ResetSessionStep(
+            label: 'Release',
+            guidance:
+                'Let go of the count and return to your natural rhythm.',
+            durationSeconds: 15,
+          ),
+        ],
+      ),
+    ),
+    ResetContent(
       id: '90s-calm-down',
       title: '90s Calm Down',
       durationSeconds: 90,
