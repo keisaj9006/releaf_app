@@ -3,8 +3,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/session/session_manager.dart';
 import '../../features/brain/presentation/game_result_screen.dart';
+import '../../theme/app_theme.dart';
+import '../../theme/releaf_design_tokens.dart';
+import '../../theme/widgets/releaf_brain_artwork.dart';
 import 'math_puzzle_generator.dart';
 import 'math_race_stats.dart';
 
@@ -82,17 +84,8 @@ class _MathRaceScreenState extends ConsumerState<MathRaceScreen> {
     );
   }
 
-  void _pauseAndMinimize() {
-    // PAUSE = stop timer + leave screen + show resume pill
+  void _exitSession() {
     _timer?.cancel();
-
-    ref.read(sessionManagerProvider.notifier).setPausedSession(
-      title: 'Math Race',
-      subtitle: 'Paused • $_timeLeft s left',
-      resumeRoute: '/brain', // P0: resume leads to Brain hub
-      extra: null,
-    );
-
     Navigator.of(context).maybePop();
   }
 
@@ -172,20 +165,32 @@ class _MathRaceScreenState extends ConsumerState<MathRaceScreen> {
     return '$a ${p.op} $b = $r';
   }
 
-  Widget _statusChip(String label) {
+  Widget _statusChip({
+    required IconData icon,
+    required String label,
+    Color accent = const Color(0xFFE3A66A),
+  }) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: .92),
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 6)],
+        color: const Color(0xD9151720),
+        borderRadius: BorderRadius.circular(ReleafRadii.pill),
+        border: Border.all(color: accent.withValues(alpha: 0.22)),
       ),
-      child: Text(
-        label,
-        style: const TextStyle(
-          fontWeight: FontWeight.w700,
-          color: Color(0xFF1E4D2B),
-        ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: accent),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: ReleafTypography.meta.copyWith(
+              color: ReleafColors.textPrimary,
+              fontWeight: FontWeight.w700,
+              fontSize: 10,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -196,11 +201,19 @@ class _MathRaceScreenState extends ConsumerState<MathRaceScreen> {
     required VoidCallback? onTap,
   }) {
     return SizedBox(
-      height: 54,
-      child: FilledButton.tonalIcon(
+      height: 48,
+      child: OutlinedButton.icon(
         onPressed: onTap,
-        icon: Icon(icon, size: 18),
+        icon: Icon(icon, size: 17),
         label: Text(label, overflow: TextOverflow.ellipsis),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: ReleafColors.textPrimary,
+          side: BorderSide(
+            color: const Color(0xFFE3A66A).withValues(alpha: 0.20),
+          ),
+          backgroundColor:
+              const Color(0xFF151720).withValues(alpha: 0.72),
+        ),
       ),
     );
   }
@@ -208,201 +221,387 @@ class _MathRaceScreenState extends ConsumerState<MathRaceScreen> {
   @override
   Widget build(BuildContext context) {
     final p = _puzzle;
+    const accent = Color(0xFFE3A66A);
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        title: const Text('Math Race'),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            tooltip: 'Minimize',
-            icon: const Icon(Icons.horizontal_rule),
-            onPressed: _pauseAndMinimize,
-          ),
-          IconButton(
-            tooltip: 'Close',
-            icon: const Icon(Icons.close),
-            onPressed: () => Navigator.of(context).maybePop(),
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: p == null
-            ? const Center(child: CircularProgressIndicator())
-            : Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
+    return Theme(
+      data: AppTheme.premiumDark(),
+      child: Scaffold(
+        backgroundColor: ReleafColors.background,
+        appBar: AppBar(
+          toolbarHeight: 72,
+          backgroundColor: const Color(0xE90D0E15),
+          surfaceTintColor: Colors.transparent,
+          titleSpacing: 20,
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _statusChip('Lvl: $_level'),
-                  _statusChip('Time: $_timeLeft s'),
-                  _statusChip('Score: $_score'),
-                ],
+              Text(
+                'CALCULATION',
+                style: ReleafTypography.eyebrow.copyWith(
+                  color: accent,
+                  letterSpacing: 1.8,
+                ),
               ),
-              const SizedBox(height: 16),
-
-              Expanded(
-                child: Center(
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 22,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: .95),
-                      borderRadius: BorderRadius.circular(24),
-                      boxShadow: const [
-                        BoxShadow(
-                          color: Colors.black12,
-                          blurRadius: 14,
-                          offset: Offset(0, 8),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: Text(
-                            _expressionText(p),
-                            style: const TextStyle(
-                              fontSize: 44,
-                              fontWeight: FontWeight.w900,
-                              color: Color(0xFF154314),
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                        const SizedBox(height: 14),
-                        if (_feedback != null)
-                          Text(
-                            _feedback!,
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w800,
-                              color: _feedback!.startsWith('Nice')
-                                  ? Colors.green[700]
-                                  : Colors.red[700],
-                            ),
-                          ),
-                        const SizedBox(height: 18),
-
-                        GridView.count(
-                          shrinkWrap: true,
-                          crossAxisCount: 2,
-                          mainAxisSpacing: 12,
-                          crossAxisSpacing: 12,
-                          childAspectRatio: 2.6,
-                          children: p.options.map((opt) {
-                            final isDisabled = _locked;
-                            return InkWell(
-                              onTap: isDisabled ? null : () => _answer(opt),
-                              borderRadius: BorderRadius.circular(18),
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(18),
-                                  boxShadow: const [
-                                    BoxShadow(
-                                      color: Colors.black12,
-                                      blurRadius: 8,
-                                      offset: Offset(0, 4),
-                                    ),
-                                  ],
-                                ),
-                                alignment: Alignment.center,
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 10,
-                                  horizontal: 8,
-                                ),
-                                child: Text(
-                                  opt.toString(),
-                                  style: const TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                      ],
-                    ),
+              const SizedBox(height: 2),
+              Text(
+                'Math Race',
+                style: ReleafTypography.cardTitle.copyWith(fontSize: 17),
+              ),
+            ],
+          ),
+          actions: [
+            IconButton(
+              tooltip: 'Exit Math Race',
+              icon: const Icon(Icons.close_rounded),
+              onPressed: _exitSession,
+            ),
+          ],
+        ),
+        body: Stack(
+          children: [
+            const Positioned.fill(
+              child: ReleafBrainArtwork(
+                variant: ReleafBrainArtworkVariant.mathRace,
+                intensity: 0.38,
+              ),
+            ),
+            const Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Color(0xB70C0C14),
+                      Color(0xED0B0D12),
+                      ReleafColors.background,
+                    ],
+                    stops: [0, 0.48, 1],
                   ),
                 ),
               ),
-              const SizedBox(height: 12),
+            ),
+            SafeArea(
+              top: false,
+              child: p == null
+                  ? const Center(
+                      child: CircularProgressIndicator(color: accent),
+                    )
+                  : LayoutBuilder(
+                      builder: (context, constraints) {
+                        final compact = constraints.maxHeight < 690;
 
-              Wrap(
-                spacing: 10,
-                runSpacing: 10,
-                children: [
-                  SizedBox(
-                    width: (MediaQuery.of(context).size.width - 42) / 2,
-                    child: _actionButton(
-                      icon: Icons.refresh,
-                      label: 'Restart',
-                      onTap: _locked ? null : _restartSession,
-                    ),
-                  ),
-                  SizedBox(
-                    width: (MediaQuery.of(context).size.width - 42) / 2,
-                    child: _actionButton(
-                      icon: Icons.bar_chart,
-                      label: 'Stats',
-                      onTap: () async {
-                        final best = await MathRaceStats.load();
-                        if (!context.mounted) return;
-                        showDialog(
-                          context: context,
-                          builder: (_) => AlertDialog(
-                            title: const Text('Stats'),
-                            content: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('Best score: ${best.bestScore}'),
-                                Text('Best level: ${best.bestLevel}'),
-                              ],
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.of(context).pop(),
-                                child: const Text('OK'),
+                        return SingleChildScrollView(
+                          physics: const BouncingScrollPhysics(),
+                          padding: EdgeInsets.fromLTRB(
+                            ReleafSpacing.screen,
+                            compact ? ReleafSpacing.sm : ReleafSpacing.md,
+                            ReleafSpacing.screen,
+                            ReleafSpacing.lg,
+                          ),
+                          child: Center(
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 620),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  Wrap(
+                                    spacing: ReleafSpacing.xs,
+                                    runSpacing: ReleafSpacing.xs,
+                                    children: [
+                                      _statusChip(
+                                        icon: Icons.layers_outlined,
+                                        label: 'Level $_level',
+                                      ),
+                                      _statusChip(
+                                        icon: Icons.timer_outlined,
+                                        label: '${_timeLeft}s',
+                                        accent: _timeLeft <= 10
+                                            ? const Color(0xFFE19A84)
+                                            : accent,
+                                      ),
+                                      _statusChip(
+                                        icon: Icons.bolt_rounded,
+                                        label: 'Score $_score',
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(
+                                    height: compact
+                                        ? ReleafSpacing.md
+                                        : ReleafSpacing.xl,
+                                  ),
+                                  Container(
+                                    key: const Key('math-race-puzzle-card'),
+                                    width: double.infinity,
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: ReleafSpacing.lg,
+                                      vertical: compact ? 24 : 34,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      gradient: const LinearGradient(
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                        colors: [
+                                          Color(0xF01A1722),
+                                          Color(0xF011151D),
+                                        ],
+                                      ),
+                                      borderRadius: BorderRadius.circular(
+                                        ReleafRadii.extraLarge,
+                                      ),
+                                      border: Border.all(
+                                        color: accent.withValues(alpha: 0.24),
+                                      ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: accent.withValues(alpha: 0.08),
+                                          blurRadius: 32,
+                                          offset: const Offset(0, 16),
+                                        ),
+                                      ],
+                                    ),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          'FIND THE MISSING VALUE',
+                                          style:
+                                              ReleafTypography.eyebrow.copyWith(
+                                            color: accent,
+                                            fontSize: 9,
+                                          ),
+                                        ),
+                                        const SizedBox(
+                                          height: ReleafSpacing.lg,
+                                        ),
+                                        FittedBox(
+                                          fit: BoxFit.scaleDown,
+                                          child: Text(
+                                            _expressionText(p),
+                                            style: ReleafTypography.display
+                                                .copyWith(
+                                              fontSize: compact ? 42 : 52,
+                                              fontWeight: FontWeight.w700,
+                                              color:
+                                                  const Color(0xFFFFF2E0),
+                                            ),
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          height: compact
+                                              ? ReleafSpacing.sm
+                                              : ReleafSpacing.lg,
+                                        ),
+                                        AnimatedSwitcher(
+                                          duration: ReleafMotion.quick,
+                                          child: _feedback == null
+                                              ? Text(
+                                                  'Choose one answer.',
+                                                  key: const ValueKey(
+                                                    'math-hint',
+                                                  ),
+                                                  style: ReleafTypography.meta
+                                                      .copyWith(
+                                                    color: ReleafColors
+                                                        .textSecondary,
+                                                  ),
+                                                )
+                                              : Text(
+                                                  _feedback!,
+                                                  key: ValueKey(_feedback),
+                                                  style: ReleafTypography
+                                                      .cardTitle
+                                                      .copyWith(
+                                                    color: _feedback!
+                                                            .startsWith('Nice')
+                                                        ? const Color(
+                                                            0xFF80CDB7,
+                                                          )
+                                                        : const Color(
+                                                            0xFFE1A184,
+                                                          ),
+                                                  ),
+                                                ),
+                                        ),
+                                        const SizedBox(
+                                          height: ReleafSpacing.lg,
+                                        ),
+                                        GridView.count(
+                                          shrinkWrap: true,
+                                          physics:
+                                              const NeverScrollableScrollPhysics(),
+                                          crossAxisCount: 2,
+                                          mainAxisSpacing: ReleafSpacing.sm,
+                                          crossAxisSpacing: ReleafSpacing.sm,
+                                          childAspectRatio: 2.45,
+                                          children: p.options.map((opt) {
+                                            return Material(
+                                              color: Colors.transparent,
+                                              borderRadius:
+                                                  BorderRadius.circular(
+                                                ReleafRadii.medium,
+                                              ),
+                                              child: InkWell(
+                                                onTap: _locked
+                                                    ? null
+                                                    : () => _answer(opt),
+                                                borderRadius:
+                                                    BorderRadius.circular(
+                                                  ReleafRadii.medium,
+                                                ),
+                                                child: Ink(
+                                                  decoration: BoxDecoration(
+                                                    color: const Color(
+                                                      0xFF111722,
+                                                    ),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                      ReleafRadii.medium,
+                                                    ),
+                                                    border: Border.all(
+                                                      color: accent.withValues(
+                                                        alpha: 0.22,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  alignment: Alignment.center,
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                    vertical: 10,
+                                                    horizontal: 8,
+                                                  ),
+                                                  child: Text(
+                                                    opt.toString(),
+                                                    style: ReleafTypography
+                                                        .sectionTitle
+                                                        .copyWith(
+                                                      fontSize: 21,
+                                                      color: const Color(
+                                                        0xFFF5EEE7,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            );
+                                          }).toList(),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(height: ReleafSpacing.md),
+                                  LayoutBuilder(
+                                    builder: (context, actions) {
+                                      final stacked =
+                                          actions.maxWidth < 380;
+                                      final restart = _actionButton(
+                                        icon: Icons.refresh_rounded,
+                                        label: 'Restart',
+                                        onTap:
+                                            _locked ? null : _restartSession,
+                                      );
+                                      final stats = _actionButton(
+                                        icon: Icons.bar_chart_rounded,
+                                        label: 'Stats',
+                                        onTap: () async {
+                                          final best =
+                                              await MathRaceStats.load();
+                                          if (!context.mounted) return;
+                                          showDialog(
+                                            context: context,
+                                            builder: (_) => AlertDialog(
+                                              title: const Text(
+                                                'Math Race stats',
+                                              ),
+                                              content: Column(
+                                                mainAxisSize:
+                                                    MainAxisSize.min,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    'Best score: ${best.bestScore}',
+                                                  ),
+                                                  Text(
+                                                    'Best level: ${best.bestLevel}',
+                                                  ),
+                                                ],
+                                              ),
+                                              actions: [
+                                                TextButton(
+                                                  onPressed: () =>
+                                                      Navigator.of(context)
+                                                          .pop(),
+                                                  child: const Text('Close'),
+                                                ),
+                                              ],
+                                            ),
+                                          );
+                                        },
+                                      );
+
+                                      return Column(
+                                        children: [
+                                          if (stacked) ...[
+                                            restart,
+                                            const SizedBox(
+                                              height: ReleafSpacing.xs,
+                                            ),
+                                            stats,
+                                          ] else
+                                            Row(
+                                              children: [
+                                                Expanded(child: restart),
+                                                const SizedBox(
+                                                  width: ReleafSpacing.xs,
+                                                ),
+                                                Expanded(child: stats),
+                                              ],
+                                            ),
+                                          const SizedBox(
+                                            height: ReleafSpacing.xs,
+                                          ),
+                                          _actionButton(
+                                            icon:
+                                                Icons.skip_next_rounded,
+                                            label: 'Skip · −2 score',
+                                            onTap: _locked
+                                                ? null
+                                                : () {
+                                                    setState(() {
+                                                      _score = (_score - 2)
+                                                          .clamp(0, 999999);
+                                                      _level++;
+                                                      _feedback = null;
+                                                      _locked = false;
+                                                    });
+                                                    _nextPuzzle();
+                                                  },
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  ),
+                                  const SizedBox(height: ReleafSpacing.sm),
+                                  Text(
+                                    'Score reflects performance in this exercise only.',
+                                    textAlign: TextAlign.center,
+                                    style: ReleafTypography.meta.copyWith(
+                                      color: ReleafColors.textMuted,
+                                      fontSize: 10,
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ],
+                            ),
                           ),
                         );
                       },
                     ),
-                  ),
-                  SizedBox(
-                    width: (MediaQuery.of(context).size.width - 42),
-                    child: _actionButton(
-                      icon: Icons.skip_next,
-                      label: 'Skip (−2 score)',
-                      onTap: _locked
-                          ? null
-                          : () {
-                        setState(() {
-                          _score = (_score - 2).clamp(0, 999999);
-                          _level++;
-                          _feedback = null;
-                          _locked = false;
-                        });
-                        _nextPuzzle();
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
