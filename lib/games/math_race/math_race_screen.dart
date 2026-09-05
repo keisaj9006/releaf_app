@@ -466,20 +466,21 @@ class _MathRaceScreenState extends ConsumerState<MathRaceScreen> {
                                                       ),
                                                     ),
                                                   ),
-                                                  alignment: Alignment.center,
                                                   padding: const EdgeInsets
                                                       .symmetric(
                                                     vertical: 10,
                                                     horizontal: 8,
                                                   ),
-                                                  child: Text(
-                                                    opt.toString(),
-                                                    style: ReleafTypography
-                                                        .sectionTitle
-                                                        .copyWith(
-                                                      fontSize: 21,
-                                                      color: const Color(
-                                                        0xFFF5EEE7,
+                                                  child: Center(
+                                                    child: Text(
+                                                      opt.toString(),
+                                                      style: ReleafTypography
+                                                          .sectionTitle
+                                                          .copyWith(
+                                                        fontSize: 21,
+                                                        color: const Color(
+                                                          0xFFF5EEE7,
+                                                        ),
                                                       ),
                                                     ),
                                                   ),

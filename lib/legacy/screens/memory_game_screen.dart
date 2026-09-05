@@ -382,7 +382,7 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
                             ),
                             _MemoryStatusPill(
                               icon: Icons.refresh_rounded,
-                              label: '${mistakes} mistakes',
+                              label: '$mistakes mistakes',
                               accent: ReleafColors.textSecondary,
                             ),
                           ],
