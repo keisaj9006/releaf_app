@@ -69,7 +69,7 @@ void main() {
     expect(find.byKey(const Key('sound-featured-card')), findsOneWidget);
     expect(tester.takeException(), isNull);
 
-    await tester.ensureVisible(find.text('Available Now'));
+    await tester.ensureVisible(find.text('AVAILABLE NOW'));
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
   });
