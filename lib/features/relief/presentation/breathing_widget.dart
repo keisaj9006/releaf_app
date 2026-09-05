@@ -11,6 +11,7 @@ import '../../../theme/releaf_design_tokens.dart';
 import '../../../theme/widgets/releaf_artwork.dart';
 import '../../../theme/widgets/releaf_components.dart';
 import '../../../theme/widgets/releaf_session_living_form.dart';
+import '../../../theme/widgets/releaf_sensory_halo.dart';
 import '../data/reset_catalog.dart';
 import '../domain/models/breath_pattern.dart';
 import '../domain/models/reset_content.dart';
@@ -36,9 +37,11 @@ class BreathingWidget extends ConsumerStatefulWidget {
 class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
   ResetContent? _session;
   int _remainingSeconds = 0;
+  int _activeDurationSeconds = 0;
   Timer? _timer;
   SessionPhase _phase = SessionPhase.running;
   bool _awarded = false;
+  bool _usingSimplifiedProgram = false;
 
   @override
   void initState() {
@@ -53,6 +56,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
 
       setState(() {
         _session = session;
+        _activeDurationSeconds = session.durationSeconds;
         _remainingSeconds = session.durationSeconds;
       });
 
@@ -112,6 +116,27 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
     if (mounted) context.pop();
   }
 
+  void _activateSimplifiedPath() {
+    final program = _session?.program;
+    if (program == null ||
+        !program.hasSimplifiedPath ||
+        _usingSimplifiedProgram ||
+        _phase != SessionPhase.running) {
+      return;
+    }
+
+    final simplifiedDuration = program.simplifiedDurationSeconds;
+    if (simplifiedDuration <= 0) return;
+
+    HapticFeedback.selectionClick();
+    setState(() {
+      _usingSimplifiedProgram = true;
+      _activeDurationSeconds = simplifiedDuration;
+      _remainingSeconds = simplifiedDuration;
+    });
+    _startTimer();
+  }
+
   void _submitFeedbackAndClose(bool helpedALot) {
     if (mounted) context.pop(helpedALot);
   }
@@ -168,9 +193,9 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
     final session = _session!;
     final reducedMotion =
         MediaQuery.maybeOf(context)?.disableAnimations ?? false;
-    final progress = session.durationSeconds <= 0
+    final progress = _activeDurationSeconds <= 0
         ? 1.0
-        : 1 - (_remainingSeconds / session.durationSeconds);
+        : 1 - (_remainingSeconds / _activeDurationSeconds);
     final phaseLabel = _sessionPhaseLabel(session);
     final artwork = _artworkFor(session);
     final breathPattern = session.program?.breathPattern;
@@ -240,20 +265,35 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
                           child: SizedBox(
                             width: formSize,
                             height: formSize,
-                            child: ReleafSessionLivingForm(
-                              variant: artwork,
-                              progress: progress,
-                              breathing: isPacedBreathing,
-                              phaseLabel: phaseLabel,
-                              inhaleSeconds: breathPattern?.inhaleSeconds ?? 4,
-                              holdAfterInhaleSeconds:
-                                  breathPattern?.holdAfterInhaleSeconds ?? 0,
-                              exhaleSeconds: breathPattern?.exhaleSeconds ?? 4,
-                              holdAfterExhaleSeconds:
-                                  breathPattern?.holdAfterExhaleSeconds ?? 0,
-                              showBreathPath: showBreathPath,
-                              reducedMotion: reducedMotion,
-                            ),
+                            child: session.visualType ==
+                                    ResetVisualType.sensoryHalo
+                                ? ReleafSensoryHalo(
+                                    progress: progress,
+                                    activeCount:
+                                        _sensoryCountFor(phaseLabel),
+                                    phaseLabel: phaseLabel ?? 'Notice',
+                                    reducedMotion: reducedMotion,
+                                  )
+                                : ReleafSessionLivingForm(
+                                    variant: artwork,
+                                    progress: progress,
+                                    breathing: isPacedBreathing,
+                                    phaseLabel: phaseLabel,
+                                    inhaleSeconds:
+                                        breathPattern?.inhaleSeconds ?? 4,
+                                    holdAfterInhaleSeconds:
+                                        breathPattern
+                                                ?.holdAfterInhaleSeconds ??
+                                            0,
+                                    exhaleSeconds:
+                                        breathPattern?.exhaleSeconds ?? 4,
+                                    holdAfterExhaleSeconds:
+                                        breathPattern
+                                                ?.holdAfterExhaleSeconds ??
+                                            0,
+                                    showBreathPath: showBreathPath,
+                                    reducedMotion: reducedMotion,
+                                  ),
                           ),
                         ),
                       ),
@@ -285,7 +325,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
                                 child: Text(
                                   _currentGuidance(session),
                                   key: ValueKey(
-                                    'guidance-${_sessionStepIndex(session)}',
+                                    'guidance-${_sessionStepIndex(session)}-$_usingSimplifiedProgram',
                                   ),
                                   textAlign: TextAlign.center,
                                   style: ReleafTypography.body.copyWith(
@@ -305,6 +345,36 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
                           key: Key('reset-active-session-guidance-hidden'),
                           height: 1,
                         ),
+                      if (session.program?.hasSimplifiedPath == true) ...[
+                        const SizedBox(height: ReleafSpacing.sm),
+                        if (!_usingSimplifiedProgram)
+                          Center(
+                            child: TextButton(
+                              key: const Key('reset-simplify-action'),
+                              onPressed: _activateSimplifiedPath,
+                              style: TextButton.styleFrom(
+                                foregroundColor: ReleafColors.textSecondary,
+                              ),
+                              child: Text(
+                                session.program!.simplifyActionLabel ??
+                                    'Try a simpler version',
+                                style: ReleafTypography.meta.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          )
+                        else
+                          Center(
+                            child: Text(
+                              'SIMPLIFIED 3–2–1',
+                              key: const Key('reset-simplified-active'),
+                              style: ReleafTypography.eyebrow.copyWith(
+                                color: ReleafColors.sage.withValues(alpha: 0.82),
+                              ),
+                            ),
+                          ),
+                      ],
                     ],
                   ),
                 );
@@ -573,13 +643,21 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
       return _breathPhaseLabel(frame.phase);
     }
 
-    return program.stepAtElapsedSeconds(elapsed).label;
+    return program
+        .stepAtElapsedSeconds(
+          elapsed,
+          simplified: _usingSimplifiedProgram,
+        )
+        .label;
   }
 
   int _sessionStepIndex(ResetContent session) {
     final program = session.program;
     if (program != null) {
-      return program.stepIndexAtElapsedSeconds(_elapsedSeconds(session));
+      return program.stepIndexAtElapsedSeconds(
+        _elapsedSeconds(session),
+        simplified: _usingSimplifiedProgram,
+      );
     }
 
     if (session.instructions.isEmpty || session.durationSeconds <= 0) return 0;
@@ -594,7 +672,12 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
   String _currentGuidance(ResetContent session) {
     final program = session.program;
     if (program != null) {
-      return program.stepAtElapsedSeconds(_elapsedSeconds(session)).guidance;
+      return program
+          .stepAtElapsedSeconds(
+            _elapsedSeconds(session),
+            simplified: _usingSimplifiedProgram,
+          )
+          .guidance;
     }
 
     if (session.instructions.isEmpty) return 'Settle in.';
@@ -602,8 +685,8 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
   }
 
   int _elapsedSeconds(ResetContent session) {
-    return (session.durationSeconds - _remainingSeconds)
-        .clamp(0, session.durationSeconds);
+    return (_activeDurationSeconds - _remainingSeconds)
+        .clamp(0, _activeDurationSeconds);
   }
 
   String _breathPhaseLabel(BreathPhase phase) {
@@ -619,12 +702,35 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
     if (session.program?.type == ResetProgramType.pacedBreathing) {
       return 'FOLLOW THE RHYTHM';
     }
+    if (session.visualType == ResetVisualType.sensoryHalo) {
+      return 'GROUND WITH YOUR SENSES';
+    }
     return 'STAY WITH THE MOMENT';
+  }
+
+  int _sensoryCountFor(String? phaseLabel) {
+    if (_usingSimplifiedProgram) {
+      return switch (phaseLabel) {
+        'See' => 3,
+        'Feel' => 2,
+        _ => 1,
+      };
+    }
+
+    return switch (phaseLabel) {
+      'Arrive' => 5,
+      'See' => 5,
+      'Feel' => 4,
+      'Hear' => 3,
+      'Smell' => 2,
+      _ => 1,
+    };
   }
 
   ReleafArtworkVariant _artworkFor(ResetContent session) {
     return switch (session.id) {
       '60s-grounding' => ReleafArtworkVariant.grounding,
+      'back-to-room' => ReleafArtworkVariant.noBreath,
       '90s-calm-down' => ReleafArtworkVariant.calm,
       'longer-exhale' => ReleafArtworkVariant.breath,
       '5min-focus' => ReleafArtworkVariant.focus,
