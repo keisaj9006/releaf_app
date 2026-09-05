@@ -231,7 +231,7 @@ void main() {
 
     expect(find.byKey(const Key('reset-body-release-visual')), findsOneWidget);
     expect(find.byKey(const Key('reset-living-form')), findsNothing);
-    expect(find.text('Notice'), findsOneWidget);
+    expect(find.text('NOTICE'), findsOneWidget);
     expect(find.text('01:30'), findsOneWidget);
   });
 
@@ -263,7 +263,7 @@ void main() {
     await tester.pump(const Duration(seconds: 41));
     await tester.pump(const Duration(milliseconds: 300));
 
-    expect(find.text('Unhook'), findsOneWidget);
+    expect(find.text('UNHOOK'), findsOneWidget);
     expect(
       find.text(
         'Try adding: “I am noticing the thought that…” before the sentence.',
