@@ -7,17 +7,24 @@ class ReleafSectionHeading extends StatelessWidget {
     super.key,
     required this.title,
     required this.description,
+    this.accentColor,
   });
 
   final String title;
   final String description;
+  final Color? accentColor;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title.toUpperCase(), style: ReleafTypography.eyebrow),
+        Text(
+          title.toUpperCase(),
+          style: ReleafTypography.eyebrow.copyWith(
+            color: accentColor ?? ReleafColors.sage,
+          ),
+        ),
         const SizedBox(height: ReleafSpacing.xs),
         Text(description, style: ReleafTypography.body),
       ],
@@ -76,16 +83,19 @@ class ReleafRoundIconButton extends StatelessWidget {
     required this.tooltip,
     required this.onPressed,
     this.isWarm = false,
+    this.accentColor,
   });
 
   final IconData icon;
   final String tooltip;
   final VoidCallback onPressed;
   final bool isWarm;
+  final Color? accentColor;
 
   @override
   Widget build(BuildContext context) {
-    final accent = isWarm ? ReleafColors.premium : ReleafColors.sage;
+    final accent =
+        accentColor ?? (isWarm ? ReleafColors.premium : ReleafColors.sage);
 
     return Semantics(
       button: true,

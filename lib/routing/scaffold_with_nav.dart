@@ -22,6 +22,7 @@ class ScaffoldWithNavBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final session = ref.watch(sessionManagerProvider);
+    final accent = _accentForIndex(navigationShell.currentIndex);
 
     return Scaffold(
       body: Stack(
@@ -51,10 +52,11 @@ class ScaffoldWithNavBar extends ConsumerWidget {
           : FloatingActionButton.small(
               tooltip: 'Open Emergency Calm',
               backgroundColor: ReleafColors.surfaceElevated,
-              foregroundColor: ReleafColors.sage,
+              foregroundColor: ReleafFeatureAccents.emergency,
               shape: CircleBorder(
                 side: BorderSide(
-                  color: ReleafColors.sage.withValues(alpha: 0.34),
+                  color:
+                      ReleafFeatureAccents.emergency.withValues(alpha: 0.34),
                 ),
               ),
               onPressed: () {
@@ -64,12 +66,20 @@ class ScaffoldWithNavBar extends ConsumerWidget {
               },
               child: const Icon(Icons.health_and_safety_outlined),
             ),
-      bottomNavigationBar: Theme(
-        data: Theme.of(context).copyWith(
-          navigationBarTheme: NavigationBarThemeData(
-            height: 82,
-            backgroundColor: ReleafColors.backgroundRaised,
-            indicatorColor: ReleafColors.sage.withValues(alpha: 0.16),
+      bottomNavigationBar: DecoratedBox(
+        decoration: BoxDecoration(
+          border: Border(
+            top: BorderSide(
+              color: ReleafColors.borderSoft.withValues(alpha: 0.82),
+            ),
+          ),
+        ),
+        child: Theme(
+          data: Theme.of(context).copyWith(
+            navigationBarTheme: NavigationBarThemeData(
+              height: 82,
+              backgroundColor: ReleafColors.backgroundRaised,
+              indicatorColor: accent.withValues(alpha: 0.16),
             surfaceTintColor: Colors.transparent,
             labelTextStyle: WidgetStateProperty.resolveWith((states) {
               final selected = states.contains(WidgetState.selected);
@@ -85,7 +95,7 @@ class ScaffoldWithNavBar extends ConsumerWidget {
             iconTheme: WidgetStateProperty.resolveWith((states) {
               final selected = states.contains(WidgetState.selected);
               return IconThemeData(
-                color: selected ? ReleafColors.sage : ReleafColors.textMuted,
+                color: selected ? accent : ReleafColors.textMuted,
                 size: 22,
               );
             }),
@@ -115,11 +125,23 @@ class ScaffoldWithNavBar extends ConsumerWidget {
             icon: Icon(Icons.bedtime_outlined),
             label: 'Sleep',
           ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
+}
+
+Color _accentForIndex(int index) {
+  return switch (index) {
+    0 => ReleafFeatureAccents.home,
+    1 => ReleafFeatureAccents.reset,
+    2 => ReleafFeatureAccents.brain,
+    3 => ReleafFeatureAccents.meditation,
+    4 => ReleafFeatureAccents.sleep,
+    _ => ReleafColors.sage,
+  };
 }
 
 class _ResumePill extends StatelessWidget {

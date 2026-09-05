@@ -26,6 +26,16 @@ abstract final class ReleafColors {
   static const glowPremium = Color(0x2ED7BA82);
 }
 
+abstract final class ReleafFeatureAccents {
+  static const home = ReleafColors.sage;
+  static const reset = ReleafColors.sage;
+  static const brain = Color(0xFF91A4EF);
+  static const meditation = Color(0xFFC8B4D0);
+  static const sleep = Color(0xFFB8B9C9);
+  static const sound = Color(0xFF9CCBD3);
+  static const emergency = Color(0xFFD8B98A);
+}
+
 abstract final class ReleafSpacing {
   static const xxs = 4.0;
   static const xs = 8.0;

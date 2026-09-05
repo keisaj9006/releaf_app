@@ -99,13 +99,14 @@ class _SoundPlayerScreenState extends ConsumerState<SoundPlayerScreen> {
                                 ReleafRoundIconButton(
                                   icon: Icons.keyboard_arrow_down_rounded,
                                   tooltip: 'Close player',
+                                  accentColor: ReleafFeatureAccents.sound,
                                   onPressed: context.pop,
                                 ),
                                 const Spacer(),
                                 Text(
                                   'SOUND SPACE',
                                   style: ReleafTypography.eyebrow.copyWith(
-                                    color: ReleafColors.sage,
+                                    color: ReleafFeatureAccents.sound,
                                     letterSpacing: 1.8,
                                   ),
                                 ),
@@ -117,6 +118,7 @@ class _SoundPlayerScreenState extends ConsumerState<SoundPlayerScreen> {
                                   tooltip: favorite
                                       ? 'Remove favorite'
                                       : 'Add favorite',
+                                  accentColor: ReleafFeatureAccents.sound,
                                   onPressed: () =>
                                       controller.toggleFavorite(track.id),
                                 ),
@@ -146,11 +148,11 @@ class _SoundPlayerScreenState extends ConsumerState<SoundPlayerScreen> {
                             ),
                             DecoratedBox(
                               decoration: BoxDecoration(
-                                color: ReleafColors.sage.withValues(alpha: 0.08),
+                                color: ReleafFeatureAccents.sound.withValues(alpha: 0.08),
                                 borderRadius:
                                     BorderRadius.circular(ReleafRadii.pill),
                                 border: Border.all(
-                                  color: ReleafColors.sage.withValues(
+                                  color: ReleafFeatureAccents.sound.withValues(
                                     alpha: 0.20,
                                   ),
                                 ),
@@ -165,7 +167,7 @@ class _SoundPlayerScreenState extends ConsumerState<SoundPlayerScreen> {
                                   key: const Key('sound-player-state'),
                                   style: ReleafTypography.eyebrow.copyWith(
                                     fontSize: 9,
-                                    color: ReleafColors.sage,
+                                    color: ReleafFeatureAccents.sound,
                                   ),
                                 ),
                               ),
@@ -414,7 +416,7 @@ class _SoundArtworkDiscState extends State<_SoundArtworkDisc>
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: ReleafColors.sage.withValues(
+                        color: ReleafFeatureAccents.sound.withValues(
                           alpha: 0.10 + pulse * 0.11,
                         ),
                         blurRadius: 38 + pulse * 24,
@@ -451,7 +453,7 @@ class _SoundArtworkDiscState extends State<_SoundArtworkDisc>
                   backgroundColor:
                       ReleafColors.borderSoft.withValues(alpha: 0.42),
                   valueColor: const AlwaysStoppedAnimation(
-                    ReleafColors.sage,
+                    ReleafFeatureAccents.sound,
                   ),
                 ),
                 Center(
@@ -475,7 +477,7 @@ class _SoundArtworkDiscState extends State<_SoundArtworkDisc>
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: ReleafColors.sage.withValues(
+                              color: ReleafFeatureAccents.sound.withValues(
                                 alpha: 0.08 + pulse * 0.08,
                               ),
                               blurRadius: 22,
@@ -531,7 +533,7 @@ class _SoundPulsePainter extends CustomPainter {
         Paint()
           ..style = PaintingStyle.stroke
           ..strokeWidth = 1.2
-          ..color = ReleafColors.sage.withValues(alpha: alpha),
+          ..color = ReleafFeatureAccents.sound.withValues(alpha: alpha),
       );
     }
   }
@@ -607,10 +609,10 @@ class _PrimaryPlayButton extends StatelessWidget {
           height: compact ? 66 : 76,
         decoration: const BoxDecoration(
           shape: BoxShape.circle,
-          color: ReleafColors.sage,
+          color: ReleafFeatureAccents.sound,
           boxShadow: [
             BoxShadow(
-              color: ReleafColors.glowSage,
+              color: Color(0x334B95A2),
               blurRadius: 26,
               spreadRadius: 2,
             ),
@@ -722,10 +724,10 @@ class _TimerChip extends StatelessWidget {
       selected: selected,
       label: Text(label),
       onSelected: (_) => onTap(),
-      selectedColor: ReleafColors.sage.withValues(alpha: 0.20),
+      selectedColor: ReleafFeatureAccents.sound.withValues(alpha: 0.20),
       backgroundColor: ReleafColors.surfaceSoft,
       side: BorderSide(
-        color: selected ? ReleafColors.sage : ReleafColors.borderSoft,
+        color: selected ? ReleafFeatureAccents.sound : ReleafColors.borderSoft,
       ),
       labelStyle: ReleafTypography.meta.copyWith(
         color: selected ? ReleafColors.textPrimary : ReleafColors.textSecondary,

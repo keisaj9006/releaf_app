@@ -181,7 +181,7 @@ class _SoundHeader extends StatelessWidget {
               Text(
                 'AMBIENT AUDIO',
                 style: ReleafTypography.eyebrow.copyWith(
-                  color: const Color(0xFF8FC3CC),
+                  color: ReleafFeatureAccents.sound,
                   letterSpacing: 1.7,
                 ),
               ),
@@ -434,16 +434,16 @@ class _SoundTrackTile extends StatelessWidget {
                   height: 58,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: ReleafColors.sage.withValues(alpha: 0.10),
+                    color: ReleafFeatureAccents.sound.withValues(alpha: 0.10),
                     border: Border.all(
-                      color: ReleafColors.sage.withValues(alpha: 0.28),
+                      color: ReleafFeatureAccents.sound.withValues(alpha: 0.28),
                     ),
                   ),
                   child: Icon(
                     isPlaying
                         ? Icons.equalizer_rounded
                         : Icons.graphic_eq_rounded,
-                    color: ReleafColors.sage,
+                    color: ReleafFeatureAccents.sound,
                   ),
                 ),
                 const SizedBox(width: ReleafSpacing.md),
@@ -463,7 +463,7 @@ class _SoundTrackTile extends StatelessWidget {
                         isCurrent ? 'Current sound' : 'Ambient • Loop',
                         style: ReleafTypography.meta.copyWith(
                           color: isCurrent
-                              ? ReleafColors.sage
+                              ? ReleafFeatureAccents.sound
                               : ReleafColors.textSecondary,
                         ),
                       ),
@@ -523,7 +523,7 @@ class _InScreenMiniPlayer extends ConsumerWidget {
             children: [
               const Icon(
                 Icons.graphic_eq_rounded,
-                color: ReleafColors.sage,
+                color: ReleafFeatureAccents.sound,
               ),
               const SizedBox(width: ReleafSpacing.sm),
               Expanded(
@@ -597,7 +597,7 @@ class _GlassTag extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 13, color: const Color(0xFF9CCBD3)),
+            Icon(icon, size: 13, color: ReleafFeatureAccents.sound),
             const SizedBox(width: 6),
             Text(
               label,
