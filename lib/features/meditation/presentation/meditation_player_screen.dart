@@ -11,6 +11,7 @@ import '../../../theme/releaf_design_tokens.dart';
 import '../../../theme/widgets/releaf_artwork.dart';
 import '../../../theme/widgets/releaf_components.dart';
 import '../../../theme/widgets/releaf_session_living_form.dart';
+import '../application/meditation_audio_controller.dart';
 import '../data/meditation_catalog.dart';
 import '../domain/meditation_content.dart';
 
@@ -40,6 +41,16 @@ class _MeditationPlayerScreenState
         ref.read(meditationCatalogProvider).getById(widget.meditationId);
     _remainingSeconds = item?.durationSeconds ?? 0;
     _startTimer();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || item == null) return;
+      unawaited(
+        ref.read(meditationAudioControllerProvider.notifier).start(
+              soundId: item.backgroundSoundId,
+              volume: item.backgroundSoundVolume,
+            ),
+      );
+    });
   }
 
   void _startTimer() {
@@ -55,6 +66,9 @@ class _MeditationPlayerScreenState
           _remainingSeconds = 0;
           _running = false;
         });
+        unawaited(
+          ref.read(meditationAudioControllerProvider.notifier).stop(),
+        );
         return;
       }
       setState(() => _remainingSeconds -= 1);
@@ -64,11 +78,23 @@ class _MeditationPlayerScreenState
   void _togglePause() {
     HapticFeedback.selectionClick();
     setState(() => _running = !_running);
+
+    final audioController =
+        ref.read(meditationAudioControllerProvider.notifier);
+
     if (_running) {
       _startTimer();
+      unawaited(audioController.resumeForSession());
     } else {
       _timer?.cancel();
+      unawaited(audioController.pauseForSession());
     }
+  }
+
+  Future<void> _exitMeditation() async {
+    _timer?.cancel();
+    await ref.read(meditationAudioControllerProvider.notifier).stop();
+    if (mounted) context.pop();
   }
 
   @override
@@ -91,6 +117,8 @@ class _MeditationPlayerScreenState
         ),
       );
     }
+
+    final audioState = ref.watch(meditationAudioControllerProvider);
 
     final elapsed = item.durationSeconds - _remainingSeconds;
     final step = _stepAt(item, elapsed);
@@ -154,7 +182,7 @@ class _MeditationPlayerScreenState
                                 ReleafRoundIconButton(
                                   icon: Icons.close_rounded,
                                   tooltip: 'Exit meditation',
-                                  onPressed: context.pop,
+                                  onPressed: _exitMeditation,
                                 ),
                                 const SizedBox(width: ReleafSpacing.md),
                                 Expanded(
@@ -307,6 +335,26 @@ class _MeditationPlayerScreenState
                                           fontSize: compact ? 14 : 16,
                                         ),
                                       ),
+                                    if (item.backgroundSoundId != null) ...[
+                                      SizedBox(
+                                        height: compact
+                                            ? ReleafSpacing.xs
+                                            : ReleafSpacing.sm,
+                                      ),
+                                      _MeditationSoundControl(
+                                        enabled: audioState.enabled,
+                                        onPressed: () {
+                                          unawaited(
+                                            ref
+                                                .read(
+                                                  meditationAudioControllerProvider
+                                                      .notifier,
+                                                )
+                                                .toggleEnabled(),
+                                          );
+                                        },
+                                      ),
+                                    ],
                                   ],
                                 ),
                               ),
@@ -322,7 +370,7 @@ class _MeditationPlayerScreenState
                               child: FilledButton.icon(
                                 key: const Key('meditation-primary-control'),
                                 onPressed: _remainingSeconds == 0
-                                    ? context.pop
+                                    ? _exitMeditation
                                     : _togglePause,
                                 icon: Icon(
                                   _remainingSeconds == 0
@@ -472,6 +520,81 @@ class _MeditationVisual extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+class _MeditationSoundControl extends StatelessWidget {
+  const _MeditationSoundControl({
+    required this.enabled,
+    required this.onPressed,
+  });
+
+  final bool enabled;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final semanticLabel =
+        enabled ? 'Mute ambient sound' : 'Play ambient sound';
+
+    return Semantics(
+      button: true,
+      label: semanticLabel,
+      child: Material(
+        color: ReleafColors.sage.withValues(alpha: enabled ? 0.09 : 0.035),
+        shape: StadiumBorder(
+          side: BorderSide(
+            color: ReleafColors.sage.withValues(alpha: enabled ? 0.28 : 0.14),
+          ),
+        ),
+        child: InkWell(
+          key: const Key('meditation-sound-control'),
+          customBorder: const StadiumBorder(),
+          onTap: onPressed,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 11,
+              vertical: 7,
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  enabled
+                      ? Icons.graphic_eq_rounded
+                      : Icons.volume_off_rounded,
+                  size: 15,
+                  color: enabled
+                      ? ReleafColors.sage
+                      : ReleafColors.textSecondary,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  'AMBIENCE',
+                  style: ReleafTypography.eyebrow.copyWith(
+                    color: enabled
+                        ? ReleafColors.sage
+                        : ReleafColors.textSecondary,
+                    fontSize: 9,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  enabled ? 'ON' : 'OFF',
+                  style: ReleafTypography.meta.copyWith(
+                    color: enabled
+                        ? ReleafColors.textPrimary.withValues(alpha: 0.78)
+                        : ReleafColors.textSecondary,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

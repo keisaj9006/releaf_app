@@ -17,6 +17,8 @@ class MeditationCatalog {
       durationSeconds: 120,
       category: MeditationCategory.startHere,
       accessTier: MeditationAccessTier.free,
+      backgroundSoundId: 'releaf-atmosphere-01',
+      backgroundSoundVolume: 0.20,
       steps: [
         MeditationStep(
           label: 'Arrive',
@@ -51,6 +53,8 @@ class MeditationCatalog {
       durationSeconds: 300,
       category: MeditationCategory.anxiety,
       accessTier: MeditationAccessTier.free,
+      backgroundSoundId: 'releaf-atmosphere-02',
+      backgroundSoundVolume: 0.18,
       steps: [
         MeditationStep(
           label: 'Arrive',
@@ -90,6 +94,8 @@ class MeditationCatalog {
       durationSeconds: 300,
       category: MeditationCategory.body,
       accessTier: MeditationAccessTier.premium,
+      backgroundSoundId: 'releaf-atmosphere-01',
+      backgroundSoundVolume: 0.20,
       steps: [
         MeditationStep(
           label: 'Face',
@@ -125,6 +131,8 @@ class MeditationCatalog {
       durationSeconds: 300,
       category: MeditationCategory.mind,
       accessTier: MeditationAccessTier.premium,
+      backgroundSoundId: 'releaf-atmosphere-02',
+      backgroundSoundVolume: 0.20,
       steps: [
         MeditationStep(
           label: 'Notice',
@@ -163,6 +171,8 @@ class MeditationCatalog {
       durationSeconds: 180,
       category: MeditationCategory.everyday,
       accessTier: MeditationAccessTier.premium,
+      backgroundSoundId: 'releaf-atmosphere-01',
+      backgroundSoundVolume: 0.16,
       steps: [
         MeditationStep(
           label: 'Stop',
@@ -190,6 +200,8 @@ class MeditationCatalog {
       durationSeconds: 300,
       category: MeditationCategory.unguided,
       accessTier: MeditationAccessTier.free,
+      backgroundSoundId: 'releaf-atmosphere-02',
+      backgroundSoundVolume: 0.22,
       unguided: true,
       steps: [
         MeditationStep(

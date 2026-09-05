@@ -7,6 +7,7 @@ import 'package:releaf_app/core/providers.dart';
 import 'package:releaf_app/core/subscription/revenuecat_service.dart';
 import 'package:releaf_app/core/subscription/subscription_controller.dart';
 import 'package:releaf_app/core/subscription/subscription_state.dart';
+import 'package:releaf_app/features/meditation/application/meditation_audio_controller.dart';
 import 'package:releaf_app/routing/app_router.dart';
 import 'package:releaf_app/routing/app_routes.dart';
 
@@ -28,11 +29,47 @@ class _FixedSubscriptionController extends SubscriptionController {
   Future<void> refresh() async {}
 }
 
+class _FakeMeditationAudioDriver implements MeditationAudioDriver {
+  int playCalls = 0;
+  int pauseCalls = 0;
+  int resumeCalls = 0;
+  int stopCalls = 0;
+  String? lastAssetPath;
+
+  @override
+  Future<void> playAsset(
+    String assetPath, {
+    required double volume,
+  }) async {
+    playCalls += 1;
+    lastAssetPath = assetPath;
+  }
+
+  @override
+  Future<void> pause() async {
+    pauseCalls += 1;
+  }
+
+  @override
+  Future<void> resume() async {
+    resumeCalls += 1;
+  }
+
+  @override
+  Future<void> stop() async {
+    stopCalls += 1;
+  }
+
+  @override
+  Future<void> dispose() async {}
+}
+
 Future<void> _pumpRoute(
   WidgetTester tester, {
   required String location,
   required SharedPreferences preferences,
   bool isPremium = false,
+  MeditationAudioDriver? meditationAudioDriver,
 }) async {
   final router = createAppRouter(initialLocation: location);
   addTearDown(router.dispose);
@@ -43,6 +80,9 @@ Future<void> _pumpRoute(
         sharedPreferencesProvider.overrideWithValue(preferences),
         subscriptionControllerProvider.overrideWith(
           (ref) => _FixedSubscriptionController(isPremium: isPremium),
+        ),
+        meditationAudioDriverProvider.overrideWithValue(
+          meditationAudioDriver ?? _FakeMeditationAudioDriver(),
         ),
       ],
       child: MaterialApp.router(routerConfig: router),
@@ -131,10 +171,13 @@ void main() {
   testWidgets('Meditation player uses the signature Living Form and pauses', (
     WidgetTester tester,
   ) async {
+    final audioDriver = _FakeMeditationAudioDriver();
+
     await _pumpRoute(
       tester,
       location: AppRoutes.meditationSessionFor('mindfulness-basics-2'),
       preferences: await _preferences(),
+      meditationAudioDriver: audioDriver,
     );
 
     expect(find.byKey(const Key('meditation-living-form')), findsOneWidget);
@@ -142,13 +185,28 @@ void main() {
       find.byKey(const Key('meditation-primary-control')),
       findsOneWidget,
     );
+    expect(
+      find.byKey(const Key('meditation-sound-control')),
+      findsOneWidget,
+    );
     expect(find.text('ARRIVE'), findsOneWidget);
+    expect(audioDriver.playCalls, 1);
+    expect(audioDriver.lastAssetPath, 'sounds/relief_01.mp3');
 
     await tester.tap(find.text('Pause'));
     await tester.pump(const Duration(milliseconds: 300));
 
     expect(find.text('PAUSED'), findsOneWidget);
     expect(find.text('Continue'), findsOneWidget);
+    expect(audioDriver.pauseCalls, 1);
+
+    await tester.tap(find.text('Continue'));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(audioDriver.resumeCalls, 1);
+
+    await tester.tap(find.byKey(const Key('meditation-sound-control')));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(audioDriver.pauseCalls, 2);
   });
 
   testWidgets('Meditation player stays overflow-free at 320px', (
