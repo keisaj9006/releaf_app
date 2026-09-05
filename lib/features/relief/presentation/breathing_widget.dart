@@ -9,6 +9,7 @@ import 'package:go_router/go_router.dart';
 import '../../progress/data/leaves_repository.dart';
 import '../../../theme/releaf_design_tokens.dart';
 import '../../../theme/widgets/releaf_artwork.dart';
+import '../../../theme/widgets/releaf_breath_path.dart';
 import '../../../theme/widgets/releaf_components.dart';
 import '../../../theme/widgets/releaf_session_living_form.dart';
 import '../data/reset_catalog.dart';
@@ -173,6 +174,10 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
         : 1 - (_remainingSeconds / session.durationSeconds);
     final phaseLabel = _sessionPhaseLabel(session);
     final artwork = _artworkFor(session);
+    final breathPattern = session.program?.breathPattern;
+    final isPacedBreathing =
+        session.program?.type == ResetProgramType.pacedBreathing &&
+        breathPattern != null;
 
     return Stack(
       key: const ValueKey('running'),
@@ -203,8 +208,11 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
             child: LayoutBuilder(
               builder: (context, constraints) {
                 final formSize = math.min(
-                  math.max(230.0, constraints.maxWidth * 0.64),
-                  math.min(360.0, constraints.maxHeight * 0.54),
+                  math.max(210.0, constraints.maxWidth * 0.62),
+                  math.min(
+                    350.0,
+                    constraints.maxHeight * (isPacedBreathing ? 0.42 : 0.54),
+                  ),
                 );
 
                 return Padding(
@@ -232,33 +240,32 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
                             child: ReleafSessionLivingForm(
                               variant: artwork,
                               progress: progress,
-                              breathing:
-                                  session.program?.type ==
-                                  ResetProgramType.pacedBreathing,
+                              breathing: isPacedBreathing,
                               phaseLabel: phaseLabel,
-                              inhaleSeconds:
-                                  session.program?.breathPattern?.inhaleSeconds ??
-                                  4,
+                              inhaleSeconds: breathPattern?.inhaleSeconds ?? 4,
                               holdAfterInhaleSeconds:
-                                  session
-                                      .program
-                                      ?.breathPattern
-                                      ?.holdAfterInhaleSeconds ??
-                                  0,
-                              exhaleSeconds:
-                                  session.program?.breathPattern?.exhaleSeconds ??
-                                  4,
+                                  breathPattern?.holdAfterInhaleSeconds ?? 0,
+                              exhaleSeconds: breathPattern?.exhaleSeconds ?? 4,
                               holdAfterExhaleSeconds:
-                                  session
-                                      .program
-                                      ?.breathPattern
-                                      ?.holdAfterExhaleSeconds ??
-                                  0,
+                                  breathPattern?.holdAfterExhaleSeconds ?? 0,
                               reducedMotion: reducedMotion,
                             ),
                           ),
                         ),
                       ),
+                      if (isPacedBreathing) ...[
+                        const SizedBox(height: ReleafSpacing.xs),
+                        ReleafBreathPath(
+                          inhaleSeconds: breathPattern.inhaleSeconds,
+                          holdAfterInhaleSeconds:
+                              breathPattern.holdAfterInhaleSeconds,
+                          exhaleSeconds: breathPattern.exhaleSeconds,
+                          holdAfterExhaleSeconds:
+                              breathPattern.holdAfterExhaleSeconds,
+                          reducedMotion: reducedMotion,
+                        ),
+                        const SizedBox(height: ReleafSpacing.xs),
+                      ],
                       if (widget.launchOptions.showGuidanceText)
                         Padding(
                           key: const Key('reset-active-session-guidance'),
