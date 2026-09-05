@@ -1,0 +1,226 @@
+import 'dart:async';
+
+import 'package:audioplayers/audioplayers.dart' as audio;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../../core/providers.dart';
+import '../data/sound_catalog.dart';
+import '../domain/sound_content.dart';
+
+class SoundPlayerState {
+  const SoundPlayerState({
+    this.currentTrackId,
+    this.isPlaying = false,
+    this.position = Duration.zero,
+    this.duration = Duration.zero,
+    this.volume = 0.78,
+    this.favoriteIds = const <String>{},
+    this.recentIds = const <String>[],
+    this.sleepTimerMinutes,
+  });
+
+  final String? currentTrackId;
+  final bool isPlaying;
+  final Duration position;
+  final Duration duration;
+  final double volume;
+  final Set<String> favoriteIds;
+  final List<String> recentIds;
+  final int? sleepTimerMinutes;
+
+  SoundPlayerState copyWith({
+    String? currentTrackId,
+    bool clearCurrentTrack = false,
+    bool? isPlaying,
+    Duration? position,
+    Duration? duration,
+    double? volume,
+    Set<String>? favoriteIds,
+    List<String>? recentIds,
+    int? sleepTimerMinutes,
+    bool clearSleepTimer = false,
+  }) {
+    return SoundPlayerState(
+      currentTrackId:
+          clearCurrentTrack ? null : (currentTrackId ?? this.currentTrackId),
+      isPlaying: isPlaying ?? this.isPlaying,
+      position: position ?? this.position,
+      duration: duration ?? this.duration,
+      volume: volume ?? this.volume,
+      favoriteIds: favoriteIds ?? this.favoriteIds,
+      recentIds: recentIds ?? this.recentIds,
+      sleepTimerMinutes:
+          clearSleepTimer ? null : (sleepTimerMinutes ?? this.sleepTimerMinutes),
+    );
+  }
+}
+
+final soundPlayerControllerProvider =
+    StateNotifierProvider<SoundPlayerController, SoundPlayerState>((ref) {
+  final controller = SoundPlayerController(
+    ref.watch(soundCatalogProvider),
+    ref.watch(sharedPreferencesProvider),
+  );
+  ref.onDispose(controller.dispose);
+  return controller;
+});
+
+class SoundPlayerController extends StateNotifier<SoundPlayerState> {
+  SoundPlayerController(this._catalog, this._prefs)
+      : super(
+          SoundPlayerState(
+            favoriteIds:
+                (_prefs.getStringList(_favoritesKey) ?? const <String>[]).toSet(),
+            recentIds:
+                _prefs.getStringList(_recentsKey) ?? const <String>[],
+          ),
+        ) {
+    _durationSubscription = _player.onDurationChanged.listen((duration) {
+      if (!mounted) return;
+      state = state.copyWith(duration: duration);
+    });
+    _positionSubscription = _player.onPositionChanged.listen((position) {
+      if (!mounted) return;
+      state = state.copyWith(position: position);
+    });
+    _playerStateSubscription = _player.onPlayerStateChanged.listen((playerState) {
+      if (!mounted) return;
+      state = state.copyWith(
+        isPlaying: playerState == audio.PlayerState.playing,
+      );
+    });
+  }
+
+  static const _favoritesKey = 'sound.favorite_ids';
+  static const _recentsKey = 'sound.recent_ids';
+
+  final SoundCatalog _catalog;
+  final SharedPreferences _prefs;
+  final audio.AudioPlayer _player = audio.AudioPlayer();
+
+  StreamSubscription<Duration>? _durationSubscription;
+  StreamSubscription<Duration>? _positionSubscription;
+  StreamSubscription<audio.PlayerState>? _playerStateSubscription;
+  Timer? _sleepTimer;
+
+  Future<void> play(SoundContent track) async {
+    await _player.setReleaseMode(audio.ReleaseMode.loop);
+    await _player.setVolume(state.volume);
+
+    if (state.currentTrackId == track.id) {
+      await _player.resume();
+    } else {
+      await _player.stop();
+      state = state.copyWith(
+        currentTrackId: track.id,
+        position: Duration.zero,
+        duration: Duration.zero,
+        isPlaying: false,
+      );
+      await _player.play(audio.AssetSource(track.assetPath));
+      await _markRecent(track.id);
+    }
+  }
+
+  Future<void> playById(String id) async {
+    final track = _catalog.getById(id);
+    if (track == null) return;
+    await play(track);
+  }
+
+  Future<void> togglePlayPause() async {
+    if (state.currentTrackId == null) return;
+    if (state.isPlaying) {
+      await _player.pause();
+    } else {
+      await _player.resume();
+    }
+  }
+
+  Future<void> seekRelative(Duration delta) async {
+    if (state.currentTrackId == null) return;
+
+    final maxMs = state.duration.inMilliseconds;
+    final targetMs = (state.position + delta).inMilliseconds;
+    final clamped = maxMs <= 0
+        ? targetMs.clamp(0, 1 << 31)
+        : targetMs.clamp(0, maxMs);
+
+    await _player.seek(Duration(milliseconds: clamped));
+  }
+
+  Future<void> seekTo(Duration position) async {
+    if (state.currentTrackId == null) return;
+    await _player.seek(position);
+  }
+
+  Future<void> setVolume(double volume) async {
+    final safe = volume.clamp(0.0, 1.0).toDouble();
+    state = state.copyWith(volume: safe);
+    await _player.setVolume(safe);
+  }
+
+  Future<void> stop() async {
+    _sleepTimer?.cancel();
+    _sleepTimer = null;
+    await _player.stop();
+    state = state.copyWith(
+      clearCurrentTrack: true,
+      clearSleepTimer: true,
+      position: Duration.zero,
+      duration: Duration.zero,
+      isPlaying: false,
+    );
+  }
+
+  Future<void> toggleFavorite(String trackId) async {
+    final next = Set<String>.from(state.favoriteIds);
+    if (!next.add(trackId)) {
+      next.remove(trackId);
+    }
+    state = state.copyWith(favoriteIds: next);
+    await _prefs.setStringList(_favoritesKey, next.toList());
+  }
+
+  Future<void> setSleepTimer(int? minutes) async {
+    _sleepTimer?.cancel();
+    _sleepTimer = null;
+
+    if (minutes == null) {
+      state = state.copyWith(clearSleepTimer: true);
+      return;
+    }
+
+    state = state.copyWith(sleepTimerMinutes: minutes);
+    _sleepTimer = Timer(Duration(minutes: minutes), () async {
+      if (!mounted) return;
+      await _player.pause();
+      if (!mounted) return;
+      state = state.copyWith(
+        isPlaying: false,
+        clearSleepTimer: true,
+      );
+    });
+  }
+
+  Future<void> _markRecent(String trackId) async {
+    final next = <String>[
+      trackId,
+      ...state.recentIds.where((id) => id != trackId),
+    ].take(6).toList();
+
+    state = state.copyWith(recentIds: next);
+    await _prefs.setStringList(_recentsKey, next);
+  }
+
+  @override
+  void dispose() {
+    _sleepTimer?.cancel();
+    _durationSubscription?.cancel();
+    _positionSubscription?.cancel();
+    _playerStateSubscription?.cancel();
+    _player.dispose();
+    super.dispose();
+  }
+}
