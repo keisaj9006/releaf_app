@@ -6,10 +6,20 @@ import 'package:purchases_flutter/purchases_flutter.dart';
 import 'revenuecat_service.dart';
 import 'subscription_state.dart';
 
+const bool _premiumPreviewFromBuild = bool.fromEnvironment(
+  'RELEAF_PREMIUM_PREVIEW',
+  defaultValue: false,
+);
+
 class SubscriptionController extends StateNotifier<SubscriptionState> {
   final RevenueCatService _service;
+  final bool _premiumPreview;
 
-  SubscriptionController(this._service) : super(const SubscriptionState()) {
+  SubscriptionController(
+    this._service, {
+    bool premiumPreview = _premiumPreviewFromBuild,
+  })  : _premiumPreview = premiumPreview,
+        super(SubscriptionState(isPremium: premiumPreview)) {
     initAndRefresh();
   }
 
@@ -18,6 +28,11 @@ class SubscriptionController extends StateNotifier<SubscriptionState> {
   }
 
   Future<void> refresh() async {
+    if (_premiumPreview) {
+      state = const SubscriptionState(isPremium: true);
+      return;
+    }
+
     state = state.copyWith(isLoading: true, clearError: true);
     try {
       final customerInfo = await _service.getCustomerInfoSafe();
