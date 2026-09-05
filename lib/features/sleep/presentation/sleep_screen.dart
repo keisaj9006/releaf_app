@@ -211,66 +211,82 @@ class _TonightCard extends StatelessWidget {
       onPressed: onPressed,
       warmAccent: true,
       padding: EdgeInsets.zero,
-      child: SizedBox(
-        height: 294,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            const ReleafArtwork(variant: ReleafArtworkVariant.ambient),
-            const DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Color(0x08000000),
-                    Color(0x42000000),
-                    Color(0xED000000),
-                  ],
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final compact = constraints.maxWidth < 360;
+
+          return SizedBox(
+            height: compact ? 370 : 294,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                const ReleafArtwork(
+                  variant: ReleafArtworkVariant.ambient,
                 ),
-              ),
+                const DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Color(0x08000000),
+                        Color(0x42000000),
+                        Color(0xED000000),
+                      ],
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.all(
+                    compact ? ReleafSpacing.lg : ReleafSpacing.xl,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'TONIGHT',
+                        style: ReleafTypography.eyebrow.copyWith(
+                          color: ReleafColors.premium,
+                        ),
+                      ),
+                      const Spacer(),
+                      Text(
+                        session.title,
+                        style: ReleafTypography.display.copyWith(
+                          fontSize: compact ? 26 : 29,
+                          letterSpacing: -0.8,
+                        ),
+                      ),
+                      const SizedBox(height: ReleafSpacing.xs),
+                      Text(
+                        'An 8-minute guided transition out of the unfinished day.',
+                        style: ReleafTypography.body.copyWith(
+                          color: ReleafColors.textPrimary.withValues(
+                            alpha: 0.78,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: ReleafSpacing.lg),
+                      SizedBox(
+                        width: compact ? double.infinity : null,
+                        height: ReleafControlSizes.standard,
+                        child: FilledButton.icon(
+                          onPressed: onPressed,
+                          icon: const Icon(Icons.nights_stay_rounded),
+                          label: const Text('Start tonight'),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: ReleafColors.premium,
+                            foregroundColor: ReleafColors.background,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-            Padding(
-              padding: const EdgeInsets.all(ReleafSpacing.xl),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'TONIGHT',
-                    style: ReleafTypography.eyebrow.copyWith(
-                      color: ReleafColors.premium,
-                    ),
-                  ),
-                  const Spacer(),
-                  Text(
-                    session.title,
-                    style: ReleafTypography.display.copyWith(
-                      fontSize: 29,
-                      letterSpacing: -0.8,
-                    ),
-                  ),
-                  const SizedBox(height: ReleafSpacing.xs),
-                  Text(
-                    'An 8-minute guided transition out of the unfinished day.',
-                    style: ReleafTypography.body.copyWith(
-                      color: ReleafColors.textPrimary.withValues(alpha: 0.78),
-                    ),
-                  ),
-                  const SizedBox(height: ReleafSpacing.lg),
-                  FilledButton.icon(
-                    onPressed: onPressed,
-                    icon: const Icon(Icons.nights_stay_rounded),
-                    label: const Text('Start tonight'),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: ReleafColors.premium,
-                      foregroundColor: ReleafColors.background,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
@@ -374,64 +390,93 @@ class _SoundCard extends StatelessWidget {
     return ReleafPressableCard(
       onPressed: onPressed,
       padding: EdgeInsets.zero,
-      child: SizedBox(
-        height: 170,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            const ReleafArtwork(variant: ReleafArtworkVariant.ambient),
-            const DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.centerRight,
-                  end: Alignment.centerLeft,
-                  colors: [
-                    Color(0x20000000),
-                    Color(0xE5000000),
-                  ],
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final compact = constraints.maxWidth < 360;
+
+          return SizedBox(
+            height: compact ? 198 : 170,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                const ReleafArtwork(
+                  variant: ReleafArtworkVariant.ambient,
                 ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(ReleafSpacing.lg),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.graphic_eq_rounded,
-                    size: 42,
-                    color: ReleafColors.sage,
-                  ),
-                  const SizedBox(width: ReleafSpacing.lg),
-                  Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Sound Space',
-                          style: ReleafTypography.sectionTitle.copyWith(
-                            fontSize: 22,
-                          ),
-                        ),
-                        const SizedBox(height: 5),
-                        Text(
-                          'Loop ambient audio and set a sleep timer.',
-                          style: ReleafTypography.meta.copyWith(
-                            color: ReleafColors.textSecondary,
-                          ),
-                        ),
+                const DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.centerRight,
+                      end: Alignment.centerLeft,
+                      colors: [
+                        Color(0x20000000),
+                        Color(0xE5000000),
                       ],
                     ),
                   ),
-                  const Icon(
-                    Icons.chevron_right_rounded,
-                    color: ReleafColors.textSecondary,
+                ),
+                Padding(
+                  padding: EdgeInsets.all(
+                    compact ? ReleafSpacing.md : ReleafSpacing.lg,
                   ),
-                ],
-              ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: compact ? 48 : 58,
+                        height: compact ? 48 : 58,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: ReleafColors.sage.withValues(alpha: 0.09),
+                          border: Border.all(
+                            color: ReleafColors.sage.withValues(alpha: 0.20),
+                          ),
+                        ),
+                        alignment: Alignment.center,
+                        child: Icon(
+                          Icons.graphic_eq_rounded,
+                          size: compact ? 25 : 30,
+                          color: ReleafColors.sage,
+                        ),
+                      ),
+                      SizedBox(
+                        width: compact
+                            ? ReleafSpacing.sm
+                            : ReleafSpacing.lg,
+                      ),
+                      Expanded(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Sound Space',
+                              style: ReleafTypography.sectionTitle.copyWith(
+                                fontSize: compact ? 19 : 22,
+                              ),
+                            ),
+                            const SizedBox(height: 5),
+                            Text(
+                              'Loop ambient audio and set a sleep timer.',
+                              maxLines: compact ? 3 : 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: ReleafTypography.meta.copyWith(
+                                color: ReleafColors.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: ReleafSpacing.xs),
+                      const Icon(
+                        Icons.chevron_right_rounded,
+                        color: ReleafColors.textSecondary,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
