@@ -42,6 +42,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
   SessionPhase _phase = SessionPhase.running;
   bool _awarded = false;
   bool _usingSimplifiedProgram = false;
+  final Map<int, int> _sensoryCompletedByStep = <int, int>{};
 
   @override
   void initState() {
@@ -131,10 +132,66 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
     HapticFeedback.selectionClick();
     setState(() {
       _usingSimplifiedProgram = true;
+      _sensoryCompletedByStep.clear();
       _activeDurationSeconds = simplifiedDuration;
       _remainingSeconds = simplifiedDuration;
     });
     _startTimer();
+  }
+
+  void _registerSensoryNotice() {
+    final session = _session;
+    if (session == null ||
+        session.visualType != ResetVisualType.sensoryHalo ||
+        _phase != SessionPhase.running) {
+      return;
+    }
+
+    final phaseLabel = _sessionPhaseLabel(session);
+    final target = _sensoryTargetFor(phaseLabel);
+    if (target <= 0) return;
+
+    final stepIndex = _sessionStepIndex(session);
+    final completed = _sensoryCompletedByStep[stepIndex] ?? 0;
+    if (completed >= target) return;
+
+    HapticFeedback.selectionClick();
+    final nextCompleted = completed + 1;
+    setState(() {
+      _sensoryCompletedByStep[stepIndex] = nextCompleted;
+    });
+
+    if (nextCompleted >= target) {
+      Future<void>.delayed(const Duration(milliseconds: 420), () {
+        if (!mounted || _phase != SessionPhase.running) return;
+        _advanceGuidedStep();
+      });
+    }
+  }
+
+  void _advanceGuidedStep() {
+    final session = _session;
+    final program = session?.program;
+    if (session == null || program == null) return;
+
+    final steps = program.stepsFor(simplified: _usingSimplifiedProgram);
+    final currentIndex = _sessionStepIndex(session);
+
+    if (currentIndex >= steps.length - 1) {
+      _timer?.cancel();
+      setState(() => _remainingSeconds = 0);
+      _triggerFeedbackPhase();
+      return;
+    }
+
+    final nextElapsed = steps
+        .take(currentIndex + 1)
+        .fold<int>(0, (sum, step) => sum + step.durationSeconds);
+    final nextRemaining =
+        (_activeDurationSeconds - nextElapsed).clamp(0, _activeDurationSeconds);
+
+    HapticFeedback.lightImpact();
+    setState(() => _remainingSeconds = nextRemaining);
   }
 
   void _submitFeedbackAndClose(bool helpedALot) {
@@ -269,9 +326,15 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
                                     ResetVisualType.sensoryHalo
                                 ? ReleafSensoryHalo(
                                     progress: progress,
-                                    activeCount:
-                                        _sensoryCountFor(phaseLabel),
+                                    targetCount:
+                                        _sensoryTargetFor(phaseLabel),
+                                    completedCount:
+                                        _sensoryCompletedFor(session),
                                     phaseLabel: phaseLabel ?? 'Notice',
+                                    onNotice:
+                                        _sensoryTargetFor(phaseLabel) > 0
+                                            ? _registerSensoryNotice
+                                            : null,
                                     reducedMotion: reducedMotion,
                                   )
                                 : ReleafSessionLivingForm(
@@ -337,6 +400,22 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
                                   ),
                                 ),
                               ),
+                              if (session.visualType ==
+                                      ResetVisualType.sensoryHalo &&
+                                  _sensoryTargetFor(phaseLabel) > 0) ...[
+                                const SizedBox(height: ReleafSpacing.xs),
+                                Text(
+                                  'Tap the halo each time you notice one.',
+                                  key: const Key('reset-sensory-tap-hint'),
+                                  textAlign: TextAlign.center,
+                                  style: ReleafTypography.meta.copyWith(
+                                    color: ReleafColors.sage.withValues(
+                                      alpha: 0.82,
+                                    ),
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
                             ],
                           ),
                         )
@@ -349,17 +428,38 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
                         const SizedBox(height: ReleafSpacing.sm),
                         if (!_usingSimplifiedProgram)
                           Center(
-                            child: TextButton(
+                            child: OutlinedButton.icon(
                               key: const Key('reset-simplify-action'),
                               onPressed: _activateSimplifiedPath,
-                              style: TextButton.styleFrom(
-                                foregroundColor: ReleafColors.textSecondary,
+                              icon: const Icon(
+                                Icons.compress_rounded,
+                                size: 17,
                               ),
-                              child: Text(
+                              label: Text(
                                 session.program!.simplifyActionLabel ??
                                     'Try a simpler version',
                                 style: ReleafTypography.meta.copyWith(
+                                  color: ReleafColors.textPrimary,
                                   fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: ReleafColors.sage,
+                                side: BorderSide(
+                                  color: ReleafColors.sage.withValues(
+                                    alpha: 0.34,
+                                  ),
+                                ),
+                                backgroundColor: ReleafColors.sage.withValues(
+                                  alpha: 0.07,
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: ReleafSpacing.md,
+                                  vertical: 12,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius:
+                                      BorderRadius.circular(ReleafRadii.pill),
                                 ),
                               ),
                             ),
@@ -708,23 +808,29 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
     return 'STAY WITH THE MOMENT';
   }
 
-  int _sensoryCountFor(String? phaseLabel) {
+  int _sensoryTargetFor(String? phaseLabel) {
     if (_usingSimplifiedProgram) {
       return switch (phaseLabel) {
         'See' => 3,
         'Feel' => 2,
-        _ => 1,
+        'Hear' => 1,
+        _ => 0,
       };
     }
 
     return switch (phaseLabel) {
-      'Arrive' => 5,
       'See' => 5,
       'Feel' => 4,
       'Hear' => 3,
       'Smell' => 2,
-      _ => 1,
+      'Taste' => 1,
+      _ => 0,
     };
+  }
+
+  int _sensoryCompletedFor(ResetContent session) {
+    final stepIndex = _sessionStepIndex(session);
+    return _sensoryCompletedByStep[stepIndex] ?? 0;
   }
 
   ReleafArtworkVariant _artworkFor(ResetContent session) {
