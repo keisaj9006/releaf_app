@@ -556,6 +556,421 @@ class ResetCatalog {
       ),
     ),
     ResetContent(
+      id: 'before-interview',
+      title: 'Before an Interview',
+      durationSeconds: 150,
+      level: ResetLevel.quick,
+      quickCategory: QuickResetCategory.situational,
+      modality: ResetModality.guidedPractice,
+      accessTier: ResetAccessTier.free,
+      visualType: ResetVisualType.nextStep,
+      instructions: [
+        'Notice the urge to prepare everything at once.',
+        'Choose one thing you want to communicate clearly.',
+        'Let your shoulders drop and place both feet somewhere stable.',
+        'Choose one small action you can take when the conversation begins.',
+        'Keep only that first step for now.',
+      ],
+      program: ResetSessionProgram.guided(
+        steps: [
+          ResetSessionStep(
+            label: 'Arrive',
+            guidance:
+                'Notice the urge to prepare everything at once. You do not need to solve the whole interview right now.',
+            durationSeconds: 25,
+          ),
+          ResetSessionStep(
+            label: 'Choose',
+            guidance: 'Choose one thing you want to communicate clearly.',
+            durationSeconds: 35,
+            advanceActionLabel: 'I have one',
+          ),
+          ResetSessionStep(
+            label: 'Settle',
+            guidance:
+                'Let your shoulders drop and place both feet somewhere stable.',
+            durationSeconds: 30,
+          ),
+          ResetSessionStep(
+            label: 'First Step',
+            guidance:
+                'Choose one small action you can take when the conversation begins.',
+            durationSeconds: 35,
+            advanceActionLabel: 'I know my first step',
+          ),
+          ResetSessionStep(
+            label: 'Ready',
+            guidance: 'Keep only that first step for now.',
+            durationSeconds: 25,
+          ),
+        ],
+      ),
+    ),
+    ResetContent(
+      id: 'before-presentation',
+      title: 'Before a Presentation',
+      durationSeconds: 150,
+      level: ResetLevel.quick,
+      quickCategory: QuickResetCategory.situational,
+      modality: ResetModality.guidedPractice,
+      accessTier: ResetAccessTier.free,
+      visualType: ResetVisualType.bodyRelease,
+      instructions: [
+        'Notice where you are holding tension.',
+        'Let your jaw loosen and your shoulders drop.',
+        'Press your feet gently into the floor and release.',
+        'Choose the first sentence or first action you need.',
+        'Let the rest of the presentation wait until it arrives.',
+      ],
+      program: ResetSessionProgram.guided(
+        steps: [
+          ResetSessionStep(
+            label: 'Notice',
+            guidance: 'Notice where you are holding tension.',
+            durationSeconds: 25,
+          ),
+          ResetSessionStep(
+            label: 'Release',
+            guidance: 'Let your jaw loosen and your shoulders drop.',
+            durationSeconds: 30,
+          ),
+          ResetSessionStep(
+            label: 'Press',
+            guidance:
+                'Press your feet gently into the floor, then let the effort go.',
+            durationSeconds: 30,
+          ),
+          ResetSessionStep(
+            label: 'First Line',
+            guidance: 'Choose the first sentence or first action you need.',
+            durationSeconds: 35,
+            advanceActionLabel: 'I have it',
+          ),
+          ResetSessionStep(
+            label: 'Begin',
+            guidance: 'Let the rest of the presentation wait until it arrives.',
+            durationSeconds: 30,
+          ),
+        ],
+      ),
+    ),
+    ResetContent(
+      id: 'after-conflict',
+      title: 'After a Conflict',
+      durationSeconds: 150,
+      level: ResetLevel.quick,
+      quickCategory: QuickResetCategory.situational,
+      modality: ResetModality.guidedPractice,
+      accessTier: ResetAccessTier.free,
+      visualType: ResetVisualType.acceptanceSpace,
+      instructions: [
+        'Notice what is still activated in you after the conflict.',
+        'Name the strongest feeling without deciding who was right.',
+        'Let the feeling be present for this moment without acting on it.',
+        'Create a little space between the feeling and your next action.',
+        'Choose whether the next useful step is pause, repair, or distance.',
+      ],
+      program: ResetSessionProgram.guided(
+        steps: [
+          ResetSessionStep(
+            label: 'Notice',
+            guidance:
+                'Notice what is still activated in you after the conflict.',
+            durationSeconds: 25,
+          ),
+          ResetSessionStep(
+            label: 'Name',
+            guidance:
+                'Name the strongest feeling without deciding who was right.',
+            durationSeconds: 30,
+          ),
+          ResetSessionStep(
+            label: 'Allow',
+            guidance:
+                'Let the feeling be present for this moment without acting on it.',
+            durationSeconds: 30,
+          ),
+          ResetSessionStep(
+            label: 'Room',
+            guidance:
+                'Create a little space between the feeling and your next action.',
+            durationSeconds: 35,
+          ),
+          ResetSessionStep(
+            label: 'Choose',
+            guidance:
+                'Choose whether the next useful step is pause, repair, or distance.',
+            durationSeconds: 30,
+          ),
+        ],
+      ),
+    ),
+    ResetContent(
+      id: 'panic-spike',
+      title: 'Panic Spike',
+      durationSeconds: 90,
+      level: ResetLevel.quick,
+      quickCategory: QuickResetCategory.situational,
+      modality: ResetModality.grounding,
+      accessTier: ResetAccessTier.free,
+      visualType: ResetVisualType.sensoryHalo,
+      instructions: [
+        'Look around and remind yourself where you are.',
+        'Notice five things you can see.',
+        'Notice four points of contact or physical sensation.',
+        'Listen for three sounds around you.',
+        'Return attention to the room.',
+      ],
+      program: ResetSessionProgram.guided(
+        simplifyActionLabel: 'Too much? Use 3–2–1',
+        steps: [
+          ResetSessionStep(
+            label: 'Arrive',
+            guidance: 'Look around and remind yourself where you are.',
+            durationSeconds: 10,
+          ),
+          ResetSessionStep(
+            label: 'See',
+            guidance: 'Notice five things you can see.',
+            durationSeconds: 30,
+          ),
+          ResetSessionStep(
+            label: 'Feel',
+            guidance: 'Notice four points of contact or physical sensation.',
+            durationSeconds: 25,
+          ),
+          ResetSessionStep(
+            label: 'Hear',
+            guidance: 'Listen for three sounds around you.',
+            durationSeconds: 20,
+          ),
+          ResetSessionStep(
+            label: 'Return',
+            guidance: 'Return attention to the room.',
+            durationSeconds: 5,
+          ),
+        ],
+        simplifiedSteps: [
+          ResetSessionStep(
+            label: 'See',
+            guidance: 'Notice three things you can see.',
+            durationSeconds: 20,
+          ),
+          ResetSessionStep(
+            label: 'Feel',
+            guidance: 'Notice two points of contact or physical sensation.',
+            durationSeconds: 20,
+          ),
+          ResetSessionStep(
+            label: 'Hear',
+            guidance: 'Notice one sound around you.',
+            durationSeconds: 20,
+          ),
+        ],
+      ),
+    ),
+    ResetContent(
+      id: 'overthinking-night',
+      title: 'Overthinking at Night',
+      durationSeconds: 150,
+      level: ResetLevel.quick,
+      quickCategory: QuickResetCategory.situational,
+      modality: ResetModality.guidedPractice,
+      accessTier: ResetAccessTier.free,
+      visualType: ResetVisualType.thoughtUnhook,
+      instructions: [
+        'Notice the thought your mind keeps returning to.',
+        'Name it as a thought rather than a problem you must solve now.',
+        'Try: I am noticing the thought that...',
+        'Let the thought stay without following it into another problem.',
+        'Return attention to one simple sensation in the room or bed.',
+      ],
+      program: ResetSessionProgram.guided(
+        steps: [
+          ResetSessionStep(
+            label: 'Notice',
+            guidance: 'Notice the thought your mind keeps returning to.',
+            durationSeconds: 25,
+          ),
+          ResetSessionStep(
+            label: 'Name',
+            guidance:
+                'Name it as a thought rather than a problem you must solve now.',
+            durationSeconds: 30,
+          ),
+          ResetSessionStep(
+            label: 'Unhook',
+            guidance: 'Try: “I am noticing the thought that…”',
+            durationSeconds: 35,
+          ),
+          ResetSessionStep(
+            label: 'Space',
+            guidance:
+                'Let the thought stay without following it into another problem.',
+            durationSeconds: 30,
+          ),
+          ResetSessionStep(
+            label: 'Refocus',
+            guidance:
+                'Return attention to one simple sensation in the room or bed.',
+            durationSeconds: 30,
+          ),
+        ],
+      ),
+    ),
+    ResetContent(
+      id: 'social-pressure',
+      title: 'Social Pressure',
+      durationSeconds: 120,
+      level: ResetLevel.quick,
+      quickCategory: QuickResetCategory.situational,
+      modality: ResetModality.grounding,
+      accessTier: ResetAccessTier.free,
+      visualType: ResetVisualType.objectFocus,
+      instructions: [
+        'Choose one neutral object in the room.',
+        'Notice one detail about its shape or surface.',
+        'Let your attention widen enough to notice where your body is supported.',
+        'Choose one simple social action rather than monitoring how you appear.',
+        'Return attention to the conversation or space around you.',
+      ],
+      program: ResetSessionProgram.guided(
+        steps: [
+          ResetSessionStep(
+            label: 'Anchor',
+            guidance: 'Choose one neutral object in the room.',
+            durationSeconds: 20,
+            advanceActionLabel: 'I have one',
+          ),
+          ResetSessionStep(
+            label: 'Detail',
+            guidance: 'Notice one detail about its shape or surface.',
+            durationSeconds: 25,
+            advanceActionLabel: 'Found one',
+          ),
+          ResetSessionStep(
+            label: 'Support',
+            guidance:
+                'Let your attention widen enough to notice where your body is supported.',
+            durationSeconds: 25,
+          ),
+          ResetSessionStep(
+            label: 'Next',
+            guidance:
+                'Choose one simple social action rather than monitoring how you appear.',
+            durationSeconds: 30,
+            advanceActionLabel: 'I know the next action',
+          ),
+          ResetSessionStep(
+            label: 'Return',
+            guidance:
+                'Return attention to the conversation or space around you.',
+            durationSeconds: 20,
+          ),
+        ],
+      ),
+    ),
+    ResetContent(
+      id: 'travel-stress',
+      title: 'Travel Stress',
+      durationSeconds: 120,
+      level: ResetLevel.quick,
+      quickCategory: QuickResetCategory.situational,
+      modality: ResetModality.grounding,
+      accessTier: ResetAccessTier.free,
+      visualType: ResetVisualType.soundRipple,
+      instructions: [
+        'Notice one stable point of contact beneath you.',
+        'Listen for one nearby sound.',
+        'Listen for one farther-away sound.',
+        'Name the next concrete travel step you actually need to take.',
+        'Let everything after that wait.',
+      ],
+      program: ResetSessionProgram.guided(
+        steps: [
+          ResetSessionStep(
+            label: 'Support',
+            guidance: 'Notice one stable point of contact beneath you.',
+            durationSeconds: 20,
+          ),
+          ResetSessionStep(
+            label: 'Near',
+            guidance: 'Listen for one nearby sound.',
+            durationSeconds: 20,
+            advanceActionLabel: 'Found one',
+          ),
+          ResetSessionStep(
+            label: 'Far',
+            guidance: 'Listen for one farther-away sound.',
+            durationSeconds: 20,
+            advanceActionLabel: 'Found one',
+          ),
+          ResetSessionStep(
+            label: 'Next',
+            guidance:
+                'Name the next concrete travel step you actually need to take.',
+            durationSeconds: 35,
+            advanceActionLabel: 'I know the next step',
+          ),
+          ResetSessionStep(
+            label: 'Only This',
+            guidance: 'Let everything after that wait.',
+            durationSeconds: 25,
+          ),
+        ],
+      ),
+    ),
+    ResetContent(
+      id: 'work-overwhelm',
+      title: 'Work Overwhelm',
+      durationSeconds: 120,
+      level: ResetLevel.quick,
+      quickCategory: QuickResetCategory.situational,
+      modality: ResetModality.guidedPractice,
+      accessTier: ResetAccessTier.free,
+      visualType: ResetVisualType.nextStep,
+      instructions: [
+        'Stop trying to hold the whole workload in your head.',
+        'Choose the one task that matters next.',
+        'Shrink it to the first visible action.',
+        'Set aside everything that does not belong to this next action.',
+        'Start with only that step.',
+      ],
+      program: ResetSessionProgram.guided(
+        steps: [
+          ResetSessionStep(
+            label: 'Pause',
+            guidance:
+                'Stop trying to hold the whole workload in your head.',
+            durationSeconds: 20,
+          ),
+          ResetSessionStep(
+            label: 'Choose',
+            guidance: 'Choose the one task that matters next.',
+            durationSeconds: 30,
+            advanceActionLabel: 'I have one',
+          ),
+          ResetSessionStep(
+            label: 'Shrink',
+            guidance: 'Shrink it to the first visible action.',
+            durationSeconds: 30,
+            advanceActionLabel: 'That is small enough',
+          ),
+          ResetSessionStep(
+            label: 'Clear',
+            guidance:
+                'Set aside everything that does not belong to this next action.',
+            durationSeconds: 20,
+          ),
+          ResetSessionStep(
+            label: 'Start',
+            guidance: 'Start with only that step.',
+            durationSeconds: 20,
+          ),
+        ],
+      ),
+    ),
+    ResetContent(
       id: 'equal-rhythm',
       title: 'Equal Rhythm',
       durationSeconds: 120,
