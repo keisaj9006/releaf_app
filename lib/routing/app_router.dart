@@ -10,6 +10,8 @@ import '../features/relief/presentation/relief_screen.dart';
 import '../features/relief/presentation/relief_session_gate.dart';
 import '../features/relief/domain/models/reset_launch_options.dart';
 import '../features/brain/presentation/brain_screen.dart';
+import '../features/sound/presentation/sound_screen.dart';
+import '../features/sound/presentation/sound_player_screen.dart';
 import '../features/brain/presentation/game_host_screen.dart';
 import '../features/brain/presentation/game_result_screen.dart';
 import '../features/home/daily_loop_screen.dart';
@@ -85,6 +87,19 @@ GoRouter createAppRouter({String initialLocation = AppRoutes.home}) => GoRouter(
           ],
         ),
       ],
+    ),
+
+    GoRoute(
+      path: AppRoutes.sound,
+      pageBuilder: (context, state) => _fadePage(const SoundScreen()),
+    ),
+
+    GoRoute(
+      path: AppRoutes.soundPlayer,
+      pageBuilder: (context, state) {
+        final trackId = state.pathParameters['trackId'] ?? '';
+        return _fadePage(SoundPlayerScreen(trackId: trackId));
+      },
     ),
 
     GoRoute(
