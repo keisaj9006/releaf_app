@@ -58,12 +58,10 @@ class SoundPlayerState {
 
 final soundPlayerControllerProvider =
     StateNotifierProvider<SoundPlayerController, SoundPlayerState>((ref) {
-  final controller = SoundPlayerController(
+  return SoundPlayerController(
     ref.watch(soundCatalogProvider),
     ref.watch(sharedPreferencesProvider),
   );
-  ref.onDispose(controller.dispose);
-  return controller;
 });
 
 class SoundPlayerController extends StateNotifier<SoundPlayerState> {
@@ -147,7 +145,7 @@ class SoundPlayerController extends StateNotifier<SoundPlayerState> {
         ? targetMs.clamp(0, 1 << 31)
         : targetMs.clamp(0, maxMs);
 
-    await _player.seek(Duration(milliseconds: clamped));
+    await _player.seek(Duration(milliseconds: clamped.toInt()));
   }
 
   Future<void> seekTo(Duration position) async {
@@ -220,7 +218,7 @@ class SoundPlayerController extends StateNotifier<SoundPlayerState> {
     _durationSubscription?.cancel();
     _positionSubscription?.cancel();
     _playerStateSubscription?.cancel();
-    _player.dispose();
+    unawaited(_player.dispose());
     super.dispose();
   }
 }
