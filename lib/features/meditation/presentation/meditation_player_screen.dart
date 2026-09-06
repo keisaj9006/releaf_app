@@ -213,6 +213,8 @@ class _MeditationPlayerScreenState
         .speakGuidance(
           item.steps[stepIndex].spokenGuidance ??
               item.steps[stepIndex].guidance,
+          narrationAssetPath:
+              item.steps[stepIndex].narrationAssetPath,
         );
   }
 
