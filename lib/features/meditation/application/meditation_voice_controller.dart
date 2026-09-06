@@ -57,12 +57,12 @@ class FlutterMeditationVoiceDriver implements MeditationVoiceDriver {
       }
 
       await _tts.setLanguage('en-GB');
-      await _preferNaturalBritishVoice();
+      await _preferCalmFemaleVoice();
 
       // Guided meditation should be substantially slower than conversational
       // speech. The quiet left after each instruction is intentional.
-      await _tts.setSpeechRate(0.31);
-      await _tts.setPitch(0.90);
+      await _tts.setSpeechRate(0.27);
+      await _tts.setPitch(0.93);
       await _tts.awaitSpeakCompletion(true);
 
       if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
@@ -98,32 +98,74 @@ class FlutterMeditationVoiceDriver implements MeditationVoiceDriver {
     }
   }
 
-  Future<void> _preferNaturalBritishVoice() async {
+  Future<void> _preferCalmFemaleVoice() async {
     try {
       final voices = await _tts.getVoices;
       if (voices is! List) return;
 
+      final candidates = voices.whereType<Map>().toList(growable: false);
+      if (candidates.isEmpty) return;
+
       Map<dynamic, dynamic>? best;
-      var bestScore = -1;
+      var bestScore = -100000;
 
-      for (final candidate in voices) {
-        if (candidate is! Map) continue;
-
+      for (final candidate in candidates) {
         final locale = (candidate['locale'] ?? '').toString();
-        if (locale.toLowerCase().replaceAll('_', '-') != 'en-gb') {
-          continue;
-        }
+        final normalizedLocale =
+            locale.toLowerCase().replaceAll('_', '-');
+        if (!normalizedLocale.startsWith('en-')) continue;
 
         final name = (candidate['name'] ?? '').toString();
-        final normalized = name.toLowerCase();
+        if (name.isEmpty || locale.isEmpty) continue;
+
+        final normalizedName = name.toLowerCase();
+        final features = (candidate['features'] ?? '').toString().toLowerCase();
+        final networkRequired =
+            (candidate['network_required'] ?? '').toString().toLowerCase();
+        final quality = int.tryParse((candidate['quality'] ?? '').toString());
+
         var score = 0;
 
-        if (normalized.contains('neural')) score += 8;
-        if (normalized.contains('premium')) score += 7;
-        if (normalized.contains('enhanced')) score += 6;
-        if (normalized.contains('network')) score += 5;
-        if (normalized.contains('wavenet')) score += 5;
-        if (normalized.contains('legacy')) score -= 4;
+        // Gender is the highest-priority requirement. Google Android voices
+        // often encode this directly in the voice name.
+        if (normalizedName.contains('#female_') ||
+            normalizedName.contains('female')) {
+          score += 5000;
+        }
+        if (normalizedName.contains('#male_') ||
+            normalizedName.contains('male')) {
+          score -= 10000;
+        }
+
+        // Prefer British English, but a clearly identified female English
+        // voice is better than a male British fallback.
+        if (normalizedLocale == 'en-gb') {
+          score += 1200;
+        } else if (normalizedLocale == 'en-au') {
+          score += 700;
+        } else if (normalizedLocale == 'en-us') {
+          score += 500;
+        }
+
+        // Google's FIS British family is historically female. Prefer it when
+        // gender metadata is not exposed by the engine.
+        if (normalizedLocale == 'en-gb' &&
+            normalizedName.contains('x-fis')) {
+          score += 2600;
+        }
+
+        // Prefer higher-quality / network voices when available.
+        if (normalizedName.contains('neural')) score += 900;
+        if (normalizedName.contains('premium')) score += 800;
+        if (normalizedName.contains('enhanced')) score += 700;
+        if (normalizedName.contains('wavenet')) score += 650;
+        if (normalizedName.contains('network') ||
+            networkRequired == 'true' ||
+            features.contains('network')) {
+          score += 450;
+        }
+        if (quality != null) score += quality * 20;
+        if (normalizedName.contains('legacy')) score -= 900;
 
         if (score > bestScore) {
           best = candidate;
@@ -139,8 +181,8 @@ class FlutterMeditationVoiceDriver implements MeditationVoiceDriver {
 
       await _tts.setVoice({'name': name, 'locale': locale});
     } catch (_) {
-      // Voice inventories vary across devices. Fall back rather than making
-      // the meditation voice unavailable.
+      // Voice inventories differ between devices. Keep meditation usable if
+      // the preferred female voice cannot be selected on this phone.
     }
   }
 
@@ -154,9 +196,9 @@ class FlutterMeditationVoiceDriver implements MeditationVoiceDriver {
 
   Duration _pauseAfter(String sentence) {
     if (sentence.endsWith('?') || sentence.endsWith('!')) {
-      return const Duration(milliseconds: 800);
+      return const Duration(milliseconds: 1200);
     }
-    return const Duration(milliseconds: 620);
+    return const Duration(milliseconds: 900);
   }
 
   @override
