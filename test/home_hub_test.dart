@@ -168,6 +168,27 @@ void main() {
     );
   });
 
+  testWidgets('Home Continue surfaces the most recent accessible meditation', (
+    WidgetTester tester,
+  ) async {
+    final preferences = await _preferences();
+    await preferences.setBool('releaf.home.intro.dismissed.v1', true);
+    await preferences.setStringList(
+      'meditation.recent_ids',
+      ['breath-and-body-4'],
+    );
+
+    await _pumpHome(tester, preferences: preferences);
+
+    expect(find.text('CONTINUE'), findsOneWidget);
+    expect(find.text('RECENT MEDITATION'), findsOneWidget);
+    expect(find.text('Breath & Body'), findsOneWidget);
+    expect(
+      find.text('Return to a practice you used recently.'),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('Home mindfulness recommendation advances with meditation progress', (
     WidgetTester tester,
   ) async {

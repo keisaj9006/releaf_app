@@ -45,6 +45,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final hasPremiumEntitlement =
         ref.watch(subscriptionControllerProvider).isPremium;
     final currentSound = soundCatalog.getById(soundState.currentTrackId ?? '');
+    final recentMeditation = _recentAccessibleMeditation(
+      catalog: meditationCatalog,
+      library: meditationLibrary,
+      isPremium: hasPremiumEntitlement,
+    );
 
     final now = ref.watch(homeNowProvider);
     final dailyInsight = DailyInsightCatalog.forDate(now);
@@ -150,7 +155,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 ),
                               ),
                               if (activeSession.hasActive ||
-                                  currentSound != null) ...[
+                                  currentSound != null ||
+                                  recentMeditation != null) ...[
                                 const SizedBox(height: ReleafSpacing.section),
                                 const ReleafSectionHeading(
                                   title: 'Continue',
@@ -179,6 +185,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                     icon: Icons.graphic_eq_rounded,
                                     onPressed: () => context.push(
                                       AppRoutes.soundPlayerFor(currentSound.id),
+                                    ),
+                                  )
+                                else if (recentMeditation != null)
+                                  _ContinueCard(
+                                    eyebrow: 'RECENT MEDITATION',
+                                    title: recentMeditation.title,
+                                    subtitle:
+                                        'Return to a practice you used recently.',
+                                    icon: Icons.spa_outlined,
+                                    onPressed: () => context.push(
+                                      AppRoutes.meditationSessionFor(
+                                        recentMeditation.id,
+                                      ),
                                     ),
                                   ),
                               ],
@@ -811,6 +830,20 @@ _HomeRecommendation _recommendationFor({
     eyebrow: 'SUGGESTED NOW',
     reason: 'Reset and Brain are already complete today.',
   );
+}
+
+MeditationContent? _recentAccessibleMeditation({
+  required MeditationCatalog catalog,
+  required MeditationLibraryState library,
+  required bool isPremium,
+}) {
+  for (final id in library.recentIds) {
+    final item = catalog.getById(id);
+    if (item == null) continue;
+    if (item.isPremium && !isPremium) continue;
+    return item;
+  }
+  return null;
 }
 
 MeditationContent _suggestedMeditation({
