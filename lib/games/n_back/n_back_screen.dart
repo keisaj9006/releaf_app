@@ -47,7 +47,7 @@ class _NBackScreenState extends State<NBackScreen> {
       BrainDifficulty.medium => _levelIndex >= 7 ? 1 : 0,
       BrainDifficulty.hard => _levelIndex >= 8 ? 1 : 0,
     };
-    return (base + extra).clamp(1, 4);
+    return (base + extra).clamp(1, 4).toInt();
   }
 
   int get _trialCount {
@@ -155,16 +155,18 @@ class _NBackScreenState extends State<NBackScreen> {
   void _complete() {
     if (_finished) return;
     _finished = true;
-    final answered = math.max(1, _correct + _mistakes);
+    final answered = math.max(1, _correct + _mistakes).toInt();
     final accuracy = _correct / answered;
-    final score = math.max(
-      0,
-      ((_correct * 12 * _multiplier) +
-              (accuracy * 100).round() +
-              (widget.trainingLevel * 5) -
-              (_mistakes * 4))
-          .round(),
-    );
+    final score = math
+        .max(
+          0,
+          ((_correct * 12 * _multiplier) +
+                  (accuracy * 100).round() +
+                  (widget.trainingLevel * 5) -
+                  (_mistakes * 4))
+              .round(),
+        )
+        .toInt();
     HapticFeedback.mediumImpact();
     widget.onFinish(score);
   }
@@ -172,7 +174,7 @@ class _NBackScreenState extends State<NBackScreen> {
   @override
   Widget build(BuildContext context) {
     final warmup = _index < _nBack;
-    final current = _sequence[_index.clamp(0, _sequence.length - 1)];
+    final current = _sequence[_index.clamp(0, _sequence.length - 1).toInt()];
     final answered = _correct + _mistakes;
     final accuracy = answered == 0 ? null : (_correct / answered * 100).round();
 
