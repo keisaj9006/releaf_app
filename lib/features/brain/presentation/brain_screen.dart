@@ -935,6 +935,9 @@ class _SkillGameGrid extends StatelessWidget {
                   presentation: _presentationFor(game.id),
                   bestScore: training.bestScoreFor(game.id),
                   hasCompleted: training.hasCompleted(game.id),
+                  trainingLevel: usesProgressiveBrainLevel(game.id)
+                      ? training.trainingLevelFor(game.id)
+                      : null,
                   onPressed: () => context.push(
                     AppRoutes.brainGameFor(game.id),
                   ),
