@@ -330,7 +330,7 @@ void main() {
     expect(
       find.descendant(
         of: find.byKey(const Key('sequence-echo-length')),
-        matching: find.text('3'),
+        matching: find.text('4'),
       ),
       findsOneWidget,
     );
@@ -362,7 +362,7 @@ void main() {
       ),
     );
     await tester.pump();
-    expect(find.byKey(const Key('pattern-logic-answer-3')), findsNothing);
+    expect(find.byKey(const Key('pattern-logic-answer-3')), findsOneWidget);
     await tester.tap(find.byKey(const Key('brain-difficulty-hard')));
     await tester.pump();
     expect(find.byKey(const Key('pattern-logic-answer-4')), findsOneWidget);
@@ -373,8 +373,8 @@ void main() {
       ),
     );
     await tester.pump();
-    expect(find.byKey(const Key('signal-scan-cell-15')), findsOneWidget);
-    expect(find.byKey(const Key('signal-scan-cell-16')), findsNothing);
+    expect(find.byKey(const Key('signal-scan-cell-24')), findsOneWidget);
+    expect(find.byKey(const Key('signal-scan-cell-25')), findsNothing);
     await tester.tap(find.byKey(const Key('brain-difficulty-hard')));
     await tester.pump();
     expect(find.byKey(const Key('signal-scan-cell-35')), findsOneWidget);
