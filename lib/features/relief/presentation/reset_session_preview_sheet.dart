@@ -1,10 +1,13 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../theme/releaf_design_tokens.dart';
 import '../../../theme/widgets/releaf_artwork.dart';
 import '../../../theme/widgets/releaf_components.dart';
+import '../application/reset_audio_preferences.dart';
 import '../domain/models/reset_content.dart';
 import '../domain/models/reset_launch_options.dart';
 
@@ -38,7 +41,7 @@ Future<ResetSessionPreviewResult?> showResetSessionPreview(
   );
 }
 
-class _ResetSessionPreviewSheet extends StatefulWidget {
+class _ResetSessionPreviewSheet extends ConsumerStatefulWidget {
   const _ResetSessionPreviewSheet({
     required this.session,
     required this.isLocked,
@@ -48,13 +51,19 @@ class _ResetSessionPreviewSheet extends StatefulWidget {
   final bool isLocked;
 
   @override
-  State<_ResetSessionPreviewSheet> createState() =>
+  ConsumerState<_ResetSessionPreviewSheet> createState() =>
       _ResetSessionPreviewSheetState();
 }
 
 class _ResetSessionPreviewSheetState
-    extends State<_ResetSessionPreviewSheet> {
+    extends ConsumerState<_ResetSessionPreviewSheet> {
   var _options = const ResetLaunchOptions();
+
+  @override
+  void initState() {
+    super.initState();
+    _options = ref.read(resetAudioPreferencesProvider).applyTo(_options);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -176,6 +185,13 @@ class _ResetSessionPreviewSheetState
                                       voiceGuidanceEnabled: value,
                                     );
                                   });
+                                  unawaited(
+                                    ref
+                                        .read(
+                                          resetAudioPreferencesProvider.notifier,
+                                        )
+                                        .setVoiceEnabled(value),
+                                  );
                                 },
                               ),
                               if (_options.voiceGuidanceEnabled) ...[
@@ -191,6 +207,13 @@ class _ResetSessionPreviewSheetState
                                         voiceVolume: value,
                                       );
                                     });
+                                    unawaited(
+                                      ref
+                                          .read(
+                                            resetAudioPreferencesProvider.notifier,
+                                          )
+                                          .setVoiceVolume(value),
+                                    );
                                   },
                                 ),
                               ],
@@ -208,6 +231,13 @@ class _ResetSessionPreviewSheetState
                                       ambientSoundEnabled: value,
                                     );
                                   });
+                                  unawaited(
+                                    ref
+                                        .read(
+                                          resetAudioPreferencesProvider.notifier,
+                                        )
+                                        .setAmbientEnabled(value),
+                                  );
                                 },
                               ),
                               if (_options.ambientSoundEnabled) ...[
@@ -225,6 +255,13 @@ class _ResetSessionPreviewSheetState
                                         ambientVolume: value,
                                       );
                                     });
+                                    unawaited(
+                                      ref
+                                          .read(
+                                            resetAudioPreferencesProvider.notifier,
+                                          )
+                                          .setAmbientVolume(value),
+                                    );
                                   },
                                 ),
                               ],
