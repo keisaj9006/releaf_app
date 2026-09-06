@@ -23,6 +23,8 @@ void main() {
     'press-release',
     'make-room',
     'one-small-next-step',
+    'before-panic-builds',
+    'before-exam',
     'before-interview',
     'before-presentation',
     'after-conflict',
