@@ -561,6 +561,127 @@ class ResetCatalog {
       ),
     ),
     ResetContent(
+      id: 'before-panic-builds',
+      title: 'Before Panic Builds',
+      durationSeconds: 120,
+      level: ResetLevel.quick,
+      quickCategory: QuickResetCategory.situational,
+      modality: ResetModality.grounding,
+      accessTier: ResetAccessTier.free,
+      visualType: ResetVisualType.sensoryHalo,
+      instructions: [
+        'Look around and name where you are.',
+        'Notice two or three stable points of physical contact.',
+        'Let your attention widen to the room instead of monitoring every body sensation.',
+        'Release effort in the jaw, hands, or shoulders if that feels comfortable.',
+        'Choose one simple next action and stay with only that.',
+      ],
+      program: ResetSessionProgram.guided(
+        simplifyActionLabel: 'Too much? Make it simpler',
+        steps: [
+          ResetSessionStep(
+            label: 'Orient',
+            guidance:
+                'Look around and name where you are. Let your eyes land on a few ordinary details.',
+            durationSeconds: 20,
+          ),
+          ResetSessionStep(
+            label: 'Contact',
+            guidance:
+                'Notice two or three stable points of contact: feet, chair, floor, wall, or your hands.',
+            durationSeconds: 25,
+          ),
+          ResetSessionStep(
+            label: 'Widen',
+            guidance:
+                'Let attention widen to the room instead of checking every body sensation.',
+            durationSeconds: 25,
+          ),
+          ResetSessionStep(
+            label: 'Release',
+            guidance:
+                'If it feels comfortable, loosen the jaw, hands, or shoulders without forcing anything.',
+            durationSeconds: 25,
+          ),
+          ResetSessionStep(
+            label: 'Next',
+            guidance:
+                'Choose one simple next action. You do not need to solve the whole moment at once.',
+            durationSeconds: 25,
+          ),
+        ],
+        simplifiedSteps: [
+          ResetSessionStep(
+            label: 'See',
+            guidance: 'Name three ordinary things you can see.',
+            durationSeconds: 20,
+          ),
+          ResetSessionStep(
+            label: 'Feel',
+            guidance: 'Notice two points where your body is supported.',
+            durationSeconds: 20,
+          ),
+          ResetSessionStep(
+            label: 'Next',
+            guidance: 'Choose one small next action.',
+            durationSeconds: 20,
+          ),
+        ],
+      ),
+    ),
+    ResetContent(
+      id: 'before-exam',
+      title: 'Before an Exam',
+      durationSeconds: 150,
+      level: ResetLevel.quick,
+      quickCategory: QuickResetCategory.situational,
+      modality: ResetModality.guidedPractice,
+      accessTier: ResetAccessTier.free,
+      visualType: ResetVisualType.nextStep,
+      instructions: [
+        'Stop trying to revise everything in the final minutes.',
+        'Choose the first thing you will do when the exam begins.',
+        'Notice your feet, chair, or another stable point of support.',
+        'Release unnecessary tension in your jaw, hands, and shoulders.',
+        'Keep only the first question or first instruction in front of you.',
+      ],
+      program: ResetSessionProgram.guided(
+        steps: [
+          ResetSessionStep(
+            label: 'Stop',
+            guidance:
+                'Stop trying to revise everything in the final minutes. You do not need to hold the whole subject at once.',
+            durationSeconds: 25,
+          ),
+          ResetSessionStep(
+            label: 'First Step',
+            guidance:
+                'Choose the first thing you will do when the exam begins: read the instructions, scan the page, or start with one question.',
+            durationSeconds: 30,
+            advanceActionLabel: 'I know my first step',
+          ),
+          ResetSessionStep(
+            label: 'Support',
+            guidance:
+                'Notice your feet, chair, or another stable point of physical support.',
+            durationSeconds: 30,
+          ),
+          ResetSessionStep(
+            label: 'Release',
+            guidance:
+                'Let unnecessary effort soften in your jaw, hands, and shoulders.',
+            durationSeconds: 30,
+          ),
+          ResetSessionStep(
+            label: 'Begin',
+            guidance:
+                'Keep only the first question or first instruction in front of you. The rest can arrive one step at a time.',
+            durationSeconds: 35,
+          ),
+        ],
+      ),
+    ),
+    ResetContent(
       id: 'before-interview',
       title: 'Before an Interview',
       durationSeconds: 150,
