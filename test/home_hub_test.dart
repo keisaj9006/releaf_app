@@ -82,6 +82,8 @@ void main() {
 
     expect(find.text('Personalize recommendations'), findsOneWidget);
 
+    await tester.ensureVisible(find.byKey(const Key('home-focus-strip')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('home-focus-strip')));
     await tester.pumpAndSettle();
 
@@ -114,6 +116,8 @@ void main() {
     expect(find.byKey(const Key('home-recommendation-card')), findsOneWidget);
     expect(tester.takeException(), isNull);
 
+    await tester.ensureVisible(find.byKey(const Key('home-focus-strip')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('home-focus-strip')));
     await tester.pumpAndSettle();
     expect(find.text('What should Releaf help you with most?'), findsOneWidget);
