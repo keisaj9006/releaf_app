@@ -7,6 +7,9 @@ import '../../../routing/app_routes.dart';
 import '../../../theme/app_theme.dart';
 import '../../../theme/releaf_design_tokens.dart';
 import '../../../theme/widgets/releaf_sleep_artwork.dart';
+import '../../meditation/data/meditation_catalog.dart';
+import '../../meditation/domain/meditation_content.dart';
+import '../../relief/application/relief_paywall_hooks.dart';
 import '../../relief/data/reset_catalog.dart';
 import '../../relief/domain/models/reset_content.dart';
 import '../../sound/data/sound_catalog.dart';
@@ -21,18 +24,41 @@ class SleepScreen extends ConsumerWidget {
     'longer-exhale',
   ];
 
+  static const _sleepSoundIds = [
+    'night-air',
+    'soft-rain',
+    'brown-noise',
+    'pink-noise',
+    'deep-drift',
+  ];
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final resetCatalog = ref.watch(resetCatalogProvider);
     final soundCatalog = ref.watch(soundCatalogProvider);
+    final meditationCatalog = ref.watch(meditationCatalogProvider);
     final sessions = _sleepResetIds
         .map(resetCatalog.getById)
         .whereType<ResetContent>()
         .toList(growable: false);
-    final sounds = soundCatalog.getAll();
+    final sounds = _sleepSoundIds
+        .map(soundCatalog.getById)
+        .whereType<SoundContent>()
+        .toList(growable: false);
+    final sleepMeditations =
+        meditationCatalog.getSeries(MeditationCatalog.sleepSeriesId);
     final tonight = resetCatalog.getById('evening-unwind');
     final hasPremiumEntitlement =
         ref.watch(subscriptionControllerProvider).isPremium;
+
+    Future<void> openMeditation(MeditationContent item) async {
+      if (item.isPremium && !hasPremiumEntitlement) {
+        await maybeShowPaywall(context, ref, force: true);
+        return;
+      }
+      if (!context.mounted) return;
+      await context.push(AppRoutes.meditationSessionFor(item.id));
+    }
 
     return Theme(
       data: AppTheme.premiumDark(),
@@ -97,6 +123,22 @@ class SleepScreen extends ConsumerWidget {
                                     ),
                                     label: const Text('Open sound library'),
                                   ),
+                                ),
+                              ],
+                              if (sleepMeditations.isNotEmpty) ...[
+                                const SizedBox(height: ReleafSpacing.section),
+                                const _SectionHeading(
+                                  eyebrow: 'SLEEP MEDITATIONS',
+                                  title: 'Move from doing into settling.',
+                                  description:
+                                      'Night-specific practices for letting go of the day, softening body effort and giving a busy mind less to follow.',
+                                ),
+                                const SizedBox(height: ReleafSpacing.md),
+                                _SleepMeditationRail(
+                                  items: sleepMeditations,
+                                  hasPremiumEntitlement:
+                                      hasPremiumEntitlement,
+                                  onOpen: openMeditation,
                                 ),
                               ],
                               const SizedBox(height: ReleafSpacing.section),
@@ -540,6 +582,166 @@ class _SoundCard extends StatelessWidget {
   }
 }
 
+class _SleepMeditationRail extends StatelessWidget {
+  const _SleepMeditationRail({
+    required this.items,
+    required this.hasPremiumEntitlement,
+    required this.onOpen,
+  });
+
+  final List<MeditationContent> items;
+  final bool hasPremiumEntitlement;
+  final ValueChanged<MeditationContent> onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 224,
+      child: ListView.separated(
+        key: const Key('sleep-meditation-rail'),
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        itemCount: items.length,
+        separatorBuilder: (_, _) => const SizedBox(width: ReleafSpacing.sm),
+        itemBuilder: (context, index) {
+          final item = items[index];
+          final compact = MediaQuery.sizeOf(context).width < 360;
+
+          return SizedBox(
+            width: compact ? 232 : 270,
+            child: _SleepMeditationCard(
+              item: item,
+              isLocked: item.isPremium && !hasPremiumEntitlement,
+              onPressed: () => onOpen(item),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _SleepMeditationCard extends StatelessWidget {
+  const _SleepMeditationCard({
+    required this.item,
+    required this.isLocked,
+    required this.onPressed,
+  });
+
+  final MeditationContent item;
+  final bool isLocked;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(ReleafRadii.large),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onPressed,
+        child: Ink(
+          decoration: BoxDecoration(
+            color: const Color(0xFF0C1017),
+            borderRadius: BorderRadius.circular(ReleafRadii.large),
+            border: Border.all(
+              color: const Color(0xFF7D8199).withValues(alpha: 0.23),
+            ),
+          ),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                height: 126,
+                child: ReleafSleepArtwork(
+                  variant: _sleepArtworkForMeditation(item.category),
+                  intensity: 0.92,
+                ),
+              ),
+              const DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.transparent,
+                      Color(0xA90C1017),
+                      Color(0xFF0C1017),
+                    ],
+                    stops: [0.10, 0.50, 0.70],
+                  ),
+                ),
+              ),
+              Positioned(
+                top: ReleafSpacing.md,
+                left: ReleafSpacing.md,
+                child: _GlassTag(
+                  icon: Icons.self_improvement_rounded,
+                  label: '${_durationLabel(item.durationSeconds).toUpperCase()} MEDITATION',
+                ),
+              ),
+              Positioned(
+                left: ReleafSpacing.md,
+                right: ReleafSpacing.md,
+                bottom: ReleafSpacing.md,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: ReleafTypography.cardTitle.copyWith(fontSize: 17),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      item.subtitle,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: ReleafTypography.meta.copyWith(
+                        color: ReleafColors.textSecondary,
+                        height: 1.35,
+                      ),
+                    ),
+                    const SizedBox(height: ReleafSpacing.xs),
+                    Row(
+                      children: [
+                        Text(
+                          isLocked ? 'Premium' : 'Included',
+                          style: ReleafTypography.meta.copyWith(
+                            color: isLocked
+                                ? ReleafColors.premium
+                                : const Color(0xFFB6BBCB),
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const Spacer(),
+                        Icon(
+                          isLocked
+                              ? Icons.lock_outline_rounded
+                              : Icons.play_arrow_rounded,
+                          size: 19,
+                          color: isLocked
+                              ? ReleafColors.premium
+                              : const Color(0xFFCDD0DA),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _SleepResetRail extends StatelessWidget {
   const _SleepResetRail({
     required this.sessions,
@@ -828,5 +1030,20 @@ ReleafSleepArtworkVariant _artworkForSession(String id) {
     'tension-body-scan' => ReleafSleepArtworkVariant.body,
     'longer-exhale' => ReleafSleepArtworkVariant.breath,
     _ => ReleafSleepArtworkVariant.night,
+  };
+}
+
+
+ReleafSleepArtworkVariant _sleepArtworkForMeditation(
+  MeditationCategory category,
+) {
+  return switch (category) {
+    MeditationCategory.body => ReleafSleepArtworkVariant.body,
+    MeditationCategory.anxiety => ReleafSleepArtworkVariant.racingMind,
+    MeditationCategory.focus => ReleafSleepArtworkVariant.breath,
+    MeditationCategory.mind => ReleafSleepArtworkVariant.racingMind,
+    MeditationCategory.startHere => ReleafSleepArtworkVariant.night,
+    MeditationCategory.everyday => ReleafSleepArtworkVariant.night,
+    MeditationCategory.unguided => ReleafSleepArtworkVariant.sound,
   };
 }
