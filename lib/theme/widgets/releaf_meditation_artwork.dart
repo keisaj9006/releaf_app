@@ -12,6 +12,22 @@ enum ReleafMeditationArtworkVariant {
   timer,
 }
 
+String? _assetFor(ReleafMeditationArtworkVariant variant) {
+  return switch (variant) {
+    ReleafMeditationArtworkVariant.editorial =>
+      'assets/art/meditation/editorial.jpg',
+    ReleafMeditationArtworkVariant.anxiety =>
+      'assets/art/meditation/anxiety.jpg',
+    ReleafMeditationArtworkVariant.focus =>
+      'assets/art/meditation/focus.jpg',
+    ReleafMeditationArtworkVariant.body =>
+      'assets/art/meditation/body.jpg',
+    ReleafMeditationArtworkVariant.compassion ||
+    ReleafMeditationArtworkVariant.everyday ||
+    ReleafMeditationArtworkVariant.timer => null,
+  };
+}
+
 class ReleafMeditationArtwork extends StatelessWidget {
   const ReleafMeditationArtwork({
     super.key,
@@ -24,13 +40,46 @@ class ReleafMeditationArtwork extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final safeIntensity = intensity.clamp(0.0, 1.0).toDouble();
+    final assetPath = _assetFor(variant);
+
     return ExcludeSemantics(
-      child: CustomPaint(
-        painter: _MeditationArtworkPainter(
-          variant: variant,
-          intensity: intensity.clamp(0.0, 1.0).toDouble(),
-        ),
-        child: const SizedBox.expand(),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          CustomPaint(
+            painter: _MeditationArtworkPainter(
+              variant: variant,
+              intensity: safeIntensity,
+            ),
+            child: const SizedBox.expand(),
+          ),
+          if (assetPath != null)
+            Opacity(
+              opacity: 0.74 + (safeIntensity * 0.18),
+              child: Image.asset(
+                assetPath,
+                fit: BoxFit.cover,
+                filterQuality: FilterQuality.medium,
+                alignment: Alignment.center,
+              ),
+            ),
+          if (assetPath != null)
+            DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.black.withValues(alpha: 0.04),
+                    Colors.black.withValues(alpha: 0.20),
+                    Colors.black.withValues(alpha: 0.46),
+                  ],
+                  stops: const [0, 0.58, 1],
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
