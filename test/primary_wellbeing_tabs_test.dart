@@ -388,6 +388,11 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
 
+    // Dispose the first ProviderScope before creating a differently overridden
+    // scope for Sleep. Riverpod does not allow changing override count in-place.
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
+
     final sleepRouter = createAppRouter(initialLocation: AppRoutes.sleep);
     addTearDown(sleepRouter.dispose);
     await tester.pumpWidget(
