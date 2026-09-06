@@ -4,10 +4,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'core/providers.dart';
 import 'routing/app_router.dart';
 import 'theme/app_theme.dart';
+
+const _releafSupabaseUrl = String.fromEnvironment(
+  'RELEAF_SUPABASE_URL',
+  defaultValue: 'https://mgajdbdzflspypxhgmaw.supabase.co',
+);
+
+const _releafSupabasePublishableKey = String.fromEnvironment(
+  'RELEAF_SUPABASE_PUBLISHABLE_KEY',
+  defaultValue: 'sb_publishable_PQqPVW1Q-0xszH4dWIG4bA_nltwXQYJ',
+);
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,6 +35,11 @@ Future<void> main() async {
     systemNavigationBarIconBrightness: Brightness.dark,
   ));
 
+  await Supabase.initialize(
+    url: _releafSupabaseUrl,
+    publishableKey: _releafSupabasePublishableKey,
+  );
+
   final prefs = await SharedPreferences.getInstance();
 
   final container = ProviderContainer(
@@ -33,10 +49,16 @@ Future<void> main() async {
   );
 
   final revenueCatApiKey = _revenueCatApiKeyForCurrentPlatform();
-  await container.read(revenueCatServiceProvider).init(
+  final revenueCat = container.read(revenueCatServiceProvider);
+  await revenueCat.init(
     apiKey: revenueCatApiKey,
     debug: kDebugMode,
   );
+
+  final restoredUser = Supabase.instance.client.auth.currentUser;
+  if (restoredUser != null) {
+    await revenueCat.identifyUser(restoredUser.id);
+  }
 
   runApp(
     UncontrolledProviderScope(

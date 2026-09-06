@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'app_routes.dart';
 import 'scaffold_with_nav.dart';
 
+import '../features/account/presentation/account_screen.dart';
 import '../features/home/home_screen.dart';
 import '../features/habits/presentation/habits_screen.dart';
 import '../features/relief/presentation/relief_screen.dart';
@@ -100,6 +101,11 @@ GoRouter createAppRouter({String initialLocation = AppRoutes.home}) => GoRouter(
           ],
         ),
       ],
+    ),
+
+    GoRoute(
+      path: AppRoutes.account,
+      pageBuilder: (context, state) => _fadePage(const AccountScreen()),
     ),
 
     GoRoute(

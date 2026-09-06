@@ -24,6 +24,25 @@ class RevenueCatService {
     }
   }
 
+  Future<CustomerInfo?> identifyUser(String appUserId) async {
+    if (!_initialized || appUserId.trim().isEmpty) return null;
+    try {
+      final result = await Purchases.logIn(appUserId.trim());
+      return result.customerInfo;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<CustomerInfo?> clearUserIdentity() async {
+    if (!_initialized) return null;
+    try {
+      return await Purchases.logOut();
+    } catch (_) {
+      return null;
+    }
+  }
+
   Future<CustomerInfo?> getCustomerInfoSafe() async {
     if (!_initialized) return null;
     try {

@@ -99,7 +99,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _HomeHeader(hour: now.hour),
+                              _HomeHeader(
+                                hour: now.hour,
+                                onAccount: () => context.push(AppRoutes.account),
+                              ),
                               if (showIntro) ...[
                                 const SizedBox(height: ReleafSpacing.xl),
                                 _HomeWelcomeCard(
@@ -368,9 +371,13 @@ class _HomeWelcomeCard extends StatelessWidget {
 }
 
 class _HomeHeader extends StatelessWidget {
-  const _HomeHeader({required this.hour});
+  const _HomeHeader({
+    required this.hour,
+    required this.onAccount,
+  });
 
   final int hour;
+  final VoidCallback onAccount;
 
   @override
   Widget build(BuildContext context) {
@@ -430,10 +437,15 @@ class _HomeHeader extends StatelessWidget {
             ],
           ),
           alignment: Alignment.center,
-          child: const Icon(
-            Icons.eco_outlined,
-            color: ReleafColors.sage,
-            size: 25,
+          child: IconButton(
+            key: const Key('home-account-button'),
+            tooltip: 'Account and Premium',
+            onPressed: onAccount,
+            icon: const Icon(
+              Icons.person_outline_rounded,
+              color: ReleafColors.sage,
+              size: 25,
+            ),
           ),
         ),
       ],
