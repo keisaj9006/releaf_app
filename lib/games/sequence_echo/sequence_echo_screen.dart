@@ -28,6 +28,8 @@ class _SequenceEchoScreenState extends State<SequenceEchoScreen> {
   int _round = 0;
   int _score = 0;
   int? _litCell;
+  int? _pressedCell;
+  bool? _pressedCorrect;
   int _inputIndex = 0;
   bool _showing = false;
   bool _accepting = false;
@@ -102,10 +104,21 @@ class _SequenceEchoScreenState extends State<SequenceEchoScreen> {
 
     final sequence = _sequence;
     final expected = sequence[_inputIndex];
-    HapticFeedback.selectionClick();
+    final correct = index == expected;
 
-    if (index != expected) {
+    HapticFeedback.selectionClick();
+    setState(() {
+      _pressedCell = index;
+      _pressedCorrect = correct;
+    });
+
+    await Future<void>.delayed(const Duration(milliseconds: 150));
+    if (!mounted) return;
+
+    if (!correct) {
       setState(() {
+        _pressedCell = null;
+        _pressedCorrect = null;
         _accepting = false;
         _inputIndex = 0;
         _score = (_score - (20 * _multiplier)).clamp(0, 999999);
@@ -117,6 +130,8 @@ class _SequenceEchoScreenState extends State<SequenceEchoScreen> {
     final nextIndex = _inputIndex + 1;
     if (nextIndex < sequence.length) {
       setState(() {
+        _pressedCell = null;
+        _pressedCorrect = null;
         _inputIndex = nextIndex;
         _status = 'Good. Keep going.';
       });
@@ -127,6 +142,8 @@ class _SequenceEchoScreenState extends State<SequenceEchoScreen> {
     final nextScore = _score + (100 * _multiplier);
 
     setState(() {
+      _pressedCell = null;
+      _pressedCorrect = null;
       _accepting = false;
       _inputIndex = 0;
       _score = nextScore;
@@ -291,6 +308,11 @@ class _SequenceEchoScreenState extends State<SequenceEchoScreen> {
                               ),
                               itemBuilder: (context, index) {
                                 final lit = _litCell == index;
+                                final pressed = _pressedCell == index;
+                                final pressedCorrect =
+                                    pressed && _pressedCorrect == true;
+                                final pressedWrong =
+                                    pressed && _pressedCorrect == false;
                                 return Semantics(
                                   button: true,
                                   enabled: _accepting,
@@ -310,20 +332,31 @@ class _SequenceEchoScreenState extends State<SequenceEchoScreen> {
                                         decoration: BoxDecoration(
                                           color: lit
                                               ? const Color(0xFFDDE7FF)
-                                              : const Color(0xFF151E2D),
+                                              : pressedCorrect
+                                                  ? const Color(0xFFBEEAD8)
+                                                  : pressedWrong
+                                                      ? const Color(0xFFF1C7C0)
+                                                      : const Color(0xFF151E2D),
                                           borderRadius:
                                               BorderRadius.circular(20),
                                           border: Border.all(
                                             color: lit
                                                 ? _accent
-                                                : _accent.withValues(alpha: 0.18),
+                                                : pressedCorrect
+                                                    ? const Color(0xFF80CDB7)
+                                                    : pressedWrong
+                                                        ? const Color(0xFFE1A184)
+                                                        : _accent.withValues(alpha: 0.18),
                                           ),
-                                          boxShadow: lit
+                                          boxShadow: lit || pressed
                                               ? [
                                                   BoxShadow(
-                                                    color: _accent.withValues(
-                                                      alpha: 0.32,
-                                                    ),
+                                                    color: (pressedCorrect
+                                                            ? const Color(0xFF80CDB7)
+                                                            : pressedWrong
+                                                                ? const Color(0xFFE1A184)
+                                                                : _accent)
+                                                        .withValues(alpha: 0.32),
                                                     blurRadius: 24,
                                                   ),
                                                 ]
@@ -332,8 +365,8 @@ class _SequenceEchoScreenState extends State<SequenceEchoScreen> {
                                         child: Center(
                                           child: Icon(
                                             Icons.circle_rounded,
-                                            size: lit ? 22 : 12,
-                                            color: lit
+                                            size: lit || pressed ? 22 : 12,
+                                            color: lit || pressed
                                                 ? const Color(0xFF1A2440)
                                                 : _accent.withValues(alpha: 0.34),
                                           ),
