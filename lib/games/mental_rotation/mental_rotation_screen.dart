@@ -107,6 +107,10 @@ class _MentalRotationScreenState extends State<MentalRotationScreen> {
       left = cells;
     }
 
+    if (_isMirrorRotationEquivalent(left, _gridSide)) {
+      left = _fallbackAsymmetricPattern(_gridSide);
+    }
+
     final sameUnderRotation =
         (_round + _trainingLevel + _difficulty.index).isEven;
     final turns = random.nextInt(4);
@@ -119,6 +123,27 @@ class _MentalRotationScreenState extends State<MentalRotationScreen> {
       right: transformed,
       sameUnderRotation: sameUnderRotation,
     );
+  }
+
+  Set<int> _fallbackAsymmetricPattern(int side) {
+    final candidates = <int>{
+      0,
+      1,
+      side + 1,
+      (side * 2) + 1,
+      (side * 2) + 2,
+    }.where((index) => index < side * side).toSet();
+
+    if (!_isMirrorRotationEquivalent(candidates, side)) {
+      return candidates;
+    }
+
+    return <int>{
+      0,
+      side,
+      side + 1,
+      (side * 2) + 1,
+    }.where((index) => index < side * side).toSet();
   }
 
   bool _isMirrorRotationEquivalent(Set<int> pattern, int side) {
@@ -159,7 +184,9 @@ class _MentalRotationScreenState extends State<MentalRotationScreen> {
     final correct = saysSame == _puzzle.sameUnderRotation;
     if (correct) {
       _correct++;
-      _feedback = 'Correct. Rotation preserves the shape.';
+      _feedback = _puzzle.sameUnderRotation
+          ? 'Correct. Rotation preserves the shape.'
+          : 'Correct. You spotted the mirror reflection.';
       HapticFeedback.selectionClick();
     } else {
       _mistakes++;
