@@ -120,7 +120,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('SITUATIONAL'), findsWidgets);
-    expect(find.text('Before an Interview'), findsOneWidget);
+    expect(find.text('Before Panic Builds'), findsOneWidget);
     expect(find.byKey(const Key('reset-clear-category-filter')), findsOneWidget);
   });
 
