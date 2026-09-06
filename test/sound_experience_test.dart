@@ -17,9 +17,17 @@ void main() {
     const catalog = SoundCatalog();
     final tracks = catalog.getAll();
 
-    expect(tracks, hasLength(2));
-    expect(tracks.map((track) => track.assetPath), contains('sounds/relief_01.mp3'));
-    expect(tracks.map((track) => track.assetPath), contains('sounds/relief_02.mp3'));
+    expect(tracks, hasLength(5));
+    expect(
+      tracks.map((track) => track.assetPath),
+      containsAll([
+        'sounds/relief_01.mp3',
+        'sounds/relief_02.mp3',
+        'sounds/brown_noise.mp3',
+        'sounds/soft_rain.mp3',
+        'sounds/night_air.mp3',
+      ]),
+    );
     expect(tracks.every((track) => track.assetPath.endsWith('.mp3')), isTrue);
   });
 
@@ -44,6 +52,9 @@ void main() {
     expect(find.byKey(const Key('sound-featured-card')), findsOneWidget);
     expect(find.text('Releaf Atmosphere I'), findsWidgets);
     expect(find.text('Releaf Atmosphere II'), findsOneWidget);
+    expect(find.text('Brown Noise'), findsOneWidget);
+    expect(find.text('Soft Rain'), findsOneWidget);
+    expect(find.text('Night Air'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
