@@ -71,13 +71,13 @@ void main() {
       ]),
     );
     expect(tracks.every((track) => track.assetPath.endsWith('.mp3')), isTrue);
-    expect(tracks.where((track) => track.isPremium), hasLength(4));
-    expect(tracks.where((track) => !track.isPremium), hasLength(4));
+    expect(tracks.where((track) => track.isPremium), hasLength(3));
+    expect(tracks.where((track) => !track.isPremium), hasLength(5));
   });
 
   test('Premium Sound access respects entitlement', () {
     const catalog = SoundCatalog();
-    final premium = catalog.getById('deep-drift')!;
+    final premium = catalog.getById('pink-noise')!;
     final free = catalog.getById('soft-rain')!;
 
     expect(
@@ -163,7 +163,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
 
-    expect(find.text('PREMIUM'), findsNWidgets(4));
+    expect(find.text('PREMIUM'), findsNWidgets(3));
 
     final premiumTrack = find.byKey(
       const Key('sound-track-releaf-atmosphere-02'),
