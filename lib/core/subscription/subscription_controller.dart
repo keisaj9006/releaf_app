@@ -6,7 +6,7 @@ import 'package:purchases_flutter/purchases_flutter.dart';
 import 'revenuecat_service.dart';
 import 'subscription_state.dart';
 
-const bool _premiumPreviewFromBuild = bool.fromEnvironment(
+const bool premiumPreviewFromBuild = bool.fromEnvironment(
   'RELEAF_PREMIUM_PREVIEW',
   defaultValue: false,
 );
@@ -17,7 +17,7 @@ class SubscriptionController extends StateNotifier<SubscriptionState> {
 
   SubscriptionController(
     this._service, {
-    bool premiumPreview = _premiumPreviewFromBuild,
+    bool premiumPreview = premiumPreviewFromBuild,
   })  : _premiumPreview = premiumPreview,
         super(SubscriptionState(isPremium: premiumPreview)) {
     initAndRefresh();
