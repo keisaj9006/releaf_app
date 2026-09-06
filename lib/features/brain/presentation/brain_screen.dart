@@ -954,6 +954,7 @@ class _SkillGameCard extends StatefulWidget {
     required this.presentation,
     required this.bestScore,
     required this.hasCompleted,
+    required this.trainingLevel,
     required this.onPressed,
   });
 
@@ -961,6 +962,7 @@ class _SkillGameCard extends StatefulWidget {
   final _BrainGamePresentation presentation;
   final int? bestScore;
   final bool hasCompleted;
+  final int? trainingLevel;
   final VoidCallback onPressed;
 
   @override
@@ -1038,7 +1040,14 @@ class _SkillGameCardState extends State<_SkillGameCard> {
                                 accent: widget.presentation.accent,
                               ),
                             ),
-                            if (widget.game.hasDifficultyLevels) ...[
+                            if (widget.trainingLevel != null) ...[
+                              const SizedBox(width: 6),
+                              _SkillBadge(
+                                label:
+                                    'LEVEL ${widget.trainingLevel}/$maxBrainTrainingLevel',
+                                accent: widget.presentation.accent,
+                              ),
+                            ] else if (widget.game.hasDifficultyLevels) ...[
                               const SizedBox(width: 6),
                               _SkillBadge(
                                 label: '3 LEVELS',

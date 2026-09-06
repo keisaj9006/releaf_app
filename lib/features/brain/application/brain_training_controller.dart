@@ -3,6 +3,19 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/providers.dart';
 
+const progressiveBrainGameIds = <String>{
+  'rule_shift',
+  'sequence_echo',
+  'color_conflict',
+  'pattern_logic',
+  'signal_scan',
+};
+
+const maxBrainTrainingLevel = 12;
+
+bool usesProgressiveBrainLevel(String gameId) =>
+    progressiveBrainGameIds.contains(gameId);
+
 class BrainSessionRecord {
   const BrainSessionRecord({
     required this.gameId,
@@ -80,6 +93,16 @@ class BrainTrainingState {
       7,
       (index) => today.subtract(Duration(days: 6 - index)),
     );
+  }
+
+  int completionCountFor(String gameId) =>
+      records.where((record) => record.gameId == gameId).length;
+
+  int trainingLevelFor(String gameId) {
+    if (!usesProgressiveBrainLevel(gameId)) return 1;
+    return (completionCountFor(gameId) + 1)
+        .clamp(1, maxBrainTrainingLevel)
+        .toInt();
   }
 
   bool playedToday(String gameId) {

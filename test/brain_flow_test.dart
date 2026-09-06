@@ -317,6 +317,79 @@ void main() {
     expect(find.text('IS THE NUMBER ODD?'), findsOneWidget);
   });
 
+  test('Persistent Brain levels advance from completed sessions', () {
+    final now = DateTime.now();
+    final state = BrainTrainingState(
+      records: [
+        BrainSessionRecord(
+          gameId: 'sequence_echo',
+          completedAt: now,
+          score: 500,
+        ),
+        BrainSessionRecord(
+          gameId: 'sequence_echo',
+          completedAt: now.subtract(const Duration(days: 1)),
+          score: 400,
+        ),
+      ],
+    );
+
+    expect(state.completionCountFor('sequence_echo'), 2);
+    expect(state.trainingLevelFor('sequence_echo'), 3);
+    expect(state.trainingLevelFor('memory'), 1);
+  });
+
+  testWidgets('Game host injects the saved persistent training level', (
+    WidgetTester tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({});
+    final preferences = await SharedPreferences.getInstance();
+    final controller = BrainTrainingController(preferences);
+    await controller.recordCompletion(gameId: 'sequence_echo', score: 300);
+    await controller.recordCompletion(gameId: 'sequence_echo', score: 400);
+    controller.dispose();
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(preferences),
+        ],
+        child: const MaterialApp(
+          home: GameHostScreen(gameId: 'sequence_echo'),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    final game = tester.widget<SequenceEchoScreen>(
+      find.byType(SequenceEchoScreen),
+    );
+    expect(game.trainingLevel, 3);
+    expect(find.text('L3'), findsOneWidget);
+  });
+
+  testWidgets('Higher training level materially increases Sequence Echo', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SequenceEchoScreen(
+          trainingLevel: 3,
+          onFinish: (_) {},
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('sequence-echo-length')),
+        matching: find.text('5'),
+      ),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('New Brain difficulty levels materially change the task', (
     WidgetTester tester,
   ) async {

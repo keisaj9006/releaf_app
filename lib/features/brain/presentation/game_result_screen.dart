@@ -82,6 +82,10 @@ class _GameResultScreenState extends ConsumerState<GameResultScreen> {
         : training.bestScoreFor(widget.gameId!);
     final isPersonalBest =
         widget.score != null && bestScore != null && widget.score == bestScore;
+    final trainingLevel = widget.gameId != null &&
+            usesProgressiveBrainLevel(widget.gameId!)
+        ? training.trainingLevelFor(widget.gameId!)
+        : null;
 
     return Theme(
       data: AppTheme.premiumDark(),
@@ -260,6 +264,35 @@ class _GameResultScreenState extends ConsumerState<GameResultScreen> {
                               style: ReleafTypography.meta.copyWith(
                                 color: ReleafColors.sage,
                                 fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ],
+                        if (trainingLevel != null) ...[
+                          const SizedBox(height: ReleafSpacing.sm),
+                          Container(
+                            key: const Key('brain-next-training-level'),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 9,
+                            ),
+                            decoration: BoxDecoration(
+                              color: _accentForGame(widget.gameId)
+                                  .withValues(alpha: 0.10),
+                              borderRadius:
+                                  BorderRadius.circular(ReleafRadii.pill),
+                              border: Border.all(
+                                color: _accentForGame(widget.gameId)
+                                    .withValues(alpha: 0.22),
+                              ),
+                            ),
+                            child: Text(
+                              trainingLevel >= maxBrainTrainingLevel
+                                  ? 'LEVEL $maxBrainTrainingLevel · MASTERY'
+                                  : 'LEVEL $trainingLevel READY',
+                              style: ReleafTypography.meta.copyWith(
+                                color: _accentForGame(widget.gameId),
+                                fontWeight: FontWeight.w800,
                               ),
                             ),
                           ),
