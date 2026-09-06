@@ -9,6 +9,7 @@ const progressiveBrainGameIds = <String>{
   'color_conflict',
   'pattern_logic',
   'signal_scan',
+  'broken_mirror',
 };
 
 const maxBrainTrainingLevel = 12;
