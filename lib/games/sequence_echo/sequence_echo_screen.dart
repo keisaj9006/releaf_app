@@ -24,7 +24,7 @@ class _SequenceEchoScreenState extends State<SequenceEchoScreen> {
     0, 4, 8, 2, 6, 1, 7, 3, 5, 0, 8, 4, 2, 7, 1, 6, 3, 5,
   ];
 
-  BrainDifficulty _difficulty = BrainDifficulty.easy;
+  BrainDifficulty _difficulty = BrainDifficulty.medium;
   int _round = 0;
   int _score = 0;
   int? _litCell;
@@ -38,22 +38,22 @@ class _SequenceEchoScreenState extends State<SequenceEchoScreen> {
 
   int get _totalRounds => switch (_difficulty) {
         BrainDifficulty.easy => 5,
-        BrainDifficulty.medium => 5,
-        BrainDifficulty.hard => 6,
+        BrainDifficulty.medium => 6,
+        BrainDifficulty.hard => 7,
       };
 
   int get _sequenceLength {
     return switch (_difficulty) {
-      BrainDifficulty.easy => 3 + (_round ~/ 2),
-      BrainDifficulty.medium => 4 + (_round ~/ 2),
-      BrainDifficulty.hard => 5 + (_round ~/ 2),
+      BrainDifficulty.easy => 3 + _round,
+      BrainDifficulty.medium => 4 + _round,
+      BrainDifficulty.hard => 5 + _round,
     };
   }
 
   int get _flashMs => switch (_difficulty) {
-        BrainDifficulty.easy => 620,
-        BrainDifficulty.medium => 430,
-        BrainDifficulty.hard => 290,
+        BrainDifficulty.easy => (560 - (_round * 35)).clamp(380, 560),
+        BrainDifficulty.medium => (410 - (_round * 30)).clamp(260, 410),
+        BrainDifficulty.hard => (290 - (_round * 18)).clamp(190, 290),
       };
 
   int get _multiplier => switch (_difficulty) {
