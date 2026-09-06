@@ -84,7 +84,8 @@ class _SymbolCodeScreenState extends State<SymbolCodeScreen> {
   bool get _canChangeDifficulty =>
       _trial == 0 && _correct == 0 && _mistakes == 0 && !_stopwatch.isRunning;
 
-  String get _currentSymbol => _targets[_trial.clamp(0, _targets.length - 1)];
+  String get _currentSymbol =>
+      _targets[_trial.clamp(0, _targets.length - 1).toInt()];
 
   int get _correctValue {
     for (final pair in _key) {
