@@ -7,7 +7,7 @@ import '../../../routing/app_routes.dart';
 import '../../../legacy/screens/memory_game_screen.dart';
 import '../../../games/labyrinth/labyrinth_game_screen.dart';
 import '../../../games/math_race/math_race_screen.dart';
-import '../../../legacy/screens/broken_mirror_game_screen.dart';
+import '../../../games/broken_mirror/broken_mirror_game_screen.dart';
 import '../../../games/rule_shift/rule_shift_screen.dart';
 import '../../../games/sequence_echo/sequence_echo_screen.dart';
 import '../../../games/color_conflict/color_conflict_screen.dart';
