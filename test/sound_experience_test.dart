@@ -17,7 +17,7 @@ void main() {
     const catalog = SoundCatalog();
     final tracks = catalog.getAll();
 
-    expect(tracks, hasLength(5));
+    expect(tracks, hasLength(8));
     expect(
       tracks.map((track) => track.assetPath),
       containsAll([
@@ -26,6 +26,9 @@ void main() {
         'sounds/brown_noise.mp3',
         'sounds/soft_rain.mp3',
         'sounds/night_air.mp3',
+        'sounds/white_noise.mp3',
+        'sounds/pink_noise.mp3',
+        'sounds/deep_drift.mp3',
       ]),
     );
     expect(tracks.every((track) => track.assetPath.endsWith('.mp3')), isTrue);
@@ -55,6 +58,9 @@ void main() {
     expect(find.text('Brown Noise'), findsOneWidget);
     expect(find.text('Soft Rain'), findsOneWidget);
     expect(find.text('Night Air'), findsOneWidget);
+    expect(find.text('White Noise'), findsOneWidget);
+    expect(find.text('Pink Noise'), findsOneWidget);
+    expect(find.text('Deep Drift'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

@@ -9,6 +9,9 @@ enum ReleafSoundArtworkVariant {
   brownNoise,
   softRain,
   nightAir,
+  whiteNoise,
+  pinkNoise,
+  deepDrift,
 }
 
 class ReleafSoundArtwork extends StatelessWidget {
@@ -73,6 +76,12 @@ class _ReleafSoundArtworkPainter extends CustomPainter {
         _drawRainField(canvas, size, palette, intensity);
       case ReleafSoundArtworkVariant.nightAir:
         _drawNightAir(canvas, size, palette, intensity);
+      case ReleafSoundArtworkVariant.whiteNoise:
+        _drawWhiteNoise(canvas, size, palette, intensity);
+      case ReleafSoundArtworkVariant.pinkNoise:
+        _drawPinkNoise(canvas, size, palette, intensity);
+      case ReleafSoundArtworkVariant.deepDrift:
+        _drawDeepDrift(canvas, size, palette, intensity);
       default:
         _drawWaveField(canvas, size, palette, intensity);
         _drawSpectralBars(canvas, size, palette, intensity);
@@ -111,6 +120,95 @@ void _drawGlow(
           radius: size.longestSide * 0.72,
         ),
       ),
+  );
+}
+
+void _drawWhiteNoise(
+  Canvas canvas,
+  Size size,
+  _SoundPalette palette,
+  double intensity,
+) {
+  for (var index = 0; index < 180; index++) {
+    final x = ((index * 47) % 211) / 211 * size.width;
+    final y = ((index * 83) % 197) / 197 * size.height;
+    final radius = index % 9 == 0 ? 1.2 : 0.55;
+    canvas.drawCircle(
+      Offset(x, y),
+      radius,
+      Paint()
+        ..color = palette.highlight.withValues(
+          alpha: (0.035 + (index % 5) * 0.012) * intensity,
+        ),
+    );
+  }
+}
+
+void _drawPinkNoise(
+  Canvas canvas,
+  Size size,
+  _SoundPalette palette,
+  double intensity,
+) {
+  for (var band = 0; band < 10; band++) {
+    final y = size.height * (0.16 + band * 0.072);
+    final path = Path()
+      ..moveTo(size.width * 0.04, y)
+      ..cubicTo(
+        size.width * 0.28,
+        y - size.height * (0.025 + band * 0.002),
+        size.width * 0.62,
+        y + size.height * (0.018 + band * 0.001),
+        size.width * 0.96,
+        y,
+      );
+    canvas.drawPath(
+      path,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1 + band * 0.14
+        ..color = (band.isEven ? palette.primary : palette.highlight)
+            .withValues(alpha: (0.04 + band * 0.009) * intensity),
+    );
+  }
+}
+
+void _drawDeepDrift(
+  Canvas canvas,
+  Size size,
+  _SoundPalette palette,
+  double intensity,
+) {
+  final center = Offset(size.width * 0.68, size.height * 0.46);
+  for (var index = 0; index < 5; index++) {
+    final width = size.width * (0.32 + index * 0.10);
+    final height = size.height * (0.18 + index * 0.055);
+    canvas.drawOval(
+      Rect.fromCenter(center: center, width: width, height: height),
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.1 + index * 0.12
+        ..color = (index.isEven ? palette.primary : palette.secondary)
+            .withValues(alpha: (0.10 - index * 0.012) * intensity)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2),
+    );
+  }
+
+  final glowRect = Rect.fromCircle(
+    center: center,
+    radius: size.shortestSide * 0.20,
+  );
+  canvas.drawCircle(
+    center,
+    size.shortestSide * 0.20,
+    Paint()
+      ..shader = RadialGradient(
+        colors: [
+          palette.highlight.withValues(alpha: 0.17 * intensity),
+          palette.primary.withValues(alpha: 0.06 * intensity),
+          Colors.transparent,
+        ],
+      ).createShader(glowRect),
   );
 }
 
@@ -405,6 +503,30 @@ _SoundPalette _paletteFor(ReleafSoundArtworkVariant variant) {
         secondary: Color(0xFF5F7C82),
         highlight: Color(0xFFD6DFEA),
         glow: Color(0xFF516783),
+      ),
+    ReleafSoundArtworkVariant.whiteNoise => const _SoundPalette(
+        background: Color(0xFF121416),
+        backgroundEnd: Color(0xFF090A0B),
+        primary: Color(0xFF91979C),
+        secondary: Color(0xFF6C747A),
+        highlight: Color(0xFFE9EEF1),
+        glow: Color(0xFF9BA3A8),
+      ),
+    ReleafSoundArtworkVariant.pinkNoise => const _SoundPalette(
+        background: Color(0xFF191216),
+        backgroundEnd: Color(0xFF0C090B),
+        primary: Color(0xFFAA7C8E),
+        secondary: Color(0xFF81707A),
+        highlight: Color(0xFFE8D4DC),
+        glow: Color(0xFF9C7182),
+      ),
+    ReleafSoundArtworkVariant.deepDrift => const _SoundPalette(
+        background: Color(0xFF0C111B),
+        backgroundEnd: Color(0xFF070A10),
+        primary: Color(0xFF6B82B0),
+        secondary: Color(0xFF718C8B),
+        highlight: Color(0xFFDCE4F5),
+        glow: Color(0xFF6079A6),
       ),
   };
 }

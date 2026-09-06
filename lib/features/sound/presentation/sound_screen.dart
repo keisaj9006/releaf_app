@@ -634,6 +634,9 @@ ReleafSoundArtworkVariant _artworkForTrack(String id) {
     'brown-noise' => ReleafSoundArtworkVariant.brownNoise,
     'soft-rain' => ReleafSoundArtworkVariant.softRain,
     'night-air' => ReleafSoundArtworkVariant.nightAir,
+    'white-noise' => ReleafSoundArtworkVariant.whiteNoise,
+    'pink-noise' => ReleafSoundArtworkVariant.pinkNoise,
+    'deep-drift' => ReleafSoundArtworkVariant.deepDrift,
     _ => ReleafSoundArtworkVariant.atmosphereOne,
   };
 }

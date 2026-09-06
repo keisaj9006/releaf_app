@@ -53,6 +53,9 @@ flutter:
     - assets/sounds/brown_noise.mp3
     - assets/sounds/soft_rain.mp3
     - assets/sounds/night_air.mp3
+    - assets/sounds/white_noise.mp3
+    - assets/sounds/pink_noise.mp3
+    - assets/sounds/deep_drift.mp3
 
   fonts:
     - family: Poppins

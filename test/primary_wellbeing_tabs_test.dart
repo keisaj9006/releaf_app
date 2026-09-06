@@ -111,10 +111,13 @@ void main() {
     const catalog = SoundCatalog();
     final tracks = catalog.getAll();
 
-    expect(tracks, hasLength(5));
+    expect(tracks, hasLength(8));
     expect(catalog.getById('brown-noise')?.assetPath, 'sounds/brown_noise.mp3');
     expect(catalog.getById('soft-rain')?.assetPath, 'sounds/soft_rain.mp3');
     expect(catalog.getById('night-air')?.assetPath, 'sounds/night_air.mp3');
+    expect(catalog.getById('white-noise')?.assetPath, 'sounds/white_noise.mp3');
+    expect(catalog.getById('pink-noise')?.assetPath, 'sounds/pink_noise.mp3');
+    expect(catalog.getById('deep-drift')?.assetPath, 'sounds/deep_drift.mp3');
   });
 
   test('Meditation catalog keeps every session duration internally valid', () {
