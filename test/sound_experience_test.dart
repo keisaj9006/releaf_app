@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:releaf_app/core/providers.dart';
 import 'package:releaf_app/features/sound/application/sound_player_controller.dart';
 import 'package:releaf_app/features/sound/data/sound_catalog.dart';
+import 'package:releaf_app/features/sound/presentation/sound_player_gate.dart';
 import 'package:releaf_app/features/sound/presentation/sound_screen.dart';
 
 class _FakeSoundPlaybackDriver implements SoundPlaybackDriver {
@@ -70,6 +71,27 @@ void main() {
       ]),
     );
     expect(tracks.every((track) => track.assetPath.endsWith('.mp3')), isTrue);
+    expect(tracks.where((track) => track.isPremium), hasLength(4));
+    expect(tracks.where((track) => !track.isPremium), hasLength(4));
+  });
+
+  test('Premium Sound access respects entitlement', () {
+    const catalog = SoundCatalog();
+    final premium = catalog.getById('deep-drift')!;
+    final free = catalog.getById('soft-rain')!;
+
+    expect(
+      canAccessSoundTrack(premium, isPremiumUser: false),
+      isFalse,
+    );
+    expect(
+      canAccessSoundTrack(premium, isPremiumUser: true),
+      isTrue,
+    );
+    expect(
+      canAccessSoundTrack(free, isPremiumUser: false),
+      isTrue,
+    );
   });
 
   test('Sleep timer stores a visible real-time countdown', () async {
@@ -122,6 +144,45 @@ void main() {
     expect(find.text('White Noise'), findsOneWidget);
     expect(find.text('Pink Noise'), findsOneWidget);
     expect(find.text('Deep Drift'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Premium Sound stays visible and opens preview before paywall', (
+    WidgetTester tester,
+  ) async {
+    final preferences = await _preferences();
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(preferences),
+        ],
+        child: const MaterialApp(home: SoundScreen()),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.text('PREMIUM'), findsNWidgets(4));
+
+    final premiumTrack = find.byKey(
+      const Key('sound-track-releaf-atmosphere-02'),
+    );
+    expect(premiumTrack, findsOneWidget);
+
+    await tester.ensureVisible(premiumTrack);
+    await tester.pumpAndSettle();
+    await tester.tap(premiumTrack);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.byKey(const Key('sound-premium-preview')), findsOneWidget);
+    expect(find.text('Releaf Atmosphere II'), findsWidgets);
+    expect(find.textContaining('part of Releaf Premium'), findsOneWidget);
+    expect(
+      find.byKey(const Key('sound-premium-preview-unlock')),
+      findsOneWidget,
+    );
     expect(tester.takeException(), isNull);
   });
 
