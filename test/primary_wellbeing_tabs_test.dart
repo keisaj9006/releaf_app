@@ -404,12 +404,17 @@ void main() {
     expect(find.text('Meditate'), findsWidgets);
     expect(
       find.text(
-        'Choose a practice, then put the phone down. Releaf Guide will take it from here.',
+        'Press play, get comfortable, then let the voice carry the practice.',
       ),
       findsOneWidget,
     );
-    expect(find.text('LISTEN NOW · RELEAF GUIDE'), findsOneWidget);
-    expect(find.text('Listen now'), findsOneWidget);
+    expect(find.text('TODAY’S PRACTICE · RELEAF GUIDE'), findsOneWidget);
+    expect(find.text('Start practice'), findsOneWidget);
+    expect(
+      find.byKey(const Key('meditation-time-quick-start')),
+      findsOneWidget,
+    );
+    expect(find.text('HOW MUCH TIME DO YOU HAVE?'), findsOneWidget);
     expect(find.text('FOUNDATIONS'), findsOneWidget);
     expect(find.text('NIGHT PRACTICE'), findsOneWidget);
     expect(
