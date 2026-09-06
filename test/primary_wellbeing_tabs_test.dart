@@ -334,6 +334,14 @@ void main() {
 
     expect(find.text('MEDITATION'), findsOneWidget);
     expect(find.text('Meditate'), findsWidgets);
+    expect(
+      find.text(
+        'Choose a practice, then put the phone down. Releaf Guide will take it from here.',
+      ),
+      findsOneWidget,
+    );
+    expect(find.text('LISTEN NOW · RELEAF GUIDE'), findsOneWidget);
+    expect(find.text('Listen now'), findsOneWidget);
     expect(find.text('FOUNDATIONS'), findsOneWidget);
     expect(find.text('NIGHT PRACTICE'), findsOneWidget);
     expect(

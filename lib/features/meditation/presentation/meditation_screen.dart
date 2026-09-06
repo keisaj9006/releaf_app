@@ -218,7 +218,7 @@ class MeditationScreen extends ConsumerWidget {
                                 eyebrow: 'QUICK PRACTICES',
                                 title: 'A few minutes is enough to begin.',
                                 description:
-                                    'Short guided sessions for a pause in the middle of real life.',
+                                    'Short audio-guided sessions for a pause in the middle of real life.',
                               ),
                               const SizedBox(height: ReleafSpacing.md),
                               _PracticeRail(
@@ -369,7 +369,7 @@ class _Header extends StatelessWidget {
         Text('Meditate', style: ReleafTypography.display),
         SizedBox(height: 6),
         Text(
-          'Guided practice for attention, awareness and a less reactive relationship with your thoughts.',
+          'Choose a practice, then put the phone down. Releaf Guide will take it from here.',
           style: ReleafTypography.body,
         ),
       ],
@@ -454,7 +454,7 @@ class _FeaturedPractice extends StatelessWidget {
                   left: compact ? ReleafSpacing.lg : ReleafSpacing.xl,
                   right: 72,
                   child: const Text(
-                    'FEATURED PRACTICE',
+                    'LISTEN NOW · RELEAF GUIDE',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
@@ -506,7 +506,7 @@ class _FeaturedPractice extends StatelessWidget {
                             icon: item.unguided
                                 ? Icons.timer_outlined
                                 : Icons.record_voice_over_outlined,
-                            label: item.unguided ? 'Unguided' : 'Guided',
+                            label: item.unguided ? 'Unguided' : 'Releaf Guide',
                           ),
                         ],
                       ),
@@ -521,7 +521,7 @@ class _FeaturedPractice extends StatelessWidget {
                                 ? Icons.lock_outline_rounded
                                 : Icons.play_arrow_rounded,
                           ),
-                          label: Text(isLocked ? 'Unlock practice' : 'Begin'),
+                          label: Text(isLocked ? 'Unlock practice' : 'Listen now'),
                           style: FilledButton.styleFrom(
                             backgroundColor: const Color(0xFFD8D0C7),
                             foregroundColor: const Color(0xFF151416),
@@ -594,7 +594,7 @@ class _ProgramRail extends StatelessWidget {
               cardKey: const Key('meditation-foundations-course'),
               eyebrow: 'FOUNDATIONS',
               title: 'Learn the basics',
-              description: 'Four guided sessions that build one skill at a time.',
+              description: 'Four audio-guided sessions that build one skill at a time.',
               artwork: ReleafMeditationArtworkVariant.editorial,
               accent: const Color(0xFFC9BBCF),
               completed: foundationsCompleted,
@@ -991,7 +991,7 @@ class _PracticeCardState extends State<_PracticeCard> {
                       Row(
                         children: [
                           Text(
-                            widget.item.unguided ? 'Timer' : 'Guided',
+                            widget.item.unguided ? 'Timer' : 'Releaf Guide',
                             style: ReleafTypography.meta.copyWith(
                               color: const Color(0xFFB8AFC2),
                               fontWeight: FontWeight.w700,
@@ -1456,7 +1456,7 @@ class _SheetPracticeRow extends StatelessWidget {
                   Text(item.title, style: ReleafTypography.cardTitle),
                   const SizedBox(height: 4),
                   Text(
-                    '${_durationLabel(item)} · ${item.unguided ? 'Unguided' : 'Guided'}',
+                    '${_durationLabel(item)} · ${item.unguided ? 'Unguided' : 'Releaf Guide'}',
                     style: ReleafTypography.meta,
                   ),
                 ],
