@@ -21,7 +21,7 @@ class MeditationCatalog {
       durationSeconds: 120,
       category: MeditationCategory.startHere,
       accessTier: MeditationAccessTier.free,
-      backgroundSoundId: 'releaf-atmosphere-01',
+      backgroundSoundId: 'deep-drift',
       backgroundSoundVolume: 0.18,
       seriesId: foundationsSeriesId,
       seriesOrder: 1,
@@ -75,7 +75,7 @@ class MeditationCatalog {
       durationSeconds: 240,
       category: MeditationCategory.startHere,
       accessTier: MeditationAccessTier.free,
-      backgroundSoundId: 'releaf-atmosphere-01',
+      backgroundSoundId: 'deep-drift',
       backgroundSoundVolume: 0.16,
       seriesId: foundationsSeriesId,
       seriesOrder: 2,
@@ -128,7 +128,7 @@ class MeditationCatalog {
       durationSeconds: 300,
       category: MeditationCategory.startHere,
       accessTier: MeditationAccessTier.premium,
-      backgroundSoundId: 'releaf-atmosphere-02',
+      backgroundSoundId: 'deep-drift',
       backgroundSoundVolume: 0.16,
       seriesId: foundationsSeriesId,
       seriesOrder: 3,
@@ -170,7 +170,7 @@ class MeditationCatalog {
       durationSeconds: 360,
       category: MeditationCategory.startHere,
       accessTier: MeditationAccessTier.premium,
-      backgroundSoundId: 'releaf-atmosphere-01',
+      backgroundSoundId: 'deep-drift',
       backgroundSoundVolume: 0.15,
       seriesId: foundationsSeriesId,
       seriesOrder: 4,
@@ -215,7 +215,7 @@ class MeditationCatalog {
       durationSeconds: 300,
       category: MeditationCategory.anxiety,
       accessTier: MeditationAccessTier.free,
-      backgroundSoundId: 'releaf-atmosphere-02',
+      backgroundSoundId: 'deep-drift',
       backgroundSoundVolume: 0.16,
       steps: [
         MeditationStep(
@@ -275,7 +275,7 @@ class MeditationCatalog {
       durationSeconds: 240,
       category: MeditationCategory.anxiety,
       accessTier: MeditationAccessTier.premium,
-      backgroundSoundId: 'releaf-atmosphere-02',
+      backgroundSoundId: 'deep-drift',
       backgroundSoundVolume: 0.14,
       steps: [
         MeditationStep(
@@ -309,7 +309,7 @@ class MeditationCatalog {
       durationSeconds: 300,
       category: MeditationCategory.focus,
       accessTier: MeditationAccessTier.free,
-      backgroundSoundId: 'releaf-atmosphere-01',
+      backgroundSoundId: 'deep-drift',
       backgroundSoundVolume: 0.12,
       steps: [
         MeditationStep(
@@ -365,7 +365,7 @@ class MeditationCatalog {
       durationSeconds: 360,
       category: MeditationCategory.focus,
       accessTier: MeditationAccessTier.premium,
-      backgroundSoundId: 'releaf-atmosphere-01',
+      backgroundSoundId: 'deep-drift',
       backgroundSoundVolume: 0.12,
       steps: [
         MeditationStep(
@@ -407,7 +407,7 @@ class MeditationCatalog {
       durationSeconds: 300,
       category: MeditationCategory.body,
       accessTier: MeditationAccessTier.premium,
-      backgroundSoundId: 'releaf-atmosphere-01',
+      backgroundSoundId: 'deep-drift',
       backgroundSoundVolume: 0.16,
       steps: [
         MeditationStep(
@@ -444,7 +444,7 @@ class MeditationCatalog {
       durationSeconds: 240,
       category: MeditationCategory.body,
       accessTier: MeditationAccessTier.premium,
-      backgroundSoundId: 'releaf-atmosphere-01',
+      backgroundSoundId: 'deep-drift',
       backgroundSoundVolume: 0.14,
       steps: [
         MeditationStep(
@@ -478,7 +478,7 @@ class MeditationCatalog {
       durationSeconds: 300,
       category: MeditationCategory.mind,
       accessTier: MeditationAccessTier.premium,
-      backgroundSoundId: 'releaf-atmosphere-02',
+      backgroundSoundId: 'deep-drift',
       backgroundSoundVolume: 0.16,
       steps: [
         MeditationStep(
@@ -518,7 +518,7 @@ class MeditationCatalog {
       durationSeconds: 240,
       category: MeditationCategory.everyday,
       accessTier: MeditationAccessTier.free,
-      backgroundSoundId: 'releaf-atmosphere-01',
+      backgroundSoundId: 'deep-drift',
       backgroundSoundVolume: 0.13,
       steps: [
         MeditationStep(
@@ -566,7 +566,7 @@ class MeditationCatalog {
       durationSeconds: 180,
       category: MeditationCategory.everyday,
       accessTier: MeditationAccessTier.premium,
-      backgroundSoundId: 'releaf-atmosphere-01',
+      backgroundSoundId: 'deep-drift',
       backgroundSoundVolume: 0.12,
       steps: [
         MeditationStep(
@@ -594,7 +594,7 @@ class MeditationCatalog {
       durationSeconds: 600,
       category: MeditationCategory.focus,
       accessTier: MeditationAccessTier.premium,
-      backgroundSoundId: 'releaf-atmosphere-01',
+      backgroundSoundId: 'deep-drift',
       backgroundSoundVolume: 0.10,
       seriesId: deeperPracticeSeriesId,
       seriesOrder: 1,
@@ -644,7 +644,7 @@ class MeditationCatalog {
       durationSeconds: 480,
       category: MeditationCategory.anxiety,
       accessTier: MeditationAccessTier.premium,
-      backgroundSoundId: 'releaf-atmosphere-02',
+      backgroundSoundId: 'deep-drift',
       backgroundSoundVolume: 0.12,
       seriesId: deeperPracticeSeriesId,
       seriesOrder: 2,
@@ -694,7 +694,7 @@ class MeditationCatalog {
       durationSeconds: 600,
       category: MeditationCategory.body,
       accessTier: MeditationAccessTier.premium,
-      backgroundSoundId: 'releaf-atmosphere-01',
+      backgroundSoundId: 'deep-drift',
       backgroundSoundVolume: 0.13,
       seriesId: deeperPracticeSeriesId,
       seriesOrder: 3,
@@ -750,7 +750,7 @@ class MeditationCatalog {
       durationSeconds: 600,
       category: MeditationCategory.mind,
       accessTier: MeditationAccessTier.premium,
-      backgroundSoundId: 'releaf-atmosphere-02',
+      backgroundSoundId: 'deep-drift',
       backgroundSoundVolume: 0.11,
       seriesId: deeperPracticeSeriesId,
       seriesOrder: 4,
@@ -924,7 +924,7 @@ class MeditationCatalog {
       durationSeconds: 600,
       category: MeditationCategory.mind,
       accessTier: MeditationAccessTier.premium,
-      backgroundSoundId: 'releaf-atmosphere-02',
+      backgroundSoundId: 'deep-drift',
       backgroundSoundVolume: 0.10,
       seriesId: sleepSeriesId,
       seriesOrder: 3,
@@ -974,7 +974,7 @@ class MeditationCatalog {
       durationSeconds: 300,
       category: MeditationCategory.unguided,
       accessTier: MeditationAccessTier.free,
-      backgroundSoundId: 'releaf-atmosphere-02',
+      backgroundSoundId: 'deep-drift',
       backgroundSoundVolume: 0.18,
       unguided: true,
       steps: [
@@ -992,7 +992,7 @@ class MeditationCatalog {
       durationSeconds: 600,
       category: MeditationCategory.unguided,
       accessTier: MeditationAccessTier.premium,
-      backgroundSoundId: 'releaf-atmosphere-02',
+      backgroundSoundId: 'deep-drift',
       backgroundSoundVolume: 0.18,
       unguided: true,
       steps: [
