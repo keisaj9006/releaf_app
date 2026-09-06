@@ -40,6 +40,7 @@ flutter:
     - assets/icon/app_icon.png
     - assets/ui/
     - assets/art/meditation/
+    - assets/narration/releaf-guide/
     - assets/games/labyrinth/level1.png
     - assets/games/labyrinth/level1_mask.png
     - assets/games/labyrinth/level2.png
