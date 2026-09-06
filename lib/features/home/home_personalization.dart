@@ -61,3 +61,28 @@ final homeFocusProvider =
   final preferences = ref.watch(sharedPreferencesProvider);
   return HomeFocusController(preferences);
 });
+
+
+class HomeIntroController extends StateNotifier<bool> {
+  HomeIntroController(this._preferences)
+      : super(
+          !(_preferences.getBool(_storageKey) ?? false) &&
+              _preferences.getString(HomeFocusController._storageKey) == null,
+        );
+
+  static const _storageKey = 'releaf.home.intro.dismissed.v1';
+
+  final SharedPreferences _preferences;
+
+  Future<void> dismiss() async {
+    if (!state) return;
+    state = false;
+    await _preferences.setBool(_storageKey, true);
+  }
+}
+
+final homeIntroProvider =
+    StateNotifierProvider<HomeIntroController, bool>((ref) {
+  final preferences = ref.watch(sharedPreferencesProvider);
+  return HomeIntroController(preferences);
+});

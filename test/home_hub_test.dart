@@ -54,6 +54,22 @@ void main() {
     expect(find.text('Habit'), findsNothing);
   });
 
+  testWidgets('Home first-use welcome is optional and persists dismissal', (
+    WidgetTester tester,
+  ) async {
+    final preferences = await _preferences();
+    await _pumpHome(tester, preferences: preferences);
+
+    expect(find.byKey(const Key('home-welcome-card')), findsOneWidget);
+    expect(find.text('WELCOME TO RELEAF'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('home-welcome-dismiss')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('home-welcome-card')), findsNothing);
+    expect(preferences.getBool('releaf.home.intro.dismissed.v1'), isTrue);
+  });
+
   testWidgets('Home recommendation reacts to the selected need', (
     WidgetTester tester,
   ) async {

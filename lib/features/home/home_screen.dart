@@ -34,6 +34,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final soundState = ref.watch(soundPlayerControllerProvider);
     final soundCatalog = ref.watch(soundCatalogProvider);
     final focus = ref.watch(homeFocusProvider);
+    final showIntro = ref.watch(homeIntroProvider);
     final hasPremiumEntitlement =
         ref.watch(subscriptionControllerProvider).isPremium;
     final currentSound = soundCatalog.getById(soundState.currentTrackId ?? '');
@@ -80,6 +81,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               _HomeHeader(hour: now.hour),
+                              if (showIntro) ...[
+                                const SizedBox(height: ReleafSpacing.xl),
+                                _HomeWelcomeCard(
+                                  onPersonalize: () => _showHomeFocusSheet(
+                                    context,
+                                    ref,
+                                    focus,
+                                  ),
+                                  onDismiss: () {
+                                    ref
+                                        .read(homeIntroProvider.notifier)
+                                        .dismiss();
+                                  },
+                                ),
+                              ],
                               const SizedBox(height: ReleafSpacing.xxl),
                               const ReleafSectionHeading(
                                 title: 'Right Now',
@@ -174,6 +190,131 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _HomeWelcomeCard extends StatelessWidget {
+  const _HomeWelcomeCard({
+    required this.onPersonalize,
+    required this.onDismiss,
+  });
+
+  final VoidCallback onPersonalize;
+  final VoidCallback onDismiss;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      key: const Key('home-welcome-card'),
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(ReleafRadii.extraLarge),
+        border: Border.all(
+          color: ReleafColors.sage.withValues(alpha: 0.22),
+        ),
+        boxShadow: const [
+          BoxShadow(
+            color: ReleafColors.glowSage,
+            blurRadius: 28,
+            spreadRadius: 0,
+          ),
+        ],
+      ),
+      child: Stack(
+        children: [
+          const Positioned.fill(
+            child: ReleafArtwork(
+              variant: ReleafArtworkVariant.lifeUpgrade,
+            ),
+          ),
+          Positioned.fill(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    ReleafColors.backgroundRaised.withValues(alpha: 0.90),
+                    ReleafColors.background.withValues(alpha: 0.84),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(ReleafSpacing.lg),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final compact = constraints.maxWidth < 360;
+
+                final actions = [
+                  FilledButton.icon(
+                    key: const Key('home-welcome-personalize'),
+                    onPressed: onPersonalize,
+                    icon: const Icon(Icons.tune_rounded, size: 18),
+                    label: const Text('Choose my focus'),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: ReleafColors.sage,
+                      foregroundColor: ReleafColors.background,
+                    ),
+                  ),
+                  TextButton(
+                    key: const Key('home-welcome-dismiss'),
+                    onPressed: onDismiss,
+                    child: const Text('Not now'),
+                  ),
+                ];
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'WELCOME TO RELEAF',
+                      style: ReleafTypography.eyebrow.copyWith(
+                        color: ReleafColors.sage,
+                        letterSpacing: 1.7,
+                      ),
+                    ),
+                    const SizedBox(height: 7),
+                    Text(
+                      'Make the next suggestion feel more like yours.',
+                      style: ReleafTypography.sectionTitle.copyWith(
+                        fontSize: compact ? 21 : 24,
+                      ),
+                    ),
+                    const SizedBox(height: 7),
+                    Text(
+                      'Choose one focus and Releaf will tune default recommendations around it. You can still choose something different at any time.',
+                      style: ReleafTypography.body.copyWith(
+                        color: ReleafColors.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: ReleafSpacing.md),
+                    if (compact)
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          actions[0],
+                          const SizedBox(height: ReleafSpacing.xs),
+                          actions[1],
+                        ],
+                      )
+                    else
+                      Row(
+                        children: [
+                          actions[0],
+                          const SizedBox(width: ReleafSpacing.xs),
+                          actions[1],
+                        ],
+                      ),
+                  ],
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -795,6 +936,9 @@ Future<void> _showHomeFocusSheet(
                     await ref
                         .read(homeFocusProvider.notifier)
                         .setFocus(focus);
+                    await ref
+                        .read(homeIntroProvider.notifier)
+                        .dismiss();
                     if (sheetContext.mounted) {
                       Navigator.of(sheetContext).pop();
                     }
