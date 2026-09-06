@@ -66,6 +66,12 @@ class _FakeMeditationAudioDriver implements MeditationAudioDriver {
   }
 
   @override
+  Future<void> playAsset(String assetPath) async {
+    playAssetCalls += 1;
+    lastNarrationAssetPath = assetPath;
+  }
+
+  @override
   Future<void> setVolume(double volume) async {
     volumeCalls += 1;
     lastVolume = volume;
@@ -86,8 +92,10 @@ class _FakeMeditationVoiceDriver implements MeditationVoiceDriver {
   int volumeCalls = 0;
   int stopCalls = 0;
   int disposeCalls = 0;
+  int playAssetCalls = 0;
   double? lastVolume;
   String? lastSpokenText;
+  String? lastNarrationAssetPath;
 
   @override
   Future<void> configure({required double volume}) async {
@@ -329,6 +337,28 @@ void main() {
         reason: '$id should have voice-first narration for every step',
       );
     }
+  });
+
+  test('Recorded meditation narration is preferred over TTS', () async {
+    SharedPreferences.setMockInitialValues({});
+    final preferences = await SharedPreferences.getInstance();
+    final driver = _FakeMeditationVoiceDriver();
+    final controller = MeditationVoiceController(preferences, driver);
+
+    await controller.speakGuidance(
+      'Fallback guidance.',
+      narrationAssetPath: 'narration/releaf-guide/sample.mp3',
+    );
+
+    expect(driver.configureCalls, 1);
+    expect(driver.playAssetCalls, 1);
+    expect(
+      driver.lastNarrationAssetPath,
+      'narration/releaf-guide/sample.mp3',
+    );
+    expect(driver.speakCalls, 0);
+
+    controller.dispose();
   });
 
   test('Meditation voice preferences persist independently', () async {
