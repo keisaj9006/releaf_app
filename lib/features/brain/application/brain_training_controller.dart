@@ -17,6 +17,7 @@ const progressiveBrainGameIds = <String>{
   'mental_rotation',
   'trail_switch',
   'tower_plan',
+  'symbol_code',
 };
 
 const maxBrainTrainingLevel = 12;
