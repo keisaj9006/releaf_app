@@ -56,10 +56,14 @@ class _PasswordResetScreenState extends ConsumerState<PasswordResetScreen> {
     try {
       await ref.read(accountRecoveryServiceProvider).updatePassword(password);
 
-      final user = Supabase.instance.client.auth.currentUser;
-      if (user != null) {
-        await ref.read(revenueCatServiceProvider).identifyUser(user.id);
-        await ref.read(subscriptionControllerProvider.notifier).refresh();
+      try {
+        final user = Supabase.instance.client.auth.currentUser;
+        if (user != null) {
+          await ref.read(revenueCatServiceProvider).identifyUser(user.id);
+          await ref.read(subscriptionControllerProvider.notifier).refresh();
+        }
+      } catch (_) {
+        // Password recovery is complete even if optional entitlement sync fails.
       }
 
       if (!mounted) return;
