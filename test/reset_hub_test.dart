@@ -183,6 +183,22 @@ void main() {
     expect(find.byKey(const Key('reset-session-preview-sheet')), findsOneWidget);
     expect(find.text('WHAT TO EXPECT'), findsOneWidget);
     expect(find.text('SESSION SETUP'), findsOneWidget);
+    expect(
+      find.byKey(const Key('reset-preview-voice-toggle')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const Key('reset-preview-voice-volume')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const Key('reset-preview-ambient-toggle')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const Key('reset-preview-ambient-volume')),
+      findsOneWidget,
+    );
     expect(find.byKey(const Key('reset-preview-start')), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('reset-preview-close')));
@@ -237,6 +253,53 @@ void main() {
       find.byKey(const Key('reset-active-session-guidance-hidden')),
       findsOneWidget,
     );
+  });
+
+  testWidgets('Reset audio controls remain available during a session', (
+    WidgetTester tester,
+  ) async {
+    await _pumpResetHub(tester, preferences: await _preferences());
+
+    await tester.ensureVisible(find.byKey(const Key('reset-session-rail')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('reset-session-60s-grounding')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    await tester.tap(find.byKey(const Key('reset-preview-start')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(
+      find.byKey(const Key('reset-active-audio-button')),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.byKey(const Key('reset-active-audio-button')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(
+      find.byKey(const Key('reset-active-audio-settings')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const Key('reset-active-voice-toggle')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const Key('reset-active-voice-volume')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const Key('reset-active-ambient-toggle')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const Key('reset-active-ambient-volume')),
+      findsOneWidget,
+    );
+    expect(find.text('Deep Drift'), findsOneWidget);
   });
 
   testWidgets('Reset header Emergency action opens the free session', (
