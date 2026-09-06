@@ -52,6 +52,8 @@ void main() {
     expect(first.sourceUrl, startsWith('https://'));
     expect(first.evidenceLabel, isNotEmpty);
     expect(first.evidenceNote, isNotEmpty);
+    expect(first.teaser, isNotEmpty);
+    expect(first.teaser, isNot(first.headline));
   });
 
 
@@ -82,15 +84,17 @@ void main() {
 
     expect(find.text('DAILY INSIGHT'), findsOneWidget);
     expect(find.byKey(const Key('home-daily-insight')), findsOneWidget);
-    expect(find.text('NEW TODAY'), findsOneWidget);
-    expect(find.text('Read why this matters'), findsOneWidget);
-    expect(find.text(insight.headline), findsOneWidget);
+    expect(find.text('DID YOU KNOW?'), findsOneWidget);
+    expect(find.text('Reveal today’s insight'), findsOneWidget);
+    expect(find.text(insight.teaser), findsOneWidget);
+    expect(find.text(insight.headline), findsNothing);
 
     await tester.ensureVisible(find.byKey(const Key('home-daily-insight')));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('home-daily-insight-info')));
     await tester.pumpAndSettle();
 
+    expect(find.text(insight.headline), findsOneWidget);
     expect(find.text('EVIDENCE'), findsOneWidget);
     expect(find.text(insight.evidenceLabel), findsWidgets);
     expect(find.text('SOURCE'), findsOneWidget);
