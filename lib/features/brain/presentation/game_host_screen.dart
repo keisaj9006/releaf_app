@@ -49,7 +49,10 @@ Widget buildBrainGame({
   int trainingLevel = 1,
 }) {
   return switch (gameId) {
-    'memory' => MemoryGameScreen(onFinish: onFinish),
+    'memory' => MemoryGameScreen(
+        onFinish: onFinish,
+        trainingLevel: trainingLevel,
+      ),
     'labyrinth' => LabirynthGameScreen(
         onFinish: onFinish,
         trainingLevel: trainingLevel,
