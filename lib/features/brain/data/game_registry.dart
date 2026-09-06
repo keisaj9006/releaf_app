@@ -88,6 +88,13 @@ const brainGames = <BrainGameMeta>[
     hasDifficultyLevels: true,
   ),
   BrainGameMeta(
+    id: 'trail_switch',
+    title: 'Trail Switch',
+    icon: Icons.alt_route_rounded,
+    group: BrainGameGroup.attention,
+    hasDifficultyLevels: true,
+  ),
+  BrainGameMeta(
     id: 'color_conflict',
     title: 'Color Conflict',
     icon: Icons.palette_outlined,
