@@ -139,7 +139,39 @@ class FlutterMeditationVoiceDriver implements MeditationVoiceDriver {
   }
 
   List<String> _meditationSentences(String text) {
-    final matches = RegExp(r'[^.!?]+[.!?]+|[^.!?]+
+    final matches = RegExp(r'[^.!?]+[.!?]+|[^.!?]+\$').allMatches(text);
+    return matches
+        .map((match) => match.group(0)?.trim() ?? '')
+        .where((sentence) => sentence.isNotEmpty)
+        .toList(growable: false);
+  }
+
+  Duration _pauseAfter(String sentence) {
+    if (sentence.endsWith('?') || sentence.endsWith('!')) {
+      return const Duration(milliseconds: 800);
+    }
+    return const Duration(milliseconds: 620);
+  }
+
+  @override
+  Future<void> speak(String text) async {
+    if (text.trim().isEmpty) return;
+
+    final generation = ++_speechGeneration;
+    await _tts.stop();
+    final sentences = _meditationSentences(text);
+
+    for (var index = 0; index < sentences.length; index++) {
+      if (generation != _speechGeneration) return;
+      await _tts.speak(sentences[index], focus: false);
+      if (generation != _speechGeneration) return;
+
+      if (index < sentences.length - 1) {
+        await Future<void>.delayed(_pauseAfter(sentences[index]));
+      }
+    }
+  }
+
   @override
   Future<void> setVolume(double volume) async {
     await _tts.setVolume(volume.clamp(0.0, 1.0).toDouble());
