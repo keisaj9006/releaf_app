@@ -12,7 +12,12 @@ import '../../sound/data/sound_catalog.dart';
 import '../../sound/domain/sound_content.dart';
 
 class SleepScreen extends ConsumerWidget {
-  const SleepScreen({super.key});
+  const SleepScreen({
+    super.key,
+    this.showBack = false,
+  });
+
+  final bool showBack;
 
   static const _sleepToneIds = <String>[
     'deep-drift',
@@ -96,6 +101,21 @@ class SleepScreen extends ConsumerWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+                              if (showBack) ...[
+                                Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: IconButton(
+                                    key: const Key('sleep-back'),
+                                    tooltip: 'Back',
+                                    onPressed: () =>
+                                        Navigator.of(context).maybePop(),
+                                    icon: const Icon(
+                                      Icons.arrow_back_rounded,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: ReleafSpacing.sm),
+                              ],
                               const _Header(),
                               const SizedBox(height: ReleafSpacing.xl),
                               if (featured != null)
