@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'account_recovery_service.dart';
+
 abstract class AccountEmailService {
   Future<void> resendSignupConfirmation(String email);
 }
@@ -15,6 +17,7 @@ class SupabaseAccountEmailService implements AccountEmailService {
     await _client.auth.resend(
       type: OtpType.signup,
       email: email.trim(),
+      emailRedirectTo: releafAuthCallbackUrl,
     );
   }
 }
