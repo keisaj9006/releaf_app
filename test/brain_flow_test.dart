@@ -427,6 +427,13 @@ void main() {
     expect(find.text('L6'), findsOneWidget);
     expect(find.text('Ready'), findsOneWidget);
     expect(find.byKey(const Key('labyrinth-board')), findsOneWidget);
+    expect(find.text('ENTRY'), findsOneWidget);
+    expect(find.text('Left'), findsOneWidget);
+    expect(find.text('ROUTE'), findsOneWidget);
+    expect(
+      find.textContaining('Start at the left edge and reach the centre.'),
+      findsOneWidget,
+    );
     expect(find.textContaining('Drag anywhere'), findsOneWidget);
 
     final board = find.byKey(const Key('labyrinth-board'));
