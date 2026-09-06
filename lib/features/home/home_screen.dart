@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/providers.dart';
 import '../../core/session/session_manager.dart';
 import '../../routing/app_routes.dart';
 import '../../theme/app_theme.dart';
@@ -12,6 +13,9 @@ import '../../theme/widgets/releaf_components.dart';
 import '../progress/data/leaves_repository.dart';
 import '../sound/application/sound_player_controller.dart';
 import '../sound/data/sound_catalog.dart';
+import 'home_personalization.dart';
+
+final homeNowProvider = Provider<DateTime>((ref) => DateTime.now());
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -29,14 +33,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final activeSession = ref.watch(sessionManagerProvider);
     final soundState = ref.watch(soundPlayerControllerProvider);
     final soundCatalog = ref.watch(soundCatalogProvider);
+    final focus = ref.watch(homeFocusProvider);
+    final hasPremiumEntitlement =
+        ref.watch(subscriptionControllerProvider).isPremium;
     final currentSound = soundCatalog.getById(soundState.currentTrackId ?? '');
 
-    final now = DateTime.now();
+    final now = ref.watch(homeNowProvider);
     final recommendation = _recommendationFor(
       need: _selectedNeed,
+      focus: focus,
       hour: now.hour,
       reliefDone: leaves.reliefDone,
       brainDone: leaves.brainDone,
+      isPremium: hasPremiumEntitlement,
     );
 
     final completedToday = [
@@ -92,6 +101,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 recommendation: recommendation,
                                 onPressed: () =>
                                     context.push(recommendation.route),
+                              ),
+                              const SizedBox(height: ReleafSpacing.sm),
+                              _HomeFocusStrip(
+                                focus: focus,
+                                onPressed: () => _showHomeFocusSheet(
+                                  context,
+                                  ref,
+                                  focus,
+                                ),
                               ),
                               if (activeSession.hasActive ||
                                   currentSound != null) ...[
@@ -444,9 +462,11 @@ class _HomeRecommendation {
 
 _HomeRecommendation _recommendationFor({
   required _HomeNeed? need,
+  required HomeFocus? focus,
   required int hour,
   required bool reliefDone,
   required bool brainDone,
+  required bool isPremium,
 }) {
   if (need != null) {
     return switch (need) {
@@ -499,6 +519,21 @@ _HomeRecommendation _recommendationFor({
   }
 
   if (hour >= 20 || hour < 5) {
+    if (!isPremium) {
+      return _HomeRecommendation(
+        eyebrow: 'SUGGESTED NOW',
+        title: 'Let the Day Go',
+        description:
+            'A free night practice for setting down unfinished tasks and moving into a quieter part of the day.',
+        reason: 'Suggested from the time of day.',
+        meta: '6 min • Free • Sleep meditation',
+        route: AppRoutes.meditationSessionFor('let-the-day-go-6'),
+        artwork: ReleafArtworkVariant.ambient,
+        icon: Icons.bedtime_outlined,
+        warm: true,
+      );
+    }
+
     return const _HomeRecommendation(
       eyebrow: 'SUGGESTED NOW',
       title: 'Evening Unwind',
@@ -507,6 +542,78 @@ _HomeRecommendation _recommendationFor({
       reason: 'Suggested from the time of day.',
       meta: 'Sleep • 8 min protocol',
       route: AppRoutes.sleep,
+      artwork: ReleafArtworkVariant.ambient,
+      icon: Icons.bedtime_outlined,
+      warm: true,
+    );
+  }
+
+  if (focus == HomeFocus.steady && !reliefDone) {
+    return const _HomeRecommendation(
+      eyebrow: 'SUGGESTED FOR YOUR FOCUS',
+      title: 'Back to the Room',
+      description:
+          'A short sensory reset before you decide what else you need.',
+      reason: 'Matches your focus: Feel steadier.',
+      meta: '3 min • Free • Grounding',
+      route: '/relief/session/back-to-room',
+      artwork: ReleafArtworkVariant.grounding,
+      icon: Icons.explore_outlined,
+    );
+  }
+
+  if (focus == HomeFocus.focus && !brainDone) {
+    return const _HomeRecommendation(
+      eyebrow: 'SUGGESTED FOR YOUR FOCUS',
+      title: 'Daily Brain Workout',
+      description:
+          'Bring a short cognitive training set forward while it still fits your day.',
+      reason: 'Matches your focus: Focus better.',
+      meta: 'Memory • Spatial • Calculation',
+      route: AppRoutes.brain,
+      artwork: ReleafArtworkVariant.lifeUpgrade,
+      icon: Icons.extension_outlined,
+    );
+  }
+
+  if (focus == HomeFocus.mindfulness) {
+    return _HomeRecommendation(
+      eyebrow: 'SUGGESTED FOR YOUR FOCUS',
+      title: 'Mindfulness Basics',
+      description:
+          'Two quiet minutes of noticing and returning, without trying to empty the mind.',
+      reason: 'Matches your focus: Build mindfulness.',
+      meta: '2 min • Free • Meditation',
+      route: AppRoutes.meditationSessionFor('mindfulness-basics-2'),
+      artwork: ReleafArtworkVariant.focus,
+      icon: Icons.spa_outlined,
+    );
+  }
+
+  if (focus == HomeFocus.sleep && hour >= 17) {
+    if (isPremium) {
+      return const _HomeRecommendation(
+        eyebrow: 'SUGGESTED FOR YOUR FOCUS',
+        title: 'Tonight',
+        description:
+            'Move into the full Sleep space with guided wind-down, meditation and long-form sound.',
+        reason: 'Matches your focus: Sleep easier.',
+        meta: 'Sleep • Guided • Sound',
+        route: AppRoutes.sleep,
+        artwork: ReleafArtworkVariant.ambient,
+        icon: Icons.bedtime_outlined,
+        warm: true,
+      );
+    }
+
+    return _HomeRecommendation(
+      eyebrow: 'SUGGESTED FOR YOUR FOCUS',
+      title: 'Let the Day Go',
+      description:
+          'Use the free night practice before choosing anything longer.',
+      reason: 'Matches your focus: Sleep easier.',
+      meta: '6 min • Free • Sleep meditation',
+      route: AppRoutes.meditationSessionFor('let-the-day-go-6'),
       artwork: ReleafArtworkVariant.ambient,
       icon: Icons.bedtime_outlined,
       warm: true,
@@ -541,17 +648,266 @@ _HomeRecommendation _recommendationFor({
     );
   }
 
-  return const _HomeRecommendation(
+  return _HomeRecommendation(
     eyebrow: 'SUGGESTED NOW',
     title: 'Mindfulness Basics',
     description:
         'Two quiet minutes of noticing and returning, without trying to empty the mind.',
     reason: 'Reset and Brain are already complete today.',
     meta: '2 min • Free • Meditation',
-    route: '/meditate/mindfulness-basics-2',
+    route: AppRoutes.meditationSessionFor('mindfulness-basics-2'),
     artwork: ReleafArtworkVariant.focus,
     icon: Icons.spa_outlined,
   );
+}
+
+class _HomeFocusStrip extends StatelessWidget {
+  const _HomeFocusStrip({
+    required this.focus,
+    required this.onPressed,
+  });
+
+  final HomeFocus? focus;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      key: const Key('home-focus-strip'),
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(ReleafRadii.medium),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(ReleafRadii.medium),
+        onTap: onPressed,
+        child: Ink(
+          padding: const EdgeInsets.symmetric(
+            horizontal: ReleafSpacing.md,
+            vertical: 12,
+          ),
+          decoration: BoxDecoration(
+            color: ReleafColors.surfaceSoft.withValues(alpha: 0.56),
+            borderRadius: BorderRadius.circular(ReleafRadii.medium),
+            border: Border.all(color: ReleafColors.borderSoft),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(
+                  color: ReleafColors.sage.withValues(alpha: 0.10),
+                  shape: BoxShape.circle,
+                ),
+                alignment: Alignment.center,
+                child: const Icon(
+                  Icons.tune_rounded,
+                  size: 17,
+                  color: ReleafColors.sage,
+                ),
+              ),
+              const SizedBox(width: ReleafSpacing.sm),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      focus == null ? 'MAKE RELEAF YOURS' : 'YOUR FOCUS',
+                      style: ReleafTypography.eyebrow.copyWith(
+                        color: ReleafColors.sage,
+                        fontSize: 9,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      focus?.label ?? 'Personalize recommendations',
+                      style: ReleafTypography.meta.copyWith(
+                        color: ReleafColors.textPrimary,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: ReleafSpacing.sm),
+              Icon(
+                focus == null ? Icons.arrow_forward_rounded : Icons.edit_outlined,
+                size: 18,
+                color: ReleafColors.textSecondary,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+Future<void> _showHomeFocusSheet(
+  BuildContext context,
+  WidgetRef ref,
+  HomeFocus? selected,
+) async {
+  await showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: const Color(0xFF0D1512),
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+    ),
+    builder: (sheetContext) {
+      return SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            ReleafSpacing.screen,
+            ReleafSpacing.xl,
+            ReleafSpacing.screen,
+            ReleafSpacing.xl,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'YOUR FOCUS',
+                style: ReleafTypography.eyebrow.copyWith(
+                  color: ReleafColors.sage,
+                ),
+              ),
+              const SizedBox(height: ReleafSpacing.xs),
+              Text(
+                'What should Releaf help you with most?',
+                style: ReleafTypography.sectionTitle.copyWith(fontSize: 24),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'This tunes default suggestions. Your “Right Now” choice always takes priority.',
+                style: ReleafTypography.body.copyWith(
+                  color: ReleafColors.textSecondary,
+                ),
+              ),
+              const SizedBox(height: ReleafSpacing.lg),
+              for (final focus in HomeFocus.values) ...[
+                _HomeFocusOption(
+                  focus: focus,
+                  selected: focus == selected,
+                  onPressed: () async {
+                    await ref
+                        .read(homeFocusProvider.notifier)
+                        .setFocus(focus);
+                    if (sheetContext.mounted) {
+                      Navigator.of(sheetContext).pop();
+                    }
+                  },
+                ),
+                const SizedBox(height: ReleafSpacing.xs),
+              ],
+              if (selected != null) ...[
+                const SizedBox(height: ReleafSpacing.sm),
+                TextButton(
+                  onPressed: () async {
+                    await ref.read(homeFocusProvider.notifier).setFocus(null);
+                    if (sheetContext.mounted) {
+                      Navigator.of(sheetContext).pop();
+                    }
+                  },
+                  child: const Text('Use Releaf without a saved focus'),
+                ),
+              ],
+            ],
+          ),
+        ),
+      );
+    },
+  );
+}
+
+class _HomeFocusOption extends StatelessWidget {
+  const _HomeFocusOption({
+    required this.focus,
+    required this.selected,
+    required this.onPressed,
+  });
+
+  final HomeFocus focus;
+  final bool selected;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final icon = switch (focus) {
+      HomeFocus.steady => Icons.waves_rounded,
+      HomeFocus.focus => Icons.center_focus_strong_rounded,
+      HomeFocus.mindfulness => Icons.spa_outlined,
+      HomeFocus.sleep => Icons.bedtime_outlined,
+    };
+
+    return Material(
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(ReleafRadii.medium),
+      child: InkWell(
+        key: Key('home-focus-${focus.name}'),
+        onTap: onPressed,
+        borderRadius: BorderRadius.circular(ReleafRadii.medium),
+        child: Ink(
+          padding: const EdgeInsets.all(ReleafSpacing.md),
+          decoration: BoxDecoration(
+            color: selected
+                ? ReleafColors.sage.withValues(alpha: 0.10)
+                : ReleafColors.surfaceSoft.withValues(alpha: 0.72),
+            borderRadius: BorderRadius.circular(ReleafRadii.medium),
+            border: Border.all(
+              color: selected
+                  ? ReleafColors.sage.withValues(alpha: 0.42)
+                  : ReleafColors.borderSoft,
+            ),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                icon,
+                size: 20,
+                color: selected
+                    ? ReleafColors.sage
+                    : ReleafColors.textSecondary,
+              ),
+              const SizedBox(width: ReleafSpacing.sm),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      focus.label,
+                      style: ReleafTypography.meta.copyWith(
+                        color: ReleafColors.textPrimary,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      focus.description,
+                      style: ReleafTypography.meta.copyWith(
+                        color: ReleafColors.textSecondary,
+                        height: 1.35,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (selected) ...[
+                const SizedBox(width: ReleafSpacing.sm),
+                const Icon(
+                  Icons.check_circle_rounded,
+                  size: 19,
+                  color: ReleafColors.sage,
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class _RecommendationHero extends StatelessWidget {
