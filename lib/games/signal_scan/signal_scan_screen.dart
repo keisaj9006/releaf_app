@@ -21,16 +21,26 @@ class SignalScanScreen extends StatefulWidget {
 class _SignalScanScreenState extends State<SignalScanScreen> {
   static const _accent = Color(0xFF69C1B8);
 
-  BrainDifficulty _difficulty = BrainDifficulty.easy;
+  BrainDifficulty _difficulty = BrainDifficulty.medium;
   int _round = 0;
   int _score = 0;
   int? _wrongIndex;
   bool _finished = false;
 
-  int get _gridSize => switch (_difficulty) {
-        BrainDifficulty.easy => 4,
-        BrainDifficulty.medium => 5,
-        BrainDifficulty.hard => 6,
+  BrainDifficulty get _effectiveDifficulty {
+    if (_difficulty == BrainDifficulty.easy && _round >= 4) {
+      return BrainDifficulty.medium;
+    }
+    if (_difficulty == BrainDifficulty.medium && _round >= 4) {
+      return BrainDifficulty.hard;
+    }
+    return _difficulty;
+  }
+
+  int get _gridSize => switch (_effectiveDifficulty) {
+        BrainDifficulty.easy => _round < 2 ? 4 : 5,
+        BrainDifficulty.medium => _round < 3 ? 5 : 6,
+        BrainDifficulty.hard => _round < 4 ? 6 : 7,
       };
 
   int get _totalRounds => switch (_difficulty) {
@@ -39,13 +49,13 @@ class _SignalScanScreenState extends State<SignalScanScreen> {
         BrainDifficulty.hard => 10,
       };
 
-  int get _multiplier => switch (_difficulty) {
+  int get _multiplier => switch (_effectiveDifficulty) {
         BrainDifficulty.easy => 1,
         BrainDifficulty.medium => 2,
         BrainDifficulty.hard => 3,
       };
 
-  _ScanSet get _set => switch (_difficulty) {
+  _ScanSet get _set => switch (_effectiveDifficulty) {
         BrainDifficulty.easy => const _ScanSet(
             target: '●',
             distractors: ['○', '■', '▲'],
@@ -62,7 +72,7 @@ class _SignalScanScreenState extends State<SignalScanScreen> {
 
   int get _targetIndex {
     final count = _gridSize * _gridSize;
-    return (_round * 7 + 3 + _difficulty.index * 2) % count;
+    return (_round * 7 + 3 + _effectiveDifficulty.index * 2) % count;
   }
 
   String _symbolFor(int index) {
