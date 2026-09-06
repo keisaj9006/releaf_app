@@ -180,6 +180,18 @@ void main() {
     }
   });
 
+  test('Meditation defaults never use the legacy song-like atmosphere tracks', () {
+    const catalog = MeditationCatalog();
+
+    for (final item in catalog.getAll()) {
+      expect(
+        item.backgroundSoundId,
+        isNot(anyOf('releaf-atmosphere-01', 'releaf-atmosphere-02')),
+        reason: '${item.id} must use a curated non-song meditation sound bed',
+      );
+    }
+  });
+
   test('Meditation catalog exposes a premium Deeper Practice course', () {
     const catalog = MeditationCatalog();
     final course =
