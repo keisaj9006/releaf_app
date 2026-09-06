@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/paywall/presentation/paywall_sheet.dart';
 import '../../../core/providers.dart';
+import '../../../core/subscription/subscription_controller.dart';
 import '../../../routing/app_routes.dart';
 import '../../../theme/app_theme.dart';
 import '../../../theme/releaf_design_tokens.dart';
@@ -337,6 +338,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                               const SizedBox(height: ReleafSpacing.xl),
                               _PremiumAccountCard(
                                 isPremium: subscription.isPremium,
+                                isPreviewBuild: premiumPreviewFromBuild,
                                 isLoading: subscription.isLoading,
                                 onExplore: _openPremium,
                                 onRestore: _restorePurchases,
@@ -467,12 +469,14 @@ class _AccountHeader extends StatelessWidget {
 class _PremiumAccountCard extends StatelessWidget {
   const _PremiumAccountCard({
     required this.isPremium,
+    required this.isPreviewBuild,
     required this.isLoading,
     required this.onExplore,
     required this.onRestore,
   });
 
   final bool isPremium;
+  final bool isPreviewBuild;
   final bool isLoading;
   final VoidCallback onExplore;
   final VoidCallback onRestore;
@@ -514,7 +518,11 @@ class _PremiumAccountCard extends StatelessWidget {
               const SizedBox(width: ReleafSpacing.sm),
               Expanded(
                 child: Text(
-                  isPremium ? 'PREMIUM ACTIVE' : 'RELEAF PREMIUM',
+                  isPreviewBuild
+                      ? 'PREMIUM PREVIEW'
+                      : isPremium
+                          ? 'PREMIUM ACTIVE'
+                          : 'RELEAF PREMIUM',
                   style: ReleafTypography.eyebrow.copyWith(
                     color: ReleafColors.premium,
                   ),
@@ -524,16 +532,20 @@ class _PremiumAccountCard extends StatelessWidget {
           ),
           const SizedBox(height: ReleafSpacing.sm),
           Text(
-            isPremium
-                ? 'Your deeper practices are unlocked.'
-                : 'Preview what Premium unlocks.',
+            isPreviewBuild
+                ? 'QA unlock is active.'
+                : isPremium
+                    ? 'Your deeper practices are unlocked.'
+                    : 'Preview what Premium unlocks.',
             style: ReleafTypography.sectionTitle.copyWith(fontSize: 22),
           ),
           const SizedBox(height: 5),
           Text(
-            isPremium
-                ? 'Your entitlement applies across supported Premium content.'
-                : 'See deeper Reset protocols and meditation content before deciding.',
+            isPreviewBuild
+                ? 'This debug build unlocks Premium content for owner testing. It does not represent a store purchase.'
+                : isPremium
+                    ? 'Your entitlement applies across supported Premium content.'
+                    : 'See deeper Reset protocols, meditation and Sound content before deciding.',
             style: ReleafTypography.body.copyWith(
               color: ReleafColors.textSecondary,
             ),
