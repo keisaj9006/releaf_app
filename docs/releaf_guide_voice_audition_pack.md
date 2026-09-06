@@ -1,8 +1,10 @@
 # Releaf Guide — Voice Audition Pack
 
-## Goal
+## Status — completed 6 September 2026
 
-Select one female guide voice that can become a recognisable Releaf audio identity across Meditate and Sleep.
+Voice selection is complete. The owner-selected female voice is the locked Releaf Guide baseline; canonical generation speed is **0.75x**.
+
+This document remains as the QA reference for future regenerations or a future voice recast. Releaf Guide applies to Meditate, guided Reset content, and Emergency guidance where enabled. **Sleep remains voice-free.**
 
 ## Core audition prompt
 
@@ -41,13 +43,13 @@ Just return to one simple sensation, and give yourself a little more time.
 - suitable for anxiety settling and evening sessions
 - never whispery
 
-## Direction C — Sleep
+## Direction C — Settling / pre-panic
 - same identity as A
-- lowest energy
-- longest pauses
+- lowest urgency
+- longer pauses
 - softer consonant attack
 - no dramatic emotional colouring
-- designed for eyes-closed listening in bed
+- designed for nervous-system settling without promising an outcome
 
 ## Blind listening scorecard
 
