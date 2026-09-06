@@ -34,6 +34,8 @@ class MeditationCatalog {
               'Let your eyes close if that feels comfortable. Notice the places where your body is '
               'already supported by the surface beneath you. There is nothing to fix right now. Give '
               'yourself a few moments simply to arrive.',
+          narrationAssetPath:
+              'narration/releaf-guide/mindfulness-basics-2/01-arrive.mp3',
           durationSeconds: 30,
         ),
         MeditationStep(
@@ -44,6 +46,8 @@ class MeditationCatalog {
               'Bring your attention to one simple sensation. It might be the feeling of your feet, your '
               'hands, or the breath moving naturally. Stay with that one sensation for a little while, '
               'without trying to make it stronger or calmer.',
+          narrationAssetPath:
+              'narration/releaf-guide/mindfulness-basics-2/02-notice.mp3',
           durationSeconds: 30,
         ),
         MeditationStep(
@@ -54,6 +58,8 @@ class MeditationCatalog {
               'At some point your attention will move away. That is part of the practice, not a '
               'mistake. When you notice that you are thinking, planning, or listening to something '
               'else, gently return to the sensation you chose.',
+          narrationAssetPath:
+              'narration/releaf-guide/mindfulness-basics-2/03-return.mp3',
           durationSeconds: 30,
         ),
         MeditationStep(
@@ -64,6 +70,8 @@ class MeditationCatalog {
               'Now let your attention widen again. Notice the whole body, the sounds around you, and '
               'the room you are in. There is no need to decide whether the meditation went well. Just '
               'notice that you took these two minutes for yourself.',
+          narrationAssetPath:
+              'narration/releaf-guide/mindfulness-basics-2/04-finish.mp3',
           durationSeconds: 30,
         ),
       ],
