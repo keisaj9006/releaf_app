@@ -211,6 +211,19 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
     } catch (_) {}
   }
 
+  bool get _allAudioMuted => !_voiceEnabled && !_ambientEnabled;
+
+  Future<void> _setAllAudioMuted(bool muted) async {
+    if (muted) {
+      await _setVoiceEnabled(false);
+      await _setAmbientEnabled(false);
+      return;
+    }
+
+    await _setVoiceEnabled(true);
+    await _setAmbientEnabled(true);
+  }
+
   Future<void> _stopSessionAudio() async {
     try {
       await _voiceDriver.stop();
@@ -279,6 +292,30 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
                         ],
                       ),
                       const SizedBox(height: ReleafSpacing.lg),
+                      SizedBox(
+                        width: double.infinity,
+                        child: FilledButton.icon(
+                          key: const Key('reset-active-master-mute'),
+                          onPressed: () {
+                            unawaited(_setAllAudioMuted(!_allAudioMuted));
+                            refresh();
+                          },
+                          icon: Icon(
+                            _allAudioMuted
+                                ? Icons.volume_up_rounded
+                                : Icons.volume_off_rounded,
+                          ),
+                          label: Text(
+                            _allAudioMuted ? 'Turn sound on' : 'Mute all sound',
+                          ),
+                          style: FilledButton.styleFrom(
+                            backgroundColor:
+                                ReleafColors.sage.withValues(alpha: 0.14),
+                            foregroundColor: ReleafColors.textPrimary,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: ReleafSpacing.sm),
                       SwitchListTile.adaptive(
                         key: const Key('reset-active-voice-toggle'),
                         contentPadding: EdgeInsets.zero,
