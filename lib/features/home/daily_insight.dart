@@ -61,25 +61,24 @@ class DailyInsightCatalog {
       evidenceNote:
           'This is a population-level recommendation. The safest amount and type of activity can vary with health conditions and physical ability.',
       sourcePublisher: 'World Health Organization',
-      sourceTitle: 'WHO guidelines on physical activity and sedentary behaviour',
+      sourceTitle: 'Physical activity',
       sourceUrl:
-          'https://www.who.int/europe/publications/i/item/9789240014886',
+          'https://www.who.int/news-room/fact-sheets/detail/physical-activity',
     ),
     DailyInsight(
       id: 'walk-11-minutes',
       category: DailyInsightCategory.movement,
       headline:
-          'About 11 minutes of moderate activity a day was linked with a 23% lower risk of early death in a very large analysis.',
+          'About 11 minutes of moderate activity a day was associated with a 23% lower risk of early death in a very large analysis.',
       detail:
-          'Researchers analysing large prospective studies found that about 75 minutes of moderate activity per week — roughly 11 minutes a day — was associated with meaningful reductions in premature mortality risk compared with lower activity levels.',
+          'A dose-response meta-analysis of 94 prospective cohorts covering more than 30 million participants found meaningful risk reductions at activity levels below the full weekly guideline. Roughly 75 minutes of moderate activity per week — about 11 minutes a day — was associated with lower all-cause mortality than very low activity.',
       evidenceLabel: 'Dose-response meta-analysis',
       evidenceNote:
-          'This is an association across large populations, not a guarantee that 11 minutes changes one person’s lifespan by a fixed amount.',
-      sourcePublisher: 'University of Cambridge · MRC Epidemiology Unit',
+          'This is a population-level association, not a guarantee that 11 minutes changes one person’s lifespan by a fixed amount. The study analysed prospective cohorts rather than assigning people to exercise doses.',
+      sourcePublisher: 'British Journal of Sports Medicine · PubMed',
       sourceTitle:
-          'Daily 11 minute brisk walk enough to reduce risk of early death',
-      sourceUrl:
-          'https://www.epi.ims.cam.ac.uk/blog/2023/03/01/daily-11-minute-walk-reduce-risk-early-death/',
+          'Non-occupational physical activity and risk of cardiovascular disease, cancer and mortality outcomes: a dose-response meta-analysis of large prospective studies',
+      sourceUrl: 'https://pubmed.ncbi.nlm.nih.gov/36854652/',
     ),
     DailyInsight(
       id: 'sleep-seven-hours',
@@ -141,19 +140,19 @@ class DailyInsightCatalog {
       sourceUrl: 'https://www.nature.com/articles/s41598-019-44097-3',
     ),
     DailyInsight(
-      id: 'social-isolation-mortality',
+      id: 'social-connection-health',
       category: DailyInsightCategory.connection,
       headline:
-          'Social isolation is associated with a higher risk of premature mortality — connection is a health factor, not just a lifestyle extra.',
+          'Social connection is a health factor: WHO links stronger connection with better health and lower risk of early death.',
       detail:
-          'The U.S. Surgeon General’s evidence summary reports a 29% higher risk of premature mortality associated with social isolation, drawing on meta-analytic research.',
-      evidenceLabel: 'Public-health evidence review',
+          'The WHO Commission on Social Connection reports that loneliness affects about 1 in 6 people globally and is linked with physical and mental-health harms. The report treats social connection as a public-health issue, not simply a lifestyle preference.',
+      evidenceLabel: 'WHO evidence report',
       evidenceNote:
-          'This is a population-level association. It does not mean isolation determines any individual person’s outcome.',
-      sourcePublisher: 'U.S. Surgeon General · HHS',
-      sourceTitle: 'Social Connection',
-      sourceUrl:
-          'https://www.hhs.gov/surgeongeneral/reports-and-publications/connection/index.html',
+          'These are population-level findings. Loneliness and isolation are influenced by many personal and structural factors, and no single social action guarantees a health outcome.',
+      sourcePublisher: 'World Health Organization',
+      sourceTitle:
+          'From loneliness to social connection: charting a path to healthier societies',
+      sourceUrl: 'https://www.who.int/publications/i/item/978240112360',
     ),
     DailyInsight(
       id: 'mindfulness-nuance',
@@ -174,9 +173,9 @@ class DailyInsightCatalog {
       id: 'vitamin-d-depression',
       category: DailyInsightCategory.nutrition,
       headline:
-          'Low vitamin D levels are associated with depression, but trials have not shown that vitamin D supplements prevent or treat depression.',
+          'Low vitamin D levels are associated with depression, but trials have not shown that vitamin D supplements prevent or reliably treat depression.',
       detail:
-          'NIH reviews distinguish an observational link from treatment evidence: people with low vitamin D are more likely to report depression, yet randomized clinical trials have not demonstrated a reliable antidepressant effect from supplementation.',
+          'NIH reviews distinguish an observational link from treatment evidence: people with low vitamin D are more likely to report depression, yet randomized clinical trials have not demonstrated a consistent antidepressant effect from supplementation.',
       evidenceLabel: 'NIH evidence review',
       evidenceNote:
           'Association does not prove causation. Vitamin D still has established roles in bone, muscle and other body functions; this fact is specifically about depression claims.',
@@ -189,16 +188,16 @@ class DailyInsightCatalog {
       id: 'gratitude-evidence',
       category: DailyInsightCategory.mind,
       headline:
-          'Gratitude exercises show small mental-health benefits in trials, but the certainty of some findings is still low.',
+          'Gratitude exercises show small mental-health and wellbeing benefits in trials, but some of the evidence remains low-certainty.',
       detail:
-          'A systematic review and meta-analysis of randomized trials found improvements in several wellbeing outcomes and lower anxiety or depression scores in some analyses. The authors also reported low certainty for parts of the evidence.',
+          'A systematic review and meta-analysis of randomized trials found improvements in several wellbeing outcomes and lower anxiety or depression scores in some analyses. The review also reported low or very low certainty for a number of outcomes and substantial variation between interventions.',
       evidenceLabel: 'Systematic review + meta-analysis',
       evidenceNote:
           'Gratitude can be a low-cost wellbeing practice, but it should not be sold as a treatment or a guarantee of improved mood.',
-      sourcePublisher: 'Peer-reviewed research · PMC',
+      sourcePublisher: 'Peer-reviewed research · PubMed/PMC',
       sourceTitle:
           'The effects of gratitude interventions: a systematic review and meta-analysis',
-      sourceUrl: 'https://pmc.ncbi.nlm.nih.gov/articles/PMC10393216/',
+      sourceUrl: 'https://pubmed.ncbi.nlm.nih.gov/37585888/',
     ),
     DailyInsight(
       id: 'alcohol-sleep',
@@ -230,18 +229,19 @@ class DailyInsightCatalog {
           'https://www.who.int/news-room/fact-sheets/detail/physical-activity',
     ),
     DailyInsight(
-      id: 'daytime-activity-sleep',
-      category: DailyInsightCategory.sleep,
+      id: 'activity-immediate-benefits',
+      category: DailyInsightCategory.movement,
       headline:
-          'Daytime physical activity can support sleep — sleep and movement are not separate health systems.',
+          'One session of moderate-to-vigorous activity can improve sleep quality and reduce short-term feelings of anxiety.',
       detail:
-          'CDC/NIOSH sleep guidance recommends daytime exercise as one of the practical behaviours that can improve sleep. The effect varies by person, intensity and timing.',
-      evidenceLabel: 'Public-health guidance',
+          'CDC guidance separates immediate from long-term exercise benefits. A single session can improve sleep quality and reduce feelings of anxiety, while regular activity adds broader benefits for brain, heart and metabolic health.',
+      evidenceLabel: 'CDC public-health guidance',
       evidenceNote:
-          'Exercise is one sleep-supporting behaviour, not a treatment for every cause of insomnia or fatigue.',
-      sourcePublisher: 'CDC · NIOSH',
-      sourceTitle: 'Improve Sleep: Tips to Improve Your Sleep When Times Are Tough',
-      sourceUrl: 'https://www.cdc.gov/niosh/bulletin/2020/sleep.html',
+          'The size of an immediate effect varies between people and activities. This does not mean exercise replaces treatment for an anxiety disorder or sleep disorder.',
+      sourcePublisher: 'Centers for Disease Control and Prevention',
+      sourceTitle: 'Health Benefits of Physical Activity for Adults',
+      sourceUrl:
+          'https://www.cdc.gov/physical-activity-basics/health-benefits/adults.html',
     ),
   ];
 
