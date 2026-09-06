@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../routing/app_routes.dart';
-import '../../../legacy/screens/memory_game_screen.dart';
+import '../../../games/memory/memory_game_screen.dart';
 import '../../../games/labyrinth/labyrinth_game_screen.dart';
 import '../../../games/math_race/math_race_screen.dart';
 import '../../../games/broken_mirror/broken_mirror_game_screen.dart';
