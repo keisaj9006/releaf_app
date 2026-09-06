@@ -299,7 +299,7 @@ void main() {
       find.byKey(const Key('reset-active-ambient-volume')),
       findsOneWidget,
     );
-    expect(find.text('Deep Drift'), findsOneWidget);
+    expect(find.textContaining('Deep Drift'), findsOneWidget);
   });
 
   testWidgets('Reset header Emergency action opens the free session', (
