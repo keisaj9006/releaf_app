@@ -67,6 +67,13 @@ const brainGames = <BrainGameMeta>[
     hasDifficultyLevels: true,
   ),
   BrainGameMeta(
+    id: 'n_back',
+    title: 'N-Back',
+    icon: Icons.update_rounded,
+    group: BrainGameGroup.memory,
+    hasDifficultyLevels: true,
+  ),
+  BrainGameMeta(
     id: 'color_conflict',
     title: 'Color Conflict',
     icon: Icons.palette_outlined,
