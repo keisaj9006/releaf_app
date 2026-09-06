@@ -18,6 +18,7 @@ import 'package:releaf_app/games/n_back/n_back_screen.dart';
 import 'package:releaf_app/games/spatial_span/spatial_span_screen.dart';
 import 'package:releaf_app/games/mental_rotation/mental_rotation_screen.dart';
 import 'package:releaf_app/games/trail_switch/trail_switch_screen.dart';
+import 'package:releaf_app/games/tower_plan/tower_plan_screen.dart';
 import 'package:releaf_app/games/color_conflict/color_conflict_screen.dart';
 import 'package:releaf_app/games/pattern_logic/pattern_logic_screen.dart';
 import 'package:releaf_app/games/signal_scan/signal_scan_screen.dart';
@@ -55,6 +56,7 @@ void main() {
     expect(resolvedTypes['spatial_span'], SpatialSpanScreen);
     expect(resolvedTypes['mental_rotation'], MentalRotationScreen);
     expect(resolvedTypes['trail_switch'], TrailSwitchScreen);
+    expect(resolvedTypes['tower_plan'], TowerPlanScreen);
     expect(resolvedTypes['color_conflict'], ColorConflictScreen);
     expect(resolvedTypes['pattern_logic'], PatternLogicScreen);
     expect(resolvedTypes['signal_scan'], SignalScanScreen);
@@ -268,6 +270,7 @@ void main() {
       'spatial_span': SpatialSpanScreen,
       'mental_rotation': MentalRotationScreen,
       'trail_switch': TrailSwitchScreen,
+      'tower_plan': TowerPlanScreen,
       'color_conflict': ColorConflictScreen,
       'pattern_logic': PatternLogicScreen,
       'signal_scan': SignalScanScreen,
@@ -356,6 +359,7 @@ void main() {
     expect(state.trainingLevelFor('spatial_span'), 1);
     expect(state.trainingLevelFor('mental_rotation'), 1);
     expect(state.trainingLevelFor('trail_switch'), 1);
+    expect(state.trainingLevelFor('tower_plan'), 1);
     expect(state.trainingLevelFor('memory'), 1);
   });
 
@@ -697,6 +701,41 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('Tower Plan scales discs and enforces legal moves', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: TowerPlanScreen(
+          trainingLevel: 9,
+          onFinish: (_) {},
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('Tower Plan'), findsOneWidget);
+    expect(find.text('L9'), findsOneWidget);
+    expect(find.byKey(const Key('tower-plan-peg-0')), findsOneWidget);
+    expect(find.byKey(const Key('tower-plan-peg-1')), findsOneWidget);
+    expect(find.byKey(const Key('tower-plan-peg-2')), findsOneWidget);
+    expect(find.text('5'), findsWidgets);
+
+    await tester.tap(find.byKey(const Key('brain-difficulty-hard')));
+    await tester.pump();
+
+    expect(find.text('6'), findsWidgets);
+    expect(find.byKey(const Key('tower-plan-disc-0-6')), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('tower-plan-peg-0')));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('tower-plan-peg-1')));
+    await tester.pump();
+
+    expect(find.byKey(const Key('tower-plan-disc-1-1')), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('New Brain games stay overflow-free at 320px', (
     WidgetTester tester,
   ) async {
@@ -716,6 +755,7 @@ void main() {
       SpatialSpanScreen(onFinish: (_) {}),
       MentalRotationScreen(onFinish: (_) {}),
       TrailSwitchScreen(onFinish: (_) {}),
+      TowerPlanScreen(onFinish: (_) {}),
     ];
 
     for (final game in games) {
