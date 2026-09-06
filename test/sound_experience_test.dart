@@ -1,3 +1,4 @@
+import 'package:audioplayers/audioplayers.dart' as audio;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -7,6 +8,42 @@ import 'package:releaf_app/core/providers.dart';
 import 'package:releaf_app/features/sound/application/sound_player_controller.dart';
 import 'package:releaf_app/features/sound/data/sound_catalog.dart';
 import 'package:releaf_app/features/sound/presentation/sound_screen.dart';
+
+class _FakeSoundPlaybackDriver implements SoundPlaybackDriver {
+  @override
+  Stream<Duration> get onDurationChanged => const Stream<Duration>.empty();
+
+  @override
+  Stream<Duration> get onPositionChanged => const Stream<Duration>.empty();
+
+  @override
+  Stream<audio.PlayerState> get onPlayerStateChanged =>
+      const Stream<audio.PlayerState>.empty();
+
+  @override
+  Future<void> setReleaseMode(audio.ReleaseMode mode) async {}
+
+  @override
+  Future<void> setVolume(double volume) async {}
+
+  @override
+  Future<void> playAsset(String assetPath) async {}
+
+  @override
+  Future<void> resume() async {}
+
+  @override
+  Future<void> pause() async {}
+
+  @override
+  Future<void> stop() async {}
+
+  @override
+  Future<void> seek(Duration position) async {}
+
+  @override
+  Future<void> dispose() async {}
+}
 
 Future<SharedPreferences> _preferences() async {
   SharedPreferences.setMockInitialValues({});
@@ -40,6 +77,7 @@ void main() {
     final controller = SoundPlayerController(
       const SoundCatalog(),
       preferences,
+      driver: _FakeSoundPlaybackDriver(),
     );
     addTearDown(controller.dispose);
 
