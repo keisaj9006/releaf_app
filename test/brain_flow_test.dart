@@ -17,6 +17,7 @@ import 'package:releaf_app/games/sequence_echo/sequence_echo_screen.dart';
 import 'package:releaf_app/games/n_back/n_back_screen.dart';
 import 'package:releaf_app/games/spatial_span/spatial_span_screen.dart';
 import 'package:releaf_app/games/mental_rotation/mental_rotation_screen.dart';
+import 'package:releaf_app/games/trail_switch/trail_switch_screen.dart';
 import 'package:releaf_app/games/color_conflict/color_conflict_screen.dart';
 import 'package:releaf_app/games/pattern_logic/pattern_logic_screen.dart';
 import 'package:releaf_app/games/signal_scan/signal_scan_screen.dart';
@@ -53,6 +54,7 @@ void main() {
     expect(resolvedTypes['n_back'], NBackScreen);
     expect(resolvedTypes['spatial_span'], SpatialSpanScreen);
     expect(resolvedTypes['mental_rotation'], MentalRotationScreen);
+    expect(resolvedTypes['trail_switch'], TrailSwitchScreen);
     expect(resolvedTypes['color_conflict'], ColorConflictScreen);
     expect(resolvedTypes['pattern_logic'], PatternLogicScreen);
     expect(resolvedTypes['signal_scan'], SignalScanScreen);
@@ -265,6 +267,7 @@ void main() {
       'n_back': NBackScreen,
       'spatial_span': SpatialSpanScreen,
       'mental_rotation': MentalRotationScreen,
+      'trail_switch': TrailSwitchScreen,
       'color_conflict': ColorConflictScreen,
       'pattern_logic': PatternLogicScreen,
       'signal_scan': SignalScanScreen,
@@ -352,6 +355,7 @@ void main() {
     expect(state.trainingLevelFor('n_back'), 1);
     expect(state.trainingLevelFor('spatial_span'), 1);
     expect(state.trainingLevelFor('mental_rotation'), 1);
+    expect(state.trainingLevelFor('trail_switch'), 1);
     expect(state.trainingLevelFor('memory'), 1);
   });
 
@@ -666,6 +670,33 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('Trail Switch hard mode adds distractors and larger grid', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: TrailSwitchScreen(
+          trainingLevel: 10,
+          onFinish: (_) {},
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('Trail Switch'), findsOneWidget);
+    expect(find.text('L10'), findsOneWidget);
+    expect(find.byKey(const Key('trail-switch-target-0')), findsOneWidget);
+    expect(find.byKey(const Key('trail-switch-distractor-0')), findsNothing);
+
+    await tester.tap(find.byKey(const Key('brain-difficulty-hard')));
+    await tester.pump();
+
+    expect(find.byKey(const Key('trail-switch-distractor-0')), findsOneWidget);
+    expect(find.byKey(const Key('trail-switch-board')), findsOneWidget);
+    expect(find.byKey(const Key('trail-switch-progress')), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('New Brain games stay overflow-free at 320px', (
     WidgetTester tester,
   ) async {
@@ -684,6 +715,7 @@ void main() {
       NBackScreen(onFinish: (_) {}),
       SpatialSpanScreen(onFinish: (_) {}),
       MentalRotationScreen(onFinish: (_) {}),
+      TrailSwitchScreen(onFinish: (_) {}),
     ];
 
     for (final game in games) {
