@@ -441,10 +441,12 @@ void main() {
 
     expect(find.text('NIGHT'), findsOneWidget);
     expect(find.text('Sleep'), findsWidgets);
-    expect(find.text('SOUND FOR SLEEP'), findsOneWidget);
-    expect(find.text('SLEEP MEDITATIONS'), findsOneWidget);
-    expect(find.byKey(const Key('sleep-meditation-rail')), findsOneWidget);
-    expect(find.text('WIND DOWN'), findsOneWidget);
+    expect(find.text('SLEEP TONES'), findsOneWidget);
+    expect(find.text('NATURE AT NIGHT'), findsOneWidget);
+    expect(find.byKey(const Key('sleep-featured-sound')), findsOneWidget);
+    expect(find.text('TONIGHT · NO VOICE'), findsOneWidget);
+    expect(find.text('SLEEP MEDITATIONS'), findsNothing);
+    expect(find.text('WIND DOWN'), findsNothing);
     expect(find.byTooltip('Back'), findsNothing);
 
     final navigation = tester.widget<NavigationBar>(find.byType(NavigationBar));
@@ -494,7 +496,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
 
     expect(tester.takeException(), isNull);
-    await tester.ensureVisible(find.text('WIND DOWN'));
+    await tester.ensureVisible(find.text('NATURE AT NIGHT'));
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
   });
@@ -674,7 +676,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Sleep premium affordances reflect the real entitlement', (
+  testWidgets('Sleep remains voice-free regardless of entitlement', (
     WidgetTester tester,
   ) async {
     await _pumpRoute(
@@ -683,37 +685,12 @@ void main() {
       preferences: await _preferences(),
     );
 
-    expect(find.text('Let the Day Go'), findsWidgets);
-    expect(find.text('Start free night practice'), findsOneWidget);
-    expect(find.text('Unlock tonight'), findsNothing);
-
-    // Dispose the first ProviderScope so the premium override cannot reuse
-    // the free controller from the first half of this widget test.
-    await tester.pumpWidget(const SizedBox.shrink());
-    await tester.pump();
-
-    final premiumRouter = createAppRouter(initialLocation: AppRoutes.sleep);
-    addTearDown(premiumRouter.dispose);
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          sharedPreferencesProvider.overrideWithValue(await _preferences()),
-          subscriptionControllerProvider.overrideWith(
-            (ref) => _FixedSubscriptionController(isPremium: true),
-          ),
-          meditationAudioDriverProvider.overrideWithValue(
-            _FakeMeditationAudioDriver(),
-          ),
-        ],
-        child: MaterialApp.router(routerConfig: premiumRouter),
-      ),
-    );
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 300));
-
-    expect(find.text('Evening → Proper Unwind'), findsOneWidget);
-    expect(find.text('Start tonight'), findsOneWidget);
-    expect(find.text('Start free night practice'), findsNothing);
-    expect(find.text('Unlock tonight'), findsNothing);
+    expect(find.text('TONIGHT · NO VOICE'), findsOneWidget);
+    expect(find.text('SLEEP MEDITATIONS'), findsNothing);
+    expect(find.text('Let the Day Go'), findsNothing);
+    expect(find.text('Evening → Proper Unwind'), findsNothing);
+    expect(find.text('Deep Drift'), findsWidgets);
+    expect(find.text('Soft Rain'), findsOneWidget);
+    expect(find.text('Night Air'), findsOneWidget);
   });
-}
+}}
