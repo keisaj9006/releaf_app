@@ -141,7 +141,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               const ReleafSectionHeading(
                                 title: 'Daily Insight',
                                 description:
-                                    'One evidence-backed idea for today. Tomorrow, a new one.',
+                                    'One surprising, evidence-backed idea. Tap to reveal the full story.',
                               ),
                               const SizedBox(height: ReleafSpacing.md),
                               _DailyInsightCard(
@@ -999,7 +999,7 @@ class _DailyInsightCard extends StatelessWidget {
                             ),
                           ),
                           child: Text(
-                            'NEW TODAY',
+                            'DID YOU KNOW?',
                             style: ReleafTypography.eyebrow.copyWith(
                               color: accent,
                               fontSize: 8,
@@ -1040,7 +1040,7 @@ class _DailyInsightCard extends StatelessWidget {
                     ),
                     SizedBox(height: compact ? 34 : 42),
                     Text(
-                      insight.headline,
+                      insight.teaser,
                       maxLines: 3,
                       overflow: TextOverflow.ellipsis,
                       style: ReleafTypography.sectionTitle.copyWith(
@@ -1082,7 +1082,7 @@ class _DailyInsightCard extends StatelessWidget {
                         const SizedBox(width: 7),
                         Expanded(
                           child: Text(
-                            'Read why this matters',
+                            'Reveal today’s insight',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: ReleafTypography.meta.copyWith(
