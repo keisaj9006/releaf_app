@@ -47,7 +47,6 @@ const brainGames = <BrainGameMeta>[
     group: BrainGameGroup.reasoning,
   ),
 
-  // Legacy (jeśli chcesz utrzymać tę grę zanim ją przeniesiemy na czysto)
   BrainGameMeta(
     id: 'broken_mirror',
     title: 'Broken Mirror',
