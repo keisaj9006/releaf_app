@@ -210,7 +210,10 @@ class _MeditationPlayerScreenState
     _lastSpokenStepIndex = stepIndex;
     await ref
         .read(meditationVoiceControllerProvider.notifier)
-        .speakGuidance(item.steps[stepIndex].guidance);
+        .speakGuidance(
+          item.steps[stepIndex].spokenGuidance ??
+              item.steps[stepIndex].guidance,
+        );
   }
 
   Future<void> _toggleGuideVoice() async {

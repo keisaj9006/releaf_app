@@ -293,6 +293,32 @@ void main() {
     expect(restored.state.mix, 0.50);
   });
 
+  test('Flagship meditations expose richer spoken guidance', () {
+    const catalog = MeditationCatalog();
+    const ids = [
+      'mindfulness-basics-2',
+      'breath-and-body-4',
+      'anxious-thoughts-5',
+      'focus-anchor-5',
+      'morning-arrival-4',
+      'let-the-day-go-6',
+    ];
+
+    for (final id in ids) {
+      final item = catalog.getById(id)!;
+      expect(item.unguided, isFalse);
+      expect(
+        item.steps.every(
+          (step) =>
+              step.spokenGuidance != null &&
+              step.spokenGuidance!.length > step.guidance.length,
+        ),
+        isTrue,
+        reason: '$id should have voice-first narration for every step',
+      );
+    }
+  });
+
   test('Meditation voice preferences persist independently', () async {
     SharedPreferences.setMockInitialValues({});
     final preferences = await SharedPreferences.getInstance();
@@ -499,7 +525,7 @@ void main() {
     expect(audioDriver.lastAssetPath, 'sounds/relief_01.mp3');
     expect(voiceDriver.configureCalls, 1);
     expect(voiceDriver.speakCalls, 1);
-    expect(voiceDriver.lastSpokenText, item.steps.first.guidance);
+    expect(voiceDriver.lastSpokenText, item.steps.first.spokenGuidance);
 
     await tester.tap(find.byKey(const Key('meditation-captions-chip')));
     await tester.pump(const Duration(milliseconds: 300));

@@ -15,11 +15,16 @@ class MeditationStep {
     required this.label,
     required this.guidance,
     required this.durationSeconds,
+    this.spokenGuidance,
   });
 
   final String label;
   final String guidance;
   final int durationSeconds;
+
+  /// Optional longer narration written to be heard rather than read.
+  /// Captions keep using [guidance] so the screen stays concise.
+  final String? spokenGuidance;
 }
 
 class MeditationContent {
