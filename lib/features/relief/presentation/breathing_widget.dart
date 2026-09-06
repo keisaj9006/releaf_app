@@ -311,8 +311,11 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
                         child: FilledButton.icon(
                           key: const Key('reset-active-master-mute'),
                           onPressed: () {
-                            unawaited(_setAllAudioMuted(!_allAudioMuted));
-                            refresh();
+                            unawaited(
+                              _setAllAudioMuted(!_allAudioMuted).whenComplete(() {
+                                if (context.mounted) refresh();
+                              }),
+                            );
                           },
                           icon: Icon(
                             _allAudioMuted
