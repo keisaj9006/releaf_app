@@ -1,0 +1,254 @@
+enum DailyInsightCategory {
+  movement,
+  sleep,
+  mind,
+  connection,
+  nutrition,
+  nature,
+}
+
+class DailyInsight {
+  const DailyInsight({
+    required this.id,
+    required this.category,
+    required this.headline,
+    required this.detail,
+    required this.evidenceLabel,
+    required this.evidenceNote,
+    required this.sourcePublisher,
+    required this.sourceTitle,
+    required this.sourceUrl,
+  });
+
+  final String id;
+  final DailyInsightCategory category;
+  final String headline;
+  final String detail;
+  final String evidenceLabel;
+  final String evidenceNote;
+  final String sourcePublisher;
+  final String sourceTitle;
+  final String sourceUrl;
+}
+
+class DailyInsightCatalog {
+  const DailyInsightCatalog._();
+
+  static const List<DailyInsight> all = [
+    DailyInsight(
+      id: 'movement-150-300',
+      category: DailyInsightCategory.movement,
+      headline:
+          'For adults, 150–300 minutes of moderate activity a week is the evidence-based target for substantial health benefits.',
+      detail:
+          'WHO guidance links regular physical activity with benefits across physical health, mental health, cognitive health and sleep. The target can be accumulated across the week rather than completed in one long session.',
+      evidenceLabel: 'WHO guideline',
+      evidenceNote:
+          'Public-health recommendation based on a broad evidence review. It is a population target, not a personal prescription.',
+      sourcePublisher: 'World Health Organization',
+      sourceTitle: 'Physical activity',
+      sourceUrl:
+          'https://www.who.int/news-room/fact-sheets/detail/physical-activity',
+    ),
+    DailyInsight(
+      id: 'movement-some-is-better',
+      category: DailyInsightCategory.movement,
+      headline:
+          'You do not have to reach the full exercise target before movement starts to matter.',
+      detail:
+          'WHO explicitly states that some physical activity is better than none. For people who are currently inactive, increasing movement gradually can still provide health benefits.',
+      evidenceLabel: 'WHO guideline',
+      evidenceNote:
+          'This is a population-level recommendation. The safest amount and type of activity can vary with health conditions and physical ability.',
+      sourcePublisher: 'World Health Organization',
+      sourceTitle: 'WHO guidelines on physical activity and sedentary behaviour',
+      sourceUrl:
+          'https://www.who.int/europe/publications/i/item/9789240014886',
+    ),
+    DailyInsight(
+      id: 'walk-11-minutes',
+      category: DailyInsightCategory.movement,
+      headline:
+          'About 11 minutes of moderate activity a day was linked with a 23% lower risk of early death in a very large analysis.',
+      detail:
+          'Researchers analysing large prospective studies found that about 75 minutes of moderate activity per week — roughly 11 minutes a day — was associated with meaningful reductions in premature mortality risk compared with lower activity levels.',
+      evidenceLabel: 'Dose-response meta-analysis',
+      evidenceNote:
+          'This is an association across large populations, not a guarantee that 11 minutes changes one person’s lifespan by a fixed amount.',
+      sourcePublisher: 'University of Cambridge · MRC Epidemiology Unit',
+      sourceTitle:
+          'Daily 11 minute brisk walk enough to reduce risk of early death',
+      sourceUrl:
+          'https://www.epi.ims.cam.ac.uk/blog/2023/03/01/daily-11-minute-walk-reduce-risk-early-death/',
+    ),
+    DailyInsight(
+      id: 'sleep-seven-hours',
+      category: DailyInsightCategory.sleep,
+      headline:
+          'Most adults need at least 7 hours of sleep, but sleep need still varies between people and across age.',
+      detail:
+          'CDC guidance recommends 7 or more hours for adults aged 18–60, with age-specific ranges for older adults. Healthy sleep also depends on quality and regularity, not duration alone.',
+      evidenceLabel: 'Public-health guidance',
+      evidenceNote:
+          'Seven hours is a general minimum recommendation for most adults, not a universal ideal for every individual.',
+      sourcePublisher: 'Centers for Disease Control and Prevention',
+      sourceTitle: 'About Sleep',
+      sourceUrl: 'https://www.cdc.gov/sleep/about/index.html',
+    ),
+    DailyInsight(
+      id: 'sleep-regularity',
+      category: DailyInsightCategory.sleep,
+      headline:
+          'A consistent sleep and wake time is more evidence-based than chasing one “perfect” bedtime.',
+      detail:
+          'NIH sleep guidance recommends going to bed and waking at about the same time each day and limiting large weekend shifts. Regular timing supports the body’s sleep–wake rhythm.',
+      evidenceLabel: 'NIH sleep guidance',
+      evidenceNote:
+          'There is no single clock-time window that is best for every adult. Chronotype, work schedule, age and light exposure all matter.',
+      sourcePublisher: 'NHLBI · National Institutes of Health',
+      sourceTitle: 'Healthy Sleep Habits',
+      sourceUrl:
+          'https://www.nhlbi.nih.gov/health/sleep-deprivation/healthy-sleep-habits',
+    ),
+    DailyInsight(
+      id: 'light-body-clock',
+      category: DailyInsightCategory.sleep,
+      headline:
+          'Light is one of the strongest environmental signals for setting your sleep–wake rhythm.',
+      detail:
+          'NIH guidance on circadian rhythms highlights daytime light and reduced artificial light at night as important cues for the body clock. This is one reason morning or daytime outdoor light can support a stable routine.',
+      evidenceLabel: 'NIH circadian guidance',
+      evidenceNote:
+          'Light timing is especially relevant to circadian rhythm. It does not mean bright light alone can fix every sleep problem.',
+      sourcePublisher: 'NHLBI · National Institutes of Health',
+      sourceTitle: 'Circadian Rhythm Disorders — Treatment',
+      sourceUrl:
+          'https://www.nhlbi.nih.gov/health/circadian-rhythm-disorders/treatment',
+    ),
+    DailyInsight(
+      id: 'nature-120',
+      category: DailyInsightCategory.nature,
+      headline:
+          'In a large UK study, about 120 minutes in nature per week was associated with better self-reported health and wellbeing.',
+      detail:
+          'The association appeared whether the time in nature came from one longer visit or several shorter visits across the week. Benefits in this study were strongest around two to five hours weekly.',
+      evidenceLabel: 'Observational study',
+      evidenceNote:
+          'The study found an association, not proof that nature exposure directly caused the better health or wellbeing reports.',
+      sourcePublisher: 'Scientific Reports',
+      sourceTitle:
+          'Spending at least 120 minutes a week in nature is associated with good health and wellbeing',
+      sourceUrl: 'https://www.nature.com/articles/s41598-019-44097-3',
+    ),
+    DailyInsight(
+      id: 'social-isolation-mortality',
+      category: DailyInsightCategory.connection,
+      headline:
+          'Social isolation is associated with a higher risk of premature mortality — connection is a health factor, not just a lifestyle extra.',
+      detail:
+          'The U.S. Surgeon General’s evidence summary reports a 29% higher risk of premature mortality associated with social isolation, drawing on meta-analytic research.',
+      evidenceLabel: 'Public-health evidence review',
+      evidenceNote:
+          'This is a population-level association. It does not mean isolation determines any individual person’s outcome.',
+      sourcePublisher: 'U.S. Surgeon General · HHS',
+      sourceTitle: 'Social Connection',
+      sourceUrl:
+          'https://www.hhs.gov/surgeongeneral/reports-and-publications/connection/index.html',
+    ),
+    DailyInsight(
+      id: 'mindfulness-nuance',
+      category: DailyInsightCategory.mind,
+      headline:
+          'Mindfulness can help some people with anxiety or depression, but the average effect is modest and the evidence is not equally strong for every outcome.',
+      detail:
+          'Evidence reviews from NCCIH find that mindfulness-based approaches can outperform no treatment for some anxiety and depression outcomes, while comparisons with established treatments and longer-term effects are more mixed.',
+      evidenceLabel: 'Evidence review',
+      evidenceNote:
+          'Mindfulness is a useful tool, not a universal treatment. It should not be presented as a replacement for professional care when that care is needed.',
+      sourcePublisher: 'NCCIH · National Institutes of Health',
+      sourceTitle: 'Meditation and Mindfulness: Effectiveness and Safety',
+      sourceUrl:
+          'https://www.nccih.nih.gov/health/meditation-and-mindfulness-effectiveness-and-safety',
+    ),
+    DailyInsight(
+      id: 'vitamin-d-depression',
+      category: DailyInsightCategory.nutrition,
+      headline:
+          'Low vitamin D levels are associated with depression, but trials have not shown that vitamin D supplements prevent or treat depression.',
+      detail:
+          'NIH reviews distinguish an observational link from treatment evidence: people with low vitamin D are more likely to report depression, yet randomized clinical trials have not demonstrated a reliable antidepressant effect from supplementation.',
+      evidenceLabel: 'NIH evidence review',
+      evidenceNote:
+          'Association does not prove causation. Vitamin D still has established roles in bone, muscle and other body functions; this fact is specifically about depression claims.',
+      sourcePublisher: 'NIH Office of Dietary Supplements',
+      sourceTitle: 'Vitamin D — Health Professional Fact Sheet',
+      sourceUrl:
+          'https://ods.od.nih.gov/factsheets/VITAMIND/HealthProfessional/',
+    ),
+    DailyInsight(
+      id: 'gratitude-evidence',
+      category: DailyInsightCategory.mind,
+      headline:
+          'Gratitude exercises show small mental-health benefits in trials, but the certainty of some findings is still low.',
+      detail:
+          'A systematic review and meta-analysis of randomized trials found improvements in several wellbeing outcomes and lower anxiety or depression scores in some analyses. The authors also reported low certainty for parts of the evidence.',
+      evidenceLabel: 'Systematic review + meta-analysis',
+      evidenceNote:
+          'Gratitude can be a low-cost wellbeing practice, but it should not be sold as a treatment or a guarantee of improved mood.',
+      sourcePublisher: 'Peer-reviewed research · PMC',
+      sourceTitle:
+          'The effects of gratitude interventions: a systematic review and meta-analysis',
+      sourceUrl: 'https://pmc.ncbi.nlm.nih.gov/articles/PMC10393216/',
+    ),
+    DailyInsight(
+      id: 'alcohol-sleep',
+      category: DailyInsightCategory.sleep,
+      headline:
+          'Alcohol can make falling asleep feel easier while still making the night’s sleep lighter and more fragmented.',
+      detail:
+          'NIH sleep guidance notes that alcohol close to bedtime may make sleep onset easier but can lead to lighter sleep and more waking during the night.',
+      evidenceLabel: 'NIH sleep guidance',
+      evidenceNote:
+          'This describes a common sleep effect and is not an assessment of anyone’s alcohol use.',
+      sourcePublisher: 'NHLBI · National Institutes of Health',
+      sourceTitle: 'Insomnia — Treatment',
+      sourceUrl: 'https://www.nhlbi.nih.gov/health/insomnia/treatment',
+    ),
+    DailyInsight(
+      id: 'sedentary-time',
+      category: DailyInsightCategory.movement,
+      headline:
+          'Long periods of sedentary time matter even if you think of yourself as “someone who exercises.”',
+      detail:
+          'WHO guidance recommends both increasing physical activity and limiting sedentary behaviour. Higher sedentary time is associated with worse health outcomes in adults.',
+      evidenceLabel: 'WHO guideline',
+      evidenceNote:
+          'The evidence supports moving more and sitting less overall; it does not define one universally safe maximum sitting interval.',
+      sourcePublisher: 'World Health Organization',
+      sourceTitle: 'Physical activity',
+      sourceUrl:
+          'https://www.who.int/news-room/fact-sheets/detail/physical-activity',
+    ),
+    DailyInsight(
+      id: 'daytime-activity-sleep',
+      category: DailyInsightCategory.sleep,
+      headline:
+          'Daytime physical activity can support sleep — sleep and movement are not separate health systems.',
+      detail:
+          'CDC/NIOSH sleep guidance recommends daytime exercise as one of the practical behaviours that can improve sleep. The effect varies by person, intensity and timing.',
+      evidenceLabel: 'Public-health guidance',
+      evidenceNote:
+          'Exercise is one sleep-supporting behaviour, not a treatment for every cause of insomnia or fatigue.',
+      sourcePublisher: 'CDC · NIOSH',
+      sourceTitle: 'Improve Sleep: Tips to Improve Your Sleep When Times Are Tough',
+      sourceUrl: 'https://www.cdc.gov/niosh/bulletin/2020/sleep.html',
+    ),
+  ];
+
+  static DailyInsight forDate(DateTime date) {
+    final day = DateTime.utc(date.year, date.month, date.day);
+    final anchor = DateTime.utc(2026, 1, 1);
+    final index = day.difference(anchor).inDays % all.length;
+    return all[index < 0 ? index + all.length : index];
+  }
+}

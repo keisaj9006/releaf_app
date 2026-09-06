@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:releaf_app/core/providers.dart';
+import 'package:releaf_app/features/home/daily_insight.dart';
 import 'package:releaf_app/features/home/home_personalization.dart';
 import 'package:releaf_app/features/home/home_screen.dart';
 import 'package:releaf_app/routing/app_router.dart';
@@ -35,6 +36,25 @@ Future<void> _pumpHome(
 }
 
 void main() {
+  test('Daily insight rotation is deterministic and source-backed', () {
+    final day = DateTime(2026, 9, 6);
+    final first = DailyInsightCatalog.forDate(day);
+    final sameDay = DailyInsightCatalog.forDate(
+      DateTime(2026, 9, 6, 23, 59),
+    );
+    final nextDay = DailyInsightCatalog.forDate(DateTime(2026, 9, 7));
+
+    expect(DailyInsightCatalog.all, hasLength(14));
+    expect(first.id, sameDay.id);
+    expect(first.id, isNot(nextDay.id));
+    expect(first.sourcePublisher, isNotEmpty);
+    expect(first.sourceTitle, isNotEmpty);
+    expect(first.sourceUrl, startsWith('https://'));
+    expect(first.evidenceLabel, isNotEmpty);
+    expect(first.evidenceNote, isNotEmpty);
+  });
+
+
   testWidgets('Home renders the premium need-first hierarchy', (
     WidgetTester tester,
   ) async {
@@ -52,6 +72,30 @@ void main() {
     expect(find.text('0 Leaves collected'), findsOneWidget);
     expect(find.text('0/2'), findsOneWidget);
     expect(find.text('Habit'), findsNothing);
+  });
+
+  testWidgets('Home shows Daily Insight with evidence details', (
+    WidgetTester tester,
+  ) async {
+    final insight = DailyInsightCatalog.forDate(DateTime(2026, 9, 6));
+    await _pumpHome(tester, preferences: await _preferences());
+
+    expect(find.byKey(const Key('home-daily-insight')), findsOneWidget);
+    expect(find.text(insight.headline), findsOneWidget);
+
+    await tester.ensureVisible(find.byKey(const Key('home-daily-insight')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('home-daily-insight-info')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('EVIDENCE'), findsOneWidget);
+    expect(find.text(insight.evidenceLabel), findsOneWidget);
+    expect(find.text('SOURCE'), findsOneWidget);
+    expect(find.text(insight.sourcePublisher), findsWidgets);
+    expect(
+      find.byKey(const Key('home-daily-insight-source')),
+      findsOneWidget,
+    );
   });
 
   testWidgets('Home first-use welcome is optional and persists dismissal', (

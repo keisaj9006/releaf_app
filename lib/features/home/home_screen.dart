@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/providers.dart';
 import '../../core/session/session_manager.dart';
@@ -16,6 +17,7 @@ import '../meditation/domain/meditation_content.dart';
 import '../progress/data/leaves_repository.dart';
 import '../sound/application/sound_player_controller.dart';
 import '../sound/data/sound_catalog.dart';
+import 'daily_insight.dart';
 import 'home_personalization.dart';
 
 final homeNowProvider = Provider<DateTime>((ref) => DateTime.now());
@@ -45,6 +47,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final currentSound = soundCatalog.getById(soundState.currentTrackId ?? '');
 
     final now = ref.watch(homeNowProvider);
+    final dailyInsight = DailyInsightCatalog.forDate(now);
     final suggestedMeditation = _suggestedMeditation(
       catalog: meditationCatalog,
       library: meditationLibrary,
@@ -136,6 +139,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   context,
                                   ref,
                                   focus,
+                                ),
+                              ),
+                              const SizedBox(height: ReleafSpacing.sm),
+                              _DailyInsightCard(
+                                insight: dailyInsight,
+                                onOpen: () => _showDailyInsightSheet(
+                                  context,
+                                  dailyInsight,
                                 ),
                               ),
                               if (activeSession.hasActive ||
@@ -861,6 +872,354 @@ ReleafArtworkVariant _homeArtworkForMeditation(MeditationCategory category) {
     MeditationCategory.startHere ||
     MeditationCategory.focus ||
     MeditationCategory.mind => ReleafArtworkVariant.focus,
+  };
+}
+
+class _DailyInsightCard extends StatelessWidget {
+  const _DailyInsightCard({
+    required this.insight,
+    required this.onOpen,
+  });
+
+  final DailyInsight insight;
+  final VoidCallback onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    final accent = _dailyInsightAccent(insight.category);
+
+    return Material(
+      key: const Key('home-daily-insight'),
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(ReleafRadii.medium),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(ReleafRadii.medium),
+        onTap: onOpen,
+        child: Ink(
+          padding: const EdgeInsets.fromLTRB(
+            ReleafSpacing.md,
+            12,
+            10,
+            12,
+          ),
+          decoration: BoxDecoration(
+            color: ReleafColors.surfaceSoft.withValues(alpha: 0.64),
+            borderRadius: BorderRadius.circular(ReleafRadii.medium),
+            border: Border.all(
+              color: accent.withValues(alpha: 0.20),
+            ),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: accent.withValues(alpha: 0.10),
+                  shape: BoxShape.circle,
+                ),
+                alignment: Alignment.center,
+                child: Icon(
+                  _dailyInsightIcon(insight.category),
+                  size: 18,
+                  color: accent,
+                ),
+              ),
+              const SizedBox(width: ReleafSpacing.sm),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          'TODAY’S INSIGHT',
+                          style: ReleafTypography.eyebrow.copyWith(
+                            color: accent,
+                            fontSize: 8.5,
+                            letterSpacing: 1.25,
+                          ),
+                        ),
+                        const SizedBox(width: 7),
+                        Expanded(
+                          child: Text(
+                            _dailyInsightCategoryLabel(insight.category),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: ReleafTypography.meta.copyWith(
+                              color: ReleafColors.textMuted,
+                              fontSize: 9,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      insight.headline,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: ReleafTypography.meta.copyWith(
+                        color: ReleafColors.textPrimary,
+                        fontWeight: FontWeight.w700,
+                        height: 1.35,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${insight.sourcePublisher} · ${insight.evidenceLabel}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: ReleafTypography.meta.copyWith(
+                        color: ReleafColors.textMuted,
+                        fontSize: 8,
+                        letterSpacing: 0.05,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 6),
+              IconButton(
+                key: const Key('home-daily-insight-info'),
+                tooltip: 'About today’s insight',
+                visualDensity: VisualDensity.compact,
+                onPressed: onOpen,
+                icon: Icon(
+                  Icons.info_outline_rounded,
+                  size: 18,
+                  color: accent.withValues(alpha: 0.86),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+Future<void> _showDailyInsightSheet(
+  BuildContext context,
+  DailyInsight insight,
+) async {
+  final accent = _dailyInsightAccent(insight.category);
+
+  await showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: const Color(0xFF0D1512),
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+    ),
+    builder: (sheetContext) {
+      return SafeArea(
+        top: false,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(
+            ReleafSpacing.screen,
+            ReleafSpacing.xl,
+            ReleafSpacing.screen,
+            ReleafSpacing.xl,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 42,
+                    height: 42,
+                    decoration: BoxDecoration(
+                      color: accent.withValues(alpha: 0.10),
+                      shape: BoxShape.circle,
+                    ),
+                    alignment: Alignment.center,
+                    child: Icon(
+                      _dailyInsightIcon(insight.category),
+                      color: accent,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: ReleafSpacing.sm),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'TODAY’S INSIGHT',
+                          style: ReleafTypography.eyebrow.copyWith(
+                            color: accent,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          _dailyInsightCategoryLabel(insight.category),
+                          style: ReleafTypography.meta.copyWith(
+                            color: ReleafColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    tooltip: 'Close',
+                    onPressed: () => Navigator.of(sheetContext).pop(),
+                    icon: const Icon(
+                      Icons.close_rounded,
+                      color: ReleafColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: ReleafSpacing.lg),
+              Text(
+                insight.headline,
+                style: ReleafTypography.sectionTitle.copyWith(
+                  fontSize: 24,
+                  height: 1.22,
+                ),
+              ),
+              const SizedBox(height: ReleafSpacing.md),
+              Text(
+                insight.detail,
+                style: ReleafTypography.body.copyWith(
+                  color: ReleafColors.textPrimary.withValues(alpha: 0.84),
+                  height: 1.55,
+                ),
+              ),
+              const SizedBox(height: ReleafSpacing.lg),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(ReleafSpacing.md),
+                decoration: BoxDecoration(
+                  color: accent.withValues(alpha: 0.06),
+                  borderRadius: BorderRadius.circular(ReleafRadii.medium),
+                  border: Border.all(
+                    color: accent.withValues(alpha: 0.18),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'EVIDENCE',
+                      style: ReleafTypography.eyebrow.copyWith(
+                        color: accent,
+                        fontSize: 9,
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      insight.evidenceLabel,
+                      style: ReleafTypography.meta.copyWith(
+                        color: ReleafColors.textPrimary,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      insight.evidenceNote,
+                      style: ReleafTypography.meta.copyWith(
+                        color: ReleafColors.textSecondary,
+                        height: 1.45,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: ReleafSpacing.lg),
+              Text(
+                'SOURCE',
+                style: ReleafTypography.eyebrow.copyWith(
+                  color: ReleafColors.textMuted,
+                  fontSize: 8.5,
+                ),
+              ),
+              const SizedBox(height: 5),
+              Text(
+                insight.sourcePublisher,
+                style: ReleafTypography.meta.copyWith(
+                  color: ReleafColors.textPrimary,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 3),
+              Text(
+                insight.sourceTitle,
+                style: ReleafTypography.meta.copyWith(
+                  color: ReleafColors.textSecondary,
+                  height: 1.4,
+                ),
+              ),
+              const SizedBox(height: ReleafSpacing.md),
+              OutlinedButton.icon(
+                key: const Key('home-daily-insight-source'),
+                onPressed: () async {
+                  final uri = Uri.parse(insight.sourceUrl);
+                  final opened = await launchUrl(
+                    uri,
+                    mode: LaunchMode.externalApplication,
+                  );
+                  if (!opened && sheetContext.mounted) {
+                    ScaffoldMessenger.of(sheetContext).showSnackBar(
+                      const SnackBar(
+                        content: Text('Source link could not be opened.'),
+                      ),
+                    );
+                  }
+                },
+                icon: const Icon(Icons.open_in_new_rounded, size: 17),
+                label: const Text('Open original source'),
+              ),
+              const SizedBox(height: ReleafSpacing.md),
+              Text(
+                'Educational wellbeing information. Releaf does not use Daily Insights to diagnose, prescribe or replace professional care.',
+                style: ReleafTypography.meta.copyWith(
+                  color: ReleafColors.textMuted,
+                  fontSize: 9,
+                  height: 1.45,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
+}
+
+String _dailyInsightCategoryLabel(DailyInsightCategory category) {
+  return switch (category) {
+    DailyInsightCategory.movement => 'Movement',
+    DailyInsightCategory.sleep => 'Sleep',
+    DailyInsightCategory.mind => 'Mind',
+    DailyInsightCategory.connection => 'Connection',
+    DailyInsightCategory.nutrition => 'Nutrition',
+    DailyInsightCategory.nature => 'Nature',
+  };
+}
+
+IconData _dailyInsightIcon(DailyInsightCategory category) {
+  return switch (category) {
+    DailyInsightCategory.movement => Icons.directions_walk_rounded,
+    DailyInsightCategory.sleep => Icons.bedtime_outlined,
+    DailyInsightCategory.mind => Icons.psychology_outlined,
+    DailyInsightCategory.connection => Icons.people_alt_outlined,
+    DailyInsightCategory.nutrition => Icons.wb_sunny_outlined,
+    DailyInsightCategory.nature => Icons.park_outlined,
+  };
+}
+
+Color _dailyInsightAccent(DailyInsightCategory category) {
+  return switch (category) {
+    DailyInsightCategory.movement => const Color(0xFF9EC9AE),
+    DailyInsightCategory.sleep => const Color(0xFFB8B9D7),
+    DailyInsightCategory.mind => const Color(0xFFC7B6D5),
+    DailyInsightCategory.connection => const Color(0xFFD3B8A6),
+    DailyInsightCategory.nutrition => const Color(0xFFD4C28E),
+    DailyInsightCategory.nature => const Color(0xFFAFC5A2),
   };
 }
 
