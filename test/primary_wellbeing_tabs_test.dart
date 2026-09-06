@@ -148,6 +148,21 @@ void main() {
     expect(course.every((item) => item.durationSeconds >= 480), isTrue);
   });
 
+  test('Meditation catalog exposes a dedicated Sleep Practice series', () {
+    const catalog = MeditationCatalog();
+    final sleep = catalog.getSeries(MeditationCatalog.sleepSeriesId);
+
+    expect(sleep, hasLength(3));
+    expect(sleep.first.title, 'Let the Day Go');
+    expect(sleep.first.isPremium, isFalse);
+    expect(sleep.skip(1).every((item) => item.isPremium), isTrue);
+    expect(
+      sleep.map((item) => item.seriesOrder),
+      orderedEquals([1, 2, 3]),
+    );
+    expect(sleep.every((item) => item.backgroundSoundId != null), isTrue);
+  });
+
   test('Meditation catalog exposes a real Foundations series', () {
     const catalog = MeditationCatalog();
     final foundations = catalog.getSeries(MeditationCatalog.foundationsSeriesId);
@@ -248,6 +263,8 @@ void main() {
     expect(find.text('NIGHT'), findsOneWidget);
     expect(find.text('Sleep'), findsWidgets);
     expect(find.text('SOUND FOR SLEEP'), findsOneWidget);
+    expect(find.text('SLEEP MEDITATIONS'), findsOneWidget);
+    expect(find.byKey(const Key('sleep-meditation-rail')), findsOneWidget);
     expect(find.text('WIND DOWN'), findsOneWidget);
     expect(find.byTooltip('Back'), findsNothing);
 
