@@ -18,6 +18,7 @@ class SoundPlayerState {
     this.favoriteIds = const <String>{},
     this.recentIds = const <String>[],
     this.sleepTimerMinutes,
+    this.sleepTimerRemainingSeconds,
   });
 
   final String? currentTrackId;
@@ -28,6 +29,7 @@ class SoundPlayerState {
   final Set<String> favoriteIds;
   final List<String> recentIds;
   final int? sleepTimerMinutes;
+  final int? sleepTimerRemainingSeconds;
 
   SoundPlayerState copyWith({
     String? currentTrackId,
@@ -39,6 +41,7 @@ class SoundPlayerState {
     Set<String>? favoriteIds,
     List<String>? recentIds,
     int? sleepTimerMinutes,
+    int? sleepTimerRemainingSeconds,
     bool clearSleepTimer = false,
   }) {
     return SoundPlayerState(
@@ -52,6 +55,9 @@ class SoundPlayerState {
       recentIds: recentIds ?? this.recentIds,
       sleepTimerMinutes:
           clearSleepTimer ? null : (sleepTimerMinutes ?? this.sleepTimerMinutes),
+      sleepTimerRemainingSeconds: clearSleepTimer
+          ? null
+          : (sleepTimerRemainingSeconds ?? this.sleepTimerRemainingSeconds),
     );
   }
 }
@@ -101,6 +107,7 @@ class SoundPlayerController extends StateNotifier<SoundPlayerState> {
   StreamSubscription<Duration>? _positionSubscription;
   StreamSubscription<audio.PlayerState>? _playerStateSubscription;
   Timer? _sleepTimer;
+  DateTime? _sleepTimerDeadline;
 
   Future<void> play(SoundContent track) async {
     await _player.setReleaseMode(audio.ReleaseMode.loop);
@@ -167,6 +174,7 @@ class SoundPlayerController extends StateNotifier<SoundPlayerState> {
   Future<void> stop() async {
     _sleepTimer?.cancel();
     _sleepTimer = null;
+    _sleepTimerDeadline = null;
     await _player.stop();
     state = state.copyWith(
       clearCurrentTrack: true,
@@ -189,15 +197,43 @@ class SoundPlayerController extends StateNotifier<SoundPlayerState> {
   Future<void> setSleepTimer(int? minutes) async {
     _sleepTimer?.cancel();
     _sleepTimer = null;
+    _sleepTimerDeadline = null;
 
     if (minutes == null) {
       state = state.copyWith(clearSleepTimer: true);
       return;
     }
 
-    state = state.copyWith(sleepTimerMinutes: minutes);
-    _sleepTimer = Timer(Duration(minutes: minutes), () async {
-      if (!mounted) return;
+    final totalSeconds = minutes * 60;
+    _sleepTimerDeadline = DateTime.now().add(Duration(minutes: minutes));
+    state = state.copyWith(
+      sleepTimerMinutes: minutes,
+      sleepTimerRemainingSeconds: totalSeconds,
+    );
+
+    _sleepTimer = Timer.periodic(const Duration(seconds: 1), (timer) async {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+
+      final deadline = _sleepTimerDeadline;
+      if (deadline == null) {
+        timer.cancel();
+        return;
+      }
+
+      final remaining = deadline.difference(DateTime.now()).inSeconds + 1;
+      if (remaining > 0) {
+        state = state.copyWith(
+          sleepTimerRemainingSeconds: remaining,
+        );
+        return;
+      }
+
+      timer.cancel();
+      _sleepTimer = null;
+      _sleepTimerDeadline = null;
       await _player.pause();
       if (!mounted) return;
       state = state.copyWith(
@@ -220,6 +256,7 @@ class SoundPlayerController extends StateNotifier<SoundPlayerState> {
   @override
   void dispose() {
     _sleepTimer?.cancel();
+    _sleepTimerDeadline = null;
     _durationSubscription?.cancel();
     _positionSubscription?.cancel();
     _playerStateSubscription?.cancel();
