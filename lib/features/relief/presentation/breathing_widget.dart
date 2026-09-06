@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:audioplayers/audioplayers.dart' as audio;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../meditation/application/meditation_voice_controller.dart';
 import '../../progress/data/leaves_repository.dart';
 import '../../../theme/releaf_design_tokens.dart';
 import '../../../theme/widgets/releaf_artwork.dart';
@@ -48,9 +50,23 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
   bool _usingSimplifiedProgram = false;
   final Map<int, int> _sensoryCompletedByStep = <int, int>{};
 
+  final audio.AudioPlayer _ambientPlayer = audio.AudioPlayer();
+  final MeditationVoiceDriver _voiceDriver = FlutterMeditationVoiceDriver();
+  bool _ambientStarted = false;
+  late bool _voiceEnabled;
+  late double _voiceVolume;
+  late bool _ambientEnabled;
+  late double _ambientVolume;
+  String? _lastNarrationKey;
+
   @override
   void initState() {
     super.initState();
+
+    _voiceEnabled = widget.launchOptions.voiceGuidanceEnabled;
+    _voiceVolume = widget.launchOptions.voiceVolume;
+    _ambientEnabled = widget.launchOptions.ambientSoundEnabled;
+    _ambientVolume = widget.launchOptions.ambientVolume;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final session = ref.read(resetCatalogProvider).getById(widget.sessionId);
@@ -64,6 +80,8 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
         _activeDurationSeconds = session.durationSeconds;
         _remainingSeconds = session.durationSeconds;
       });
+
+      unawaited(_startSessionAudio());
 
       if (_remainingSeconds <= 0) {
         _triggerFeedbackPhase();
@@ -84,6 +102,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
 
       if (_remainingSeconds > 1) {
         setState(() => _remainingSeconds--);
+        unawaited(_syncSpokenGuidance());
         return;
       }
 
@@ -93,10 +112,276 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
     });
   }
 
+  Future<void> _startSessionAudio() async {
+    if (_ambientEnabled) {
+      try {
+        await _ambientPlayer.setReleaseMode(audio.ReleaseMode.loop);
+        await _ambientPlayer.setVolume(_ambientVolume);
+        await _ambientPlayer.play(
+          audio.AssetSource('sounds/deep_drift.mp3'),
+        );
+        _ambientStarted = true;
+      } catch (_) {
+        _ambientStarted = false;
+      }
+    }
+
+    await _syncSpokenGuidance(force: true);
+  }
+
+  Future<void> _syncSpokenGuidance({bool force = false}) async {
+    final session = _session;
+    if (session == null || !_voiceEnabled || _phase != SessionPhase.running) {
+      return;
+    }
+
+    final key =
+        '${_sessionStepIndex(session)}:$_usingSimplifiedProgram';
+    if (!force && key == _lastNarrationKey) return;
+    _lastNarrationKey = key;
+
+    final guidance = _currentGuidance(session).trim();
+    if (guidance.isEmpty) return;
+
+    try {
+      await _voiceDriver.configure(volume: _voiceVolume);
+      if (!_voiceEnabled || !mounted) return;
+      await _voiceDriver.speak(guidance);
+    } catch (_) {
+      // Spoken guidance is supportive; a platform TTS failure must never
+      // interrupt a Reset session.
+    }
+  }
+
+  Future<void> _setVoiceEnabled(bool enabled) async {
+    if (!mounted) return;
+    setState(() => _voiceEnabled = enabled);
+
+    if (!enabled) {
+      _lastNarrationKey = null;
+      try {
+        await _voiceDriver.stop();
+      } catch (_) {}
+      return;
+    }
+
+    await _syncSpokenGuidance(force: true);
+  }
+
+  Future<void> _setVoiceVolume(double volume) async {
+    final safe = volume.clamp(0.0, 1.0).toDouble();
+    if (mounted) setState(() => _voiceVolume = safe);
+    try {
+      await _voiceDriver.setVolume(safe);
+    } catch (_) {}
+  }
+
+  Future<void> _setAmbientEnabled(bool enabled) async {
+    if (!mounted) return;
+    setState(() => _ambientEnabled = enabled);
+
+    try {
+      if (!enabled) {
+        if (_ambientStarted) await _ambientPlayer.pause();
+        return;
+      }
+
+      if (_ambientStarted) {
+        await _ambientPlayer.setVolume(_ambientVolume);
+        await _ambientPlayer.resume();
+      } else {
+        await _ambientPlayer.setReleaseMode(audio.ReleaseMode.loop);
+        await _ambientPlayer.setVolume(_ambientVolume);
+        await _ambientPlayer.play(
+          audio.AssetSource('sounds/deep_drift.mp3'),
+        );
+        _ambientStarted = true;
+      }
+    } catch (_) {
+      // Keep the visual Reset usable if the audio layer is unavailable.
+    }
+  }
+
+  Future<void> _setAmbientVolume(double volume) async {
+    final safe = volume.clamp(0.0, 1.0).toDouble();
+    if (mounted) setState(() => _ambientVolume = safe);
+    if (!_ambientStarted) return;
+    try {
+      await _ambientPlayer.setVolume(safe);
+    } catch (_) {}
+  }
+
+  Future<void> _stopSessionAudio() async {
+    try {
+      await _voiceDriver.stop();
+    } catch (_) {}
+    try {
+      await _ambientPlayer.stop();
+    } catch (_) {}
+    _ambientStarted = false;
+  }
+
+  void _showSessionAudioSettings() {
+    showModalBottomSheet<void>(
+      context: context,
+      useSafeArea: true,
+      backgroundColor: const Color(0xFF0D1512),
+      barrierColor: Colors.black.withValues(alpha: 0.68),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      builder: (sheetContext) {
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            void refresh() => setSheetState(() {});
+
+            return SingleChildScrollView(
+              key: const Key('reset-active-audio-settings'),
+              padding: const EdgeInsets.fromLTRB(
+                ReleafSpacing.screen,
+                ReleafSpacing.lg,
+                ReleafSpacing.screen,
+                ReleafSpacing.xl,
+              ),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 560),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'SESSION AUDIO',
+                                  style: ReleafTypography.eyebrow.copyWith(
+                                    color: ReleafColors.sage,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Voice and calming background',
+                                  style: ReleafTypography.sectionTitle.copyWith(
+                                    fontSize: 22,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          IconButton(
+                            tooltip: 'Close audio settings',
+                            onPressed: () => Navigator.of(sheetContext).pop(),
+                            icon: const Icon(Icons.close_rounded),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: ReleafSpacing.lg),
+                      SwitchListTile.adaptive(
+                        key: const Key('reset-active-voice-toggle'),
+                        contentPadding: EdgeInsets.zero,
+                        title: const Text('Voice guidance'),
+                        subtitle: const Text(
+                          'Slow spoken guidance. Turn it off for a silent visual session.',
+                        ),
+                        value: _voiceEnabled,
+                        onChanged: (value) {
+                          unawaited(_setVoiceEnabled(value));
+                          refresh();
+                        },
+                      ),
+                      if (_voiceEnabled) ...[
+                        Row(
+                          children: [
+                            const Icon(Icons.volume_down_rounded, size: 18),
+                            Expanded(
+                              child: Slider(
+                                key: const Key('reset-active-voice-volume'),
+                                value: _voiceVolume,
+                                onChanged: (value) {
+                                  unawaited(_setVoiceVolume(value));
+                                  refresh();
+                                },
+                              ),
+                            ),
+                            SizedBox(
+                              width: 42,
+                              child: Text(
+                                '${(_voiceVolume * 100).round()}%',
+                                textAlign: TextAlign.end,
+                                style: ReleafTypography.meta,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                      const Divider(height: ReleafSpacing.xl),
+                      SwitchListTile.adaptive(
+                        key: const Key('reset-active-ambient-toggle'),
+                        contentPadding: EdgeInsets.zero,
+                        title: const Text('Calming background'),
+                        subtitle: const Text(
+                          'Deep Drift — a slow tonal pad kept deliberately quiet.',
+                        ),
+                        value: _ambientEnabled,
+                        onChanged: (value) {
+                          unawaited(_setAmbientEnabled(value));
+                          refresh();
+                        },
+                      ),
+                      if (_ambientEnabled) ...[
+                        Row(
+                          children: [
+                            const Icon(Icons.graphic_eq_rounded, size: 18),
+                            Expanded(
+                              child: Slider(
+                                key: const Key(
+                                  'reset-active-ambient-volume',
+                                ),
+                                value: _ambientVolume,
+                                onChanged: (value) {
+                                  unawaited(_setAmbientVolume(value));
+                                  refresh();
+                                },
+                              ),
+                            ),
+                            SizedBox(
+                              width: 42,
+                              child: Text(
+                                '${(_ambientVolume * 100).round()}%',
+                                textAlign: TextAlign.end,
+                                style: ReleafTypography.meta,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                      const SizedBox(height: ReleafSpacing.sm),
+                      Text(
+                        'The background starts at a low level on purpose. Releaf does not claim that a specific tuning frequency is required for relaxation.',
+                        style: ReleafTypography.meta.copyWith(
+                          color: ReleafColors.textMuted,
+                          height: 1.45,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   Future<void> _triggerFeedbackPhase() async {
     if (!mounted) return;
 
     HapticFeedback.mediumImpact();
+    unawaited(_stopSessionAudio());
     setState(() => _phase = SessionPhase.feedback);
 
     if (_awarded || _session?.isEmergency == true) return;
@@ -118,6 +403,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
 
   void _abortSession() {
     _timer?.cancel();
+    unawaited(_stopSessionAudio());
     if (mounted) context.pop();
   }
 
@@ -141,6 +427,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
       _remainingSeconds = simplifiedDuration;
     });
     _startTimer();
+    unawaited(_syncSpokenGuidance(force: true));
   }
 
   void _registerSensoryNotice() {
@@ -196,6 +483,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
 
     HapticFeedback.lightImpact();
     setState(() => _remainingSeconds = nextRemaining);
+    unawaited(_syncSpokenGuidance(force: true));
   }
 
   void _submitFeedbackAndClose(bool helpedALot) {
@@ -205,6 +493,8 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
   @override
   void dispose() {
     _timer?.cancel();
+    unawaited(_voiceDriver.dispose());
+    unawaited(_ambientPlayer.dispose());
     super.dispose();
   }
 
@@ -319,6 +609,8 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
                         timeString: timeString,
                         showTimer: widget.launchOptions.showSessionTimer,
                         onClose: _abortSession,
+                        onAudioPressed: _showSessionAudioSettings,
+                        audioEnabled: _voiceEnabled || _ambientEnabled,
                       ),
                       const SizedBox(height: ReleafSpacing.sm),
                       Expanded(
@@ -789,6 +1081,17 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
                                   ),
                                 ),
                               ],
+                            ),
+                          ),
+                          IconButton(
+                            key: const Key('reset-active-audio-button'),
+                            tooltip: 'Session audio',
+                            onPressed: _showSessionAudioSettings,
+                            icon: Icon(
+                              _voiceEnabled || _ambientEnabled
+                                  ? Icons.volume_up_rounded
+                                  : Icons.volume_off_rounded,
+                              color: ReleafColors.textSecondary,
                             ),
                           ),
                           if (widget.launchOptions.showSessionTimer)
@@ -1264,12 +1567,16 @@ class _SessionTopBar extends StatelessWidget {
     required this.timeString,
     required this.showTimer,
     required this.onClose,
+    required this.onAudioPressed,
+    required this.audioEnabled,
   });
 
   final ResetContent session;
   final String timeString;
   final bool showTimer;
   final VoidCallback onClose;
+  final VoidCallback onAudioPressed;
+  final bool audioEnabled;
 
   @override
   Widget build(BuildContext context) {
@@ -1303,7 +1610,20 @@ class _SessionTopBar extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(width: ReleafSpacing.sm),
+        const SizedBox(width: ReleafSpacing.xs),
+        IconButton(
+          key: const Key('reset-active-audio-button'),
+          tooltip: 'Session audio',
+          onPressed: onAudioPressed,
+          visualDensity: VisualDensity.compact,
+          icon: Icon(
+            audioEnabled
+                ? Icons.volume_up_rounded
+                : Icons.volume_off_rounded,
+            color: ReleafColors.textSecondary,
+          ),
+        ),
+        const SizedBox(width: ReleafSpacing.xs),
         if (showTimer)
           DecoratedBox(
             decoration: BoxDecoration(
