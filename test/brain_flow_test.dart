@@ -17,7 +17,7 @@ import 'package:releaf_app/games/sequence_echo/sequence_echo_screen.dart';
 import 'package:releaf_app/games/color_conflict/color_conflict_screen.dart';
 import 'package:releaf_app/games/pattern_logic/pattern_logic_screen.dart';
 import 'package:releaf_app/games/signal_scan/signal_scan_screen.dart';
-import 'package:releaf_app/legacy/screens/broken_mirror_game_screen.dart';
+import 'package:releaf_app/games/broken_mirror/broken_mirror_game_screen.dart';
 import 'package:releaf_app/games/labyrinth/labyrinth_game_screen.dart';
 import 'package:releaf_app/legacy/screens/memory_game_screen.dart';
 import 'package:releaf_app/routing/app_router.dart';
