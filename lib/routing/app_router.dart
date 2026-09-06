@@ -88,21 +88,23 @@ GoRouter createAppRouter({String initialLocation = AppRoutes.home}) => GoRouter(
         StatefulShellBranch(
           routes: [
             GoRoute(
-              path: AppRoutes.meditate,
-              pageBuilder: (context, state) =>
-                  _fadePage(const MeditationScreen()),
-            ),
-          ],
-        ),
-        StatefulShellBranch(
-          routes: [
-            GoRoute(
-              path: AppRoutes.sleep,
-              pageBuilder: (context, state) => _fadePage(const SleepScreen()),
+              path: AppRoutes.sound,
+              pageBuilder: (context, state) => _fadePage(const SoundScreen()),
             ),
           ],
         ),
       ],
+    ),
+
+    GoRoute(
+      path: AppRoutes.meditate,
+      pageBuilder: (context, state) =>
+          _fadePage(const MeditationScreen(showBack: true)),
+    ),
+    GoRoute(
+      path: AppRoutes.sleep,
+      pageBuilder: (context, state) =>
+          _fadePage(const SleepScreen(showBack: true)),
     ),
 
     GoRoute(
