@@ -348,7 +348,7 @@ void main() {
       location: AppRoutes.meditationSessionFor('steady-attention-10'),
       preferences: await _preferences(),
     );
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 500));
 
     expect(find.text('RELEAF PREMIUM'), findsOneWidget);
     expect(find.text('Unlock Premium'), findsOneWidget);
