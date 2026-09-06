@@ -13,6 +13,7 @@ import 'package:releaf_app/features/meditation/data/meditation_catalog.dart';
 import 'package:releaf_app/features/meditation/domain/meditation_content.dart';
 import 'package:releaf_app/features/meditation/domain/meditation_resume_state.dart';
 import 'package:releaf_app/features/meditation/presentation/meditation_player_screen.dart';
+import 'package:releaf_app/features/meditation/presentation/meditation_session_gate.dart';
 import 'package:releaf_app/features/sound/data/sound_catalog.dart';
 import 'package:releaf_app/routing/app_router.dart';
 import 'package:releaf_app/routing/app_routes.dart';
@@ -177,6 +178,25 @@ void main() {
     expect(catalog.getByCategory(MeditationCategory.focus), isNotEmpty);
   });
 
+  test('Meditation session access cannot bypass premium entitlement', () {
+    const catalog = MeditationCatalog();
+    final free = catalog.getById('mindfulness-basics-2')!;
+    final premium = catalog.getById('steady-attention-10')!;
+
+    expect(
+      canAccessMeditationSession(free, isPremiumUser: false),
+      isTrue,
+    );
+    expect(
+      canAccessMeditationSession(premium, isPremiumUser: false),
+      isFalse,
+    );
+    expect(
+      canAccessMeditationSession(premium, isPremiumUser: true),
+      isTrue,
+    );
+  });
+
   test('Meditation library stores favorites, recents and completion', () async {
     SharedPreferences.setMockInitialValues({});
     final preferences = await SharedPreferences.getInstance();
@@ -318,6 +338,41 @@ void main() {
     await tester.ensureVisible(find.text('WIND DOWN'));
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Direct premium meditation route is gated for free users', (
+    WidgetTester tester,
+  ) async {
+    await _pumpRoute(
+      tester,
+      location: AppRoutes.meditationSessionFor('steady-attention-10'),
+      preferences: await _preferences(),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('RELEAF PREMIUM'), findsOneWidget);
+    expect(find.text('Unlock Premium'), findsOneWidget);
+    expect(
+      find.byKey(const Key('meditation-living-form')),
+      findsNothing,
+    );
+  });
+
+  testWidgets('Direct premium meditation route opens with entitlement', (
+    WidgetTester tester,
+  ) async {
+    await _pumpRoute(
+      tester,
+      location: AppRoutes.meditationSessionFor('steady-attention-10'),
+      preferences: await _preferences(),
+      isPremium: true,
+    );
+
+    expect(
+      find.byKey(const Key('meditation-living-form')),
+      findsOneWidget,
+    );
+    expect(find.text('Steady Attention'), findsWidgets);
   });
 
   testWidgets('Meditation player uses the signature Living Form and pauses', (

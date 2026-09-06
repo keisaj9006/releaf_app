@@ -13,7 +13,7 @@ import '../features/brain/presentation/brain_screen.dart';
 import '../features/sound/presentation/sound_screen.dart';
 import '../features/sound/presentation/sound_player_screen.dart';
 import '../features/meditation/presentation/meditation_screen.dart';
-import '../features/meditation/presentation/meditation_player_screen.dart';
+import '../features/meditation/presentation/meditation_session_gate.dart';
 import '../features/meditation/domain/meditation_resume_state.dart';
 import '../features/sleep/presentation/sleep_screen.dart';
 import '../features/brain/presentation/game_host_screen.dart';
@@ -110,7 +110,7 @@ GoRouter createAppRouter({String initialLocation = AppRoutes.home}) => GoRouter(
             ? state.extra! as MeditationResumeState
             : null;
         return _fadePage(
-          MeditationPlayerScreen(
+          MeditationSessionGate(
             meditationId: meditationId,
             resumeState: resumeState,
           ),
