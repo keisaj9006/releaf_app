@@ -464,6 +464,7 @@ void main() {
     );
 
     expect(find.text('Sound'), findsWidgets);
+    expect(find.byKey(const Key('sound-emergency-action')), findsOneWidget);
     expect(find.byKey(const Key('sound-open-meditate')), findsOneWidget);
     expect(find.byKey(const Key('sound-open-sleep')), findsOneWidget);
 
