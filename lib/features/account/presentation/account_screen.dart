@@ -10,6 +10,7 @@ import '../../../theme/app_theme.dart';
 import '../../../theme/releaf_design_tokens.dart';
 import '../application/account_auth_service.dart';
 import '../application/account_email_service.dart';
+import '../application/account_recovery_service.dart';
 
 enum _AuthMode { signIn, createAccount }
 
@@ -95,6 +96,38 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
           _passwordController.clear();
         });
       }
+    } catch (error) {
+      if (mounted) setState(() => _errorMessage = _friendlyError(error));
+    } finally {
+      if (mounted) setState(() => _working = false);
+    }
+  }
+
+  Future<void> _requestPasswordReset() async {
+    if (_working) return;
+
+    final email = _emailController.text.trim();
+    if (email.isEmpty || !email.contains('@')) {
+      setState(() {
+        _errorMessage = 'Enter your email address first.';
+        _statusMessage = null;
+      });
+      return;
+    }
+
+    setState(() {
+      _working = true;
+      _errorMessage = null;
+      _statusMessage = null;
+    });
+
+    try {
+      await ref.read(accountRecoveryServiceProvider).requestPasswordReset(email);
+      if (!mounted) return;
+      setState(() {
+        _statusMessage =
+            'Password reset email sent. Open the link on this device to return to Releaf.';
+      });
     } catch (error) {
       if (mounted) setState(() => _errorMessage = _friendlyError(error));
     } finally {
@@ -377,6 +410,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
       nameController: _nameController,
       pendingConfirmationEmail: _pendingConfirmationEmail,
       onResendConfirmation: _resendConfirmation,
+      onForgotPassword: _requestPasswordReset,
       onModeChanged: (mode) {
         setState(() {
           _mode = mode;
@@ -544,6 +578,7 @@ class _SignedOutCard extends StatelessWidget {
     required this.nameController,
     required this.pendingConfirmationEmail,
     required this.onResendConfirmation,
+    required this.onForgotPassword,
     required this.onModeChanged,
     required this.onTogglePassword,
     required this.onSubmit,
@@ -557,6 +592,7 @@ class _SignedOutCard extends StatelessWidget {
   final TextEditingController nameController;
   final String? pendingConfirmationEmail;
   final VoidCallback onResendConfirmation;
+  final VoidCallback onForgotPassword;
   final ValueChanged<_AuthMode> onModeChanged;
   final VoidCallback onTogglePassword;
   final VoidCallback onSubmit;
@@ -666,8 +702,18 @@ class _SignedOutCard extends StatelessWidget {
                 ),
               ),
             ),
+            if (!creating) ...[
+              const SizedBox(height: ReleafSpacing.xs),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  key: const Key('account-forgot-password'),
+                  onPressed: working ? null : onForgotPassword,
+                  child: const Text('Forgot password?'),
+                ),
+              ),
+            ],
             if (!creating && pendingConfirmationEmail != null) ...[
-              const SizedBox(height: ReleafSpacing.sm),
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton.icon(
