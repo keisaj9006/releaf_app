@@ -284,6 +284,10 @@ void main() {
       findsOneWidget,
     );
     expect(
+      find.byKey(const Key('reset-active-master-mute')),
+      findsOneWidget,
+    );
+    expect(
       find.byKey(const Key('reset-active-voice-toggle')),
       findsOneWidget,
     );
