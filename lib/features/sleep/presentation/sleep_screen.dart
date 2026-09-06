@@ -47,7 +47,8 @@ class SleepScreen extends ConsumerWidget {
         .toList(growable: false);
     final sleepMeditations =
         meditationCatalog.getSeries(MeditationCatalog.sleepSeriesId);
-    final tonight = resetCatalog.getById('evening-unwind');
+    final premiumTonight = resetCatalog.getById('evening-unwind');
+    final freeTonight = meditationCatalog.getById('let-the-day-go-6');
     final hasPremiumEntitlement =
         ref.watch(subscriptionControllerProvider).isPremium;
 
@@ -87,14 +88,31 @@ class SleepScreen extends ConsumerWidget {
                             children: [
                               const _Header(),
                               const SizedBox(height: ReleafSpacing.xxl),
-                              if (tonight != null)
+                              if (hasPremiumEntitlement &&
+                                  premiumTonight != null)
                                 _TonightCard(
-                                  session: tonight,
-                                  isLocked: tonight.isPremium &&
-                                      !hasPremiumEntitlement,
+                                  title: premiumTonight.title,
+                                  durationSeconds:
+                                      premiumTonight.durationSeconds,
+                                  description:
+                                      'A guided transition out of unfinished tasks and into a lower-stimulation evening.',
+                                  buttonLabel: 'Start tonight',
                                   onPressed: () => context.push(
-                                    AppRoutes.reliefSessionFor(tonight.id),
+                                    AppRoutes.reliefSessionFor(
+                                      premiumTonight.id,
+                                    ),
                                   ),
+                                )
+                              else if (freeTonight != null)
+                                _TonightCard(
+                                  title: freeTonight.title,
+                                  durationSeconds:
+                                      freeTonight.durationSeconds,
+                                  description:
+                                      'A free guided practice for setting down unfinished tasks before the night continues.',
+                                  buttonLabel: 'Start free night practice',
+                                  onPressed: () =>
+                                      openMeditation(freeTonight),
                                 ),
                               if (sounds.isNotEmpty) ...[
                                 const SizedBox(height: ReleafSpacing.section),
@@ -272,13 +290,17 @@ class _Header extends StatelessWidget {
 
 class _TonightCard extends StatelessWidget {
   const _TonightCard({
-    required this.session,
-    required this.isLocked,
+    required this.title,
+    required this.durationSeconds,
+    required this.description,
+    required this.buttonLabel,
     required this.onPressed,
   });
 
-  final ResetContent session;
-  final bool isLocked;
+  final String title;
+  final int durationSeconds;
+  final String description;
+  final String buttonLabel;
   final VoidCallback onPressed;
 
   @override
@@ -289,7 +311,7 @@ class _TonightCard extends StatelessWidget {
 
         return Semantics(
           container: true,
-          label: 'Tonight. ${session.title}. 8 minute guided wind-down.',
+          label: 'Tonight. $title. ${_durationLabel(durationSeconds)}.',
           child: Container(
             key: const Key('sleep-tonight-hero'),
             height: compact ? 366 : 324,
@@ -341,7 +363,7 @@ class _TonightCard extends StatelessWidget {
                   right: compact ? ReleafSpacing.lg : ReleafSpacing.xl,
                   child: _GlassTag(
                     icon: Icons.schedule_rounded,
-                    label: _durationLabel(session.durationSeconds),
+                    label: _durationLabel(durationSeconds),
                   ),
                 ),
                 Positioned(
@@ -353,7 +375,7 @@ class _TonightCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        session.title,
+                        title,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: ReleafTypography.display.copyWith(
@@ -363,7 +385,7 @@ class _TonightCard extends StatelessWidget {
                       ),
                       const SizedBox(height: ReleafSpacing.xs),
                       Text(
-                        'A guided transition out of unfinished tasks and into a lower-stimulation evening.',
+                        description,
                         maxLines: compact ? 3 : 2,
                         overflow: TextOverflow.ellipsis,
                         style: ReleafTypography.body.copyWith(
@@ -377,14 +399,8 @@ class _TonightCard extends StatelessWidget {
                         height: ReleafControlSizes.standard,
                         child: FilledButton.icon(
                           onPressed: onPressed,
-                          icon: Icon(
-                            isLocked
-                                ? Icons.lock_outline_rounded
-                                : Icons.nights_stay_rounded,
-                          ),
-                          label: Text(
-                            isLocked ? 'Unlock tonight' : 'Start tonight',
-                          ),
+                          icon: const Icon(Icons.nights_stay_rounded),
+                          label: Text(buttonLabel),
                           style: FilledButton.styleFrom(
                             backgroundColor: const Color(0xFFD8D5CB),
                             foregroundColor: const Color(0xFF101116),

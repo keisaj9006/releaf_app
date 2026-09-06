@@ -482,7 +482,9 @@ void main() {
       preferences: await _preferences(),
     );
 
-    expect(find.text('Unlock tonight'), findsOneWidget);
+    expect(find.text('Let the Day Go'), findsWidgets);
+    expect(find.text('Start free night practice'), findsOneWidget);
+    expect(find.text('Unlock tonight'), findsNothing);
 
     // Dispose the first ProviderScope so the premium override cannot reuse
     // the free controller from the first half of this widget test.
@@ -508,7 +510,9 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
 
+    expect(find.text('Evening → Proper Unwind'), findsOneWidget);
     expect(find.text('Start tonight'), findsOneWidget);
+    expect(find.text('Start free night practice'), findsNothing);
     expect(find.text('Unlock tonight'), findsNothing);
   });
 }
