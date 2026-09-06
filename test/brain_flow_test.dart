@@ -16,6 +16,7 @@ import 'package:releaf_app/games/rule_shift/rule_shift_screen.dart';
 import 'package:releaf_app/games/sequence_echo/sequence_echo_screen.dart';
 import 'package:releaf_app/games/n_back/n_back_screen.dart';
 import 'package:releaf_app/games/spatial_span/spatial_span_screen.dart';
+import 'package:releaf_app/games/mental_rotation/mental_rotation_screen.dart';
 import 'package:releaf_app/games/color_conflict/color_conflict_screen.dart';
 import 'package:releaf_app/games/pattern_logic/pattern_logic_screen.dart';
 import 'package:releaf_app/games/signal_scan/signal_scan_screen.dart';
@@ -51,6 +52,7 @@ void main() {
     expect(resolvedTypes['sequence_echo'], SequenceEchoScreen);
     expect(resolvedTypes['n_back'], NBackScreen);
     expect(resolvedTypes['spatial_span'], SpatialSpanScreen);
+    expect(resolvedTypes['mental_rotation'], MentalRotationScreen);
     expect(resolvedTypes['color_conflict'], ColorConflictScreen);
     expect(resolvedTypes['pattern_logic'], PatternLogicScreen);
     expect(resolvedTypes['signal_scan'], SignalScanScreen);
@@ -262,6 +264,7 @@ void main() {
       'sequence_echo': SequenceEchoScreen,
       'n_back': NBackScreen,
       'spatial_span': SpatialSpanScreen,
+      'mental_rotation': MentalRotationScreen,
       'color_conflict': ColorConflictScreen,
       'pattern_logic': PatternLogicScreen,
       'signal_scan': SignalScanScreen,
@@ -348,6 +351,7 @@ void main() {
     expect(state.trainingLevelFor('math_race'), 1);
     expect(state.trainingLevelFor('n_back'), 1);
     expect(state.trainingLevelFor('spatial_span'), 1);
+    expect(state.trainingLevelFor('mental_rotation'), 1);
     expect(state.trainingLevelFor('memory'), 1);
   });
 
@@ -634,6 +638,34 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('Mental Rotation scales grid with persistent level', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MentalRotationScreen(
+          trainingLevel: 10,
+          onFinish: (_) {},
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('Mental Rotation'), findsOneWidget);
+    expect(find.text('L10'), findsOneWidget);
+    expect(find.byKey(const Key('mental-left-24')), findsOneWidget);
+    expect(find.byKey(const Key('mental-right-24')), findsOneWidget);
+    expect(find.text('5×5'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('brain-difficulty-hard')));
+    await tester.pump();
+
+    expect(find.byKey(const Key('mental-rotation-puzzle')), findsOneWidget);
+    expect(find.byKey(const Key('mental-rotation-same')), findsOneWidget);
+    expect(find.byKey(const Key('mental-rotation-mirrored')), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('New Brain games stay overflow-free at 320px', (
     WidgetTester tester,
   ) async {
@@ -651,6 +683,7 @@ void main() {
       SignalScanScreen(onFinish: (_) {}),
       NBackScreen(onFinish: (_) {}),
       SpatialSpanScreen(onFinish: (_) {}),
+      MentalRotationScreen(onFinish: (_) {}),
     ];
 
     for (final game in games) {
