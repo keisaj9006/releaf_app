@@ -81,6 +81,13 @@ const brainGames = <BrainGameMeta>[
     hasDifficultyLevels: true,
   ),
   BrainGameMeta(
+    id: 'mental_rotation',
+    title: 'Mental Rotation',
+    icon: Icons.rotate_90_degrees_ccw_rounded,
+    group: BrainGameGroup.spatial,
+    hasDifficultyLevels: true,
+  ),
+  BrainGameMeta(
     id: 'color_conflict',
     title: 'Color Conflict',
     icon: Icons.palette_outlined,
