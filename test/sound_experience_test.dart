@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:releaf_app/core/providers.dart';
+import 'package:releaf_app/features/sound/application/sound_player_controller.dart';
 import 'package:releaf_app/features/sound/data/sound_catalog.dart';
 import 'package:releaf_app/features/sound/presentation/sound_screen.dart';
 
@@ -32,6 +33,28 @@ void main() {
       ]),
     );
     expect(tracks.every((track) => track.assetPath.endsWith('.mp3')), isTrue);
+  });
+
+  test('Sleep timer stores a visible real-time countdown', () async {
+    final preferences = await _preferences();
+    final controller = SoundPlayerController(
+      const SoundCatalog(),
+      preferences,
+    );
+    addTearDown(controller.dispose);
+
+    await controller.setSleepTimer(30);
+
+    expect(controller.state.sleepTimerMinutes, 30);
+    expect(
+      controller.state.sleepTimerRemainingSeconds,
+      inInclusiveRange(1799, 1800),
+    );
+
+    await controller.setSleepTimer(null);
+
+    expect(controller.state.sleepTimerMinutes, isNull);
+    expect(controller.state.sleepTimerRemainingSeconds, isNull);
   });
 
   testWidgets('Sound library renders its own audio-first visual language', (
