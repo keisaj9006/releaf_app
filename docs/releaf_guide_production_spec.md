@@ -1,10 +1,14 @@
 # Releaf Guide — Production Voice Specification
 
-## Decision
+## Decision — voice locked 6 September 2026
 
-System TTS is a fallback only. Releaf's premium meditation experience should use a consistent, pre-rendered female guide voice.
+System TTS is a fallback only. Releaf's premium guided experience uses one consistent, pre-rendered female Releaf Guide voice.
 
-The production-quality target is a real female voice actor recorded in the intended meditation style. For scalable future narration, a verified professional voice clone may be used only when the voice owner creates/verifies the clone and grants Releaf the required usage rights.
+The owner-selected voice is now the production baseline. Reference generation ID: `d730719be8654c93bddd639a96da7417`.
+
+Canonical generation speed: **0.75x**. Generate narration at 0.75 in the voice provider rather than time-stretching finished audio in the app. This preserves the intended phrasing and avoids playback artefacts.
+
+The voice applies to **Meditate**, guided Reset experiences, and Emergency guidance where voice is enabled. **Sleep is voice-free** and must contain only sleep audio/music/nature sound content.
 
 ## Voice identity
 
@@ -64,23 +68,27 @@ Longer sessions should generally contain a lower narration density than short in
 - avoid promising calm
 - permissive language
 
-### Sleep
-- slowest profile
+### Evening / settling
 - softer energy
 - longer gaps
 - reduced verbal density toward the end
+- still clearly guided; do not turn the delivery into whisper/ASMR
+
+### Sleep
+No Releaf Guide narration. Sleep is a voice-free audio destination.
 
 ## Recording / generation workflow
 
-### Best-quality path
-1. Cast one female voice actor.
-2. Record a 10–15 minute audition pack using real Releaf scripts.
-3. Select the voice using blind listening criteria: naturalness, warmth, trust, non-AI impression, long-session comfort.
-4. Record final sessions as clean isolated voice.
+### Production path after voice lock
+1. Use the owner-selected Releaf Guide voice consistently across the guided library.
+2. Generate at **0.75x speed** using the provider's native speed control.
+3. Use real Releaf scripts with intentional punctuation and short phrasing; silence belongs in the session timing, not as filler words.
+4. Export final sessions as clean isolated voice.
 5. Edit breath/noise only when distracting; do not sterilise natural speech.
 6. Master all narration to a consistent loudness.
 7. Export narration separately from ambience.
 8. Mix dynamically in-app so users retain independent Guide/Ambience controls.
+9. QA every generated session for naturalness, pronunciation, cadence, clipping, and comfort before shipping.
 
 ### Scalable synthetic path
 If a verified professional voice clone is used:
