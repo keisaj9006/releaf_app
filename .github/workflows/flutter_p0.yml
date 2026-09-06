@@ -30,8 +30,22 @@ jobs:
       - name: Test
         run: flutter test
 
+      - name: Check RevenueCat configuration
+        env:
+          REVENUECAT_ANDROID_API_KEY: ${{ secrets.REVENUECAT_ANDROID_API_KEY }}
+        run: |
+          if [ -z "$REVENUECAT_ANDROID_API_KEY" ]; then
+            echo "::warning::REVENUECAT_ANDROID_API_KEY is not configured. Premium purchase/restore will be unavailable in this APK."
+          else
+            echo "RevenueCat Android configuration detected."
+          fi
+
       - name: Build Android debug APK
-        run: flutter build apk --debug
+        env:
+          REVENUECAT_ANDROID_API_KEY: ${{ secrets.REVENUECAT_ANDROID_API_KEY }}
+        run: >
+          flutter build apk --debug
+          --dart-define=REVENUECAT_ANDROID_API_KEY="$REVENUECAT_ANDROID_API_KEY"
 
       - name: Upload Android debug APK
         uses: actions/upload-artifact@v4
