@@ -717,12 +717,6 @@ String _formatTimerCountdown(int totalSeconds) {
   return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
 }
 
-String _formatDuration(Duration duration) {
-  final minutes = duration.inMinutes;
-  final seconds = duration.inSeconds.remainder(60);
-  return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-}
-
 
 ReleafSoundArtworkVariant _artworkForTrack(String id) {
   return id.endsWith('02')
