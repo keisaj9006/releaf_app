@@ -4,11 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/providers.dart';
 import '../../../routing/app_routes.dart';
 import '../../../theme/app_theme.dart';
 import '../../../theme/releaf_design_tokens.dart';
 import '../../../theme/widgets/releaf_sound_artwork.dart';
 import '../../../theme/widgets/releaf_components.dart';
+import '../../relief/application/relief_paywall_hooks.dart';
 import '../application/sound_player_controller.dart';
 import '../data/sound_catalog.dart';
 import '../domain/sound_content.dart';
@@ -20,6 +22,7 @@ class SoundScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final catalog = ref.watch(soundCatalogProvider);
     final state = ref.watch(soundPlayerControllerProvider);
+    final isPremium = ref.watch(subscriptionControllerProvider).isPremium;
     final tracks = catalog.getAll();
 
     final recent = state.recentIds
@@ -63,8 +66,11 @@ class SoundScreen extends ConsumerWidget {
                                 isPlaying:
                                     state.currentTrackId == tracks.first.id &&
                                     state.isPlaying,
-                                onOpen: () => context.push(
-                                  AppRoutes.soundPlayerFor(tracks.first.id),
+                                onOpen: () => _openSoundTrack(
+                                  context,
+                                  ref,
+                                  tracks.first,
+                                  isPremium: isPremium,
                                 ),
                               ),
                               if (recent.isNotEmpty) ...[
@@ -78,6 +84,13 @@ class SoundScreen extends ConsumerWidget {
                                 _SoundTrackRail(
                                   tracks: recent,
                                   state: state,
+                                  isPremium: isPremium,
+                                  onOpen: (track) => _openSoundTrack(
+                                    context,
+                                    ref,
+                                    track,
+                                    isPremium: isPremium,
+                                  ),
                                 ),
                               ],
                               if (favorites.isNotEmpty) ...[
@@ -91,6 +104,13 @@ class SoundScreen extends ConsumerWidget {
                                 _SoundTrackRail(
                                   tracks: favorites,
                                   state: state,
+                                  isPremium: isPremium,
+                                  onOpen: (track) => _openSoundTrack(
+                                    context,
+                                    ref,
+                                    track,
+                                    isPremium: isPremium,
+                                  ),
                                 ),
                               ],
                               const SizedBox(height: ReleafSpacing.section),
@@ -105,6 +125,13 @@ class SoundScreen extends ConsumerWidget {
                                 _SoundTrackRow(
                                   track: track,
                                   state: state,
+                                  isPremium: isPremium,
+                                  onOpen: () => _openSoundTrack(
+                                    context,
+                                    ref,
+                                    track,
+                                    isPremium: isPremium,
+                                  ),
                                 ),
                                 const SizedBox(height: ReleafSpacing.sm),
                               ],
@@ -341,10 +368,14 @@ class _SoundTrackRail extends StatelessWidget {
   const _SoundTrackRail({
     required this.tracks,
     required this.state,
+    required this.isPremium,
+    required this.onOpen,
   });
 
   final List<SoundContent> tracks;
   final SoundPlayerState state;
+  final bool isPremium;
+  final ValueChanged<SoundContent> onOpen;
 
   @override
   Widget build(BuildContext context) {
@@ -364,6 +395,8 @@ class _SoundTrackRail extends StatelessWidget {
               isCurrent: state.currentTrackId == track.id,
               isPlaying:
                   state.currentTrackId == track.id && state.isPlaying,
+              isLocked: track.isPremium && !isPremium,
+              onPressed: () => onOpen(track),
             ),
           );
         },
@@ -376,10 +409,14 @@ class _SoundTrackRow extends StatelessWidget {
   const _SoundTrackRow({
     required this.track,
     required this.state,
+    required this.isPremium,
+    required this.onOpen,
   });
 
   final SoundContent track;
   final SoundPlayerState state;
+  final bool isPremium;
+  final VoidCallback onOpen;
 
   @override
   Widget build(BuildContext context) {
@@ -389,6 +426,8 @@ class _SoundTrackRow extends StatelessWidget {
         track: track,
         isCurrent: state.currentTrackId == track.id,
         isPlaying: state.currentTrackId == track.id && state.isPlaying,
+        isLocked: track.isPremium && !isPremium,
+        onPressed: onOpen,
       ),
     );
   }
@@ -399,16 +438,20 @@ class _SoundTrackTile extends StatelessWidget {
     required this.track,
     required this.isCurrent,
     required this.isPlaying,
+    required this.isLocked,
+    required this.onPressed,
   });
 
   final SoundContent track;
   final bool isCurrent;
   final bool isPlaying;
+  final bool isLocked;
+  final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
     return ReleafPressableCard(
-      onPressed: () => context.push(AppRoutes.soundPlayerFor(track.id)),
+      onPressed: onPressed,
       padding: EdgeInsets.zero,
       child: Stack(
         fit: StackFit.expand,
@@ -429,6 +472,18 @@ class _SoundTrackTile extends StatelessWidget {
               ),
             ),
           ),
+          if (isLocked)
+            Positioned.fill(
+              child: ColoredBox(
+                color: Colors.black.withValues(alpha: 0.20),
+              ),
+            ),
+          if (isLocked)
+            const Positioned(
+              top: 10,
+              right: 10,
+              child: _PremiumTag(),
+            ),
           Padding(
             padding: const EdgeInsets.all(ReleafSpacing.md),
             child: Row(
@@ -476,11 +531,197 @@ class _SoundTrackTile extends StatelessWidget {
                     ],
                   ),
                 ),
-                const Icon(
-                  Icons.chevron_right_rounded,
-                  color: ReleafColors.textSecondary,
+                Icon(
+                  isLocked
+                      ? Icons.lock_outline_rounded
+                      : Icons.chevron_right_rounded,
+                  color: isLocked
+                      ? ReleafColors.premium
+                      : ReleafColors.textSecondary,
                 ),
               ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+Future<void> _openSoundTrack(
+  BuildContext context,
+  WidgetRef ref,
+  SoundContent track, {
+  required bool isPremium,
+}) async {
+  if (!track.isPremium || isPremium) {
+    await context.push(AppRoutes.soundPlayerFor(track.id));
+    return;
+  }
+
+  final unlock = await showModalBottomSheet<bool>(
+    context: context,
+    useSafeArea: true,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    barrierColor: Colors.black.withValues(alpha: 0.70),
+    builder: (_) => _SoundPremiumPreviewSheet(track: track),
+  );
+
+  if (unlock != true || !context.mounted) return;
+
+  await maybeShowPaywall(context, ref, force: true, softOffer: true);
+  if (!context.mounted) return;
+
+  final nowPremium = ref.read(subscriptionControllerProvider).isPremium;
+  if (nowPremium) {
+    await context.push(AppRoutes.soundPlayerFor(track.id));
+  }
+}
+
+class _SoundPremiumPreviewSheet extends StatelessWidget {
+  const _SoundPremiumPreviewSheet({required this.track});
+
+  final SoundContent track;
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.bottomCenter,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 680),
+        child: Material(
+          key: const Key('sound-premium-preview'),
+          color: ReleafColors.backgroundRaised,
+          borderRadius: const BorderRadius.vertical(
+            top: Radius.circular(ReleafRadii.extraLarge),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(
+              ReleafSpacing.screen,
+              ReleafSpacing.lg,
+              ReleafSpacing.screen,
+              ReleafSpacing.xl,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const _PremiumTag(),
+                    const Spacer(),
+                    IconButton(
+                      tooltip: 'Close preview',
+                      onPressed: () => Navigator.of(context).pop(false),
+                      icon: const Icon(Icons.close_rounded),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: ReleafSpacing.md),
+                Container(
+                  height: 180,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(ReleafRadii.large),
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      ReleafSoundArtwork(
+                        variant: _artworkForTrack(track.id),
+                        intensity: 0.94,
+                      ),
+                      const DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Color(0x12000000),
+                              Color(0xD2080F12),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: ReleafSpacing.lg),
+                Text(
+                  track.title,
+                  style: ReleafTypography.display.copyWith(fontSize: 28),
+                ),
+                const SizedBox(height: ReleafSpacing.xs),
+                Text(
+                  track.subtitle,
+                  style: ReleafTypography.body.copyWith(
+                    color: ReleafColors.textSecondary,
+                    height: 1.5,
+                  ),
+                ),
+                const SizedBox(height: ReleafSpacing.sm),
+                Text(
+                  '${_categoryLabel(track.category)} • Continuous loop',
+                  style: ReleafTypography.meta.copyWith(
+                    color: ReleafFeatureAccents.sound,
+                  ),
+                ),
+                const SizedBox(height: ReleafSpacing.lg),
+                Text(
+                  'This sound is part of Releaf Premium. You can see what it is before deciding to unlock it.',
+                  style: ReleafTypography.meta.copyWith(
+                    color: ReleafColors.textMuted,
+                    height: 1.45,
+                  ),
+                ),
+                const SizedBox(height: ReleafSpacing.lg),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    key: const Key('sound-premium-preview-unlock'),
+                    onPressed: () => Navigator.of(context).pop(true),
+                    icon: const Icon(Icons.lock_open_rounded),
+                    label: const Text('Unlock Premium'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PremiumTag extends StatelessWidget {
+  const _PremiumTag();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
+      decoration: BoxDecoration(
+        color: ReleafColors.premium.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(ReleafRadii.pill),
+        border: Border.all(
+          color: ReleafColors.premium.withValues(alpha: 0.26),
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(
+            Icons.workspace_premium_outlined,
+            size: 13,
+            color: ReleafColors.premium,
+          ),
+          const SizedBox(width: 5),
+          Text(
+            'PREMIUM',
+            style: ReleafTypography.eyebrow.copyWith(
+              color: ReleafColors.premium,
+              fontSize: 8,
             ),
           ),
         ],
