@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/session/session_manager.dart';
-import '../features/relief/data/reset_catalog.dart';
 import '../theme/releaf_design_tokens.dart';
 import 'app_routes.dart';
 
@@ -48,25 +47,6 @@ class ScaffoldWithNavBar extends ConsumerWidget {
             ),
         ],
       ),
-      floatingActionButton: navigationShell.currentIndex == 1
-          ? null
-          : FloatingActionButton.small(
-              tooltip: 'Open Emergency Calm',
-              backgroundColor: ReleafColors.surfaceElevated,
-              foregroundColor: ReleafFeatureAccents.emergency,
-              shape: CircleBorder(
-                side: BorderSide(
-                  color:
-                      ReleafFeatureAccents.emergency.withValues(alpha: 0.34),
-                ),
-              ),
-              onPressed: () {
-                context.push(
-                  AppRoutes.reliefSessionFor(ResetCatalog.emergencySessionId),
-                );
-              },
-              child: const Icon(Icons.health_and_safety_outlined),
-            ),
       bottomNavigationBar: DecoratedBox(
         decoration: BoxDecoration(
           border: Border(
