@@ -1248,6 +1248,48 @@ _BrainGamePresentation _presentationFor(String gameId) {
         artwork: ReleafBrainArtworkVariant.sequenceEcho,
         accent: Color(0xFF8FA8E8),
       ),
+    'n_back' => const _BrainGamePresentation(
+        skill: 'WORKING MEMORY UPDATE',
+        benefit:
+            'Keep recent information active and update it as each new item arrives.',
+        artwork: ReleafBrainArtworkVariant.sequenceEcho,
+        accent: Color(0xFFB8A5FF),
+      ),
+    'spatial_span' => const _BrainGamePresentation(
+        skill: 'VISUOSPATIAL MEMORY',
+        benefit:
+            'Hold a short path of locations in mind and reproduce it in order.',
+        artwork: ReleafBrainArtworkVariant.memory,
+        accent: Color(0xFF82C9E8),
+      ),
+    'mental_rotation' => const _BrainGamePresentation(
+        skill: 'SPATIAL REASONING',
+        benefit:
+            'Compare shapes across rotations and distinguish them from mirror reflections.',
+        artwork: ReleafBrainArtworkVariant.brokenMirror,
+        accent: Color(0xFFE0A7D8),
+      ),
+    'trail_switch' => const _BrainGamePresentation(
+        skill: 'VISUAL SEARCH & SWITCHING',
+        benefit:
+            'Scan a field and follow an ordered sequence while switching between rule sets.',
+        artwork: ReleafBrainArtworkVariant.ruleShift,
+        accent: Color(0xFFF1BC73),
+      ),
+    'tower_plan' => const _BrainGamePresentation(
+        skill: 'PLANNING & PROBLEM SOLVING',
+        benefit:
+            'Plan legal moves toward a goal while respecting changing constraints.',
+        artwork: ReleafBrainArtworkVariant.labyrinth,
+        accent: Color(0xFF78D0A8),
+      ),
+    'symbol_code' => const _BrainGamePresentation(
+        skill: 'ASSOCIATIVE MAPPING',
+        benefit:
+            'Read a temporary symbol key and apply the mapping accurately across trials.',
+        artwork: ReleafBrainArtworkVariant.signalScan,
+        accent: Color(0xFF8CC8FF),
+      ),
     'color_conflict' => const _BrainGamePresentation(
         skill: 'INHIBITORY CONTROL',
         benefit: 'Ignore conflicting word information and respond to ink color.',
