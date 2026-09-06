@@ -12,8 +12,13 @@ import 'math_race_stats.dart';
 
 class MathRaceScreen extends ConsumerStatefulWidget {
   final ValueChanged<int>? onFinish;
+  final int trainingLevel;
 
-  const MathRaceScreen({super.key, this.onFinish});
+  const MathRaceScreen({
+    super.key,
+    this.onFinish,
+    this.trainingLevel = 1,
+  });
 
   @override
   ConsumerState<MathRaceScreen> createState() => _MathRaceScreenState();
@@ -28,6 +33,10 @@ class _MathRaceScreenState extends ConsumerState<MathRaceScreen> {
 
   int _level = 1;
   int _score = 0;
+
+  int get _trainingLevel => widget.trainingLevel.clamp(1, 12).toInt();
+
+  int get _startingPuzzleLevel => 1 + ((_trainingLevel - 1) * 3);
 
   Difficulty _difficulty = Difficulty.easy;
   MathPuzzle? _puzzle;
@@ -52,7 +61,7 @@ class _MathRaceScreenState extends ConsumerState<MathRaceScreen> {
 
     _locked = false;
     _feedback = null;
-    _level = 1;
+    _level = _startingPuzzleLevel;
     _score = 0;
 
     _nextPuzzle();
@@ -311,7 +320,11 @@ class _MathRaceScreenState extends ConsumerState<MathRaceScreen> {
                                     children: [
                                       _statusChip(
                                         icon: Icons.layers_outlined,
-                                        label: 'Level $_level',
+                                        label: 'Brain L$_trainingLevel',
+                                      ),
+                                      _statusChip(
+                                        icon: Icons.calculate_outlined,
+                                        label: 'Puzzle $_level',
                                       ),
                                       _statusChip(
                                         icon: Icons.timer_outlined,
