@@ -21,15 +21,21 @@ class PatternLogicScreen extends StatefulWidget {
 class _PatternLogicScreenState extends State<PatternLogicScreen> {
   static const _accent = Color(0xFFA9A0E8);
 
-  BrainDifficulty _difficulty = BrainDifficulty.easy;
+  BrainDifficulty _difficulty = BrainDifficulty.medium;
   int _round = 0;
   int _score = 0;
   bool? _lastCorrect;
   bool _finished = false;
 
   List<_PatternPuzzle> get _puzzles => switch (_difficulty) {
-        BrainDifficulty.easy => _easyPuzzles,
-        BrainDifficulty.medium => _mediumPuzzles,
+        BrainDifficulty.easy => <_PatternPuzzle>[
+            ..._easyPuzzles.take(2),
+            ..._mediumPuzzles.take(4),
+          ],
+        BrainDifficulty.medium => <_PatternPuzzle>[
+            ..._mediumPuzzles.take(3),
+            ..._hardPuzzles.take(4),
+          ],
         BrainDifficulty.hard => _hardPuzzles,
       };
 
