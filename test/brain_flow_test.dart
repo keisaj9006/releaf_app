@@ -339,6 +339,7 @@ void main() {
     expect(state.trainingLevelFor('sequence_echo'), 3);
     expect(state.trainingLevelFor('broken_mirror'), 1);
     expect(state.trainingLevelFor('labyrinth'), 1);
+    expect(state.trainingLevelFor('math_race'), 1);
     expect(state.trainingLevelFor('memory'), 1);
   });
 
@@ -402,6 +403,27 @@ void main() {
     await tester.pump(const Duration(milliseconds: 50));
 
     expect(find.text('Ready'), findsNothing);
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
+  });
+
+  testWidgets('Math Race starts from the persistent Brain level', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MathRaceScreen(
+          trainingLevel: 5,
+          onFinish: (_) {},
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('Brain L5'), findsOneWidget);
+    expect(find.text('Puzzle 13'), findsOneWidget);
     expect(tester.takeException(), isNull);
 
     await tester.pumpWidget(const SizedBox.shrink());
