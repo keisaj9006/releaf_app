@@ -1109,6 +1109,7 @@ class _DailyInsightCard extends StatelessWidget {
                     ),
                   ],
                 ),
+              ),
               ],
             ),
           ),
