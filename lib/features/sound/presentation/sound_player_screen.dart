@@ -199,62 +199,18 @@ class _SoundPlayerScreenState extends ConsumerState<SoundPlayerScreen> {
                                   ? ReleafSpacing.md
                                   : ReleafSpacing.xl,
                             ),
-                            _PositionSlider(
-                              position: position,
-                              duration: duration,
-                              onChanged: (value) {
-                                if (duration.inMilliseconds <= 0) return;
-                                controller.seekTo(
-                                  Duration(
-                                    milliseconds:
-                                        (duration.inMilliseconds * value)
-                                            .round(),
-                                  ),
-                                );
-                              },
-                            ),
+                            const _ContinuousLoopStatus(),
                             SizedBox(
                               height: compact
-                                  ? ReleafSpacing.xs
+                                  ? ReleafSpacing.sm
                                   : ReleafSpacing.md,
                             ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                IconButton(
-                                  tooltip: 'Back 15 seconds',
-                                  onPressed: () => controller.seekRelative(
-                                    const Duration(seconds: -15),
-                                  ),
-                                  icon: const Icon(Icons.replay_10_rounded),
-                                  iconSize: compact ? 26 : 30,
-                                ),
-                                SizedBox(
-                                  width: compact
-                                      ? ReleafSpacing.md
-                                      : ReleafSpacing.lg,
-                                ),
-                                _PrimaryPlayButton(
-                                  isPlaying: isPlaying,
-                                  compact: compact,
-                                  onPressed: isCurrent
-                                      ? controller.togglePlayPause
-                                      : () => controller.play(track),
-                                ),
-                                SizedBox(
-                                  width: compact
-                                      ? ReleafSpacing.md
-                                      : ReleafSpacing.lg,
-                                ),
-                                IconButton(
-                                  tooltip: 'Forward 15 seconds',
-                                  onPressed: () => controller.seekRelative(
-                                    const Duration(seconds: 15),
-                                  ),
-                                  icon: const Icon(Icons.forward_10_rounded),
-                                  iconSize: compact ? 26 : 30,
-                                ),
-                              ],
+                            _PrimaryPlayButton(
+                              isPlaying: isPlaying,
+                              compact: compact,
+                              onPressed: isCurrent
+                                  ? controller.togglePlayPause
+                                  : () => controller.play(track),
                             ),
                             SizedBox(
                               height: compact
@@ -272,6 +228,8 @@ class _SoundPlayerScreenState extends ConsumerState<SoundPlayerScreen> {
                             ),
                             _SleepTimer(
                               selectedMinutes: state.sleepTimerMinutes,
+                              remainingSeconds:
+                                  state.sleepTimerRemainingSeconds,
                               onSelected: controller.setSleepTimer,
                             ),
                             const SizedBox(height: ReleafSpacing.sm),
@@ -544,45 +502,44 @@ class _SoundPulsePainter extends CustomPainter {
   }
 }
 
-class _PositionSlider extends StatelessWidget {
-  const _PositionSlider({
-    required this.position,
-    required this.duration,
-    required this.onChanged,
-  });
-
-  final Duration position;
-  final Duration duration;
-  final ValueChanged<double> onChanged;
+class _ContinuousLoopStatus extends StatelessWidget {
+  const _ContinuousLoopStatus();
 
   @override
   Widget build(BuildContext context) {
-    final value = duration.inMilliseconds <= 0
-        ? 0.0
-        : (position.inMilliseconds / duration.inMilliseconds)
-            .clamp(0.0, 1.0)
-            .toDouble();
-
-    return Column(
-      children: [
-        Slider(
-          value: value,
-          onChanged: duration.inMilliseconds <= 0 ? null : onChanged,
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 6),
-          child: Row(
-            children: [
-              Text(_formatDuration(position), style: ReleafTypography.meta),
-              const Spacer(),
-              Text(_formatDuration(duration), style: ReleafTypography.meta),
-            ],
+    return Container(
+      key: const Key('sound-continuous-loop'),
+      padding: const EdgeInsets.symmetric(
+        horizontal: ReleafSpacing.md,
+        vertical: 10,
+      ),
+      decoration: BoxDecoration(
+        color: ReleafColors.surfaceSoft.withValues(alpha: 0.54),
+        borderRadius: BorderRadius.circular(ReleafRadii.pill),
+        border: Border.all(color: ReleafColors.borderSoft),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(
+            Icons.all_inclusive_rounded,
+            size: 17,
+            color: ReleafFeatureAccents.sound,
           ),
-        ),
-      ],
+          const SizedBox(width: 7),
+          Text(
+            'Continuous seamless loop',
+            style: ReleafTypography.meta.copyWith(
+              color: ReleafColors.textSecondary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
+
 
 class _PrimaryPlayButton extends StatelessWidget {
   const _PrimaryPlayButton({
@@ -667,10 +624,12 @@ class _VolumeControl extends StatelessWidget {
 class _SleepTimer extends StatelessWidget {
   const _SleepTimer({
     required this.selectedMinutes,
+    required this.remainingSeconds,
     required this.onSelected,
   });
 
   final int? selectedMinutes;
+  final int? remainingSeconds;
   final ValueChanged<int?> onSelected;
 
   @override
@@ -681,6 +640,20 @@ class _SleepTimer extends StatelessWidget {
           'SLEEP TIMER',
           style: ReleafTypography.eyebrow.copyWith(
             color: ReleafColors.textSecondary,
+          ),
+        ),
+        const SizedBox(height: 5),
+        Text(
+          remainingSeconds == null
+              ? 'Sound will keep playing until you stop it.'
+              : 'Stops in ${_formatTimerCountdown(remainingSeconds!)}',
+          key: const Key('sound-sleep-timer-status'),
+          style: ReleafTypography.meta.copyWith(
+            color: remainingSeconds == null
+                ? ReleafColors.textMuted
+                : ReleafColors.textPrimary,
+            fontWeight:
+                remainingSeconds == null ? FontWeight.w500 : FontWeight.w700,
           ),
         ),
         const SizedBox(height: ReleafSpacing.sm),
@@ -694,7 +667,7 @@ class _SleepTimer extends StatelessWidget {
               selected: selectedMinutes == null,
               onTap: () => onSelected(null),
             ),
-            for (final minutes in const [15, 30, 60])
+            for (final minutes in const [15, 30, 45, 60, 90])
               _TimerChip(
                 label: '$minutes min',
                 selected: selectedMinutes == minutes,
@@ -735,6 +708,13 @@ class _TimerChip extends StatelessWidget {
       ),
     );
   }
+}
+
+String _formatTimerCountdown(int totalSeconds) {
+  final safe = totalSeconds.clamp(0, 24 * 60 * 60);
+  final minutes = safe ~/ 60;
+  final seconds = safe % 60;
+  return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
 }
 
 String _formatDuration(Duration duration) {
