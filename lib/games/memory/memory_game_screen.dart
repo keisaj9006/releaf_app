@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:math' show pi, max;
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../legacy/screens/memory_stats_screen.dart';
+import 'memory_stats_screen.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/releaf_design_tokens.dart';
 import '../../theme/widgets/releaf_brain_artwork.dart';
