@@ -757,7 +757,7 @@ Future<void> _showHomeFocusSheet(
     builder: (sheetContext) {
       return SafeArea(
         top: false,
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(
             ReleafSpacing.screen,
             ReleafSpacing.xl,
