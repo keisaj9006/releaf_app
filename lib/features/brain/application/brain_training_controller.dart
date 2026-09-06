@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/providers.dart';
 
 const progressiveBrainGameIds = <String>{
+  'memory',
   'rule_shift',
   'sequence_echo',
   'color_conflict',
