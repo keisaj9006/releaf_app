@@ -43,17 +43,29 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen>
   // ====== Rozmiary ======
   // Wizualny listek (duży – to co widzisz)
   static const double _leafVisualRadiusFrac = 0.035;
-  // Kolizyjny promień (mniejszy – do przejścia korytarzami)
-  static const double _leafHitRadiusFrac = 0.018;
+  // Collision tolerance tightens as levels progress.
+  static const List<double> _leafHitRadiusByLevel = [
+    0.018,
+    0.020,
+    0.022,
+    0.024,
+  ];
+
+  double get _leafHitRadiusFrac =>
+      _leafHitRadiusByLevel[_levelIndex.clamp(0, _leafHitRadiusByLevel.length - 1)];
   // Meta
   static const double _goalRadiusScreenFrac = 0.028;
   // Krok interpolacji ruchu
   static const double _stepScreenPx = 3.0;
 
   // Czas i statystyki
-  static const int _levelSeconds = 60;
-  int _timeLeft = _levelSeconds;
-  int get _timeSpent => _levelSeconds - _timeLeft;
+  static const List<int> _levelSeconds = [55, 48, 42, 36];
+
+  int get _levelTimeLimit =>
+      _levelSeconds[_levelIndex.clamp(0, _levelSeconds.length - 1)];
+
+  int _timeLeft = _levelSeconds.first;
+  int get _timeSpent => _levelTimeLimit - _timeLeft;
   int _wallHits = 0;
 
   // ✅ To jest lokalny wynik gry (NIE globalne Leaves)
@@ -109,7 +121,7 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen>
     _countdown?.cancel();
     _ticker?.cancel();
     _paused = false;
-    _timeLeft = _levelSeconds;
+    _timeLeft = _levelTimeLimit;
     _wallHits = 0;
     _lastVelocityImg = Offset.zero;
     _updateWalkSpeed();
@@ -449,6 +461,10 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen>
         stats: [
           _StatRow(label: 'Time', value: '${_timeSpent}s'),
           _StatRow(label: 'Wall hits', value: '$_wallHits'),
+          _StatRow(
+            label: 'Precision',
+            value: 'L${_levelIndex + 1} · ${(_leafHitRadiusFrac * 1000).round()}',
+          ),
           _StatRow(label: 'Score earned', value: '+$earned'),
         ],
         primaryText: (_levelIndex < _levelsCount - 1) ? 'Next' : 'Finish',
@@ -607,6 +623,12 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen>
                         icon: Icons.flag_outlined,
                         label: 'Level',
                         value: 'L${_levelIndex + 1}/$_levelsCount',
+                        compact: isCompact,
+                      ),
+                      _HudPill(
+                        icon: Icons.tune_rounded,
+                        label: 'Precision',
+                        value: '${(_leafHitRadiusFrac * 1000).round()}',
                         compact: isCompact,
                       ),
                       Row(
