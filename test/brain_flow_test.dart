@@ -746,7 +746,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: SymbolCodeScreen(
-          trainingLevel: 10,
+          trainingLevel: 4,
           onFinish: (_) {},
         ),
       ),
@@ -754,15 +754,15 @@ void main() {
     await tester.pump();
 
     expect(find.text('Symbol Code'), findsOneWidget);
-    expect(find.text('L10'), findsOneWidget);
-    expect(find.byKey(const Key('symbol-code-key-7')), findsOneWidget);
-    expect(find.byKey(const Key('symbol-code-key-8')), findsNothing);
+    expect(find.text('L4'), findsOneWidget);
+    expect(find.byKey(const Key('symbol-code-key-6')), findsOneWidget);
+    expect(find.byKey(const Key('symbol-code-key-7')), findsNothing);
     expect(find.byKey(const Key('symbol-code-options')), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('brain-difficulty-hard')));
     await tester.pump();
 
-    expect(find.byKey(const Key('symbol-code-key-8')), findsOneWidget);
+    expect(find.byKey(const Key('symbol-code-key-7')), findsOneWidget);
     expect(find.byKey(const Key('symbol-code-target')), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
