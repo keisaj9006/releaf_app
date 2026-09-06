@@ -82,7 +82,7 @@ class SoundCatalog {
           'An original slow tonal pad with a low, steady harmonic movement.',
       assetPath: 'sounds/deep_drift.mp3',
       category: SoundCategory.atmosphere,
-      accessTier: SoundAccessTier.premium,
+      accessTier: SoundAccessTier.free,
     ),
   ];
 
