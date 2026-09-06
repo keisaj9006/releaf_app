@@ -16,7 +16,12 @@ import '../data/meditation_catalog.dart';
 import '../domain/meditation_content.dart';
 
 class MeditationScreen extends ConsumerWidget {
-  const MeditationScreen({super.key});
+  const MeditationScreen({
+    super.key,
+    this.showBack = false,
+  });
+
+  final bool showBack;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -135,6 +140,21 @@ class MeditationScreen extends ConsumerWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+                              if (showBack) ...[
+                                Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: IconButton(
+                                    key: const Key('meditation-back'),
+                                    tooltip: 'Back',
+                                    onPressed: () =>
+                                        Navigator.of(context).maybePop(),
+                                    icon: const Icon(
+                                      Icons.arrow_back_rounded,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: ReleafSpacing.sm),
+                              ],
                               const _Header(),
                               const SizedBox(height: ReleafSpacing.xl),
                               _FeaturedPractice(
