@@ -42,7 +42,10 @@ Widget buildBrainGame({
         onFinish: onFinish,
         trainingLevel: trainingLevel,
       ),
-    'math_race' => MathRaceScreen(onFinish: onFinish),
+    'math_race' => MathRaceScreen(
+        onFinish: onFinish,
+        trainingLevel: trainingLevel,
+      ),
     'broken_mirror' => BrokenMirrorGameScreen(
         level: trainingLevel,
         enableTimer: trainingLevel >= 4,
