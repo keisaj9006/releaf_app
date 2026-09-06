@@ -40,17 +40,38 @@ jobs:
             echo "RevenueCat Android configuration detected."
           fi
 
-      - name: Build Android debug APK
+      - name: Build Android standard debug APK
         env:
           REVENUECAT_ANDROID_API_KEY: ${{ secrets.REVENUECAT_ANDROID_API_KEY }}
-        run: >
-          flutter build apk --debug
-          --dart-define=REVENUECAT_ANDROID_API_KEY="$REVENUECAT_ANDROID_API_KEY"
+        run: |
+          flutter build apk --debug \
+            --dart-define=REVENUECAT_ANDROID_API_KEY="$REVENUECAT_ANDROID_API_KEY"
+          mkdir -p build/qa-apks
+          cp build/app/outputs/flutter-apk/app-debug.apk \
+            build/qa-apks/releaf-debug-standard.apk
 
-      - name: Upload Android debug APK
+      - name: Build Android Premium Preview APK
+        env:
+          REVENUECAT_ANDROID_API_KEY: ${{ secrets.REVENUECAT_ANDROID_API_KEY }}
+        run: |
+          flutter build apk --debug \
+            --dart-define=REVENUECAT_ANDROID_API_KEY="$REVENUECAT_ANDROID_API_KEY" \
+            --dart-define=RELEAF_PREMIUM_PREVIEW=true
+          cp build/app/outputs/flutter-apk/app-debug.apk \
+            build/qa-apks/releaf-debug-premium-preview.apk
+
+      - name: Upload Android standard debug APK
         uses: actions/upload-artifact@v4
         with:
-          name: releaf-android-debug
-          path: build/app/outputs/flutter-apk/app-debug.apk
+          name: releaf-android-debug-standard
+          path: build/qa-apks/releaf-debug-standard.apk
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Upload Android Premium Preview APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: releaf-android-debug-premium-preview
+          path: build/qa-apks/releaf-debug-premium-preview.apk
           if-no-files-found: error
           retention-days: 7
