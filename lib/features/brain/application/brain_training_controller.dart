@@ -14,6 +14,7 @@ const progressiveBrainGameIds = <String>{
   'math_race',
   'n_back',
   'spatial_span',
+  'mental_rotation',
 };
 
 const maxBrainTrainingLevel = 12;
