@@ -9,6 +9,7 @@ import '../../../routing/app_routes.dart';
 import '../../../theme/app_theme.dart';
 import '../../../theme/releaf_design_tokens.dart';
 import '../application/account_auth_service.dart';
+import '../application/account_email_service.dart';
 
 enum _AuthMode { signIn, createAccount }
 
@@ -29,6 +30,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
   bool _obscurePassword = true;
   String? _statusMessage;
   String? _errorMessage;
+  String? _pendingConfirmationEmail;
 
   @override
   void dispose() {
@@ -77,16 +79,46 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
 
       if (result.user != null) {
         await _syncPremiumIdentity(result.user!.id);
-        if (mounted) setState(() => _statusMessage = 'Signed in securely.');
+        if (mounted) {
+          setState(() {
+            _pendingConfirmationEmail = null;
+            _statusMessage = 'Signed in securely.';
+          });
+        }
       } else if (result.needsEmailConfirmation) {
         if (!mounted) return;
         setState(() {
+          _pendingConfirmationEmail = email;
           _statusMessage =
               'Account created. Check your email to confirm it, then sign in.';
           _mode = _AuthMode.signIn;
           _passwordController.clear();
         });
       }
+    } catch (error) {
+      if (mounted) setState(() => _errorMessage = _friendlyError(error));
+    } finally {
+      if (mounted) setState(() => _working = false);
+    }
+  }
+
+  Future<void> _resendConfirmation() async {
+    final email = _pendingConfirmationEmail?.trim();
+    if (email == null || email.isEmpty || _working) return;
+
+    setState(() {
+      _working = true;
+      _errorMessage = null;
+      _statusMessage = null;
+    });
+
+    try {
+      await ref.read(accountEmailServiceProvider).resendSignupConfirmation(email);
+      if (!mounted) return;
+      setState(() {
+        _statusMessage =
+            'Confirmation email sent again. Check your inbox and spam folder.';
+      });
     } catch (error) {
       if (mounted) setState(() => _errorMessage = _friendlyError(error));
     } finally {
@@ -343,6 +375,8 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
       emailController: _emailController,
       passwordController: _passwordController,
       nameController: _nameController,
+      pendingConfirmationEmail: _pendingConfirmationEmail,
+      onResendConfirmation: _resendConfirmation,
       onModeChanged: (mode) {
         setState(() {
           _mode = mode;
@@ -508,6 +542,8 @@ class _SignedOutCard extends StatelessWidget {
     required this.emailController,
     required this.passwordController,
     required this.nameController,
+    required this.pendingConfirmationEmail,
+    required this.onResendConfirmation,
     required this.onModeChanged,
     required this.onTogglePassword,
     required this.onSubmit,
@@ -519,6 +555,8 @@ class _SignedOutCard extends StatelessWidget {
   final TextEditingController emailController;
   final TextEditingController passwordController;
   final TextEditingController nameController;
+  final String? pendingConfirmationEmail;
+  final VoidCallback onResendConfirmation;
   final ValueChanged<_AuthMode> onModeChanged;
   final VoidCallback onTogglePassword;
   final VoidCallback onSubmit;
@@ -628,6 +666,18 @@ class _SignedOutCard extends StatelessWidget {
                 ),
               ),
             ),
+            if (!creating && pendingConfirmationEmail != null) ...[
+              const SizedBox(height: ReleafSpacing.sm),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton.icon(
+                  key: const Key('account-resend-confirmation'),
+                  onPressed: working ? null : onResendConfirmation,
+                  icon: const Icon(Icons.mark_email_unread_outlined),
+                  label: const Text('Resend confirmation email'),
+                ),
+              ),
+            ],
             const SizedBox(height: ReleafSpacing.lg),
             SizedBox(
               height: 56,
