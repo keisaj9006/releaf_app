@@ -985,6 +985,11 @@ class _DailyInsightCard extends StatelessWidget {
                 key: const Key('home-daily-insight-info'),
                 tooltip: 'About today’s insight',
                 visualDensity: VisualDensity.compact,
+                constraints: const BoxConstraints.tightFor(
+                  width: 34,
+                  height: 34,
+                ),
+                padding: EdgeInsets.zero,
                 onPressed: onOpen,
                 icon: Icon(
                   Icons.info_outline_rounded,
