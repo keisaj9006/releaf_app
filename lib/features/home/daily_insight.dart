@@ -29,6 +29,53 @@ class DailyInsight {
   final String sourcePublisher;
   final String sourceTitle;
   final String sourceUrl;
+
+  /// Curiosity-first Home copy. The full evidence-backed claim remains inside
+  /// the detail sheet so the Home card invites a tap instead of giving away
+  /// the entire insight at a glance.
+  String get teaser => switch (id) {
+        'movement-150-300' =>
+          'How much movement does your body actually need in a week?',
+        'movement-some-is-better' =>
+          'Think exercise only counts when you hit the full target?',
+        'walk-11-minutes' =>
+          'Could 11 minutes a day make a measurable difference?',
+        'sleep-seven-hours' =>
+          'Is seven hours really the magic number for sleep?',
+        'sleep-regularity' =>
+          'Your bedtime may matter less than one other sleep habit.',
+        'light-body-clock' =>
+          'One everyday signal has a surprisingly strong effect on your body clock.',
+        'nature-120' =>
+          'How much time in nature was linked with better wellbeing in a large UK study?',
+        'social-connection-health' =>
+          'Social connection affects more than mood — but how much more?',
+        'mindfulness-nuance' =>
+          'Mindfulness can help — but the evidence is more nuanced than most apps admit.',
+        'vitamin-d-depression' =>
+          'Low vitamin D and depression are linked. Does supplementation actually fix it?',
+        'gratitude-evidence' =>
+          'Gratitude practices may help, but the size of the effect might surprise you.',
+        'alcohol-sleep' =>
+          'Alcohol can make you sleepy while quietly worsening another part of sleep.',
+        'sedentary-time' =>
+          'A workout may not completely cancel out a very sedentary day.',
+        'activity-immediate-benefits' =>
+          'Some benefits of exercise can show up after just one session.',
+        'movement-strength-two-days' =>
+          'Cardio is only half the weekly movement picture.',
+        'nutrition-fruit-veg-400' =>
+          'What does “enough fruit and veg” actually look like in a day?',
+        'nutrition-free-sugars' =>
+          'Not all sugar is treated the same in public-health guidance.',
+        'nutrition-hydration-guide' =>
+          'Do you really need eight glasses of plain water every day?',
+        'sleep-caffeine-hours' =>
+          'That afternoon coffee may still be active much later than you think.',
+        'nutrition-salt-five-grams' =>
+          'How much salt is the daily guideline — and where is most of it hiding?',
+        _ => headline,
+      };
 }
 
 class DailyInsightCatalog {
