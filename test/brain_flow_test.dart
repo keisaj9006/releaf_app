@@ -19,6 +19,7 @@ import 'package:releaf_app/games/spatial_span/spatial_span_screen.dart';
 import 'package:releaf_app/games/mental_rotation/mental_rotation_screen.dart';
 import 'package:releaf_app/games/trail_switch/trail_switch_screen.dart';
 import 'package:releaf_app/games/tower_plan/tower_plan_screen.dart';
+import 'package:releaf_app/games/symbol_code/symbol_code_screen.dart';
 import 'package:releaf_app/games/color_conflict/color_conflict_screen.dart';
 import 'package:releaf_app/games/pattern_logic/pattern_logic_screen.dart';
 import 'package:releaf_app/games/signal_scan/signal_scan_screen.dart';
@@ -57,6 +58,7 @@ void main() {
     expect(resolvedTypes['mental_rotation'], MentalRotationScreen);
     expect(resolvedTypes['trail_switch'], TrailSwitchScreen);
     expect(resolvedTypes['tower_plan'], TowerPlanScreen);
+    expect(resolvedTypes['symbol_code'], SymbolCodeScreen);
     expect(resolvedTypes['color_conflict'], ColorConflictScreen);
     expect(resolvedTypes['pattern_logic'], PatternLogicScreen);
     expect(resolvedTypes['signal_scan'], SignalScanScreen);
@@ -271,6 +273,7 @@ void main() {
       'mental_rotation': MentalRotationScreen,
       'trail_switch': TrailSwitchScreen,
       'tower_plan': TowerPlanScreen,
+      'symbol_code': SymbolCodeScreen,
       'color_conflict': ColorConflictScreen,
       'pattern_logic': PatternLogicScreen,
       'signal_scan': SignalScanScreen,
@@ -360,6 +363,7 @@ void main() {
     expect(state.trainingLevelFor('mental_rotation'), 1);
     expect(state.trainingLevelFor('trail_switch'), 1);
     expect(state.trainingLevelFor('tower_plan'), 1);
+    expect(state.trainingLevelFor('symbol_code'), 1);
     expect(state.trainingLevelFor('memory'), 1);
   });
 
@@ -736,6 +740,33 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('Symbol Code scales mapping and answer set by difficulty', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SymbolCodeScreen(
+          trainingLevel: 10,
+          onFinish: (_) {},
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('Symbol Code'), findsOneWidget);
+    expect(find.text('L10'), findsOneWidget);
+    expect(find.byKey(const Key('symbol-code-key-7')), findsOneWidget);
+    expect(find.byKey(const Key('symbol-code-key-8')), findsNothing);
+    expect(find.byKey(const Key('symbol-code-options')), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('brain-difficulty-hard')));
+    await tester.pump();
+
+    expect(find.byKey(const Key('symbol-code-key-8')), findsOneWidget);
+    expect(find.byKey(const Key('symbol-code-target')), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('New Brain games stay overflow-free at 320px', (
     WidgetTester tester,
   ) async {
@@ -756,6 +787,7 @@ void main() {
       MentalRotationScreen(onFinish: (_) {}),
       TrailSwitchScreen(onFinish: (_) {}),
       TowerPlanScreen(onFinish: (_) {}),
+      SymbolCodeScreen(onFinish: (_) {}),
     ];
 
     for (final game in games) {
