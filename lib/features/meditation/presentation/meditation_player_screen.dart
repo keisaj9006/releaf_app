@@ -322,7 +322,7 @@ class _MeditationPlayerScreenState
                         icon: Icons.record_voice_over_outlined,
                         title: 'Guide voice',
                         subtitle:
-                            'Releaf Guide · calm English system voice',
+                            'Releaf Guide · female English voice · slow pace',
                         trailing: Switch.adaptive(
                           key: const Key('meditation-voice-toggle'),
                           value: voice.enabled,
@@ -431,7 +431,7 @@ class _MeditationPlayerScreenState
                     ],
                     const SizedBox(height: ReleafSpacing.lg),
                     Text(
-                      'The current guide uses your device’s text-to-speech voice. It is a working narration layer that can later be replaced by recorded Releaf voice tracks without changing the meditation flow.',
+                      'Releaf currently prioritises a female English system voice and a deliberately slow meditation pace. This remains a temporary narration layer; the production target is a dedicated recorded Releaf Guide so every device sounds identical.',
                       style: ReleafTypography.meta.copyWith(
                         color: ReleafColors.textMuted,
                         fontSize: 9.5,
