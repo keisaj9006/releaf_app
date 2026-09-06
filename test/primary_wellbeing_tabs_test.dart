@@ -573,8 +573,12 @@ void main() {
     expect(audioDriver.playCalls, 1);
     expect(audioDriver.lastAssetPath, 'sounds/deep_drift.mp3');
     expect(voiceDriver.configureCalls, 1);
-    expect(voiceDriver.speakCalls, 1);
-    expect(voiceDriver.lastSpokenText, item.steps.first.spokenGuidance);
+    expect(voiceDriver.playAssetCalls, 1);
+    expect(voiceDriver.speakCalls, 0);
+    expect(
+      voiceDriver.lastNarrationAssetPath,
+      item.steps.first.narrationAssetPath,
+    );
 
     await tester.tap(find.byKey(const Key('meditation-captions-chip')));
     await tester.pump(const Duration(milliseconds: 300));
@@ -596,7 +600,8 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
 
     expect(audioDriver.resumeCalls, 1);
-    expect(voiceDriver.speakCalls, greaterThanOrEqualTo(2));
+    expect(voiceDriver.playAssetCalls, greaterThanOrEqualTo(2));
+    expect(voiceDriver.speakCalls, 0);
 
     await tester.tap(find.byKey(const Key('meditation-more-controls')));
     await tester.pump();
@@ -651,13 +656,15 @@ void main() {
     expect(find.text('00:45'), findsOneWidget);
     expect(find.text('Paused'), findsOneWidget);
     expect(audioDriver.playCalls, 0);
+    expect(voiceDriver.playAssetCalls, 0);
     expect(voiceDriver.speakCalls, 0);
 
     await tester.tap(find.byKey(const Key('meditation-primary-control')));
     await tester.pump(const Duration(milliseconds: 400));
 
     expect(audioDriver.playCalls, 1);
-    expect(voiceDriver.speakCalls, 1);
+    expect(voiceDriver.playAssetCalls, 1);
+    expect(voiceDriver.speakCalls, 0);
   });
 
   testWidgets('Meditation player stays overflow-free at 320px', (
