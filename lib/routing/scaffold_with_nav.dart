@@ -119,12 +119,8 @@ class ScaffoldWithNavBar extends ConsumerWidget {
             label: 'Brain',
           ),
           NavigationDestination(
-            icon: Icon(Icons.spa_outlined),
-            label: 'Meditate',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.bedtime_outlined),
-            label: 'Sleep',
+            icon: Icon(Icons.graphic_eq_rounded),
+            label: 'Sound',
           ),
             ],
           ),
@@ -155,8 +151,7 @@ Color _accentForIndex(int index) {
     0 => ReleafFeatureAccents.home,
     1 => ReleafFeatureAccents.reset,
     2 => ReleafFeatureAccents.brain,
-    3 => ReleafFeatureAccents.meditation,
-    4 => ReleafFeatureAccents.sleep,
+    3 => ReleafFeatureAccents.sound,
     _ => ReleafColors.sage,
   };
 }
