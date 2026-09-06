@@ -128,7 +128,10 @@ void main() {
       find.byKey(const Key('account-password-field')),
       'secure-pass-123',
     );
-    await tester.tap(find.byKey(const Key('account-auth-submit')));
+    final submit = find.byKey(const Key('account-auth-submit'));
+    await tester.ensureVisible(submit);
+    await tester.pumpAndSettle();
+    await tester.tap(submit);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
