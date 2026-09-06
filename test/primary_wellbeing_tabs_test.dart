@@ -507,6 +507,27 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('Legacy Habits and Daily Loop routes resolve safely to Home', (
+    WidgetTester tester,
+  ) async {
+    for (final location in [AppRoutes.habits, AppRoutes.dailyLoop]) {
+      await _pumpRoute(
+        tester,
+        location: location,
+        preferences: await _preferences(),
+      );
+
+      expect(find.text('RELEAF'), findsOneWidget);
+      expect(find.text('RIGHT NOW'), findsOneWidget);
+      final navigation =
+          tester.widget<NavigationBar>(find.byType(NavigationBar));
+      expect(navigation.selectedIndex, 0);
+
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump();
+    }
+  });
+
   testWidgets('Meditate and Sleep stay overflow-free at 320px', (
     WidgetTester tester,
   ) async {
