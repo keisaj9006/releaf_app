@@ -6,6 +6,9 @@ enum ReleafSoundArtworkVariant {
   field,
   atmosphereOne,
   atmosphereTwo,
+  brownNoise,
+  softRain,
+  nightAir,
 }
 
 class ReleafSoundArtwork extends StatelessWidget {
@@ -62,8 +65,19 @@ class _ReleafSoundArtworkPainter extends CustomPainter {
     );
 
     _drawGlow(canvas, size, palette, intensity);
-    _drawWaveField(canvas, size, palette, intensity);
-    _drawSpectralBars(canvas, size, palette, intensity);
+
+    switch (variant) {
+      case ReleafSoundArtworkVariant.brownNoise:
+        _drawNoiseBands(canvas, size, palette, intensity);
+      case ReleafSoundArtworkVariant.softRain:
+        _drawRainField(canvas, size, palette, intensity);
+      case ReleafSoundArtworkVariant.nightAir:
+        _drawNightAir(canvas, size, palette, intensity);
+      default:
+        _drawWaveField(canvas, size, palette, intensity);
+        _drawSpectralBars(canvas, size, palette, intensity);
+    }
+
     _drawParticles(canvas, size, palette, variant.index, intensity);
     _drawVignette(canvas, rect);
   }
@@ -97,6 +111,118 @@ void _drawGlow(
           radius: size.longestSide * 0.72,
         ),
       ),
+  );
+}
+
+void _drawNoiseBands(
+  Canvas canvas,
+  Size size,
+  _SoundPalette palette,
+  double intensity,
+) {
+  for (var index = 0; index < 8; index++) {
+    final y = size.height * (0.22 + index * 0.075);
+    final height = size.height * (0.024 + index * 0.002);
+    final rect = Rect.fromLTWH(
+      size.width * 0.08,
+      y,
+      size.width * 0.84,
+      height,
+    );
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(rect, const Radius.circular(999)),
+      Paint()
+        ..shader = LinearGradient(
+          colors: [
+            Colors.transparent,
+            palette.primary.withValues(alpha: 0.05 * intensity),
+            palette.highlight.withValues(alpha: 0.14 * intensity),
+            palette.primary.withValues(alpha: 0.05 * intensity),
+            Colors.transparent,
+          ],
+        ).createShader(rect),
+    );
+  }
+}
+
+void _drawRainField(
+  Canvas canvas,
+  Size size,
+  _SoundPalette palette,
+  double intensity,
+) {
+  final paint = Paint()
+    ..strokeWidth = 1
+    ..strokeCap = StrokeCap.round;
+
+  for (var index = 0; index < 46; index++) {
+    final x = ((index * 37) % 103) / 103 * size.width;
+    final y = ((index * 61) % 97) / 97 * size.height;
+    final length = size.height * (0.025 + (index % 5) * 0.007);
+    paint.color = palette.highlight.withValues(
+      alpha: (0.05 + (index % 4) * 0.018) * intensity,
+    );
+    canvas.drawLine(
+      Offset(x, y),
+      Offset(x - length * 0.18, y + length),
+      paint,
+    );
+  }
+
+  for (var index = 0; index < 4; index++) {
+    final center = Offset(
+      size.width * (0.22 + index * 0.20),
+      size.height * (0.72 + (index.isEven ? 0.02 : -0.025)),
+    );
+    canvas.drawOval(
+      Rect.fromCenter(
+        center: center,
+        width: size.width * 0.15,
+        height: size.height * 0.025,
+      ),
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1
+        ..color = palette.secondary.withValues(alpha: 0.16 * intensity),
+    );
+  }
+}
+
+void _drawNightAir(
+  Canvas canvas,
+  Size size,
+  _SoundPalette palette,
+  double intensity,
+) {
+  for (var band = 0; band < 4; band++) {
+    final path = Path()
+      ..moveTo(-size.width * 0.08, size.height * (0.30 + band * 0.13))
+      ..cubicTo(
+        size.width * 0.24,
+        size.height * (0.22 + band * 0.14),
+        size.width * 0.54,
+        size.height * (0.42 + band * 0.09),
+        size.width * 1.08,
+        size.height * (0.27 + band * 0.13),
+      );
+
+    canvas.drawPath(
+      path,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.2 + band * 0.2
+        ..color = (band.isEven ? palette.primary : palette.secondary)
+            .withValues(alpha: (0.08 + band * 0.025) * intensity)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4),
+    );
+  }
+
+  canvas.drawCircle(
+    Offset(size.width * 0.76, size.height * 0.25),
+    size.shortestSide * 0.055,
+    Paint()
+      ..color = palette.highlight.withValues(alpha: 0.16 * intensity)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 9),
   );
 }
 
@@ -255,6 +381,30 @@ _SoundPalette _paletteFor(ReleafSoundArtworkVariant variant) {
         secondary: Color(0xFF6C7899),
         highlight: Color(0xFFDCE2F3),
         glow: Color(0xFF657CA6),
+      ),
+    ReleafSoundArtworkVariant.brownNoise => const _SoundPalette(
+        background: Color(0xFF16120F),
+        backgroundEnd: Color(0xFF0B0A09),
+        primary: Color(0xFF98765E),
+        secondary: Color(0xFF6F665E),
+        highlight: Color(0xFFE4D4C6),
+        glow: Color(0xFF866852),
+      ),
+    ReleafSoundArtworkVariant.softRain => const _SoundPalette(
+        background: Color(0xFF0A1418),
+        backgroundEnd: Color(0xFF080D11),
+        primary: Color(0xFF6A9BAA),
+        secondary: Color(0xFF718A9A),
+        highlight: Color(0xFFD3E7ED),
+        glow: Color(0xFF577F8B),
+      ),
+    ReleafSoundArtworkVariant.nightAir => const _SoundPalette(
+        background: Color(0xFF090D16),
+        backgroundEnd: Color(0xFF070A10),
+        primary: Color(0xFF667A9C),
+        secondary: Color(0xFF5F7C82),
+        highlight: Color(0xFFD6DFEA),
+        glow: Color(0xFF516783),
       ),
   };
 }

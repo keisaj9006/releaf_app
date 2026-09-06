@@ -49,6 +49,9 @@ flutter:
     - assets/animations/leaf_walk.json
     - assets/sounds/relief_01.mp3
     - assets/sounds/relief_02.mp3
+    - assets/sounds/brown_noise.mp3
+    - assets/sounds/soft_rain.mp3
+    - assets/sounds/night_air.mp3
 
   fonts:
     - family: Poppins

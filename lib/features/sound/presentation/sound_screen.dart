@@ -98,7 +98,7 @@ class SoundScreen extends ConsumerWidget {
                                 title: 'Available Now',
                                 accentColor: ReleafFeatureAccents.sound,
                                 description:
-                                    'Two ambient spaces, ready to loop.',
+                                    'Ambient spaces, noise and environmental textures ready to loop.',
                               ),
                               const SizedBox(height: ReleafSpacing.md),
                               for (final track in tracks) ...[
@@ -464,7 +464,9 @@ class _SoundTrackTile extends StatelessWidget {
                       ),
                       const SizedBox(height: 5),
                       Text(
-                        isCurrent ? 'Current sound' : 'Ambient • Loop',
+                        isCurrent
+                            ? 'Current sound'
+                            : '${_categoryLabel(track.category)} • Loop',
                         style: ReleafTypography.meta.copyWith(
                           color: isCurrent
                               ? ReleafFeatureAccents.sound
@@ -617,8 +619,21 @@ class _GlassTag extends StatelessWidget {
 }
 
 
+String _categoryLabel(SoundCategory category) {
+  return switch (category) {
+    SoundCategory.atmosphere => 'Ambient',
+    SoundCategory.noise => 'Noise',
+    SoundCategory.weather => 'Weather',
+    SoundCategory.environment => 'Environment',
+  };
+}
+
 ReleafSoundArtworkVariant _artworkForTrack(String id) {
-  return id.endsWith('02')
-      ? ReleafSoundArtworkVariant.atmosphereTwo
-      : ReleafSoundArtworkVariant.atmosphereOne;
+  return switch (id) {
+    'releaf-atmosphere-02' => ReleafSoundArtworkVariant.atmosphereTwo,
+    'brown-noise' => ReleafSoundArtworkVariant.brownNoise,
+    'soft-rain' => ReleafSoundArtworkVariant.softRain,
+    'night-air' => ReleafSoundArtworkVariant.nightAir,
+    _ => ReleafSoundArtworkVariant.atmosphereOne,
+  };
 }

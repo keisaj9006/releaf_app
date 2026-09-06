@@ -1,6 +1,11 @@
 enum SoundAccessTier { free, premium }
 
-enum SoundCategory { atmosphere }
+enum SoundCategory {
+  atmosphere,
+  noise,
+  weather,
+  environment,
+}
 
 class SoundContent {
   const SoundContent({

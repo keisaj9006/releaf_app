@@ -482,12 +482,12 @@ class _SoundCard extends StatelessWidget {
                   ),
                 ),
               ),
-              const Positioned(
+              Positioned(
                 top: ReleafSpacing.md,
                 left: ReleafSpacing.md,
                 child: _GlassTag(
-                  icon: Icons.graphic_eq_rounded,
-                  label: 'AMBIENT',
+                  icon: _soundIcon(track.category),
+                  label: _soundCategoryLabel(track.category),
                 ),
               ),
               Positioned(
@@ -778,6 +778,24 @@ class _NightNote extends StatelessWidget {
       ),
     );
   }
+}
+
+String _soundCategoryLabel(SoundCategory category) {
+  return switch (category) {
+    SoundCategory.atmosphere => 'AMBIENT',
+    SoundCategory.noise => 'NOISE',
+    SoundCategory.weather => 'RAIN',
+    SoundCategory.environment => 'ENVIRONMENT',
+  };
+}
+
+IconData _soundIcon(SoundCategory category) {
+  return switch (category) {
+    SoundCategory.atmosphere => Icons.graphic_eq_rounded,
+    SoundCategory.noise => Icons.blur_on_rounded,
+    SoundCategory.weather => Icons.water_drop_outlined,
+    SoundCategory.environment => Icons.air_rounded,
+  };
 }
 
 String _eyebrowFor(String id) {

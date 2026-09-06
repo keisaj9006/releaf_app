@@ -107,6 +107,16 @@ Future<void> _pumpRoute(
 }
 
 void main() {
+  test('Sound catalog exposes only real bundled sound spaces', () {
+    const catalog = SoundCatalog();
+    final tracks = catalog.getAll();
+
+    expect(tracks, hasLength(5));
+    expect(catalog.getById('brown-noise')?.assetPath, 'sounds/brown_noise.mp3');
+    expect(catalog.getById('soft-rain')?.assetPath, 'sounds/soft_rain.mp3');
+    expect(catalog.getById('night-air')?.assetPath, 'sounds/night_air.mp3');
+  });
+
   test('Meditation catalog keeps every session duration internally valid', () {
     const catalog = MeditationCatalog();
 
