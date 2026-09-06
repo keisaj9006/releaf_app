@@ -15,6 +15,7 @@ import '../meditation/application/meditation_library_controller.dart';
 import '../meditation/data/meditation_catalog.dart';
 import '../meditation/domain/meditation_content.dart';
 import '../progress/data/leaves_repository.dart';
+import '../relief/data/reset_catalog.dart';
 import '../sound/application/sound_player_controller.dart';
 import '../sound/data/sound_catalog.dart';
 import 'daily_insight.dart';
@@ -101,6 +102,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             children: [
                               _HomeHeader(
                                 hour: now.hour,
+                                onEmergency: () => context.push(
+                                  AppRoutes.reliefSessionFor(
+                                    ResetCatalog.emergencySessionId,
+                                  ),
+                                ),
                                 onAccount: () => context.push(AppRoutes.account),
                               ),
                               if (showIntro) ...[
@@ -373,10 +379,12 @@ class _HomeWelcomeCard extends StatelessWidget {
 class _HomeHeader extends StatelessWidget {
   const _HomeHeader({
     required this.hour,
+    required this.onEmergency,
     required this.onAccount,
   });
 
   final int hour;
+  final VoidCallback onEmergency;
   final VoidCallback onAccount;
 
   @override
@@ -418,7 +426,15 @@ class _HomeHeader extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(width: ReleafSpacing.md),
+        const SizedBox(width: ReleafSpacing.sm),
+        ReleafRoundIconButton(
+          key: const Key('home-emergency-action'),
+          icon: Icons.health_and_safety_outlined,
+          tooltip: 'Open Emergency Calm',
+          accentColor: ReleafFeatureAccents.emergency,
+          onPressed: onEmergency,
+        ),
+        const SizedBox(width: ReleafSpacing.sm),
         Container(
           width: 54,
           height: 54,
