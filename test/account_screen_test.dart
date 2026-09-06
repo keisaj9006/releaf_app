@@ -4,7 +4,23 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:releaf_app/features/account/application/account_auth_service.dart';
 import 'package:releaf_app/features/account/application/account_email_service.dart';
+import 'package:releaf_app/features/account/application/account_recovery_service.dart';
 import 'package:releaf_app/features/account/presentation/account_screen.dart';
+
+class _FakeAccountRecoveryService implements AccountRecoveryService {
+  String? lastResetEmail;
+  String? updatedPassword;
+
+  @override
+  Future<void> requestPasswordReset(String email) async {
+    lastResetEmail = email;
+  }
+
+  @override
+  Future<void> updatePassword(String password) async {
+    updatedPassword = password;
+  }
+}
 
 class _FakeAccountEmailService implements AccountEmailService {
   String? lastEmail;
@@ -69,6 +85,7 @@ Future<void> _pumpAccount(
   WidgetTester tester, {
   AccountUser? user,
   AccountEmailService? emailService,
+  AccountRecoveryService? recoveryService,
 }) async {
   await tester.pumpWidget(
     ProviderScope(
@@ -78,6 +95,9 @@ Future<void> _pumpAccount(
         ),
         accountEmailServiceProvider.overrideWithValue(
           emailService ?? _FakeAccountEmailService(),
+        ),
+        accountRecoveryServiceProvider.overrideWithValue(
+          recoveryService ?? _FakeAccountRecoveryService(),
         ),
       ],
       child: const MaterialApp(home: AccountScreen()),
@@ -105,6 +125,32 @@ void main() {
 
     expect(find.byKey(const Key('account-name-field')), findsOneWidget);
     expect(find.text('Create account'), findsWidgets);
+  });
+
+  testWidgets('Forgot password sends recovery email for entered address', (
+    WidgetTester tester,
+  ) async {
+    final recovery = _FakeAccountRecoveryService();
+    await _pumpAccount(tester, recoveryService: recovery);
+
+    await tester.enterText(
+      find.byKey(const Key('account-email-field')),
+      'jo@example.com',
+    );
+
+    final forgot = find.byKey(const Key('account-forgot-password'));
+    await tester.ensureVisible(forgot);
+    await tester.pumpAndSettle();
+    await tester.tap(forgot);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(recovery.lastResetEmail, 'jo@example.com');
+    expect(
+      find.textContaining('Password reset email sent'),
+      findsOneWidget,
+    );
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('Registration can resend the confirmation email', (
