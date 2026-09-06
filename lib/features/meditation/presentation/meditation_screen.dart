@@ -54,24 +54,47 @@ class MeditationScreen extends ConsumerWidget {
             orElse: () => sleepPractice.first,
           );
 
-    final featured = all.firstWhere(
-      (item) => !library.isCompleted(item.id),
-      orElse: () => all.first,
-    );
-
-    final quickPractices = all
-        .where(
-          (item) =>
-              item.durationSeconds <= 240 &&
-              item.category != MeditationCategory.startHere &&
-              item.category != MeditationCategory.unguided,
-        )
-        .toList(growable: false);
-
     final recent = library.recentIds
         .map(catalog.getById)
         .whereType<MeditationContent>()
+        .where((item) => !item.isPremium || isPremium)
         .toList(growable: false);
+
+    final accessible = all
+        .where((item) => !item.isPremium || isPremium)
+        .where((item) => item.category != MeditationCategory.unguided)
+        .toList(growable: false);
+
+    final featured = recent.isNotEmpty
+        ? recent.first
+        : (!nextFoundation.isPremium || isPremium)
+            ? nextFoundation
+            : accessible.first;
+
+    final quickPractices = accessible
+        .where(
+          (item) =>
+              item.durationSeconds <= 240 &&
+              item.category != MeditationCategory.startHere,
+        )
+        .toList(growable: false);
+
+    MeditationContent? quickByDuration({
+      required int minSeconds,
+      required int maxSeconds,
+    }) {
+      for (final item in accessible) {
+        if (item.durationSeconds >= minSeconds &&
+            item.durationSeconds <= maxSeconds) {
+          return item;
+        }
+      }
+      return null;
+    }
+
+    final quickTwo = quickByDuration(minSeconds: 0, maxSeconds: 150);
+    final quickFour = quickByDuration(minSeconds: 151, maxSeconds: 300);
+    final quickLong = quickByDuration(minSeconds: 301, maxSeconds: 900);
 
     final favorites = all
         .where((item) => library.favoriteIds.contains(item.id))
@@ -112,7 +135,7 @@ class MeditationScreen extends ConsumerWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const _Header(),
-                              const SizedBox(height: ReleafSpacing.xxl),
+                              const SizedBox(height: ReleafSpacing.xl),
                               _FeaturedPractice(
                                 item: featured,
                                 isLocked: featured.isPremium && !isPremium,
@@ -129,6 +152,43 @@ class MeditationScreen extends ConsumerWidget {
                                 },
                                 onPressed: () => open(featured),
                               ),
+                              if (quickTwo != null ||
+                                  quickFour != null ||
+                                  quickLong != null) ...[
+                                const SizedBox(height: ReleafSpacing.md),
+                                _TimeQuickStart(
+                                  twoMinute: quickTwo,
+                                  fourMinute: quickFour,
+                                  longer: quickLong,
+                                  onOpen: open,
+                                ),
+                              ],
+                              if (recent.isNotEmpty) ...[
+                                const SizedBox(height: ReleafSpacing.section),
+                                const _EditorialHeading(
+                                  eyebrow: 'CONTINUE',
+                                  title: 'Return without searching.',
+                                  description:
+                                      'Your most recent practices stay close at hand.',
+                                ),
+                                const SizedBox(height: ReleafSpacing.md),
+                                _PracticeRail(
+                                  items: recent,
+                                  library: library,
+                                  isPremium: isPremium,
+                                  onOpen: open,
+                                  onFavorite: (item) {
+                                    unawaited(
+                                      ref
+                                          .read(
+                                            meditationLibraryControllerProvider
+                                                .notifier,
+                                          )
+                                          .toggleFavorite(item.id),
+                                    );
+                                  },
+                                ),
+                              ],
                               const SizedBox(height: ReleafSpacing.section),
                               const _EditorialHeading(
                                 eyebrow: 'PROGRAMS',
@@ -161,32 +221,6 @@ class MeditationScreen extends ConsumerWidget {
                                     ? null
                                     : () => open(nextSleep),
                               ),
-                              if (recent.isNotEmpty) ...[
-                                const SizedBox(height: ReleafSpacing.section),
-                                const _EditorialHeading(
-                                  eyebrow: 'RETURN TO',
-                                  title: 'Recently played',
-                                  description:
-                                      'Pick up a practice you used before.',
-                                ),
-                                const SizedBox(height: ReleafSpacing.md),
-                                _PracticeRail(
-                                  items: recent,
-                                  library: library,
-                                  isPremium: isPremium,
-                                  onOpen: open,
-                                  onFavorite: (item) {
-                                    unawaited(
-                                      ref
-                                          .read(
-                                            meditationLibraryControllerProvider
-                                                .notifier,
-                                          )
-                                          .toggleFavorite(item.id),
-                                    );
-                                  },
-                                ),
-                              ],
                               if (favorites.isNotEmpty) ...[
                                 const SizedBox(height: ReleafSpacing.section),
                                 const _EditorialHeading(
@@ -369,7 +403,7 @@ class _Header extends StatelessWidget {
         Text('Meditate', style: ReleafTypography.display),
         SizedBox(height: 6),
         Text(
-          'Choose a practice, then put the phone down. Releaf Guide will take it from here.',
+          'Press play, get comfortable, then let the voice carry the practice.',
           style: ReleafTypography.body,
         ),
       ],
@@ -454,7 +488,7 @@ class _FeaturedPractice extends StatelessWidget {
                   left: compact ? ReleafSpacing.lg : ReleafSpacing.xl,
                   right: 72,
                   child: const Text(
-                    'LISTEN NOW · RELEAF GUIDE',
+                    'TODAY’S PRACTICE · RELEAF GUIDE',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
@@ -508,6 +542,11 @@ class _FeaturedPractice extends StatelessWidget {
                                 : Icons.record_voice_over_outlined,
                             label: item.unguided ? 'Unguided' : 'Releaf Guide',
                           ),
+                          if (!item.unguided)
+                            const _MetaPill(
+                              icon: Icons.visibility_off_outlined,
+                              label: 'Eyes-closed ready',
+                            ),
                         ],
                       ),
                       const SizedBox(height: ReleafSpacing.md),
@@ -521,7 +560,9 @@ class _FeaturedPractice extends StatelessWidget {
                                 ? Icons.lock_outline_rounded
                                 : Icons.play_arrow_rounded,
                           ),
-                          label: Text(isLocked ? 'Unlock practice' : 'Listen now'),
+                          label: Text(
+                            isLocked ? 'Unlock practice' : 'Start practice',
+                          ),
                           style: FilledButton.styleFrom(
                             backgroundColor: const Color(0xFFD8D0C7),
                             foregroundColor: const Color(0xFF151416),
@@ -539,6 +580,141 @@ class _FeaturedPractice extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+class _TimeQuickStart extends StatelessWidget {
+  const _TimeQuickStart({
+    required this.twoMinute,
+    required this.fourMinute,
+    required this.longer,
+    required this.onOpen,
+  });
+
+  final MeditationContent? twoMinute;
+  final MeditationContent? fourMinute;
+  final MeditationContent? longer;
+  final Future<void> Function(MeditationContent item) onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    final options = <({String label, String sublabel, MeditationContent item})>[
+      if (twoMinute != null)
+        (
+          label: '2 min',
+          sublabel: 'Reset attention',
+          item: twoMinute!,
+        ),
+      if (fourMinute != null)
+        (
+          label: '4 min',
+          sublabel: 'Settle in',
+          item: fourMinute!,
+        ),
+      if (longer != null)
+        (
+          label: '5+ min',
+          sublabel: 'Go deeper',
+          item: longer!,
+        ),
+    ];
+
+    return Container(
+      key: const Key('meditation-time-quick-start'),
+      padding: const EdgeInsets.fromLTRB(
+        ReleafSpacing.md,
+        ReleafSpacing.sm,
+        ReleafSpacing.md,
+        ReleafSpacing.md,
+      ),
+      decoration: BoxDecoration(
+        color: ReleafColors.surfaceSoft.withValues(alpha: 0.56),
+        borderRadius: BorderRadius.circular(ReleafRadii.large),
+        border: Border.all(
+          color: const Color(0xFFB5A8C0).withValues(alpha: 0.15),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'HOW MUCH TIME DO YOU HAVE?',
+            style: ReleafTypography.eyebrow.copyWith(
+              color: const Color(0xFFC9BBCF),
+              fontSize: 8.5,
+              letterSpacing: 1.25,
+            ),
+          ),
+          const SizedBox(height: ReleafSpacing.sm),
+          Row(
+            children: [
+              for (var index = 0; index < options.length; index++) ...[
+                if (index > 0) const SizedBox(width: ReleafSpacing.xs),
+                Expanded(
+                  child: _TimeQuickStartButton(
+                    label: options[index].label,
+                    sublabel: options[index].sublabel,
+                    onPressed: () => onOpen(options[index].item),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TimeQuickStartButton extends StatelessWidget {
+  const _TimeQuickStartButton({
+    required this.label,
+    required this.sublabel,
+    required this.onPressed,
+  });
+
+  final String label;
+  final String sublabel;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.white.withValues(alpha: 0.045),
+      borderRadius: BorderRadius.circular(ReleafRadii.medium),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(ReleafRadii.medium),
+        onTap: onPressed,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: 10,
+            vertical: 11,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: ReleafTypography.meta.copyWith(
+                  color: ReleafColors.textPrimary,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                sublabel,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: ReleafTypography.meta.copyWith(
+                  color: ReleafColors.textMuted,
+                  fontSize: 8.5,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
