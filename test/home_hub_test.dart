@@ -120,6 +120,26 @@ void main() {
     );
   });
 
+  testWidgets('Home mindfulness recommendation advances with meditation progress', (
+    WidgetTester tester,
+  ) async {
+    final preferences = await _preferences();
+    await preferences.setString('releaf.home.focus.v1', HomeFocus.mindfulness.name);
+    await preferences.setStringList(
+      'meditation.completed_ids',
+      ['mindfulness-basics-2'],
+    );
+
+    await _pumpHome(tester, preferences: preferences);
+
+    expect(find.text('SUGGESTED FOR YOUR FOCUS'), findsOneWidget);
+    expect(find.text('Breath & Body'), findsOneWidget);
+    expect(
+      find.text('Matches your focus: Build mindfulness.'),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('Home remains overflow-free on a narrow phone', (
     WidgetTester tester,
   ) async {

@@ -10,6 +10,9 @@ import '../../theme/releaf_design_tokens.dart';
 import '../../theme/widgets/releaf_artwork.dart';
 import '../../theme/widgets/releaf_brain_artwork.dart';
 import '../../theme/widgets/releaf_components.dart';
+import '../meditation/application/meditation_library_controller.dart';
+import '../meditation/data/meditation_catalog.dart';
+import '../meditation/domain/meditation_content.dart';
 import '../progress/data/leaves_repository.dart';
 import '../sound/application/sound_player_controller.dart';
 import '../sound/data/sound_catalog.dart';
@@ -33,6 +36,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final activeSession = ref.watch(sessionManagerProvider);
     final soundState = ref.watch(soundPlayerControllerProvider);
     final soundCatalog = ref.watch(soundCatalogProvider);
+    final meditationCatalog = ref.watch(meditationCatalogProvider);
+    final meditationLibrary = ref.watch(meditationLibraryControllerProvider);
     final focus = ref.watch(homeFocusProvider);
     final showIntro = ref.watch(homeIntroProvider);
     final hasPremiumEntitlement =
@@ -40,6 +45,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final currentSound = soundCatalog.getById(soundState.currentTrackId ?? '');
 
     final now = ref.watch(homeNowProvider);
+    final suggestedMeditation = _suggestedMeditation(
+      catalog: meditationCatalog,
+      library: meditationLibrary,
+      isPremium: hasPremiumEntitlement,
+    );
     final recommendation = _recommendationFor(
       need: _selectedNeed,
       focus: focus,
@@ -47,6 +57,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       reliefDone: leaves.reliefDone,
       brainDone: leaves.brainDone,
       isPremium: hasPremiumEntitlement,
+      suggestedMeditation: suggestedMeditation,
     );
 
     final completedToday = [
@@ -608,6 +619,7 @@ _HomeRecommendation _recommendationFor({
   required bool reliefDone,
   required bool brainDone,
   required bool isPremium,
+  required MeditationContent suggestedMeditation,
 }) {
   if (need != null) {
     return switch (need) {
@@ -718,16 +730,10 @@ _HomeRecommendation _recommendationFor({
   }
 
   if (focus == HomeFocus.mindfulness) {
-    return _HomeRecommendation(
+    return _meditationRecommendation(
+      item: suggestedMeditation,
       eyebrow: 'SUGGESTED FOR YOUR FOCUS',
-      title: 'Mindfulness Basics',
-      description:
-          'Two quiet minutes of noticing and returning, without trying to empty the mind.',
       reason: 'Matches your focus: Build mindfulness.',
-      meta: '2 min • Free • Meditation',
-      route: AppRoutes.meditationSessionFor('mindfulness-basics-2'),
-      artwork: ReleafArtworkVariant.focus,
-      icon: Icons.spa_outlined,
     );
   }
 
@@ -789,17 +795,73 @@ _HomeRecommendation _recommendationFor({
     );
   }
 
-  return _HomeRecommendation(
+  return _meditationRecommendation(
+    item: suggestedMeditation,
     eyebrow: 'SUGGESTED NOW',
-    title: 'Mindfulness Basics',
-    description:
-        'Two quiet minutes of noticing and returning, without trying to empty the mind.',
     reason: 'Reset and Brain are already complete today.',
-    meta: '2 min • Free • Meditation',
-    route: AppRoutes.meditationSessionFor('mindfulness-basics-2'),
-    artwork: ReleafArtworkVariant.focus,
+  );
+}
+
+MeditationContent _suggestedMeditation({
+  required MeditationCatalog catalog,
+  required MeditationLibraryState library,
+  required bool isPremium,
+}) {
+  bool accessible(MeditationContent item) => !item.isPremium || isPremium;
+
+  final foundations = catalog
+      .getSeries(MeditationCatalog.foundationsSeriesId)
+      .where(accessible)
+      .toList(growable: false);
+
+  for (final item in foundations) {
+    if (!library.isCompleted(item.id)) return item;
+  }
+
+  final available = catalog
+      .getAll()
+      .where(accessible)
+      .where((item) => item.category != MeditationCategory.unguided)
+      .toList(growable: false);
+
+  for (final item in available) {
+    if (!library.isCompleted(item.id)) return item;
+  }
+
+  if (foundations.isNotEmpty) return foundations.first;
+  return available.first;
+}
+
+_HomeRecommendation _meditationRecommendation({
+  required MeditationContent item,
+  required String eyebrow,
+  required String reason,
+}) {
+  final minutes = item.durationSeconds ~/ 60;
+  final access = item.isPremium ? 'Premium' : 'Free';
+
+  return _HomeRecommendation(
+    eyebrow: eyebrow,
+    title: item.title,
+    description: item.subtitle,
+    reason: reason,
+    meta: '$minutes min • $access • Meditation',
+    route: AppRoutes.meditationSessionFor(item.id),
+    artwork: _homeArtworkForMeditation(item.category),
     icon: Icons.spa_outlined,
   );
+}
+
+ReleafArtworkVariant _homeArtworkForMeditation(MeditationCategory category) {
+  return switch (category) {
+    MeditationCategory.anxiety => ReleafArtworkVariant.calm,
+    MeditationCategory.body => ReleafArtworkVariant.grounding,
+    MeditationCategory.everyday => ReleafArtworkVariant.lifeUpgrade,
+    MeditationCategory.unguided => ReleafArtworkVariant.ambient,
+    MeditationCategory.startHere ||
+    MeditationCategory.focus ||
+    MeditationCategory.mind => ReleafArtworkVariant.focus,
+  };
 }
 
 class _HomeFocusStrip extends StatelessWidget {
