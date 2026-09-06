@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -342,11 +343,195 @@ Future<void> _openMeditation({
   required bool isPremium,
 }) async {
   if (item.isPremium && !isPremium) {
-    await maybeShowPaywall(context, ref, force: true);
-    return;
+    final unlock = await showModalBottomSheet<bool>(
+      context: context,
+      useSafeArea: true,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withValues(alpha: 0.70),
+      builder: (_) => _MeditationPremiumPreviewSheet(item: item),
+    );
+
+    if (unlock != true || !context.mounted) return;
+
+    await maybeShowPaywall(
+      context,
+      ref,
+      force: true,
+      softOffer: true,
+    );
+    if (!context.mounted) return;
+
+    final nowPremium = ref.read(subscriptionControllerProvider).isPremium;
+    if (!nowPremium) return;
   }
+
   if (!context.mounted) return;
   await context.push(AppRoutes.meditationSessionFor(item.id));
+}
+
+class _MeditationPremiumPreviewSheet extends StatelessWidget {
+  const _MeditationPremiumPreviewSheet({required this.item});
+
+  final MeditationContent item;
+
+  @override
+  Widget build(BuildContext context) {
+    final minutes = math.max(1, (item.durationSeconds / 60).round());
+    final sample = item.steps.isEmpty ? null : item.steps.first.guidance;
+
+    return Align(
+      alignment: Alignment.bottomCenter,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 700),
+        child: Material(
+          key: const Key('meditation-premium-preview'),
+          color: ReleafColors.backgroundRaised,
+          borderRadius: const BorderRadius.vertical(
+            top: Radius.circular(ReleafRadii.extraLarge),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(
+              ReleafSpacing.screen,
+              ReleafSpacing.lg,
+              ReleafSpacing.screen,
+              ReleafSpacing.xl,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 9,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: ReleafColors.premium.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(ReleafRadii.pill),
+                        border: Border.all(
+                          color: ReleafColors.premium.withValues(alpha: 0.26),
+                        ),
+                      ),
+                      child: Text(
+                        'PREMIUM PREVIEW',
+                        style: ReleafTypography.eyebrow.copyWith(
+                          color: ReleafColors.premium,
+                          fontSize: 8,
+                        ),
+                      ),
+                    ),
+                    const Spacer(),
+                    IconButton(
+                      tooltip: 'Close preview',
+                      onPressed: () => Navigator.of(context).pop(false),
+                      icon: const Icon(Icons.close_rounded),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: ReleafSpacing.md),
+                Container(
+                  height: 180,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(ReleafRadii.large),
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      ReleafMeditationArtwork(
+                        variant: _artworkFor(item.category),
+                        intensity: 0.92,
+                      ),
+                      const DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Color(0x12000000),
+                              Color(0xD7090D0B),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: ReleafSpacing.lg),
+                Text(
+                  item.title,
+                  style: ReleafTypography.display.copyWith(fontSize: 28),
+                ),
+                const SizedBox(height: ReleafSpacing.xs),
+                Text(
+                  item.subtitle,
+                  style: ReleafTypography.body.copyWith(
+                    color: ReleafColors.textSecondary,
+                    height: 1.5,
+                  ),
+                ),
+                const SizedBox(height: ReleafSpacing.sm),
+                Wrap(
+                  spacing: ReleafSpacing.xs,
+                  runSpacing: ReleafSpacing.xs,
+                  children: [
+                    _MetaPill(
+                      icon: Icons.timer_outlined,
+                      label: '${minutes} min',
+                    ),
+                    _MetaPill(
+                      icon: Icons.spa_outlined,
+                      label: _categoryLabel(item.category),
+                    ),
+                  ],
+                ),
+                if (sample != null && sample.trim().isNotEmpty) ...[
+                  const SizedBox(height: ReleafSpacing.lg),
+                  Text(
+                    'A GLIMPSE INSIDE',
+                    style: ReleafTypography.eyebrow.copyWith(
+                      color: ReleafColors.premium,
+                    ),
+                  ),
+                  const SizedBox(height: ReleafSpacing.xs),
+                  Text(
+                    sample,
+                    maxLines: 4,
+                    overflow: TextOverflow.ellipsis,
+                    style: ReleafTypography.body.copyWith(
+                      color: ReleafColors.textPrimary.withValues(alpha: 0.84),
+                      height: 1.5,
+                    ),
+                  ),
+                ],
+                const SizedBox(height: ReleafSpacing.lg),
+                Text(
+                  'You can review the practice before deciding. Starting the full guided session requires Releaf Premium.',
+                  style: ReleafTypography.meta.copyWith(
+                    color: ReleafColors.textMuted,
+                    height: 1.45,
+                  ),
+                ),
+                const SizedBox(height: ReleafSpacing.lg),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    key: const Key('meditation-premium-preview-unlock'),
+                    onPressed: () => Navigator.of(context).pop(true),
+                    icon: const Icon(Icons.lock_open_rounded),
+                    label: const Text('Unlock Premium'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class _MeditationBackdrop extends StatelessWidget {
