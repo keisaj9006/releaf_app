@@ -494,8 +494,15 @@ class _MeditationPlayerScreenState
                 reducedMotion: reducedMotion,
                 child: ReleafMeditationArtwork(
                   variant: _meditationArtworkFor(item.category),
-                  intensity: 0.92,
+                  intensity: 0.96,
                 ),
+              ),
+            ),
+            Positioned.fill(
+              child: _MeditationAtmosphereMotion(
+                key: const Key('meditation-atmosphere-motion'),
+                reducedMotion: reducedMotion,
+                variant: _meditationArtworkFor(item.category),
               ),
             ),
             const Positioned.fill(
@@ -1303,7 +1310,7 @@ class _SlowMeditationBackdropState extends State<_SlowMeditationBackdrop>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
     vsync: this,
-    duration: const Duration(seconds: 12),
+    duration: const Duration(seconds: 18),
   )..repeat(reverse: true);
 
   @override
@@ -1333,6 +1340,133 @@ class _SlowMeditationBackdropState extends State<_SlowMeditationBackdrop>
           );
         },
         child: widget.child,
+      ),
+    );
+  }
+}
+
+class _MeditationAtmosphereMotion extends StatefulWidget {
+  const _MeditationAtmosphereMotion({
+    super.key,
+    required this.reducedMotion,
+    required this.variant,
+  });
+
+  final bool reducedMotion;
+  final ReleafMeditationArtworkVariant variant;
+
+  @override
+  State<_MeditationAtmosphereMotion> createState() =>
+      _MeditationAtmosphereMotionState();
+}
+
+class _MeditationAtmosphereMotionState
+    extends State<_MeditationAtmosphereMotion>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(seconds: 20),
+  )..repeat(reverse: true);
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.reducedMotion) {
+      return _buildAtmosphere(0.5);
+    }
+
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, _) {
+        final value = Curves.easeInOutSine.transform(_controller.value);
+        return _buildAtmosphere(value);
+      },
+    );
+  }
+
+  Widget _buildAtmosphere(double value) {
+    final accent = ReleafFeatureAccents.meditation;
+    final phase = widget.variant.index.isEven ? value : 1 - value;
+
+    return IgnorePointer(
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Positioned(
+            left: -80 + (phase * 54),
+            top: 70 + (phase * 28),
+            child: _AtmosphereGlow(
+              size: 270,
+              opacity: 0.10 + (phase * 0.045),
+              color: accent,
+            ),
+          ),
+          Positioned(
+            right: -105 + ((1 - phase) * 42),
+            bottom: 110 + ((1 - phase) * 36),
+            child: _AtmosphereGlow(
+              size: 310,
+              opacity: 0.07 + ((1 - phase) * 0.035),
+              color: Colors.white,
+            ),
+          ),
+          Align(
+            alignment: Alignment(
+              -0.20 + (phase * 0.34),
+              -0.72 + (phase * 0.18),
+            ),
+            child: Container(
+              width: 170,
+              height: 2,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(ReleafRadii.pill),
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.transparent,
+                    accent.withValues(alpha: 0.12),
+                    Colors.transparent,
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AtmosphereGlow extends StatelessWidget {
+  const _AtmosphereGlow({
+    required this.size,
+    required this.opacity,
+    required this.color,
+  });
+
+  final double size;
+  final double opacity;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: RadialGradient(
+          colors: [
+            color.withValues(alpha: opacity),
+            color.withValues(alpha: opacity * 0.32),
+            Colors.transparent,
+          ],
+          stops: const [0, 0.48, 1],
+        ),
       ),
     );
   }
