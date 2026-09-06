@@ -391,7 +391,7 @@ void main() {
     restored.dispose();
   });
 
-  testWidgets('Meditate is a primary destination, not a nested page', (
+  testWidgets('Meditate opens as a standalone Sound experience', (
     WidgetTester tester,
   ) async {
     await _pumpRoute(
@@ -423,14 +423,11 @@ void main() {
     );
     expect(find.text('QUICK PRACTICES'), findsOneWidget);
     expect(find.text('EXPLORE BY INTENTION'), findsOneWidget);
-    expect(find.byTooltip('Back'), findsNothing);
-
-    final navigation = tester.widget<NavigationBar>(find.byType(NavigationBar));
-    expect(navigation.destinations, hasLength(5));
-    expect(navigation.selectedIndex, 3);
+    expect(find.byKey(const Key('meditation-back')), findsOneWidget);
+    expect(find.byType(NavigationBar), findsNothing);
   });
 
-  testWidgets('Sleep is a primary destination, not a nested page', (
+  testWidgets('Sleep opens as a standalone Sound experience', (
     WidgetTester tester,
   ) async {
     await _pumpRoute(
@@ -447,11 +444,28 @@ void main() {
     expect(find.text('TONIGHT · NO VOICE'), findsOneWidget);
     expect(find.text('SLEEP MEDITATIONS'), findsNothing);
     expect(find.text('WIND DOWN'), findsNothing);
-    expect(find.byTooltip('Back'), findsNothing);
+    expect(find.byKey(const Key('sleep-back')), findsOneWidget);
+    expect(find.byType(NavigationBar), findsNothing);
+  });
+
+  testWidgets('Sound is the fourth primary destination and opens wellbeing spaces', (
+    WidgetTester tester,
+  ) async {
+    await _pumpRoute(
+      tester,
+      location: AppRoutes.sound,
+      preferences: await _preferences(),
+    );
+
+    expect(find.text('Sound'), findsWidgets);
+    expect(find.byKey(const Key('sound-open-meditate')), findsOneWidget);
+    expect(find.byKey(const Key('sound-open-sleep')), findsOneWidget);
 
     final navigation = tester.widget<NavigationBar>(find.byType(NavigationBar));
-    expect(navigation.destinations, hasLength(5));
-    expect(navigation.selectedIndex, 4);
+    expect(navigation.destinations, hasLength(4));
+    expect(navigation.selectedIndex, 3);
+    expect(find.text('Meditate'), findsOneWidget);
+    expect(find.text('Sleep'), findsOneWidget);
   });
 
   testWidgets('Meditate and Sleep stay overflow-free at 320px', (
