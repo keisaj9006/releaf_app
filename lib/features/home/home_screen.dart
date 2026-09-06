@@ -137,6 +137,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 onPressed: () =>
                                     context.push(recommendation.route),
                               ),
+                              const SizedBox(height: ReleafSpacing.section),
+                              const ReleafSectionHeading(
+                                title: 'Daily Insight',
+                                description:
+                                    'One evidence-backed idea for today. Tomorrow, a new one.',
+                              ),
+                              const SizedBox(height: ReleafSpacing.md),
+                              _DailyInsightCard(
+                                insight: dailyInsight,
+                                onOpen: () => _showDailyInsightSheet(
+                                  context,
+                                  dailyInsight,
+                                ),
+                              ),
                               const SizedBox(height: ReleafSpacing.sm),
                               _HomeFocusStrip(
                                 focus: focus,
@@ -144,14 +158,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   context,
                                   ref,
                                   focus,
-                                ),
-                              ),
-                              const SizedBox(height: ReleafSpacing.sm),
-                              _DailyInsightCard(
-                                insight: dailyInsight,
-                                onOpen: () => _showDailyInsightSheet(
-                                  context,
-                                  dailyInsight,
                                 ),
                               ),
                               if (activeSession.hasActive ||
@@ -921,179 +927,233 @@ class _DailyInsightCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final accent = _dailyInsightAccent(insight.category);
 
-    Widget infoButton({double size = 34}) {
-      return SizedBox(
-        width: size,
-        height: size,
-        child: IconButton(
-          key: const Key('home-daily-insight-info'),
-          tooltip: 'About today’s insight',
-          style: IconButton.styleFrom(
-            padding: EdgeInsets.zero,
-            minimumSize: Size.zero,
-            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          ),
-          onPressed: onOpen,
-          icon: Icon(
-            Icons.info_outline_rounded,
-            size: 18,
-            color: accent.withValues(alpha: 0.86),
-          ),
-        ),
-      );
-    }
-
-    Widget leadingIcon({double size = 36}) {
-      return Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          color: accent.withValues(alpha: 0.10),
-          shape: BoxShape.circle,
-        ),
-        alignment: Alignment.center,
-        child: Icon(
-          _dailyInsightIcon(insight.category),
-          size: size * 0.5,
-          color: accent,
-        ),
-      );
-    }
-
-    Widget headline() {
-      return Text(
-        insight.headline,
-        maxLines: 2,
-        overflow: TextOverflow.ellipsis,
-        style: ReleafTypography.meta.copyWith(
-          color: ReleafColors.textPrimary,
-          fontWeight: FontWeight.w700,
-          height: 1.35,
-        ),
-      );
-    }
-
-    Widget source() {
-      return Text(
-        '${insight.sourcePublisher} · ${insight.evidenceLabel}',
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: ReleafTypography.meta.copyWith(
-          color: ReleafColors.textMuted,
-          fontSize: 8,
-          letterSpacing: 0.05,
-        ),
-      );
-    }
-
     return Material(
       key: const Key('home-daily-insight'),
       color: Colors.transparent,
-      borderRadius: BorderRadius.circular(ReleafRadii.medium),
+      borderRadius: BorderRadius.circular(ReleafRadii.extraLarge),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
-        borderRadius: BorderRadius.circular(ReleafRadii.medium),
+        borderRadius: BorderRadius.circular(ReleafRadii.extraLarge),
         onTap: onOpen,
         child: Ink(
-          padding: const EdgeInsets.fromLTRB(
-            ReleafSpacing.md,
-            12,
-            10,
-            12,
-          ),
+          height: 236,
           decoration: BoxDecoration(
-            color: ReleafColors.surfaceSoft.withValues(alpha: 0.64),
-            borderRadius: BorderRadius.circular(ReleafRadii.medium),
+            borderRadius: BorderRadius.circular(ReleafRadii.extraLarge),
             border: Border.all(
-              color: accent.withValues(alpha: 0.20),
+              color: accent.withValues(alpha: 0.24),
             ),
+            boxShadow: [
+              BoxShadow(
+                color: accent.withValues(alpha: 0.07),
+                blurRadius: 28,
+                offset: const Offset(0, 14),
+              ),
+            ],
           ),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final compact = constraints.maxWidth < 300;
-
-              if (compact) {
-                return Column(
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              ReleafArtwork(
+                variant: _dailyInsightArtwork(insight.category),
+                intensity: 0.62,
+              ),
+              const DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Color(0x42070C09),
+                      Color(0xA80A100D),
+                      Color(0xF2070B09),
+                    ],
+                    stops: [0, 0.48, 1],
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(ReleafSpacing.lg),
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
-                        leadingIcon(size: 30),
-                        const SizedBox(width: ReleafSpacing.xs),
-                        Expanded(
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 9,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: accent.withValues(alpha: 0.12),
+                            borderRadius:
+                                BorderRadius.circular(ReleafRadii.pill),
+                            border: Border.all(
+                              color: accent.withValues(alpha: 0.24),
+                            ),
+                          ),
                           child: Text(
-                            'TODAY’S INSIGHT · ${_dailyInsightCategoryLabel(insight.category)}',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                            'NEW TODAY',
                             style: ReleafTypography.eyebrow.copyWith(
                               color: accent,
                               fontSize: 8,
-                              letterSpacing: 1.0,
+                              letterSpacing: 1.2,
                             ),
                           ),
                         ),
-                        const SizedBox(width: 4),
-                        infoButton(size: 30),
-                      ],
-                    ),
-                    const SizedBox(height: 6),
-                    headline(),
-                    const SizedBox(height: 4),
-                    source(),
-                  ],
-                );
-              }
-
-              return Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  leadingIcon(),
-                  const SizedBox(width: ReleafSpacing.sm),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Text(
-                              'TODAY’S INSIGHT',
-                              style: ReleafTypography.eyebrow.copyWith(
-                                color: accent,
-                                fontSize: 8.5,
-                                letterSpacing: 1.25,
-                              ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            _dailyInsightCategoryLabel(insight.category)
+                                .toUpperCase(),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: ReleafTypography.eyebrow.copyWith(
+                              color: ReleafColors.textSecondary,
+                              fontSize: 8,
+                              letterSpacing: 1.15,
                             ),
-                            const SizedBox(width: 7),
-                            Expanded(
-                              child: Text(
-                                _dailyInsightCategoryLabel(insight.category),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: ReleafTypography.meta.copyWith(
-                                  color: ReleafColors.textMuted,
-                                  fontSize: 9,
-                                ),
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
-                        const SizedBox(height: 4),
-                        headline(),
-                        const SizedBox(height: 4),
-                        source(),
+                        SizedBox(
+                          width: 36,
+                          height: 36,
+                          child: IconButton(
+                            key: const Key('home-daily-insight-info'),
+                            tooltip: 'About today’s insight',
+                            onPressed: onOpen,
+                            padding: EdgeInsets.zero,
+                            icon: Icon(
+                              Icons.info_outline_rounded,
+                              size: 19,
+                              color: accent,
+                            ),
+                          ),
+                        ),
                       ],
                     ),
-                  ),
-                  const SizedBox(width: 6),
-                  infoButton(),
-                ],
-              );
-            },
+                    const Spacer(),
+                    Text(
+                      insight.headline,
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                      style: ReleafTypography.sectionTitle.copyWith(
+                        fontSize: 20,
+                        height: 1.28,
+                        letterSpacing: -0.25,
+                      ),
+                    ),
+                    const SizedBox(height: ReleafSpacing.sm),
+                    Wrap(
+                      spacing: 7,
+                      runSpacing: 6,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        _DailyInsightEvidencePill(
+                          label: insight.evidenceLabel,
+                          accent: accent,
+                        ),
+                        Text(
+                          insight.sourcePublisher,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: ReleafTypography.meta.copyWith(
+                            color: ReleafColors.textMuted,
+                            fontSize: 9,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: ReleafSpacing.md),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.auto_stories_outlined,
+                          color: accent,
+                          size: 17,
+                        ),
+                        const SizedBox(width: 7),
+                        Text(
+                          'Read why this matters',
+                          style: ReleafTypography.meta.copyWith(
+                            color: ReleafColors.textPrimary,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const Spacer(),
+                        Text(
+                          '1 min',
+                          style: ReleafTypography.meta.copyWith(
+                            color: ReleafColors.textMuted,
+                            fontSize: 9,
+                          ),
+                        ),
+                        const SizedBox(width: 5),
+                        Icon(
+                          Icons.arrow_forward_rounded,
+                          color: accent,
+                          size: 17,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 }
+
+class _DailyInsightEvidencePill extends StatelessWidget {
+  const _DailyInsightEvidencePill({
+    required this.label,
+    required this.accent,
+  });
+
+  final String label;
+  final Color accent;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      constraints: const BoxConstraints(maxWidth: 180),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.22),
+        borderRadius: BorderRadius.circular(ReleafRadii.pill),
+        border: Border.all(
+          color: accent.withValues(alpha: 0.20),
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.verified_outlined,
+            size: 13,
+            color: accent,
+          ),
+          const SizedBox(width: 5),
+          Flexible(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: ReleafTypography.meta.copyWith(
+                color: ReleafColors.textSecondary,
+                fontSize: 8.5,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 
 Future<void> _showDailyInsightSheet(
   BuildContext context,
@@ -1304,6 +1364,19 @@ IconData _dailyInsightIcon(DailyInsightCategory category) {
     DailyInsightCategory.connection => Icons.people_alt_outlined,
     DailyInsightCategory.nutrition => Icons.wb_sunny_outlined,
     DailyInsightCategory.nature => Icons.park_outlined,
+  };
+}
+
+ReleafArtworkVariant _dailyInsightArtwork(
+  DailyInsightCategory category,
+) {
+  return switch (category) {
+    DailyInsightCategory.movement => ReleafArtworkVariant.lifeUpgrade,
+    DailyInsightCategory.sleep => ReleafArtworkVariant.ambient,
+    DailyInsightCategory.mind => ReleafArtworkVariant.focus,
+    DailyInsightCategory.connection => ReleafArtworkVariant.calm,
+    DailyInsightCategory.nutrition => ReleafArtworkVariant.situational,
+    DailyInsightCategory.nature => ReleafArtworkVariant.grounding,
   };
 }
 
