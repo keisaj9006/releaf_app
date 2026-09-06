@@ -95,6 +95,13 @@ const brainGames = <BrainGameMeta>[
     hasDifficultyLevels: true,
   ),
   BrainGameMeta(
+    id: 'tower_plan',
+    title: 'Tower Plan',
+    icon: Icons.account_tree_outlined,
+    group: BrainGameGroup.reasoning,
+    hasDifficultyLevels: true,
+  ),
+  BrainGameMeta(
     id: 'color_conflict',
     title: 'Color Conflict',
     icon: Icons.palette_outlined,
