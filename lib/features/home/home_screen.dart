@@ -926,6 +926,7 @@ class _DailyInsightCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final accent = _dailyInsightAccent(insight.category);
+    final compact = MediaQuery.sizeOf(context).width < 360;
 
     return Material(
       key: const Key('home-daily-insight'),
@@ -936,7 +937,7 @@ class _DailyInsightCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(ReleafRadii.extraLarge),
         onTap: onOpen,
         child: Ink(
-          height: 236,
+          height: compact ? 278 : 236,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(ReleafRadii.extraLarge),
             border: Border.all(
@@ -1052,15 +1053,16 @@ class _DailyInsightCard extends StatelessWidget {
                           label: insight.evidenceLabel,
                           accent: accent,
                         ),
-                        Text(
-                          insight.sourcePublisher,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: ReleafTypography.meta.copyWith(
-                            color: ReleafColors.textMuted,
-                            fontSize: 9,
+                        if (!compact)
+                          Text(
+                            insight.sourcePublisher,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: ReleafTypography.meta.copyWith(
+                              color: ReleafColors.textMuted,
+                              fontSize: 9,
+                            ),
                           ),
-                        ),
                       ],
                     ),
                     const SizedBox(height: ReleafSpacing.md),
@@ -1072,14 +1074,18 @@ class _DailyInsightCard extends StatelessWidget {
                           size: 17,
                         ),
                         const SizedBox(width: 7),
-                        Text(
-                          'Read why this matters',
-                          style: ReleafTypography.meta.copyWith(
-                            color: ReleafColors.textPrimary,
-                            fontWeight: FontWeight.w700,
+                        Expanded(
+                          child: Text(
+                            'Read why this matters',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: ReleafTypography.meta.copyWith(
+                              color: ReleafColors.textPrimary,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                         ),
-                        const Spacer(),
+                        const SizedBox(width: 8),
                         Text(
                           '1 min',
                           style: ReleafTypography.meta.copyWith(
