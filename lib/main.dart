@@ -1,4 +1,6 @@
 // FILE: lib/main.dart
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -8,6 +10,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'core/providers.dart';
 import 'routing/app_router.dart';
+import 'routing/app_routes.dart';
 import 'theme/app_theme.dart';
 
 const _releafSupabaseUrl = String.fromEnvironment(
@@ -81,8 +84,37 @@ String _revenueCatApiKeyForCurrentPlatform() {
   }
 }
 
-class ReleafApp extends StatelessWidget {
+class ReleafApp extends StatefulWidget {
   const ReleafApp({super.key});
+
+  @override
+  State<ReleafApp> createState() => _ReleafAppState();
+}
+
+class _ReleafAppState extends State<ReleafApp> {
+  StreamSubscription<AuthState>? _authSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+
+    try {
+      _authSubscription =
+          Supabase.instance.client.auth.onAuthStateChange.listen((state) {
+        if (state.event == AuthChangeEvent.passwordRecovery) {
+          appRouter.go(AppRoutes.passwordReset);
+        }
+      });
+    } catch (_) {
+      // Widget tests may intentionally build the app without Supabase.initialize.
+    }
+  }
+
+  @override
+  void dispose() {
+    _authSubscription?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
