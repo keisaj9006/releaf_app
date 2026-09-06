@@ -403,6 +403,43 @@ void main() {
     expect(find.text('L3'), findsOneWidget);
   });
 
+  testWidgets('Memory uses the persistent Brain training level', (
+    WidgetTester tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({});
+    final preferences = await SharedPreferences.getInstance();
+    final controller = BrainTrainingController(preferences);
+
+    for (var index = 0; index < 3; index++) {
+      await controller.recordCompletion(gameId: 'memory', score: 300 + index);
+    }
+    controller.dispose();
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(preferences),
+        ],
+        child: const MaterialApp(
+          home: GameHostScreen(gameId: 'memory'),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    final game = tester.widget<MemoryGameScreen>(
+      find.byType(MemoryGameScreen),
+    );
+    expect(game.trainingLevel, 4);
+    expect(find.text('Brain L4'), findsOneWidget);
+    expect(find.text('4 pairs'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
+  });
+
   testWidgets('Labyrinth exposes progressive level and touch fallback', (
     WidgetTester tester,
   ) async {
