@@ -3,7 +3,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:releaf_app/features/account/application/account_auth_service.dart';
+import 'package:releaf_app/features/account/application/account_email_service.dart';
 import 'package:releaf_app/features/account/presentation/account_screen.dart';
+
+class _FakeAccountEmailService implements AccountEmailService {
+  String? lastEmail;
+
+  @override
+  Future<void> resendSignupConfirmation(String email) async {
+    lastEmail = email;
+  }
+}
 
 class _FakeAccountAuthService implements AccountAuthService {
   _FakeAccountAuthService({this.user});
@@ -58,12 +68,16 @@ class _FakeAccountAuthService implements AccountAuthService {
 Future<void> _pumpAccount(
   WidgetTester tester, {
   AccountUser? user,
+  AccountEmailService? emailService,
 }) async {
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
         accountAuthServiceProvider.overrideWithValue(
           _FakeAccountAuthService(user: user),
+        ),
+        accountEmailServiceProvider.overrideWithValue(
+          emailService ?? _FakeAccountEmailService(),
         ),
       ],
       child: const MaterialApp(home: AccountScreen()),
@@ -91,6 +105,54 @@ void main() {
 
     expect(find.byKey(const Key('account-name-field')), findsOneWidget);
     expect(find.text('Create account'), findsWidgets);
+  });
+
+  testWidgets('Registration can resend the confirmation email', (
+    WidgetTester tester,
+  ) async {
+    final emailService = _FakeAccountEmailService();
+    await _pumpAccount(tester, emailService: emailService);
+
+    await tester.tap(find.text('Register'));
+    await tester.pump();
+
+    await tester.enterText(
+      find.byKey(const Key('account-name-field')),
+      'Jo',
+    );
+    await tester.enterText(
+      find.byKey(const Key('account-email-field')),
+      'jo@example.com',
+    );
+    await tester.enterText(
+      find.byKey(const Key('account-password-field')),
+      'secure-pass-123',
+    );
+    await tester.tap(find.byKey(const Key('account-auth-submit')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(
+      find.byKey(const Key('account-resend-confirmation')),
+      findsOneWidget,
+    );
+    expect(
+      find.textContaining('Check your email to confirm it'),
+      findsOneWidget,
+    );
+
+    await tester.tap(
+      find.byKey(const Key('account-resend-confirmation')),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(emailService.lastEmail, 'jo@example.com');
+    expect(
+      find.textContaining('Confirmation email sent again'),
+      findsOneWidget,
+    );
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('Signed in account shows identity and profile actions', (
