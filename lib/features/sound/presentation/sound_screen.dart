@@ -59,7 +59,13 @@ class SoundScreen extends ConsumerWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _SoundHeader(onBack: context.pop),
+                              const _SoundHeader(),
+                              const SizedBox(height: ReleafSpacing.lg),
+                              _SoundDestinations(
+                                onMeditate: () =>
+                                    context.push(AppRoutes.meditate),
+                                onSleep: () => context.push(AppRoutes.sleep),
+                              ),
                               const SizedBox(height: ReleafSpacing.xxl),
                               _FeaturedSound(
                                 track: tracks.first,
@@ -190,48 +196,166 @@ class _SoundBackdrop extends StatelessWidget {
 }
 
 class _SoundHeader extends StatelessWidget {
-  const _SoundHeader({required this.onBack});
-
-  final VoidCallback onBack;
+  const _SoundHeader();
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        ReleafRoundIconButton(
-          icon: Icons.arrow_back_rounded,
-          tooltip: 'Back',
-          accentColor: ReleafFeatureAccents.sound,
-          onPressed: onBack,
+        Text(
+          'AMBIENT AUDIO',
+          style: ReleafTypography.eyebrow.copyWith(
+            color: ReleafFeatureAccents.sound,
+            letterSpacing: 1.7,
+          ),
         ),
-        const SizedBox(width: ReleafSpacing.md),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'AMBIENT AUDIO',
-                style: ReleafTypography.eyebrow.copyWith(
-                  color: ReleafFeatureAccents.sound,
-                  letterSpacing: 1.7,
-                ),
-              ),
-              const SizedBox(height: 5),
-              Text(
-                'Sound',
-                style: ReleafTypography.display.copyWith(fontSize: 30),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'Long-form audio for focus, rest and lower-stimulation moments.',
-                style: ReleafTypography.meta.copyWith(
-                  color: ReleafColors.textSecondary,
-                ),
-              ),
-            ],
+        const SizedBox(height: 5),
+        Text(
+          'Sound',
+          style: ReleafTypography.display.copyWith(fontSize: 30),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'Long-form audio, meditation and sleep spaces for lower-stimulation moments.',
+          style: ReleafTypography.meta.copyWith(
+            color: ReleafColors.textSecondary,
           ),
         ),
       ],
+    );
+  }
+}
+
+class _SoundDestinations extends StatelessWidget {
+  const _SoundDestinations({
+    required this.onMeditate,
+    required this.onSleep,
+  });
+
+  final VoidCallback onMeditate;
+  final VoidCallback onSleep;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final stacked = constraints.maxWidth < 420;
+
+        final meditate = _SoundDestinationCard(
+          key: const Key('sound-open-meditate'),
+          icon: Icons.spa_outlined,
+          eyebrow: 'GUIDED',
+          title: 'Meditate',
+          description:
+              'Voice-led practices with separate ambience and narration controls.',
+          accent: ReleafFeatureAccents.meditation,
+          onPressed: onMeditate,
+        );
+        final sleep = _SoundDestinationCard(
+          key: const Key('sound-open-sleep'),
+          icon: Icons.bedtime_outlined,
+          eyebrow: 'NO VOICE',
+          title: 'Sleep',
+          description:
+              'Low-stimulation tones and nature sound designed for the end of the day.',
+          accent: ReleafFeatureAccents.sleep,
+          onPressed: onSleep,
+        );
+
+        if (stacked) {
+          return Column(
+            children: [
+              meditate,
+              const SizedBox(height: ReleafSpacing.sm),
+              sleep,
+            ],
+          );
+        }
+
+        return Row(
+          children: [
+            Expanded(child: meditate),
+            const SizedBox(width: ReleafSpacing.sm),
+            Expanded(child: sleep),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _SoundDestinationCard extends StatelessWidget {
+  const _SoundDestinationCard({
+    super.key,
+    required this.icon,
+    required this.eyebrow,
+    required this.title,
+    required this.description,
+    required this.accent,
+    required this.onPressed,
+  });
+
+  final IconData icon;
+  final String eyebrow;
+  final String title;
+  final String description;
+  final Color accent;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return ReleafPressableCard(
+      onPressed: onPressed,
+      padding: const EdgeInsets.all(ReleafSpacing.md),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: accent.withValues(alpha: 0.10),
+              border: Border.all(color: accent.withValues(alpha: 0.20)),
+            ),
+            alignment: Alignment.center,
+            child: Icon(icon, color: accent, size: 21),
+          ),
+          const SizedBox(width: ReleafSpacing.sm),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  eyebrow,
+                  style: ReleafTypography.eyebrow.copyWith(
+                    color: accent,
+                    fontSize: 8,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(title, style: ReleafTypography.cardTitle),
+                const SizedBox(height: 3),
+                Text(
+                  description,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                  style: ReleafTypography.meta.copyWith(
+                    color: ReleafColors.textSecondary,
+                    height: 1.4,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 6),
+          const Icon(
+            Icons.chevron_right_rounded,
+            color: ReleafColors.textMuted,
+          ),
+        ],
+      ),
     );
   }
 }
