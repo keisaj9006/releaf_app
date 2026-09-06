@@ -75,6 +75,8 @@ void main() {
   ) async {
     await _pumpHome(tester, preferences: await _preferences());
 
+    await tester.ensureVisible(find.text('Calm down'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Calm down'));
     await tester.pump(const Duration(milliseconds: 300));
 
@@ -82,6 +84,8 @@ void main() {
     expect(find.text('Back to the Room'), findsOneWidget);
     expect(find.text('You chose calm down.'), findsOneWidget);
 
+    await tester.ensureVisible(find.text('Focus'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Focus'));
     await tester.pump(const Duration(milliseconds: 300));
 
