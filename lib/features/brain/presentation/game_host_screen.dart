@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../routing/app_routes.dart';
 import '../../../legacy/screens/memory_game_screen.dart';
-import '../../../legacy/screens/labirynth_game_screen.dart';
+import '../../../games/labyrinth/labyrinth_game_screen.dart';
 import '../../../games/math_race/math_race_screen.dart';
 import '../../../legacy/screens/broken_mirror_game_screen.dart';
 import '../../../games/rule_shift/rule_shift_screen.dart';
@@ -38,7 +38,10 @@ Widget buildBrainGame({
 }) {
   return switch (gameId) {
     'memory' => MemoryGameScreen(onFinish: onFinish),
-    'labyrinth' => LabirynthGameScreen(onFinish: onFinish),
+    'labyrinth' => LabirynthGameScreen(
+        onFinish: onFinish,
+        trainingLevel: trainingLevel,
+      ),
     'math_race' => MathRaceScreen(onFinish: onFinish),
     'broken_mirror' => BrokenMirrorGameScreen(
         level: trainingLevel,
