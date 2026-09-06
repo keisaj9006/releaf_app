@@ -480,7 +480,7 @@ class _MeditationPremiumPreviewSheet extends StatelessWidget {
                   children: [
                     _MetaPill(
                       icon: Icons.timer_outlined,
-                      label: '${minutes} min',
+                      label: '$minutes min',
                     ),
                     _MetaPill(
                       icon: Icons.spa_outlined,
