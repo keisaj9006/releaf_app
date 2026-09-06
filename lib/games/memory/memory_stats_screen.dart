@@ -211,7 +211,7 @@ class _SummaryRow extends StatelessWidget {
         _SummaryPill(label: 'LEVELS', value: '$completed'),
         _SummaryPill(
           label: 'BEST TIME',
-          value: bestTime == null ? '—' : '${bestTime}s',
+          value: bestTime == null ? '—' : '$bestTime s',
         ),
         _SummaryPill(
           label: 'FEWEST ERRORS',
