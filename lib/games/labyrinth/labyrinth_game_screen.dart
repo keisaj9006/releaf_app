@@ -33,11 +33,16 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen> {
   static const double _ballRadius = 0.18;
   static const double _wallThickness = 0.075;
   static const Duration _physicsStep = Duration(milliseconds: 16);
+  static const int _motionCalibrationSampleTarget = 12;
+  static const double _motionDeadZone = 0.08;
 
   late final _MazeLevel _level;
   late Offset _position;
   Offset _velocity = Offset.zero;
   Offset _tilt = Offset.zero;
+  Offset _motionCalibrationSum = Offset.zero;
+  Offset _motionBaseline = Offset.zero;
+  int _motionCalibrationSamples = 0;
 
   Timer? _physicsTimer;
   Timer? _countdown;
@@ -85,17 +90,34 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen> {
         (event) {
           if (!mounted || _paused || _finished) return;
 
-          // Portrait mapping. Drag-anywhere remains available as a fallback
-          // and for users who prefer touch control.
-          final next = Offset(
-            (-event.x / 9.81).clamp(-1.0, 1.0).toDouble(),
-            (event.y / 9.81).clamp(-1.0, 1.0).toDouble(),
+          final raw = Offset(event.x, event.y);
+          if (_motionCalibrationSamples < _motionCalibrationSampleTarget) {
+            _motionCalibrationSum += raw;
+            _motionCalibrationSamples++;
+            if (_motionCalibrationSamples == _motionCalibrationSampleTarget) {
+              _motionBaseline =
+                  _motionCalibrationSum / _motionCalibrationSampleTarget;
+              if (!_motionAvailable) {
+                setState(() => _motionAvailable = true);
+              }
+            }
+            return;
+          }
+
+          // Calibrate against the position in which the phone is naturally
+          // held when the session opens. This prevents gravity/orientation
+          // bias from starting the timer before an intentional tilt.
+          final relative = raw - _motionBaseline;
+          var next = Offset(
+            (-relative.dx / 5.8).clamp(-1.0, 1.0).toDouble(),
+            (relative.dy / 5.8).clamp(-1.0, 1.0).toDouble(),
           );
 
-          _tilt = next;
-          if (!_motionAvailable && next.distance > 0.05) {
-            setState(() => _motionAvailable = true);
+          if (next.distance < _motionDeadZone) {
+            next = Offset.zero;
           }
+
+          _tilt = next;
         },
         onError: (_) {
           if (mounted && _motionAvailable) {
@@ -417,6 +439,7 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen> {
                         level: _levelNumber,
                         timeLeft: _timeLeft,
                         wallHits: _wallHits,
+                        entryLabel: _level.entryLabel,
                         started: _started,
                         paused: _paused,
                         motionAvailable: _motionAvailable,
@@ -455,8 +478,8 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen> {
                         ),
                         child: Text(
                           _motionAvailable
-                              ? 'Tilt your phone to guide the light. You can also drag anywhere on the maze.'
-                              : 'Drag anywhere on the maze to guide the light. Tilt control activates automatically when motion is available.',
+                              ? 'Start at the ${_level.entryLabel.toLowerCase()} edge and reach the centre. Tilt your phone to guide the light, or drag anywhere on the maze.'
+                              : 'Start at the ${_level.entryLabel.toLowerCase()} edge and reach the centre. Drag anywhere on the maze; tilt control activates after sensor calibration.',
                           key: const Key('labyrinth-control-hint'),
                           textAlign: TextAlign.center,
                           style: ReleafTypography.meta.copyWith(
@@ -512,6 +535,8 @@ class _MazeLevel {
     required this.start,
     required this.goal,
     required this.timeLimitSeconds,
+    required this.entrySide,
+    required this.shortestPathMoves,
   });
 
   final int level;
@@ -521,6 +546,15 @@ class _MazeLevel {
   final Offset start;
   final Offset goal;
   final int timeLimitSeconds;
+  final _MazeEntrySide entrySide;
+  final int shortestPathMoves;
+
+  String get entryLabel => switch (entrySide) {
+        _MazeEntrySide.bottom => 'Bottom',
+        _MazeEntrySide.left => 'Left',
+        _MazeEntrySide.top => 'Top',
+        _MazeEntrySide.right => 'Right',
+      };
 
   factory _MazeLevel.generate(int rawLevel) {
     final level = rawLevel.clamp(1, 12).toInt();
@@ -536,8 +570,13 @@ class _MazeLevel {
     );
 
     final random = math.Random(4813 + (level * 7919));
-    final startColumn = columns ~/ 2;
-    final startRow = rows - 1;
+    final entrySide = _MazeEntrySide.values[(level - 1) % 4];
+    final (startColumn, startRow) = switch (entrySide) {
+      _MazeEntrySide.bottom => (columns ~/ 2, rows - 1),
+      _MazeEntrySide.left => (0, rows ~/ 2),
+      _MazeEntrySide.top => (columns ~/ 2, 0),
+      _MazeEntrySide.right => (columns - 1, rows ~/ 2),
+    };
     final visited = List<List<bool>>.generate(
       rows,
       (_) => List<bool>.filled(columns, false),
@@ -608,9 +647,21 @@ class _MazeLevel {
     }
 
     final goalColumn = columns ~/ 2;
-    final goalRow = 0;
+    final goalRow = rows ~/ 2;
+    final shortestPathMoves = _shortestPathMoves(
+      cells: cells,
+      columns: columns,
+      rows: rows,
+      startColumn: startColumn,
+      startRow: startRow,
+      goalColumn: goalColumn,
+      goalRow: goalRow,
+    );
     final timeLimitSeconds =
-        (78 - (level * 3) + ((columns * rows) ~/ 4)).clamp(48, 82).toInt();
+        (26 + (shortestPathMoves * 3.0) - (level * 0.3))
+            .round()
+            .clamp(42, 86)
+            .toInt();
 
     return _MazeLevel(
       level: level,
@@ -620,7 +671,56 @@ class _MazeLevel {
       start: Offset(startColumn + 0.5, startRow + 0.5),
       goal: Offset(goalColumn + 0.5, goalRow + 0.5),
       timeLimitSeconds: timeLimitSeconds,
+      entrySide: entrySide,
+      shortestPathMoves: shortestPathMoves,
     );
+  }
+
+  static int _shortestPathMoves({
+    required List<List<_MazeCell>> cells,
+    required int columns,
+    required int rows,
+    required int startColumn,
+    required int startRow,
+    required int goalColumn,
+    required int goalRow,
+  }) {
+    final distances = List<List<int>>.generate(
+      rows,
+      (_) => List<int>.filled(columns, -1),
+    );
+    final queue = <(int, int)>[(startColumn, startRow)];
+    distances[startRow][startColumn] = 0;
+    var head = 0;
+
+    while (head < queue.length) {
+      final (column, row) = queue[head++];
+      if (column == goalColumn && row == goalRow) {
+        return distances[row][column];
+      }
+
+      final cell = cells[row][column];
+      final nextDistance = distances[row][column] + 1;
+
+      void enqueue(int nextColumn, int nextRow) {
+        if (nextColumn < 0 ||
+            nextColumn >= columns ||
+            nextRow < 0 ||
+            nextRow >= rows ||
+            distances[nextRow][nextColumn] != -1) {
+          return;
+        }
+        distances[nextRow][nextColumn] = nextDistance;
+        queue.add((nextColumn, nextRow));
+      }
+
+      if (!cell.top) enqueue(column, row - 1);
+      if (!cell.right) enqueue(column + 1, row);
+      if (!cell.bottom) enqueue(column, row + 1);
+      if (!cell.left) enqueue(column - 1, row);
+    }
+
+    return math.max(columns, rows).toInt();
   }
 
   bool hasVerticalWall(int xLine, int row) {
@@ -637,6 +737,8 @@ class _MazeLevel {
     return cells[yLine - 1][column].bottom || cells[yLine][column].top;
   }
 }
+
+enum _MazeEntrySide { bottom, left, top, right }
 
 class _MazeCell {
   bool top = true;
@@ -744,6 +846,26 @@ class _MazeBoardPainter extends CustomPainter {
       Paint()..color = const Color(0xFFFFF0BE),
     );
 
+    final goalLabel = TextPainter(
+      text: const TextSpan(
+        text: 'GOAL',
+        style: TextStyle(
+          color: Color(0xFFE7C77A),
+          fontSize: 8,
+          fontWeight: FontWeight.w800,
+          letterSpacing: 1.1,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    goalLabel.paint(
+      canvas,
+      Offset(
+        goal.dx - (goalLabel.width / 2),
+        goal.dy - goalRadius - goalLabel.height - 5,
+      ),
+    );
+
     final ball = Offset(
       position.dx / level.columns * size.width,
       position.dy / level.rows * size.height,
@@ -808,6 +930,7 @@ class _MazeHeader extends StatelessWidget {
     required this.level,
     required this.timeLeft,
     required this.wallHits,
+    required this.entryLabel,
     required this.started,
     required this.paused,
     required this.motionAvailable,
@@ -818,6 +941,7 @@ class _MazeHeader extends StatelessWidget {
   final int level;
   final int timeLeft;
   final int wallHits;
+  final String entryLabel;
   final bool started;
   final bool paused;
   final bool motionAvailable;
@@ -883,6 +1007,7 @@ class _MazeHeader extends StatelessWidget {
                 value: started ? '${timeLeft}s' : 'Ready',
               ),
               _MazeStat(label: 'WALLS', value: '$wallHits'),
+              _MazeStat(label: 'ENTRY', value: entryLabel),
               _MazeStat(
                 label: 'CONTROL',
                 value: motionAvailable ? 'Tilt + touch' : 'Touch',
