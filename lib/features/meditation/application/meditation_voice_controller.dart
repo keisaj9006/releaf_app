@@ -8,6 +8,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/providers.dart';
 
+const double releafNarrationSpeedMultiplier = 0.75;
+const double releafFlutterTtsNeutralRate = 0.50;
+const double releafFlutterTtsSpeechRate =
+    releafFlutterTtsNeutralRate * releafNarrationSpeedMultiplier;
+
 class MeditationVoiceState {
   const MeditationVoiceState({
     this.enabled = true,
@@ -63,9 +68,9 @@ class FlutterMeditationVoiceDriver implements MeditationVoiceDriver {
       await _tts.setLanguage('en-GB');
       await _preferCalmFemaleVoice();
 
-      // Guided meditation should be substantially slower than conversational
-      // speech. The quiet left after each instruction is intentional.
-      await _tts.setSpeechRate(0.27);
+      // Releaf narration runs at 0.75x of the plugin's neutral 0.50
+      // baseline. Recorded narration should be authored to the same pacing.
+      await _tts.setSpeechRate(releafFlutterTtsSpeechRate);
       await _tts.setPitch(0.93);
       await _tts.awaitSpeakCompletion(true);
 
