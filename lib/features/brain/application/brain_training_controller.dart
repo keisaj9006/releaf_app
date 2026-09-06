@@ -13,6 +13,7 @@ const progressiveBrainGameIds = <String>{
   'labyrinth',
   'math_race',
   'n_back',
+  'spatial_span',
 };
 
 const maxBrainTrainingLevel = 12;
