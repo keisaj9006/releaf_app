@@ -13,7 +13,7 @@ import '../features/relief/presentation/relief_session_gate.dart';
 import '../features/relief/domain/models/reset_launch_options.dart';
 import '../features/brain/presentation/brain_screen.dart';
 import '../features/sound/presentation/sound_screen.dart';
-import '../features/sound/presentation/sound_player_screen.dart';
+import '../features/sound/presentation/sound_player_gate.dart';
 import '../features/meditation/presentation/meditation_screen.dart';
 import '../features/meditation/presentation/meditation_session_gate.dart';
 import '../features/meditation/domain/meditation_resume_state.dart';
@@ -143,7 +143,7 @@ GoRouter createAppRouter({String initialLocation = AppRoutes.home}) => GoRouter(
       path: AppRoutes.soundPlayer,
       pageBuilder: (context, state) {
         final trackId = state.pathParameters['trackId'] ?? '';
-        return _fadePage(SoundPlayerScreen(trackId: trackId));
+        return _fadePage(SoundPlayerGate(trackId: trackId));
       },
     ),
 
