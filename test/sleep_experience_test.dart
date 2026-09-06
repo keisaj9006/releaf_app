@@ -41,6 +41,8 @@ void main() {
     final premiumSound = find.byKey(const Key('sleep-sound-pink-noise'));
     expect(premiumSound, findsOneWidget);
 
+    await tester.ensureVisible(premiumSound);
+    await tester.pumpAndSettle();
     await tester.tap(premiumSound);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
