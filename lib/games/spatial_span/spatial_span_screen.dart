@@ -360,7 +360,7 @@ class _SpatialSpanScreenState extends State<SpatialSpanScreen> {
                                 ),
                                 _SpatialStat(
                                   label: 'GRID',
-                                  value: '${_gridSide}×$_gridSide',
+                                  value: '$_gridSide×$_gridSide',
                                 ),
                               ],
                             ),
