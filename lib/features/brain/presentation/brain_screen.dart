@@ -6,6 +6,8 @@ import '../../../routing/app_routes.dart';
 import '../../../theme/app_theme.dart';
 import '../../../theme/releaf_design_tokens.dart';
 import '../../../theme/widgets/releaf_brain_artwork.dart';
+import '../../../theme/widgets/releaf_components.dart';
+import '../../relief/data/reset_catalog.dart';
 import '../application/brain_training_controller.dart';
 import '../data/game_registry.dart';
 import 'game_host_screen.dart';
@@ -47,7 +49,14 @@ class BrainScreen extends ConsumerWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _BrainHeader(training: training),
+                        _BrainHeader(
+                          training: training,
+                          onEmergencyPressed: () => context.push(
+                            AppRoutes.reliefSessionFor(
+                              ResetCatalog.emergencySessionId,
+                            ),
+                          ),
+                        ),
                         const SizedBox(height: ReleafSpacing.xxl),
                         _DailyWorkoutPanel(
                           games: workoutGames,
@@ -164,9 +173,13 @@ class _BrainBackdropPainter extends CustomPainter {
 }
 
 class _BrainHeader extends StatelessWidget {
-  const _BrainHeader({required this.training});
+  const _BrainHeader({
+    required this.training,
+    required this.onEmergencyPressed,
+  });
 
   final BrainTrainingState training;
+  final VoidCallback onEmergencyPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -199,11 +212,26 @@ class _BrainHeader extends StatelessWidget {
       builder: (context, constraints) {
         final compact = constraints.maxWidth < 360;
 
+        final emergency = ReleafRoundIconButton(
+          key: const Key('brain-emergency-action'),
+          icon: Icons.health_and_safety_outlined,
+          tooltip: 'Open Emergency Calm',
+          accentColor: ReleafFeatureAccents.emergency,
+          onPressed: onEmergencyPressed,
+        );
+
         if (compact) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              copy,
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(child: copy),
+                  const SizedBox(width: ReleafSpacing.sm),
+                  emergency,
+                ],
+              ),
               const SizedBox(height: ReleafSpacing.md),
               _SevenDayBadge(
                 sessions: training.sessionsLast7Days,
@@ -217,7 +245,9 @@ class _BrainHeader extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(child: copy),
-            const SizedBox(width: ReleafSpacing.md),
+            const SizedBox(width: ReleafSpacing.sm),
+            emergency,
+            const SizedBox(width: ReleafSpacing.sm),
             _SevenDayBadge(
               sessions: training.sessionsLast7Days,
               compact: false,
