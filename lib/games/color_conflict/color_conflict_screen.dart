@@ -30,7 +30,7 @@ class _ColorConflictScreenState extends State<ColorConflictScreen> {
     _ConflictColor('PURPLE', Color(0xFFAA91EA)),
   ];
 
-  BrainDifficulty _difficulty = BrainDifficulty.easy;
+  BrainDifficulty _difficulty = BrainDifficulty.medium;
   Timer? _timer;
   int _round = 0;
   int _score = 0;
@@ -40,21 +40,21 @@ class _ColorConflictScreenState extends State<ColorConflictScreen> {
   bool? _lastCorrect;
 
   int get _colorCount => switch (_difficulty) {
-        BrainDifficulty.easy => 3,
-        BrainDifficulty.medium => 4,
+        BrainDifficulty.easy => _round < 3 ? 3 : 4,
+        BrainDifficulty.medium => _round < 4 ? 4 : 5,
         BrainDifficulty.hard => 5,
       };
 
   int get _totalRounds => switch (_difficulty) {
-        BrainDifficulty.easy => 8,
-        BrainDifficulty.medium => 10,
-        BrainDifficulty.hard => 12,
+        BrainDifficulty.easy => 9,
+        BrainDifficulty.medium => 11,
+        BrainDifficulty.hard => 13,
       };
 
   int get _sessionSeconds => switch (_difficulty) {
-        BrainDifficulty.easy => 42,
-        BrainDifficulty.medium => 34,
-        BrainDifficulty.hard => 26,
+        BrainDifficulty.easy => 38,
+        BrainDifficulty.medium => 30,
+        BrainDifficulty.hard => 24,
       };
 
   int get _multiplier => switch (_difficulty) {
