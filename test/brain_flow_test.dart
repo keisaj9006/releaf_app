@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sensors_plus/sensors_plus.dart';
 
 import 'package:releaf_app/core/providers.dart';
 import 'package:releaf_app/features/brain/application/brain_training_controller.dart';
@@ -17,7 +18,7 @@ import 'package:releaf_app/games/color_conflict/color_conflict_screen.dart';
 import 'package:releaf_app/games/pattern_logic/pattern_logic_screen.dart';
 import 'package:releaf_app/games/signal_scan/signal_scan_screen.dart';
 import 'package:releaf_app/legacy/screens/broken_mirror_game_screen.dart';
-import 'package:releaf_app/legacy/screens/labirynth_game_screen.dart';
+import 'package:releaf_app/games/labyrinth/labyrinth_game_screen.dart';
 import 'package:releaf_app/legacy/screens/memory_game_screen.dart';
 import 'package:releaf_app/routing/app_router.dart';
 import 'package:releaf_app/routing/app_routes.dart';
@@ -337,6 +338,7 @@ void main() {
     expect(state.completionCountFor('sequence_echo'), 2);
     expect(state.trainingLevelFor('sequence_echo'), 3);
     expect(state.trainingLevelFor('broken_mirror'), 1);
+    expect(state.trainingLevelFor('labyrinth'), 1);
     expect(state.trainingLevelFor('memory'), 1);
   });
 
@@ -367,6 +369,43 @@ void main() {
     );
     expect(game.trainingLevel, 3);
     expect(find.text('L3'), findsOneWidget);
+  });
+
+  testWidgets('Labyrinth exposes progressive level and touch fallback', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(420, 840);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: LabirynthGameScreen(
+          trainingLevel: 6,
+          onFinish: (_) {},
+          motionStream: const Stream<AccelerometerEvent>.empty(),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('L6'), findsOneWidget);
+    expect(find.text('Ready'), findsOneWidget);
+    expect(find.byKey(const Key('labyrinth-board')), findsOneWidget);
+    expect(find.textContaining('Drag anywhere'), findsOneWidget);
+
+    final board = find.byKey(const Key('labyrinth-board'));
+    await tester.drag(board, const Offset(0, -36));
+    await tester.pump(const Duration(milliseconds: 50));
+
+    expect(find.text('Ready'), findsNothing);
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
   });
 
   testWidgets('Game host scales Broken Mirror from saved training level', (
