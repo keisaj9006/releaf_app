@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'account_recovery_service.dart';
+
 class AccountUser {
   const AccountUser({
     required this.id,
@@ -96,6 +98,7 @@ class SupabaseAccountAuthService implements AccountAuthService {
     final response = await _client.auth.signUp(
       email: email.trim(),
       password: password,
+      emailRedirectTo: releafAuthCallbackUrl,
       data: {
         if (cleanName.isNotEmpty) 'display_name': cleanName,
       },
