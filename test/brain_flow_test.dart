@@ -14,6 +14,7 @@ import 'package:releaf_app/features/progress/data/leaves_repository.dart';
 import 'package:releaf_app/games/math_race/math_race_screen.dart';
 import 'package:releaf_app/games/rule_shift/rule_shift_screen.dart';
 import 'package:releaf_app/games/sequence_echo/sequence_echo_screen.dart';
+import 'package:releaf_app/games/n_back/n_back_screen.dart';
 import 'package:releaf_app/games/color_conflict/color_conflict_screen.dart';
 import 'package:releaf_app/games/pattern_logic/pattern_logic_screen.dart';
 import 'package:releaf_app/games/signal_scan/signal_scan_screen.dart';
@@ -47,6 +48,7 @@ void main() {
     expect(resolvedTypes['broken_mirror'], BrokenMirrorGameScreen);
     expect(resolvedTypes['rule_shift'], RuleShiftScreen);
     expect(resolvedTypes['sequence_echo'], SequenceEchoScreen);
+    expect(resolvedTypes['n_back'], NBackScreen);
     expect(resolvedTypes['color_conflict'], ColorConflictScreen);
     expect(resolvedTypes['pattern_logic'], PatternLogicScreen);
     expect(resolvedTypes['signal_scan'], SignalScanScreen);
@@ -256,6 +258,7 @@ void main() {
       'broken_mirror': BrokenMirrorGameScreen,
       'rule_shift': RuleShiftScreen,
       'sequence_echo': SequenceEchoScreen,
+      'n_back': NBackScreen,
       'color_conflict': ColorConflictScreen,
       'pattern_logic': PatternLogicScreen,
       'signal_scan': SignalScanScreen,
@@ -340,6 +343,7 @@ void main() {
     expect(state.trainingLevelFor('broken_mirror'), 1);
     expect(state.trainingLevelFor('labyrinth'), 1);
     expect(state.trainingLevelFor('math_race'), 1);
+    expect(state.trainingLevelFor('n_back'), 1);
     expect(state.trainingLevelFor('memory'), 1);
   });
 
@@ -550,6 +554,55 @@ void main() {
     await tester.pump();
   });
 
+  testWidgets('N-Back exposes difficulty and progressive N value', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: NBackScreen(
+          trainingLevel: 9,
+          onFinish: (_) {},
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('N-Back'), findsOneWidget);
+    expect(find.text('L9'), findsOneWidget);
+    expect(find.text('2-back'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('brain-difficulty-hard')));
+    await tester.pump();
+
+    expect(find.text('4-back'), findsOneWidget);
+    expect(find.byKey(const Key('n-back-stimulus-card')), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('N-Back moves from warmup into match decisions', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: NBackScreen(
+          trainingLevel: 1,
+          onFinish: (_) {},
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.byKey(const Key('n-back-continue')), findsOneWidget);
+    await tester.tap(find.byKey(const Key('n-back-continue')));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('n-back-continue')));
+    await tester.pump();
+
+    expect(find.byKey(const Key('n-back-match')), findsOneWidget);
+    expect(find.byKey(const Key('n-back-different')), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('New Brain games stay overflow-free at 320px', (
     WidgetTester tester,
   ) async {
@@ -565,6 +618,7 @@ void main() {
       ColorConflictScreen(onFinish: (_) {}),
       PatternLogicScreen(onFinish: (_) {}),
       SignalScanScreen(onFinish: (_) {}),
+      NBackScreen(onFinish: (_) {}),
     ];
 
     for (final game in games) {
