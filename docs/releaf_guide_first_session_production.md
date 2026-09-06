@@ -8,7 +8,7 @@ Session: `mindfulness-basics-2` — **Mindfulness Basics**
 Duration: 2 minutes  
 Access: Free  
 Guide: owner-selected Releaf Guide voice  
-Canonical generation speed: **0.75x**  
+Canonical delivery speed: **0.82x**
 Ambience: `deep-drift` at in-app mix level `0.18`
 
 The voice and ambience must remain separate assets. Do not bake ambience into the narration files.
@@ -17,7 +17,7 @@ The voice and ambience must remain separate assets. Do not bake ambience into th
 
 Locked:
 - selected Releaf Guide voice
-- speed: **0.75x**
+- speed: **0.82x**
 
 Starting QA baseline:
 - stability: around 0.50–0.60
@@ -91,7 +91,7 @@ Just notice that you took these two minutes for yourself.
 
 Reject/regenerate any segment if:
 - the voice identity noticeably changes between segments
-- 0.75x introduces slurring, metallic stretching, or unnatural vowels
+- 0.82x introduces slurring, metallic stretching, or unnatural vowels
 - a sentence becomes sing-song or obviously synthetic
 - consonants disappear at low volume
 - the delivery sounds parental, clinical, dramatic, sleepy, or ASMR-like

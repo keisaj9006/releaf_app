@@ -6,7 +6,7 @@ System TTS is a fallback only. Releaf's premium guided experience uses one consi
 
 The owner-selected voice is now the production baseline. Reference generation ID: `d730719be8654c93bddd639a96da7417`.
 
-Canonical generation speed: **0.75x**. Generate narration at 0.75 in the voice provider rather than time-stretching finished audio in the app. This preserves the intended phrasing and avoids playback artefacts.
+Canonical delivery speed: **0.82x**. Generate narration at 0.82 in the voice provider when supported. When the approved provider does not expose numeric speed control, apply pitch-preserving 0.82 mastering before bundling the asset. Never alter narration playback speed in Flutter.
 
 The voice applies to **Meditate**, guided Reset experiences, and Emergency guidance where voice is enabled. **Sleep is voice-free** and must contain only sleep audio/music/nature sound content.
 
@@ -81,7 +81,7 @@ No Releaf Guide narration. Sleep is a voice-free audio destination.
 
 ### Production path after voice lock
 1. Use the owner-selected Releaf Guide voice consistently across the guided library.
-2. Generate at **0.75x speed** using the provider's native speed control.
+2. Deliver at **0.82x speed**, using native provider control where available or pitch-preserving offline mastering before bundling.
 3. Use real Releaf scripts with intentional punctuation and short phrasing; silence belongs in the session timing, not as filler words.
 4. Export final sessions as clean isolated voice.
 5. Edit breath/noise only when distracting; do not sterilise natural speech.

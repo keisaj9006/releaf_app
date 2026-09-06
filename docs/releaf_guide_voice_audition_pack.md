@@ -2,7 +2,7 @@
 
 ## Status — completed 6 September 2026
 
-Voice selection is complete. The owner-selected female voice is the locked Releaf Guide baseline; canonical generation speed is **0.75x**.
+Voice selection is complete. The owner-selected female voice is the locked Releaf Guide baseline; canonical delivery speed is **0.82x**.
 
 This document remains as the QA reference for future regenerations or a future voice recast. Releaf Guide applies to Meditate, guided Reset content, and Emergency guidance where enabled. **Sleep remains voice-free.**
 

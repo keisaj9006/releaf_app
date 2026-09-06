@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:releaf_app/features/meditation/data/meditation_catalog.dart';
 
@@ -25,5 +27,15 @@ void main() {
       ),
       isTrue,
     );
+
+    for (final step in session.steps) {
+      final asset = File('assets/${step.narrationAssetPath}');
+      expect(asset.existsSync(), isTrue, reason: '${asset.path} must exist');
+      expect(
+        asset.lengthSync(),
+        greaterThan(10000),
+        reason: '${asset.path} must contain production narration',
+      );
+    }
   });
 }
