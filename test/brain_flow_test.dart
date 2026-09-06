@@ -569,7 +569,7 @@ void main() {
 
     expect(find.text('N-Back'), findsOneWidget);
     expect(find.text('L9'), findsOneWidget);
-    expect(find.text('2-back'), findsOneWidget);
+    expect(find.text('3-back'), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('brain-difficulty-hard')));
     await tester.pump();
