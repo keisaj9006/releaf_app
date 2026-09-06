@@ -448,9 +448,8 @@ class _MeditationPlayerScreenState
   @override
   void dispose() {
     _timer?.cancel();
-    unawaited(
-      ref.read(meditationVoiceControllerProvider.notifier).stop(),
-    );
+    // The autoDispose voice provider owns platform cleanup. ConsumerState.ref
+    // must not be read once teardown has started.
     super.dispose();
   }
 
