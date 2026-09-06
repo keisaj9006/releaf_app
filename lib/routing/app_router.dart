@@ -5,6 +5,7 @@ import 'app_routes.dart';
 import 'scaffold_with_nav.dart';
 
 import '../features/account/presentation/account_screen.dart';
+import '../features/account/presentation/password_reset_screen.dart';
 import '../features/home/home_screen.dart';
 import '../features/legal/privacy.dart';
 import '../features/habits/presentation/habits_screen.dart';
@@ -111,6 +112,11 @@ GoRouter createAppRouter({String initialLocation = AppRoutes.home}) => GoRouter(
     GoRoute(
       path: AppRoutes.privacy,
       pageBuilder: (context, state) => _fadePage(const PrivacyScreen()),
+    ),
+    GoRoute(
+      path: AppRoutes.passwordReset,
+      pageBuilder: (context, state) =>
+          _fadePage(const PasswordResetScreen()),
     ),
 
     GoRoute(
