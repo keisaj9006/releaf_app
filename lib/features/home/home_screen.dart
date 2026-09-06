@@ -888,6 +888,71 @@ class _DailyInsightCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final accent = _dailyInsightAccent(insight.category);
 
+    Widget infoButton({double size = 34}) {
+      return SizedBox(
+        width: size,
+        height: size,
+        child: IconButton(
+          key: const Key('home-daily-insight-info'),
+          tooltip: 'About today’s insight',
+          style: IconButton.styleFrom(
+            padding: EdgeInsets.zero,
+            minimumSize: Size.zero,
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          ),
+          onPressed: onOpen,
+          icon: Icon(
+            Icons.info_outline_rounded,
+            size: 18,
+            color: accent.withValues(alpha: 0.86),
+          ),
+        ),
+      );
+    }
+
+    Widget leadingIcon({double size = 36}) {
+      return Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          color: accent.withValues(alpha: 0.10),
+          shape: BoxShape.circle,
+        ),
+        alignment: Alignment.center,
+        child: Icon(
+          _dailyInsightIcon(insight.category),
+          size: size * 0.5,
+          color: accent,
+        ),
+      );
+    }
+
+    Widget headline() {
+      return Text(
+        insight.headline,
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+        style: ReleafTypography.meta.copyWith(
+          color: ReleafColors.textPrimary,
+          fontWeight: FontWeight.w700,
+          height: 1.35,
+        ),
+      );
+    }
+
+    Widget source() {
+      return Text(
+        '${insight.sourcePublisher} · ${insight.evidenceLabel}',
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: ReleafTypography.meta.copyWith(
+          color: ReleafColors.textMuted,
+          fontSize: 8,
+          letterSpacing: 0.05,
+        ),
+      );
+    }
+
     return Material(
       key: const Key('home-daily-insight'),
       color: Colors.transparent,
@@ -909,95 +974,87 @@ class _DailyInsightCard extends StatelessWidget {
               color: accent.withValues(alpha: 0.20),
             ),
           ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: accent.withValues(alpha: 0.10),
-                  shape: BoxShape.circle,
-                ),
-                alignment: Alignment.center,
-                child: Icon(
-                  _dailyInsightIcon(insight.category),
-                  size: 18,
-                  color: accent,
-                ),
-              ),
-              const SizedBox(width: ReleafSpacing.sm),
-              Expanded(
-                child: Column(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final compact = constraints.maxWidth < 300;
+
+              if (compact) {
+                return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
-                        Text(
-                          'TODAY’S INSIGHT',
-                          style: ReleafTypography.eyebrow.copyWith(
-                            color: accent,
-                            fontSize: 8.5,
-                            letterSpacing: 1.25,
-                          ),
-                        ),
-                        const SizedBox(width: 7),
+                        leadingIcon(size: 30),
+                        const SizedBox(width: ReleafSpacing.xs),
                         Expanded(
                           child: Text(
-                            _dailyInsightCategoryLabel(insight.category),
+                            'TODAY’S INSIGHT · ${_dailyInsightCategoryLabel(insight.category)}',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: ReleafTypography.meta.copyWith(
-                              color: ReleafColors.textMuted,
-                              fontSize: 9,
+                            style: ReleafTypography.eyebrow.copyWith(
+                              color: accent,
+                              fontSize: 8,
+                              letterSpacing: 1.0,
                             ),
                           ),
                         ),
+                        const SizedBox(width: 4),
+                        infoButton(size: 30),
                       ],
                     ),
+                    const SizedBox(height: 6),
+                    headline(),
                     const SizedBox(height: 4),
-                    Text(
-                      insight.headline,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: ReleafTypography.meta.copyWith(
-                        color: ReleafColors.textPrimary,
-                        fontWeight: FontWeight.w700,
-                        height: 1.35,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${insight.sourcePublisher} · ${insight.evidenceLabel}',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: ReleafTypography.meta.copyWith(
-                        color: ReleafColors.textMuted,
-                        fontSize: 8,
-                        letterSpacing: 0.05,
-                      ),
-                    ),
+                    source(),
                   ],
-                ),
-              ),
-              const SizedBox(width: 6),
-              IconButton(
-                key: const Key('home-daily-insight-info'),
-                tooltip: 'About today’s insight',
-                visualDensity: VisualDensity.compact,
-                constraints: const BoxConstraints.tightFor(
-                  width: 34,
-                  height: 34,
-                ),
-                padding: EdgeInsets.zero,
-                onPressed: onOpen,
-                icon: Icon(
-                  Icons.info_outline_rounded,
-                  size: 18,
-                  color: accent.withValues(alpha: 0.86),
-                ),
-              ),
-            ],
+                );
+              }
+
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  leadingIcon(),
+                  const SizedBox(width: ReleafSpacing.sm),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              'TODAY’S INSIGHT',
+                              style: ReleafTypography.eyebrow.copyWith(
+                                color: accent,
+                                fontSize: 8.5,
+                                letterSpacing: 1.25,
+                              ),
+                            ),
+                            const SizedBox(width: 7),
+                            Expanded(
+                              child: Text(
+                                _dailyInsightCategoryLabel(insight.category),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: ReleafTypography.meta.copyWith(
+                                  color: ReleafColors.textMuted,
+                                  fontSize: 9,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        headline(),
+                        const SizedBox(height: 4),
+                        source(),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  infoButton(),
+                ],
+              );
+            },
           ),
         ),
       ),
