@@ -14,6 +14,7 @@ import '../../../games/n_back/n_back_screen.dart';
 import '../../../games/spatial_span/spatial_span_screen.dart';
 import '../../../games/mental_rotation/mental_rotation_screen.dart';
 import '../../../games/trail_switch/trail_switch_screen.dart';
+import '../../../games/tower_plan/tower_plan_screen.dart';
 import '../../../games/color_conflict/color_conflict_screen.dart';
 import '../../../games/pattern_logic/pattern_logic_screen.dart';
 import '../../../games/signal_scan/signal_scan_screen.dart';
@@ -31,6 +32,7 @@ const supportedBrainGameIds = <String>{
   'spatial_span',
   'mental_rotation',
   'trail_switch',
+  'tower_plan',
   'color_conflict',
   'pattern_logic',
   'signal_scan',
@@ -81,6 +83,10 @@ Widget buildBrainGame({
         trainingLevel: trainingLevel,
       ),
     'trail_switch' => TrailSwitchScreen(
+        onFinish: onFinish,
+        trainingLevel: trainingLevel,
+      ),
+    'tower_plan' => TowerPlanScreen(
         onFinish: onFinish,
         trainingLevel: trainingLevel,
       ),
