@@ -511,7 +511,8 @@ void main() {
     expect(voiceDriver.speakCalls, greaterThanOrEqualTo(2));
 
     await tester.tap(find.byKey(const Key('meditation-more-controls')));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 350));
 
     expect(
       find.byKey(const Key('meditation-voice-volume')),
