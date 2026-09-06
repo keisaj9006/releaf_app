@@ -74,6 +74,13 @@ const brainGames = <BrainGameMeta>[
     hasDifficultyLevels: true,
   ),
   BrainGameMeta(
+    id: 'spatial_span',
+    title: 'Spatial Span',
+    icon: Icons.apps_rounded,
+    group: BrainGameGroup.spatial,
+    hasDifficultyLevels: true,
+  ),
+  BrainGameMeta(
     id: 'color_conflict',
     title: 'Color Conflict',
     icon: Icons.palette_outlined,
