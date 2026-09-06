@@ -937,7 +937,7 @@ class _DailyInsightCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(ReleafRadii.extraLarge),
         onTap: onOpen,
         child: Ink(
-          height: compact ? 278 : 236,
+          height: compact ? 294 : 236,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(ReleafRadii.extraLarge),
             border: Border.all(
