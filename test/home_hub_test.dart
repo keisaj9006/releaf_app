@@ -63,7 +63,9 @@ void main() {
     await _pumpHome(tester, preferences: await _preferences());
 
     expect(find.text('RELEAF'), findsOneWidget);
+    expect(find.byKey(const Key('home-emergency-action')), findsOneWidget);
     expect(find.byKey(const Key('home-account-button')), findsOneWidget);
+    expect(find.byType(FloatingActionButton), findsNothing);
     expect(find.text('RIGHT NOW'), findsOneWidget);
     expect(find.text('Calm down'), findsOneWidget);
     expect(find.text('Clear my head'), findsOneWidget);
