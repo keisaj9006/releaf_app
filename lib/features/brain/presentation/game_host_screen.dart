@@ -11,6 +11,7 @@ import '../../../games/broken_mirror/broken_mirror_game_screen.dart';
 import '../../../games/rule_shift/rule_shift_screen.dart';
 import '../../../games/sequence_echo/sequence_echo_screen.dart';
 import '../../../games/n_back/n_back_screen.dart';
+import '../../../games/spatial_span/spatial_span_screen.dart';
 import '../../../games/color_conflict/color_conflict_screen.dart';
 import '../../../games/pattern_logic/pattern_logic_screen.dart';
 import '../../../games/signal_scan/signal_scan_screen.dart';
@@ -25,6 +26,7 @@ const supportedBrainGameIds = <String>{
   'rule_shift',
   'sequence_echo',
   'n_back',
+  'spatial_span',
   'color_conflict',
   'pattern_logic',
   'signal_scan',
@@ -63,6 +65,10 @@ Widget buildBrainGame({
         trainingLevel: trainingLevel,
       ),
     'n_back' => NBackScreen(
+        onFinish: onFinish,
+        trainingLevel: trainingLevel,
+      ),
+    'spatial_span' => SpatialSpanScreen(
         onFinish: onFinish,
         trainingLevel: trainingLevel,
       ),
