@@ -12,9 +12,11 @@ class ColorConflictScreen extends StatefulWidget {
   const ColorConflictScreen({
     super.key,
     this.onFinish,
+    this.trainingLevel = 1,
   });
 
   final ValueChanged<int?>? onFinish;
+  final int trainingLevel;
 
   @override
   State<ColorConflictScreen> createState() => _ColorConflictScreenState();
@@ -39,23 +41,31 @@ class _ColorConflictScreenState extends State<ColorConflictScreen> {
   bool _finished = false;
   bool? _lastCorrect;
 
+  int get _levelIndex => (widget.trainingLevel - 1).clamp(0, 11).toInt();
+
   int get _colorCount => switch (_difficulty) {
         BrainDifficulty.easy => _round < 3 ? 3 : 4,
         BrainDifficulty.medium => _round < 4 ? 4 : 5,
         BrainDifficulty.hard => 5,
       };
 
-  int get _totalRounds => switch (_difficulty) {
-        BrainDifficulty.easy => 9,
-        BrainDifficulty.medium => 11,
-        BrainDifficulty.hard => 13,
-      };
+  int get _totalRounds {
+    final base = switch (_difficulty) {
+      BrainDifficulty.easy => 9,
+      BrainDifficulty.medium => 11,
+      BrainDifficulty.hard => 13,
+    };
+    return base + (_levelIndex ~/ 3);
+  }
 
-  int get _sessionSeconds => switch (_difficulty) {
-        BrainDifficulty.easy => 38,
-        BrainDifficulty.medium => 30,
-        BrainDifficulty.hard => 24,
-      };
+  int get _sessionSeconds {
+    final base = switch (_difficulty) {
+      BrainDifficulty.easy => 38,
+      BrainDifficulty.medium => 30,
+      BrainDifficulty.hard => 24,
+    };
+    return (base - _levelIndex).clamp(12, 38).toInt();
+  }
 
   int get _multiplier => switch (_difficulty) {
         BrainDifficulty.easy => 1,
@@ -165,6 +175,16 @@ class _ColorConflictScreenState extends State<ColorConflictScreen> {
             ],
           ),
           actions: [
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.only(right: 4),
+                child: Text(
+                  'L${widget.trainingLevel}',
+                  key: const Key('color-conflict-training-level'),
+                  style: ReleafTypography.eyebrow.copyWith(color: _accent),
+                ),
+              ),
+            ),
             IconButton(
               tooltip: 'Exit Color Conflict',
               onPressed: () => Navigator.of(context).maybePop(),

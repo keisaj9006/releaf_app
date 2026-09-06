@@ -10,9 +10,11 @@ class SignalScanScreen extends StatefulWidget {
   const SignalScanScreen({
     super.key,
     this.onFinish,
+    this.trainingLevel = 1,
   });
 
   final ValueChanged<int?>? onFinish;
+  final int trainingLevel;
 
   @override
   State<SignalScanScreen> createState() => _SignalScanScreenState();
@@ -27,27 +29,41 @@ class _SignalScanScreenState extends State<SignalScanScreen> {
   int? _wrongIndex;
   bool _finished = false;
 
+  int get _levelIndex => (widget.trainingLevel - 1).clamp(0, 11).toInt();
+
   BrainDifficulty get _effectiveDifficulty {
-    if (_difficulty == BrainDifficulty.easy && _round >= 4) {
+    final pressureRound = _round + (_levelIndex ~/ 3);
+    if (_difficulty == BrainDifficulty.easy && pressureRound >= 4) {
       return BrainDifficulty.medium;
     }
-    if (_difficulty == BrainDifficulty.medium && _round >= 4) {
+    if (_difficulty == BrainDifficulty.medium && pressureRound >= 4) {
       return BrainDifficulty.hard;
     }
     return _difficulty;
   }
 
-  int get _gridSize => switch (_effectiveDifficulty) {
-        BrainDifficulty.easy => _round < 2 ? 4 : 5,
-        BrainDifficulty.medium => _round < 3 ? 5 : 6,
-        BrainDifficulty.hard => _round < 4 ? 6 : 7,
-      };
+  int get _gridSize {
+    final base = switch (_effectiveDifficulty) {
+      BrainDifficulty.easy => _round < 2 ? 4 : 5,
+      BrainDifficulty.medium => _round < 3 ? 5 : 6,
+      BrainDifficulty.hard => _round < 4 ? 6 : 7,
+    };
+    return (base + (_levelIndex ~/ 4)).clamp(4, 8).toInt();
+  }
 
-  int get _totalRounds => switch (_difficulty) {
-        BrainDifficulty.easy => 6,
-        BrainDifficulty.medium => 8,
-        BrainDifficulty.hard => 10,
-      };
+  int get _totalRounds {
+    final base = switch (_difficulty) {
+      BrainDifficulty.easy => 6,
+      BrainDifficulty.medium => 8,
+      BrainDifficulty.hard => 10,
+    };
+    return base + (_levelIndex ~/ 2);
+  }
+
+  double get _symbolSize {
+    final base = _gridSize >= 6 ? 21.0 : 27.0;
+    return (base - (_levelIndex * 0.55)).clamp(14.0, 27.0).toDouble();
+  }
 
   int get _multiplier => switch (_effectiveDifficulty) {
         BrainDifficulty.easy => 1,
@@ -138,6 +154,16 @@ class _SignalScanScreenState extends State<SignalScanScreen> {
             ],
           ),
           actions: [
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.only(right: 4),
+                child: Text(
+                  'L${widget.trainingLevel}',
+                  key: const Key('signal-scan-training-level'),
+                  style: ReleafTypography.eyebrow.copyWith(color: _accent),
+                ),
+              ),
+            ),
             IconButton(
               tooltip: 'Exit Signal Scan',
               onPressed: () => Navigator.of(context).maybePop(),
@@ -316,7 +342,7 @@ class _SignalScanScreenState extends State<SignalScanScreen> {
                                           child: Text(
                                             _symbolFor(index),
                                             style: TextStyle(
-                                              fontSize: _gridSize >= 6 ? 21 : 27,
+                                              fontSize: _symbolSize,
                                               color: wrong
                                                   ? const Color(0xFFE1A184)
                                                   : const Color(0xFFD8E9E6),

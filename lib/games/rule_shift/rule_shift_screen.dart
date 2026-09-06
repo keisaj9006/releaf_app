@@ -11,9 +11,11 @@ class RuleShiftScreen extends StatefulWidget {
   const RuleShiftScreen({
     super.key,
     this.onFinish,
+    this.trainingLevel = 1,
   });
 
   final ValueChanged<int?>? onFinish;
+  final int trainingLevel;
 
   @override
   State<RuleShiftScreen> createState() => _RuleShiftScreenState();
@@ -33,12 +35,26 @@ class _RuleShiftScreenState extends State<RuleShiftScreen> {
     _RuleShiftTrial(rule: _Rule.high, value: 5, expected: false),
     _RuleShiftTrial(rule: _Rule.odd, value: 4, expected: false),
     _RuleShiftTrial(rule: _Rule.high, value: 8, expected: true),
+    _RuleShiftTrial(rule: _Rule.multipleOfThree, value: 6, expected: true),
+    _RuleShiftTrial(rule: _Rule.multipleOfThree, value: 8, expected: false),
+    _RuleShiftTrial(rule: _Rule.inRange, value: 5, expected: true),
+    _RuleShiftTrial(rule: _Rule.inRange, value: 9, expected: false),
+    _RuleShiftTrial(rule: _Rule.multipleOfThree, value: 9, expected: true),
+    _RuleShiftTrial(rule: _Rule.inRange, value: 3, expected: true),
+    _RuleShiftTrial(rule: _Rule.multipleOfThree, value: 4, expected: false),
+    _RuleShiftTrial(rule: _Rule.inRange, value: 7, expected: true),
+    _RuleShiftTrial(rule: _Rule.multipleOfThree, value: 3, expected: true),
+    _RuleShiftTrial(rule: _Rule.inRange, value: 2, expected: false),
+    _RuleShiftTrial(rule: _Rule.multipleOfThree, value: 7, expected: false),
   ];
 
   int _index = 0;
   int _score = 0;
   bool _locked = false;
   bool? _lastCorrect;
+
+  int get _levelIndex => (widget.trainingLevel - 1).clamp(0, 11).toInt();
+  int get _trialCount => 12 + _levelIndex;
 
   _RuleShiftTrial get _trial => _trials[_index];
 
@@ -57,7 +73,7 @@ class _RuleShiftScreenState extends State<RuleShiftScreen> {
     await Future<void>.delayed(const Duration(milliseconds: 280));
     if (!mounted) return;
 
-    if (_index == _trials.length - 1) {
+    if (_index == _trialCount - 1) {
       widget.onFinish?.call(_score);
       return;
     }
@@ -71,7 +87,7 @@ class _RuleShiftScreenState extends State<RuleShiftScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final progress = (_index + 1) / _trials.length;
+    final progress = (_index + 1) / _trialCount;
 
     return Theme(
       data: AppTheme.premiumDark(),
@@ -167,7 +183,7 @@ class _RuleShiftScreenState extends State<RuleShiftScreen> {
                         ),
                         const SizedBox(height: ReleafSpacing.sm),
                         Text(
-                          'ROUND ${_index + 1} OF ${_trials.length}',
+                          'LEVEL ${widget.trainingLevel} · ROUND ${_index + 1} OF $_trialCount',
                           textAlign: TextAlign.right,
                           style: ReleafTypography.meta.copyWith(
                             color: ReleafColors.textMuted,
@@ -325,6 +341,14 @@ enum _Rule {
   high(
     label: 'IS IT GREATER THAN 5?',
     semanticLabel: 'Rule: is the number greater than five',
+  ),
+  multipleOfThree(
+    label: 'IS IT A MULTIPLE OF 3?',
+    semanticLabel: 'Rule: is the number a multiple of three',
+  ),
+  inRange(
+    label: 'IS IT BETWEEN 3 AND 7?',
+    semanticLabel: 'Rule: is the number between three and seven inclusive',
   );
 
   const _Rule({

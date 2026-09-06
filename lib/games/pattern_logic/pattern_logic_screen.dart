@@ -10,9 +10,11 @@ class PatternLogicScreen extends StatefulWidget {
   const PatternLogicScreen({
     super.key,
     this.onFinish,
+    this.trainingLevel = 1,
   });
 
   final ValueChanged<int?>? onFinish;
+  final int trainingLevel;
 
   @override
   State<PatternLogicScreen> createState() => _PatternLogicScreenState();
@@ -27,17 +29,44 @@ class _PatternLogicScreenState extends State<PatternLogicScreen> {
   bool? _lastCorrect;
   bool _finished = false;
 
-  List<_PatternPuzzle> get _puzzles => switch (_difficulty) {
-        BrainDifficulty.easy => <_PatternPuzzle>[
-            ..._easyPuzzles.take(2),
-            ..._mediumPuzzles.take(4),
-          ],
-        BrainDifficulty.medium => <_PatternPuzzle>[
-            ..._mediumPuzzles.take(3),
-            ..._hardPuzzles.take(4),
-          ],
-        BrainDifficulty.hard => _hardPuzzles,
-      };
+  int get _levelIndex => (widget.trainingLevel - 1).clamp(0, 11).toInt();
+
+  List<_PatternPuzzle> get _puzzles {
+    final base = switch (_difficulty) {
+      BrainDifficulty.easy => <_PatternPuzzle>[
+          ..._easyPuzzles.take(2),
+          ..._mediumPuzzles.take(4),
+        ],
+      BrainDifficulty.medium => <_PatternPuzzle>[
+          ..._mediumPuzzles.take(3),
+          ..._hardPuzzles.take(4),
+        ],
+      BrainDifficulty.hard => <_PatternPuzzle>[..._hardPuzzles],
+    };
+
+    if (_levelIndex == 0) return base;
+
+    final supplements = switch (_difficulty) {
+      BrainDifficulty.easy => <_PatternPuzzle>[
+          ..._mediumPuzzles,
+          ..._hardPuzzles,
+        ],
+      BrainDifficulty.medium => <_PatternPuzzle>[
+          ..._hardPuzzles,
+          ..._mediumPuzzles.reversed,
+        ],
+      BrainDifficulty.hard => <_PatternPuzzle>[
+          ..._hardPuzzles.reversed,
+          ..._hardPuzzles,
+        ],
+    };
+
+    final result = <_PatternPuzzle>[...base];
+    for (var index = 0; index < _levelIndex; index++) {
+      result.add(supplements[(index + _levelIndex) % supplements.length]);
+    }
+    return result;
+  }
 
   int get _multiplier => switch (_difficulty) {
         BrainDifficulty.easy => 1,
@@ -102,6 +131,16 @@ class _PatternLogicScreenState extends State<PatternLogicScreen> {
             ],
           ),
           actions: [
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.only(right: 4),
+                child: Text(
+                  'L${widget.trainingLevel}',
+                  key: const Key('pattern-logic-training-level'),
+                  style: ReleafTypography.eyebrow.copyWith(color: _accent),
+                ),
+              ),
+            ),
             IconButton(
               tooltip: 'Exit Pattern Logic',
               onPressed: () => Navigator.of(context).maybePop(),
@@ -242,7 +281,9 @@ class _PatternLogicScreenState extends State<PatternLogicScreen> {
                                 duration: ReleafMotion.quick,
                                 child: Text(
                                   _lastCorrect == null
-                                      ? puzzle.hint
+                                      ? (widget.trainingLevel >= 7
+                                          ? 'No hint at this training level.'
+                                          : puzzle.hint)
                                       : _lastCorrect!
                                           ? 'Pattern found'
                                           : 'Different rule — keep looking',

@@ -10,9 +10,11 @@ class SequenceEchoScreen extends StatefulWidget {
   const SequenceEchoScreen({
     super.key,
     this.onFinish,
+    this.trainingLevel = 1,
   });
 
   final ValueChanged<int?>? onFinish;
+  final int trainingLevel;
 
   @override
   State<SequenceEchoScreen> createState() => _SequenceEchoScreenState();
@@ -36,25 +38,33 @@ class _SequenceEchoScreenState extends State<SequenceEchoScreen> {
   bool _finished = false;
   String _status = 'Choose a difficulty, then watch the sequence.';
 
-  int get _totalRounds => switch (_difficulty) {
-        BrainDifficulty.easy => 5,
-        BrainDifficulty.medium => 6,
-        BrainDifficulty.hard => 7,
-      };
+  int get _levelIndex => (widget.trainingLevel - 1).clamp(0, 11).toInt();
+
+  int get _totalRounds {
+    final base = switch (_difficulty) {
+      BrainDifficulty.easy => 5,
+      BrainDifficulty.medium => 6,
+      BrainDifficulty.hard => 7,
+    };
+    return base + (_levelIndex ~/ 3);
+  }
 
   int get _sequenceLength {
     return switch (_difficulty) {
-      BrainDifficulty.easy => 3 + _round,
-      BrainDifficulty.medium => 4 + _round,
-      BrainDifficulty.hard => 5 + _round,
+      BrainDifficulty.easy => 3 + _round + (_levelIndex ~/ 2),
+      BrainDifficulty.medium => 4 + _round + (_levelIndex ~/ 2),
+      BrainDifficulty.hard => 5 + _round + (_levelIndex ~/ 2),
     };
   }
 
-  int get _flashMs => switch (_difficulty) {
-        BrainDifficulty.easy => (560 - (_round * 35)).clamp(380, 560),
-        BrainDifficulty.medium => (410 - (_round * 30)).clamp(260, 410),
-        BrainDifficulty.hard => (290 - (_round * 18)).clamp(190, 290),
-      };
+  int get _flashMs {
+    final base = switch (_difficulty) {
+      BrainDifficulty.easy => 560 - (_round * 35),
+      BrainDifficulty.medium => 410 - (_round * 30),
+      BrainDifficulty.hard => 290 - (_round * 18),
+    };
+    return (base - (_levelIndex * 12)).clamp(145, 560).toInt();
+  }
 
   int get _multiplier => switch (_difficulty) {
         BrainDifficulty.easy => 1,
@@ -193,6 +203,16 @@ class _SequenceEchoScreenState extends State<SequenceEchoScreen> {
             ],
           ),
           actions: [
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.only(right: 4),
+                child: Text(
+                  'L${widget.trainingLevel}',
+                  key: const Key('sequence-echo-training-level'),
+                  style: ReleafTypography.eyebrow.copyWith(color: _accent),
+                ),
+              ),
+            ),
             IconButton(
               tooltip: 'Exit Sequence Echo',
               onPressed: () => Navigator.of(context).maybePop(),
