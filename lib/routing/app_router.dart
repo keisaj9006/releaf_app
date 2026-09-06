@@ -8,7 +8,6 @@ import '../features/account/presentation/account_screen.dart';
 import '../features/account/presentation/password_reset_screen.dart';
 import '../features/home/home_screen.dart';
 import '../features/legal/privacy.dart';
-import '../features/habits/presentation/habits_screen.dart';
 import '../features/relief/presentation/relief_screen.dart';
 import '../features/relief/presentation/relief_session_gate.dart';
 import '../features/relief/domain/models/reset_launch_options.dart';
@@ -21,7 +20,6 @@ import '../features/meditation/domain/meditation_resume_state.dart';
 import '../features/sleep/presentation/sleep_screen.dart';
 import '../features/brain/presentation/game_host_screen.dart';
 import '../features/brain/presentation/game_result_screen.dart';
-import '../features/home/daily_loop_screen.dart';
 
 CustomTransitionPage<void> _fadePage(Widget child) {
   return CustomTransitionPage<void>(
@@ -139,7 +137,7 @@ GoRouter createAppRouter({String initialLocation = AppRoutes.home}) => GoRouter(
 
     GoRoute(
       path: AppRoutes.habits,
-      pageBuilder: (context, state) => _fadePage(const HabitsScreen()),
+      redirect: (_, _) => AppRoutes.home,
     ),
 
     GoRoute(
@@ -195,7 +193,7 @@ GoRouter createAppRouter({String initialLocation = AppRoutes.home}) => GoRouter(
 
     GoRoute(
       path: AppRoutes.dailyLoop,
-      pageBuilder: (context, state) => _fadePage(const DailyLoopScreen()),
+      redirect: (_, _) => AppRoutes.home,
     ),
 
     GoRoute(
