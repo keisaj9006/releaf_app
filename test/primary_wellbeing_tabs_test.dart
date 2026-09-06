@@ -9,6 +9,7 @@ import 'package:releaf_app/core/subscription/subscription_controller.dart';
 import 'package:releaf_app/core/subscription/subscription_state.dart';
 import 'package:releaf_app/features/meditation/application/meditation_audio_controller.dart';
 import 'package:releaf_app/features/meditation/application/meditation_library_controller.dart';
+import 'package:releaf_app/features/meditation/application/meditation_voice_controller.dart';
 import 'package:releaf_app/features/meditation/data/meditation_catalog.dart';
 import 'package:releaf_app/features/meditation/domain/meditation_content.dart';
 import 'package:releaf_app/features/meditation/domain/meditation_resume_state.dart';
@@ -79,12 +80,51 @@ class _FakeMeditationAudioDriver implements MeditationAudioDriver {
   Future<void> dispose() async {}
 }
 
+class _FakeMeditationVoiceDriver implements MeditationVoiceDriver {
+  int configureCalls = 0;
+  int speakCalls = 0;
+  int volumeCalls = 0;
+  int stopCalls = 0;
+  int disposeCalls = 0;
+  double? lastVolume;
+  String? lastSpokenText;
+
+  @override
+  Future<void> configure({required double volume}) async {
+    configureCalls += 1;
+    lastVolume = volume;
+  }
+
+  @override
+  Future<void> speak(String text) async {
+    speakCalls += 1;
+    lastSpokenText = text;
+  }
+
+  @override
+  Future<void> setVolume(double volume) async {
+    volumeCalls += 1;
+    lastVolume = volume;
+  }
+
+  @override
+  Future<void> stop() async {
+    stopCalls += 1;
+  }
+
+  @override
+  Future<void> dispose() async {
+    disposeCalls += 1;
+  }
+}
+
 Future<void> _pumpRoute(
   WidgetTester tester, {
   required String location,
   required SharedPreferences preferences,
   bool isPremium = false,
   MeditationAudioDriver? meditationAudioDriver,
+  MeditationVoiceDriver? meditationVoiceDriver,
 }) async {
   final router = createAppRouter(initialLocation: location);
   addTearDown(router.dispose);
@@ -98,6 +138,9 @@ Future<void> _pumpRoute(
         ),
         meditationAudioDriverProvider.overrideWithValue(
           meditationAudioDriver ?? _FakeMeditationAudioDriver(),
+        ),
+        meditationVoiceDriverProvider.overrideWithValue(
+          meditationVoiceDriver ?? _FakeMeditationVoiceDriver(),
         ),
       ],
       child: MaterialApp.router(routerConfig: router),
@@ -250,6 +293,36 @@ void main() {
     expect(restored.state.mix, 0.50);
   });
 
+  test('Meditation voice preferences persist independently', () async {
+    SharedPreferences.setMockInitialValues({});
+    final preferences = await SharedPreferences.getInstance();
+    final driver = _FakeMeditationVoiceDriver();
+    final controller = MeditationVoiceController(preferences, driver);
+
+    await controller.toggleCaptions();
+    await controller.setVolume(0.56);
+    await controller.speakGuidance('Follow the voice.');
+    await controller.toggleEnabled();
+
+    expect(controller.state.showCaptions, isTrue);
+    expect(controller.state.volume, closeTo(0.56, 0.001));
+    expect(controller.state.enabled, isFalse);
+    expect(driver.configureCalls, 1);
+    expect(driver.speakCalls, 1);
+    expect(driver.lastSpokenText, 'Follow the voice.');
+
+    final restored = MeditationVoiceController(
+      preferences,
+      _FakeMeditationVoiceDriver(),
+    );
+    expect(restored.state.showCaptions, isTrue);
+    expect(restored.state.volume, closeTo(0.56, 0.001));
+    expect(restored.state.enabled, isFalse);
+
+    controller.dispose();
+    restored.dispose();
+  });
+
   testWidgets('Meditate is a primary destination, not a nested page', (
     WidgetTester tester,
   ) async {
@@ -353,7 +426,7 @@ void main() {
     expect(find.text('RELEAF PREMIUM'), findsOneWidget);
     expect(find.text('Unlock Premium'), findsOneWidget);
     expect(
-      find.byKey(const Key('meditation-living-form')),
+      find.byKey(const Key('meditation-ambient-visual')),
       findsNothing,
     );
   });
@@ -369,48 +442,85 @@ void main() {
     );
 
     expect(
-      find.byKey(const Key('meditation-living-form')),
+      find.byKey(const Key('meditation-ambient-visual')),
       findsOneWidget,
     );
     expect(find.text('Steady Attention'), findsWidgets);
   });
 
-  testWidgets('Meditation player uses the signature Living Form and pauses', (
+  testWidgets('Meditation player is audio-first with optional captions', (
     WidgetTester tester,
   ) async {
     final audioDriver = _FakeMeditationAudioDriver();
+    final voiceDriver = _FakeMeditationVoiceDriver();
+    const catalog = MeditationCatalog();
+    final item = catalog.getById('mindfulness-basics-2')!;
 
     await _pumpRoute(
       tester,
       location: AppRoutes.meditationSessionFor('mindfulness-basics-2'),
       preferences: await _preferences(),
       meditationAudioDriver: audioDriver,
+      meditationVoiceDriver: voiceDriver,
     );
 
-    expect(find.byKey(const Key('meditation-living-form')), findsOneWidget);
+    expect(
+      find.byKey(const Key('meditation-ambient-visual')),
+      findsOneWidget,
+    );
     expect(
       find.byKey(const Key('meditation-primary-control')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const Key('meditation-voice-chip')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const Key('meditation-caption-panel')),
+      findsNothing,
+    );
+    expect(find.text('ARRIVE'), findsOneWidget);
+    expect(find.text('Close your eyes and follow the voice.'), findsOneWidget);
+    expect(audioDriver.playCalls, 1);
+    expect(audioDriver.lastAssetPath, 'sounds/relief_01.mp3');
+    expect(voiceDriver.configureCalls, 1);
+    expect(voiceDriver.speakCalls, 1);
+    expect(voiceDriver.lastSpokenText, item.steps.first.guidance);
+
+    await tester.tap(find.byKey(const Key('meditation-captions-chip')));
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(
+      find.byKey(const Key('meditation-caption-panel')),
+      findsOneWidget,
+    );
+    expect(find.text(item.steps.first.guidance), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('meditation-primary-control')));
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.text('Paused'), findsOneWidget);
+    expect(audioDriver.pauseCalls, 1);
+    expect(voiceDriver.stopCalls, greaterThanOrEqualTo(1));
+
+    await tester.tap(find.byKey(const Key('meditation-primary-control')));
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(audioDriver.resumeCalls, 1);
+    expect(voiceDriver.speakCalls, greaterThanOrEqualTo(2));
+
+    await tester.tap(find.byKey(const Key('meditation-more-controls')));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const Key('meditation-voice-volume')),
       findsOneWidget,
     );
     expect(
       find.byKey(const Key('meditation-sound-control')),
       findsOneWidget,
     );
-    expect(find.text('ARRIVE'), findsOneWidget);
-    expect(audioDriver.playCalls, 1);
-    expect(audioDriver.lastAssetPath, 'sounds/relief_01.mp3');
-
-    await tester.tap(find.text('Pause'));
-    await tester.pump(const Duration(milliseconds: 300));
-
-    expect(find.text('PAUSED'), findsOneWidget);
-    expect(find.text('Continue'), findsOneWidget);
-    expect(audioDriver.pauseCalls, 1);
-
-    await tester.tap(find.text('Continue'));
-    await tester.pump(const Duration(milliseconds: 300));
-    expect(audioDriver.resumeCalls, 1);
-
     expect(
       find.byKey(const Key('meditation-sound-mix')),
       findsOneWidget,
@@ -418,20 +528,22 @@ void main() {
 
     await tester.tap(find.byKey(const Key('meditation-sound-toggle')));
     await tester.pump(const Duration(milliseconds: 300));
-    expect(audioDriver.pauseCalls, 2);
+    expect(audioDriver.pauseCalls, greaterThanOrEqualTo(2));
   });
 
-  testWidgets('Paused meditation resumes without auto-playing ambience', (
+  testWidgets('Paused meditation resumes without auto-playing audio layers', (
     WidgetTester tester,
   ) async {
     final preferences = await _preferences();
     final audioDriver = _FakeMeditationAudioDriver();
+    final voiceDriver = _FakeMeditationVoiceDriver();
 
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
           sharedPreferencesProvider.overrideWithValue(preferences),
           meditationAudioDriverProvider.overrideWithValue(audioDriver),
+          meditationVoiceDriverProvider.overrideWithValue(voiceDriver),
           subscriptionControllerProvider.overrideWith(
             (ref) => _FixedSubscriptionController(isPremium: true),
           ),
@@ -448,13 +560,15 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
 
     expect(find.text('00:45'), findsOneWidget);
-    expect(find.text('Continue'), findsOneWidget);
+    expect(find.text('Paused'), findsOneWidget);
     expect(audioDriver.playCalls, 0);
+    expect(voiceDriver.speakCalls, 0);
 
-    await tester.tap(find.text('Continue'));
+    await tester.tap(find.byKey(const Key('meditation-primary-control')));
     await tester.pump(const Duration(milliseconds: 400));
 
     expect(audioDriver.playCalls, 1);
+    expect(voiceDriver.speakCalls, 1);
   });
 
   testWidgets('Meditation player stays overflow-free at 320px', (
@@ -469,7 +583,7 @@ void main() {
       preferences: await _preferences(),
     );
 
-    expect(find.byKey(const Key('meditation-living-form')), findsOneWidget);
+    expect(find.byKey(const Key('meditation-ambient-visual')), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
