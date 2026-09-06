@@ -135,6 +135,13 @@ class PaywallSheet extends ConsumerWidget {
                           ),
                           SizedBox(height: ReleafSpacing.md),
                           _PremiumBenefit(
+                            icon: Icons.graphic_eq_rounded,
+                            title: 'Expanded Sound & Sleep library',
+                            description:
+                                'Unlock additional ambient and coloured-noise tracks while keeping Sleep narration-free.',
+                          ),
+                          SizedBox(height: ReleafSpacing.md),
+                          _PremiumBenefit(
                             icon: Icons.auto_awesome_outlined,
                             title: 'One premium entitlement',
                             description:
