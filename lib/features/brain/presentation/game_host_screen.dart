@@ -40,7 +40,12 @@ Widget buildBrainGame({
     'memory' => MemoryGameScreen(onFinish: onFinish),
     'labyrinth' => LabirynthGameScreen(onFinish: onFinish),
     'math_race' => MathRaceScreen(onFinish: onFinish),
-    'broken_mirror' => BrokenMirrorGameScreen(onFinish: () => onFinish(null)),
+    'broken_mirror' => BrokenMirrorGameScreen(
+        level: trainingLevel,
+        enableTimer: trainingLevel >= 4,
+        seconds: (75 - ((trainingLevel - 4) * 3)).clamp(48, 75).toInt(),
+        onFinish: () => onFinish(null),
+      ),
     'rule_shift' => RuleShiftScreen(
         onFinish: onFinish,
         trainingLevel: trainingLevel,
