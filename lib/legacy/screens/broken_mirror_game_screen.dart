@@ -40,6 +40,11 @@ class _BrokenMirrorGameScreenState extends ConsumerState<BrokenMirrorGameScreen>
   Timer? _timer;
   late AnimationController _pulse;
 
+  int get _levelIndex => (widget.level - 1).clamp(0, 11).toInt();
+
+  double get _snapFraction =>
+      (0.12 - (_levelIndex * 0.004)).clamp(0.075, 0.12).toDouble();
+
   @override
   void initState() {
     super.initState();
@@ -334,6 +339,7 @@ class _BrokenMirrorGameScreenState extends ConsumerState<BrokenMirrorGameScreen>
                                           shard: shard,
                                           pulse: _pulse,
                                           boardSize: _boardSize,
+                                          snapFraction: _snapFraction,
                                           onUpdate: (updated) {
                                             setState(() {
                                               final idx = _shards.indexWhere(
@@ -352,8 +358,8 @@ class _BrokenMirrorGameScreenState extends ConsumerState<BrokenMirrorGameScreen>
                             const SizedBox(height: ReleafSpacing.lg),
                             Text(
                               widget.enableTimer
-                                  ? 'Place every fragment before time runs out.'
-                                  : 'Drag each fragment into its matching place.',
+                                  ? 'Level ${widget.level}: place every fragment before time runs out.'
+                                  : 'Level ${widget.level}: drag each fragment into its matching place.',
                               textAlign: TextAlign.center,
                               style: ReleafTypography.body.copyWith(
                                 color: ReleafColors.textPrimary.withValues(
@@ -555,12 +561,14 @@ class _DraggableShard extends StatefulWidget {
     required this.shard,
     required this.pulse,
     required this.boardSize,
+    required this.snapFraction,
     required this.onUpdate,
   });
 
   final _Shard shard;
   final AnimationController pulse;
   final Size boardSize;
+  final double snapFraction;
   final void Function(_Shard) onUpdate;
 
   @override
@@ -602,8 +610,10 @@ class _DraggableShardState extends State<_DraggableShard> {
       widget.shard.targetCenter.dy * widget.boardSize.height,
     );
     final currentCenter = _position + const Offset(half, half);
-    final snapDistance =
-        math.max(38.0, widget.boardSize.shortestSide * 0.12);
+    final snapDistance = math.max(
+      28.0,
+      widget.boardSize.shortestSide * widget.snapFraction,
+    );
 
     if ((currentCenter - target).distance <= snapDistance) {
       HapticFeedback.selectionClick();
