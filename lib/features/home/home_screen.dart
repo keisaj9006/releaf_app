@@ -220,7 +220,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               _DailyEssentials(
                                 brainDone: leaves.brainDone,
                                 onBrain: () => context.go(AppRoutes.brain),
-                                onTonight: () => context.go(AppRoutes.sleep),
+                                onTonight: () => context.push(AppRoutes.sleep),
                               ),
                               const SizedBox(height: ReleafSpacing.section),
                               _ProgressCard(
