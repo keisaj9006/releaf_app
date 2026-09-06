@@ -11,6 +11,7 @@ class MeditationCatalog {
 
   static const foundationsSeriesId = 'foundations';
   static const deeperPracticeSeriesId = 'deeper-practice';
+  static const sleepSeriesId = 'sleep-practice';
 
   static const List<MeditationContent> _content = [
     MeditationContent(
@@ -702,6 +703,156 @@ class MeditationCatalog {
           guidance:
               'Narrow attention back to the body, then reconnect with the room.',
           durationSeconds: 70,
+        ),
+      ],
+    ),
+    MeditationContent(
+      id: 'let-the-day-go-6',
+      title: 'Let the Day Go',
+      subtitle: 'A gentle transition away from unfinished tasks and into the night.',
+      durationSeconds: 360,
+      category: MeditationCategory.everyday,
+      accessTier: MeditationAccessTier.free,
+      backgroundSoundId: 'night-air',
+      backgroundSoundVolume: 0.12,
+      seriesId: sleepSeriesId,
+      seriesOrder: 1,
+      steps: [
+        MeditationStep(
+          label: 'Arrive',
+          guidance:
+              'Notice where your body is supported. For these few minutes, there is nothing else you need to complete.',
+          durationSeconds: 60,
+        ),
+        MeditationStep(
+          label: 'Day',
+          guidance:
+              'Notice what your mind is still carrying from today without reopening the whole story.',
+          durationSeconds: 60,
+        ),
+        MeditationStep(
+          label: 'Set Down',
+          guidance:
+              'Let unfinished things stay unfinished until tomorrow. You do not need to solve them here.',
+          durationSeconds: 60,
+        ),
+        MeditationStep(
+          label: 'Body',
+          guidance:
+              'Notice the jaw, shoulders, hands, and the weight of the body against the surface beneath you.',
+          durationSeconds: 60,
+        ),
+        MeditationStep(
+          label: 'Quiet',
+          guidance:
+              'Let sounds, breath, and body sensations become more important than the next thought.',
+          durationSeconds: 60,
+        ),
+        MeditationStep(
+          label: 'Close',
+          guidance:
+              'Allow the practice to end without checking whether you feel perfectly calm.',
+          durationSeconds: 60,
+        ),
+      ],
+    ),
+    MeditationContent(
+      id: 'body-into-stillness-8',
+      title: 'Body Into Stillness',
+      subtitle: 'A slow evening body practice with less effort and less stimulation.',
+      durationSeconds: 480,
+      category: MeditationCategory.body,
+      accessTier: MeditationAccessTier.premium,
+      backgroundSoundId: 'deep-drift',
+      backgroundSoundVolume: 0.10,
+      seriesId: sleepSeriesId,
+      seriesOrder: 2,
+      steps: [
+        MeditationStep(
+          label: 'Settle',
+          guidance:
+              'Feel the weight of your body and the places where you are fully supported.',
+          durationSeconds: 80,
+        ),
+        MeditationStep(
+          label: 'Face',
+          guidance:
+              'Notice the forehead, eyes, jaw, and tongue. Use only as much muscular effort as you need.',
+          durationSeconds: 80,
+        ),
+        MeditationStep(
+          label: 'Shoulders',
+          guidance:
+              'Move attention through the neck, shoulders, arms, and hands without forcing them to relax.',
+          durationSeconds: 80,
+        ),
+        MeditationStep(
+          label: 'Center',
+          guidance:
+              'Notice the chest, back, abdomen, and the movement that is already happening there.',
+          durationSeconds: 80,
+        ),
+        MeditationStep(
+          label: 'Lower Body',
+          guidance:
+              'Notice the hips, legs, feet, and the contact between your body and the bed or chair.',
+          durationSeconds: 80,
+        ),
+        MeditationStep(
+          label: 'Whole Body',
+          guidance:
+              'Let the whole body be present at once and allow the practice to become quieter.',
+          durationSeconds: 80,
+        ),
+      ],
+    ),
+    MeditationContent(
+      id: 'quiet-night-10',
+      title: 'Quiet Night',
+      subtitle: 'Ten unhurried minutes for a mind that does not need another task.',
+      durationSeconds: 600,
+      category: MeditationCategory.mind,
+      accessTier: MeditationAccessTier.premium,
+      backgroundSoundId: 'releaf-atmosphere-02',
+      backgroundSoundVolume: 0.10,
+      seriesId: sleepSeriesId,
+      seriesOrder: 3,
+      steps: [
+        MeditationStep(
+          label: 'Orient',
+          guidance:
+              'Notice the room, the surface beneath you, and a few ordinary sounds around you.',
+          durationSeconds: 100,
+        ),
+        MeditationStep(
+          label: 'Unhook',
+          guidance:
+              'When a thought asks for attention, notice that thinking is happening without following the next branch.',
+          durationSeconds: 100,
+        ),
+        MeditationStep(
+          label: 'Return',
+          guidance:
+              'Return to one simple sensation: contact, warmth, sound, or the natural movement of breathing.',
+          durationSeconds: 100,
+        ),
+        MeditationStep(
+          label: 'Widen',
+          guidance:
+              'Let thoughts and sensations come and go inside a wider field of attention.',
+          durationSeconds: 100,
+        ),
+        MeditationStep(
+          label: 'Less',
+          guidance:
+              'There is nothing to perform now. Let attention become less deliberate and less effortful.',
+          durationSeconds: 100,
+        ),
+        MeditationStep(
+          label: 'Close',
+          guidance:
+              'Let the guidance end and remain with the quiet in your own way.',
+          durationSeconds: 100,
         ),
       ],
     ),
