@@ -522,7 +522,7 @@ void main() {
     expect(find.text('ARRIVE'), findsOneWidget);
     expect(find.text('Close your eyes and follow the voice.'), findsOneWidget);
     expect(audioDriver.playCalls, 1);
-    expect(audioDriver.lastAssetPath, 'sounds/relief_01.mp3');
+    expect(audioDriver.lastAssetPath, 'sounds/deep_drift.mp3');
     expect(voiceDriver.configureCalls, 1);
     expect(voiceDriver.speakCalls, 1);
     expect(voiceDriver.lastSpokenText, item.steps.first.spokenGuidance);
