@@ -11,6 +11,7 @@ import '../../../theme/releaf_design_tokens.dart';
 import '../../../theme/widgets/releaf_sound_artwork.dart';
 import '../../../theme/widgets/releaf_components.dart';
 import '../../relief/application/relief_paywall_hooks.dart';
+import '../../relief/data/reset_catalog.dart';
 import '../application/sound_player_controller.dart';
 import '../data/sound_catalog.dart';
 import '../domain/sound_content.dart';
@@ -59,7 +60,13 @@ class SoundScreen extends ConsumerWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const _SoundHeader(),
+                              _SoundHeader(
+                                onEmergencyPressed: () => context.push(
+                                  AppRoutes.reliefSessionFor(
+                                    ResetCatalog.emergencySessionId,
+                                  ),
+                                ),
+                              ),
                               const SizedBox(height: ReleafSpacing.lg),
                               _SoundDestinations(
                                 onMeditate: () =>
@@ -196,31 +203,48 @@ class _SoundBackdrop extends StatelessWidget {
 }
 
 class _SoundHeader extends StatelessWidget {
-  const _SoundHeader();
+  const _SoundHeader({required this.onEmergencyPressed});
+
+  final VoidCallback onEmergencyPressed;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'AMBIENT AUDIO',
-          style: ReleafTypography.eyebrow.copyWith(
-            color: ReleafFeatureAccents.sound,
-            letterSpacing: 1.7,
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'AMBIENT AUDIO',
+                style: ReleafTypography.eyebrow.copyWith(
+                  color: ReleafFeatureAccents.sound,
+                  letterSpacing: 1.7,
+                ),
+              ),
+              const SizedBox(height: 5),
+              Text(
+                'Sound',
+                style: ReleafTypography.display.copyWith(fontSize: 30),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Long-form audio, meditation and sleep spaces for lower-stimulation moments.',
+                style: ReleafTypography.meta.copyWith(
+                  color: ReleafColors.textSecondary,
+                ),
+              ),
+            ],
           ),
         ),
-        const SizedBox(height: 5),
-        Text(
-          'Sound',
-          style: ReleafTypography.display.copyWith(fontSize: 30),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          'Long-form audio, meditation and sleep spaces for lower-stimulation moments.',
-          style: ReleafTypography.meta.copyWith(
-            color: ReleafColors.textSecondary,
-          ),
+        const SizedBox(width: ReleafSpacing.sm),
+        ReleafRoundIconButton(
+          key: const Key('sound-emergency-action'),
+          icon: Icons.health_and_safety_outlined,
+          tooltip: 'Open Emergency Calm',
+          accentColor: ReleafFeatureAccents.emergency,
+          onPressed: onEmergencyPressed,
         ),
       ],
     );
