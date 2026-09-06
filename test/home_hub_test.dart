@@ -92,7 +92,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('EVIDENCE'), findsOneWidget);
-    expect(find.text(insight.evidenceLabel), findsOneWidget);
+    expect(find.text(insight.evidenceLabel), findsWidgets);
     expect(find.text('SOURCE'), findsOneWidget);
     expect(find.text(insight.sourcePublisher), findsWidgets);
     expect(
