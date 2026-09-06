@@ -43,6 +43,17 @@ class MeditationScreen extends ConsumerWidget {
             orElse: () => deeperPractice.first,
           );
 
+    final sleepPractice =
+        catalog.getSeries(MeditationCatalog.sleepSeriesId);
+    final sleepIds = sleepPractice.map((item) => item.id);
+    final completedSleep = library.completedInSeries(sleepIds);
+    final nextSleep = sleepPractice.isEmpty
+        ? null
+        : sleepPractice.firstWhere(
+            (item) => !library.isCompleted(item.id),
+            orElse: () => sleepPractice.first,
+          );
+
     final featured = all.firstWhere(
       (item) => !library.isCompleted(item.id),
       orElse: () => all.first,
@@ -141,6 +152,14 @@ class MeditationScreen extends ConsumerWidget {
                                 onDeeper: nextDeeper == null
                                     ? null
                                     : () => open(nextDeeper),
+                                sleepCompleted: completedSleep,
+                                sleepTotal: sleepPractice.length,
+                                sleepNext: nextSleep,
+                                sleepLocked:
+                                    nextSleep?.isPremium == true && !isPremium,
+                                onSleep: nextSleep == null
+                                    ? null
+                                    : () => open(nextSleep),
                               ),
                               if (recent.isNotEmpty) ...[
                                 const SizedBox(height: ReleafSpacing.section),
@@ -536,6 +555,11 @@ class _ProgramRail extends StatelessWidget {
     required this.deeperNext,
     required this.deeperLocked,
     required this.onDeeper,
+    required this.sleepCompleted,
+    required this.sleepTotal,
+    required this.sleepNext,
+    required this.sleepLocked,
+    required this.onSleep,
   });
 
   final int foundationsCompleted;
@@ -548,6 +572,11 @@ class _ProgramRail extends StatelessWidget {
   final MeditationContent? deeperNext;
   final bool deeperLocked;
   final VoidCallback? onDeeper;
+  final int sleepCompleted;
+  final int sleepTotal;
+  final MeditationContent? sleepNext;
+  final bool sleepLocked;
+  final VoidCallback? onSleep;
 
   @override
   Widget build(BuildContext context) {
@@ -594,6 +623,26 @@ class _ProgramRail extends StatelessWidget {
                 onPressed: onDeeper!,
               ),
             ),
+          if (sleepNext != null) ...[
+            const SizedBox(width: ReleafSpacing.sm),
+            SizedBox(
+              width: compact ? 270 : 310,
+              child: _ProgramCard(
+                cardKey: const Key('meditation-sleep-course'),
+                eyebrow: 'NIGHT PRACTICE',
+                title: 'End the day more quietly',
+                description:
+                    'Three evening practices for letting go, body stillness and a quieter mind.',
+                artwork: ReleafMeditationArtworkVariant.everyday,
+                accent: const Color(0xFFB8B9D7),
+                completed: sleepCompleted,
+                total: sleepTotal,
+                nextItem: sleepNext!,
+                isLocked: sleepLocked,
+                onPressed: onSleep!,
+              ),
+            ),
+          ],
         ],
       ),
     );

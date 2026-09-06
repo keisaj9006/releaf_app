@@ -242,6 +242,11 @@ void main() {
     expect(find.text('MEDITATION'), findsOneWidget);
     expect(find.text('Meditate'), findsWidgets);
     expect(find.text('FOUNDATIONS'), findsOneWidget);
+    expect(find.text('NIGHT PRACTICE'), findsOneWidget);
+    expect(
+      find.byKey(const Key('meditation-sleep-course')),
+      findsOneWidget,
+    );
     expect(find.text('QUICK PRACTICES'), findsOneWidget);
     expect(find.text('EXPLORE BY INTENTION'), findsOneWidget);
     expect(find.byTooltip('Back'), findsNothing);
