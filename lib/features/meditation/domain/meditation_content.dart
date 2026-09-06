@@ -16,6 +16,7 @@ class MeditationStep {
     required this.guidance,
     required this.durationSeconds,
     this.spokenGuidance,
+    this.narrationAssetPath,
   });
 
   final String label;
@@ -25,6 +26,10 @@ class MeditationStep {
   /// Optional longer narration written to be heard rather than read.
   /// Captions keep using [guidance] so the screen stays concise.
   final String? spokenGuidance;
+
+  /// Optional pre-rendered Releaf Guide narration for this step.
+  /// When present, the player uses this instead of device TTS.
+  final String? narrationAssetPath;
 }
 
 class MeditationContent {
