@@ -141,7 +141,8 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen> {
     final acceleration = 0.010 + (_levelNumber * 0.00045);
     _velocity = (_velocity * 0.90) + (_tilt * acceleration);
 
-    final maxSpeed = (0.050 + (_levelNumber * 0.0018)).clamp(0.05, 0.072);
+    final maxSpeed =
+        (0.050 + (_levelNumber * 0.0018)).clamp(0.05, 0.072).toDouble();
     if (_velocity.distance > maxSpeed) {
       _velocity = _velocity / _velocity.distance * maxSpeed;
     }
@@ -156,7 +157,7 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen> {
   bool _attemptMove(Offset delta) {
     if (delta.distance == 0) return false;
 
-    final substeps = math.max(1, (delta.distance / 0.018).ceil());
+    final substeps = math.max(1, (delta.distance / 0.018).ceil()).toInt();
     final step = delta / substeps.toDouble();
     var moved = false;
 
@@ -222,10 +223,12 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen> {
       return false;
     }
 
-    final minColumn = math.max(0, (point.dx - r).floor());
-    final maxColumn = math.min(_level.columns - 1, (point.dx + r).floor());
-    final minRow = math.max(0, (point.dy - r).floor());
-    final maxRow = math.min(_level.rows - 1, (point.dy + r).floor());
+    final minColumn = math.max(0, (point.dx - r).floor()).toInt();
+    final maxColumn =
+        math.min(_level.columns - 1, (point.dx + r).floor()).toInt();
+    final minRow = math.max(0, (point.dy - r).floor()).toInt();
+    final maxRow =
+        math.min(_level.rows - 1, (point.dy + r).floor()).toInt();
 
     for (var row = minRow; row <= maxRow; row++) {
       for (var xLine = minColumn; xLine <= maxColumn + 1; xLine++) {
@@ -287,7 +290,7 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen> {
 
     final timeBonus = (_timeLeft / math.max(1, _level.timeLimitSeconds) * 40)
         .round();
-    final precisionBonus = math.max(0, 30 - (_wallHits * 2));
+    final precisionBonus = math.max(0, 30 - (_wallHits * 2)).toInt();
     final difficultyBonus = _levelNumber * 5;
     final score = 100 + timeBonus + precisionBonus + difficultyBonus;
 
@@ -393,12 +396,16 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen> {
             builder: (context, constraints) {
               final compact = constraints.maxWidth < 380;
               final hudHeight = compact ? 132.0 : 104.0;
-              final availableHeight = math.max(220.0, constraints.maxHeight - hudHeight);
-              final boardWidth = math.min(
-                constraints.maxWidth - (ReleafSpacing.screen * 2),
-                availableHeight * (_level.columns / _level.rows),
-              );
-              final boardHeight = boardWidth * (_level.rows / _level.columns);
+              final availableHeight =
+                  math.max(220.0, constraints.maxHeight - hudHeight).toDouble();
+              final boardWidth = math
+                  .min(
+                    constraints.maxWidth - (ReleafSpacing.screen * 2),
+                    availableHeight * (_level.columns / _level.rows),
+                  )
+                  .toDouble();
+              final boardHeight =
+                  boardWidth * (_level.rows / _level.columns);
               final boardSize = Size(boardWidth, boardHeight);
 
               return Stack(
@@ -657,7 +664,9 @@ class _MazeBoardPainter extends CustomPainter {
     final cellHeight = size.height / level.rows;
 
     final boardRect = Offset.zero & size;
-    final boardRadius = Radius.circular(math.min(cellWidth, cellHeight) * 0.26);
+    final boardRadius = Radius.circular(
+      math.min(cellWidth, cellHeight).toDouble() * 0.26,
+    );
     canvas.drawRRect(
       RRect.fromRectAndRadius(boardRect, boardRadius),
       Paint()..color = const Color(0xFF0A1512),
@@ -674,13 +683,15 @@ class _MazeBoardPainter extends CustomPainter {
 
     final wallPaint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = math.max(3.0, math.min(cellWidth, cellHeight) * 0.09)
+      ..strokeWidth =
+          math.max(3.0, math.min(cellWidth, cellHeight) * 0.09).toDouble()
       ..strokeCap = StrokeCap.round
       ..color = const Color(0xFF557C68);
 
     final innerWallPaint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = math.max(1.2, wallPaint.strokeWidth * 0.38)
+      ..strokeWidth =
+          math.max(1.2, wallPaint.strokeWidth * 0.38).toDouble()
       ..strokeCap = StrokeCap.round
       ..color = const Color(0xFF9FC8B4).withValues(alpha: 0.35);
 
@@ -712,7 +723,8 @@ class _MazeBoardPainter extends CustomPainter {
       level.goal.dx / level.columns * size.width,
       level.goal.dy / level.rows * size.height,
     );
-    final goalRadius = math.min(cellWidth, cellHeight) * 0.23;
+    final goalRadius =
+        math.min(cellWidth, cellHeight).toDouble() * 0.23;
 
     canvas.drawCircle(
       goal,
@@ -736,7 +748,8 @@ class _MazeBoardPainter extends CustomPainter {
       position.dx / level.columns * size.width,
       position.dy / level.rows * size.height,
     );
-    final ballRadius = math.min(cellWidth, cellHeight) * 0.18;
+    final ballRadius =
+        math.min(cellWidth, cellHeight).toDouble() * 0.18;
 
     canvas.drawCircle(
       ball,
