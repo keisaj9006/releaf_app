@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:audioplayers/audioplayers.dart' as audio;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_tts/flutter_tts.dart';
@@ -36,6 +37,8 @@ abstract class MeditationVoiceDriver {
 
   Future<void> speak(String text);
 
+  Future<void> playAsset(String assetPath);
+
   Future<void> setVolume(double volume);
 
   Future<void> stop();
@@ -45,6 +48,7 @@ abstract class MeditationVoiceDriver {
 
 class FlutterMeditationVoiceDriver implements MeditationVoiceDriver {
   final FlutterTts _tts = FlutterTts();
+  final audio.AudioPlayer _recordedVoice = audio.AudioPlayer();
 
   bool _configured = false;
   int _speechGeneration = 0;
@@ -81,7 +85,9 @@ class FlutterMeditationVoiceDriver implements MeditationVoiceDriver {
       _configured = true;
     }
 
-    await _tts.setVolume(volume.clamp(0.0, 1.0).toDouble());
+    final safeVolume = volume.clamp(0.0, 1.0).toDouble();
+    await _tts.setVolume(safeVolume);
+    await _recordedVoice.setVolume(safeVolume);
   }
 
   Future<void> _preferNaturalAndroidEngine() async {
@@ -206,6 +212,7 @@ class FlutterMeditationVoiceDriver implements MeditationVoiceDriver {
     if (text.trim().isEmpty) return;
 
     final generation = ++_speechGeneration;
+    await _recordedVoice.stop();
     await _tts.stop();
     final sentences = _meditationSentences(text);
 
@@ -222,20 +229,37 @@ class FlutterMeditationVoiceDriver implements MeditationVoiceDriver {
   }
 
   @override
+  Future<void> playAsset(String assetPath) async {
+    if (assetPath.trim().isEmpty) return;
+
+    _speechGeneration += 1;
+    await _tts.stop();
+    await _recordedVoice.stop();
+    await _recordedVoice.setReleaseMode(audio.ReleaseMode.stop);
+    await _recordedVoice.play(audio.AssetSource(assetPath));
+  }
+
+  @override
   Future<void> setVolume(double volume) async {
-    await _tts.setVolume(volume.clamp(0.0, 1.0).toDouble());
+    final safeVolume = volume.clamp(0.0, 1.0).toDouble();
+    await _tts.setVolume(safeVolume);
+    await _recordedVoice.setVolume(safeVolume);
   }
 
   @override
   Future<void> stop() async {
     _speechGeneration += 1;
-    await _tts.stop();
+    await Future.wait([
+      _tts.stop(),
+      _recordedVoice.stop(),
+    ]);
   }
 
   @override
   Future<void> dispose() async {
     _speechGeneration += 1;
     await _tts.stop();
+    await _recordedVoice.dispose();
   }
 }
 
@@ -279,7 +303,10 @@ class MeditationVoiceController extends StateNotifier<MeditationVoiceState> {
 
   bool _configured = false;
 
-  Future<void> speakGuidance(String guidance) async {
+  Future<void> speakGuidance(
+    String guidance, {
+    String? narrationAssetPath,
+  }) async {
     if (!state.enabled || guidance.trim().isEmpty) return;
 
     try {
@@ -287,9 +314,21 @@ class MeditationVoiceController extends StateNotifier<MeditationVoiceState> {
         await _driver.configure(volume: state.volume);
         _configured = true;
       }
+
+      if (narrationAssetPath != null &&
+          narrationAssetPath.trim().isNotEmpty) {
+        try {
+          await _driver.playAsset(narrationAssetPath);
+          return;
+        } catch (_) {
+          // A missing/corrupt recorded track should fall back to TTS rather
+          // than breaking the meditation.
+        }
+      }
+
       await _driver.speak(guidance);
     } catch (_) {
-      // Voice guidance is additive. Platform TTS failure must never break
+      // Voice guidance is additive. Audio failure must never break
       // meditation timing, ambience, navigation, or completion.
     }
   }
