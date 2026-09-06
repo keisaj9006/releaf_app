@@ -18,6 +18,7 @@ import '../../../theme/widgets/releaf_session_living_form.dart';
 import '../../../theme/widgets/releaf_sensory_halo.dart';
 import '../../../theme/widgets/releaf_thought_unhook_visual.dart';
 import '../../../theme/widgets/releaf_wave2_visuals.dart';
+import '../application/reset_audio_preferences.dart';
 import '../data/reset_catalog.dart';
 import '../domain/models/breath_pattern.dart';
 import '../domain/models/reset_content.dart';
@@ -63,10 +64,11 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
   void initState() {
     super.initState();
 
-    _voiceEnabled = widget.launchOptions.voiceGuidanceEnabled;
-    _voiceVolume = widget.launchOptions.voiceVolume;
-    _ambientEnabled = widget.launchOptions.ambientSoundEnabled;
-    _ambientVolume = widget.launchOptions.ambientVolume;
+    final audioPreferences = ref.read(resetAudioPreferencesProvider);
+    _voiceEnabled = audioPreferences.voiceEnabled;
+    _voiceVolume = audioPreferences.voiceVolume;
+    _ambientEnabled = audioPreferences.ambientEnabled;
+    _ambientVolume = audioPreferences.ambientVolume;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final session = ref.read(resetCatalogProvider).getById(widget.sessionId);
@@ -156,6 +158,9 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
   Future<void> _setVoiceEnabled(bool enabled) async {
     if (!mounted) return;
     setState(() => _voiceEnabled = enabled);
+    await ref
+        .read(resetAudioPreferencesProvider.notifier)
+        .setVoiceEnabled(enabled);
 
     if (!enabled) {
       _lastNarrationKey = null;
@@ -171,6 +176,9 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
   Future<void> _setVoiceVolume(double volume) async {
     final safe = volume.clamp(0.0, 1.0).toDouble();
     if (mounted) setState(() => _voiceVolume = safe);
+    await ref
+        .read(resetAudioPreferencesProvider.notifier)
+        .setVoiceVolume(safe);
     try {
       await _voiceDriver.setVolume(safe);
     } catch (_) {}
@@ -179,6 +187,9 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
   Future<void> _setAmbientEnabled(bool enabled) async {
     if (!mounted) return;
     setState(() => _ambientEnabled = enabled);
+    await ref
+        .read(resetAudioPreferencesProvider.notifier)
+        .setAmbientEnabled(enabled);
 
     try {
       if (!enabled) {
@@ -205,6 +216,9 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
   Future<void> _setAmbientVolume(double volume) async {
     final safe = volume.clamp(0.0, 1.0).toDouble();
     if (mounted) setState(() => _ambientVolume = safe);
+    await ref
+        .read(resetAudioPreferencesProvider.notifier)
+        .setAmbientVolume(safe);
     if (!_ambientStarted) return;
     try {
       await _ambientPlayer.setVolume(safe);
