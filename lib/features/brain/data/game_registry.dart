@@ -102,6 +102,13 @@ const brainGames = <BrainGameMeta>[
     hasDifficultyLevels: true,
   ),
   BrainGameMeta(
+    id: 'symbol_code',
+    title: 'Symbol Code',
+    icon: Icons.password_rounded,
+    group: BrainGameGroup.attention,
+    hasDifficultyLevels: true,
+  ),
+  BrainGameMeta(
     id: 'color_conflict',
     title: 'Color Conflict',
     icon: Icons.palette_outlined,
