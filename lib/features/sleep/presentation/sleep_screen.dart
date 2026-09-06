@@ -444,6 +444,7 @@ class _SoundCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
+      key: Key('sleep-sound-${track.id}'),
       color: Colors.transparent,
       borderRadius: BorderRadius.circular(ReleafRadii.large),
       clipBehavior: Clip.antiAlias,
@@ -460,12 +461,6 @@ class _SoundCard extends StatelessWidget {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              if (isLocked)
-                const Positioned(
-                  top: 10,
-                  right: 10,
-                  child: _SleepPremiumTag(),
-                ),
               const Positioned(
                 top: 0,
                 left: 0,
@@ -490,6 +485,12 @@ class _SoundCard extends StatelessWidget {
                   ),
                 ),
               ),
+              if (isLocked)
+                const Positioned(
+                  top: 10,
+                  right: 10,
+                  child: _SleepPremiumTag(),
+                ),
               Padding(
                 padding: const EdgeInsets.all(ReleafSpacing.md),
                 child: Column(
