@@ -8,11 +8,16 @@ import '../../theme/releaf_design_tokens.dart';
 import '../../theme/widgets/releaf_brain_artwork.dart';
 
 class MemoryGameScreen extends StatefulWidget {
-  /// Jeśli ten ekran jest uruchamiany jako “Brain session”
-  /// (czyli z GameHost), podajesz callback.
+  /// If this screen is launched from Brain, completion is reported through
+  /// [onFinish] and [trainingLevel] is the single source of difficulty.
   final void Function(int score)? onFinish;
+  final int trainingLevel;
 
-  const MemoryGameScreen({super.key, this.onFinish});
+  const MemoryGameScreen({
+    super.key,
+    this.onFinish,
+    this.trainingLevel = 1,
+  });
 
   @override
   State<MemoryGameScreen> createState() => _MemoryGameScreenState();
@@ -32,7 +37,7 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
   bool _timeExpired = false;
 
   int currentLevel = 1;
-  int maxLevels = 50;
+  static const int maxLevels = 12;
 
   int timeLeft = 60;
   Timer? countdownTimer;
@@ -43,7 +48,12 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
   @override
   void initState() {
     super.initState();
-    _loadSavedLevel();
+    if (widget.onFinish != null) {
+      currentLevel = widget.trainingLevel.clamp(1, maxLevels).toInt();
+      _startLevel();
+    } else {
+      _loadSavedLevel();
+    }
   }
 
   @override
@@ -56,7 +66,10 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
     final prefs = await SharedPreferences.getInstance();
     if (!mounted) return;
     setState(() {
-      currentLevel = prefs.getInt('memory_current_level') ?? 1;
+      currentLevel =
+          (prefs.getInt('memory_current_level') ?? 1)
+              .clamp(1, maxLevels)
+              .toInt();
     });
     _startLevel();
   }
@@ -94,19 +107,14 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
   }
 
   int _calculatePairsForLevel(int level) {
-    if (level <= 10) return 2 + (level ~/ 3);
-    if (level <= 20) return 4 + ((level - 10) ~/ 2);
-    if (level <= 30) return 6 + ((level - 20) ~/ 2);
-    if (level <= 40) return 8 + ((level - 30) ~/ 2);
-    return 10 + ((level - 40) ~/ 2);
+    return (3 + ((level - 1) ~/ 2)).clamp(3, 8).toInt();
   }
 
   int _calculateTimeForLevel(int level) {
-    if (level <= 10) return 60 - (level * 2);
-    if (level <= 20) return 50 - ((level - 10) * 2);
-    if (level <= 30) return 40 - ((level - 20) * 2);
-    if (level <= 40) return 30 - ((level - 30) * 2);
-    return 25 - ((level - 40));
+    final pairs = _calculatePairsForLevel(level);
+    return (58 - ((level - 1) * 2) + ((pairs - 3) * 2))
+        .clamp(34, 58)
+        .toInt();
   }
 
   void _startTimer() {
@@ -265,21 +273,26 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
               Navigator.of(context).pop();
               _finishSession(completed: true);
             },
-            child: const Text('Finish session', style: TextStyle(fontFamily: 'Poppins')),
+            child: const Text(
+              'Finish session',
+              style: TextStyle(fontFamily: 'Poppins'),
+            ),
           ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              setState(() {
-                if (currentLevel < maxLevels) {
+          if (widget.onFinish == null && currentLevel < maxLevels)
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                setState(() {
                   currentLevel++;
                   _saveCurrentLevel();
                   _startLevel();
-                }
-              });
-            },
-            child: const Text('Next Level', style: TextStyle(fontFamily: 'Poppins')),
-          ),
+                });
+              },
+              child: const Text(
+                'Next Level',
+                style: TextStyle(fontFamily: 'Poppins'),
+              ),
+            ),
         ],
       ),
     );
@@ -369,8 +382,17 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
                           runSpacing: ReleafSpacing.xs,
                           children: [
                             _MemoryStatusPill(
+                              key: const Key('memory-training-level'),
                               icon: Icons.layers_outlined,
-                              label: 'Level $currentLevel',
+                              label: embedded
+                                  ? 'Brain L$currentLevel'
+                                  : 'Level $currentLevel',
+                              accent: accent,
+                            ),
+                            _MemoryStatusPill(
+                              icon: Icons.grid_view_rounded,
+                              label:
+                                  '${_calculatePairsForLevel(currentLevel)} pairs',
                               accent: accent,
                             ),
                             _MemoryStatusPill(
@@ -570,6 +592,7 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
 
 class _MemoryStatusPill extends StatelessWidget {
   const _MemoryStatusPill({
+    super.key,
     required this.icon,
     required this.label,
     required this.accent,
