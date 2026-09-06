@@ -4,6 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:releaf_app/core/providers.dart';
+import 'package:releaf_app/features/home/home_personalization.dart';
+import 'package:releaf_app/features/home/home_screen.dart';
 import 'package:releaf_app/routing/app_router.dart';
 import 'package:releaf_app/routing/app_routes.dart';
 
@@ -23,6 +25,7 @@ Future<void> _pumpHome(
     ProviderScope(
       overrides: [
         sharedPreferencesProvider.overrideWithValue(preferences),
+        homeNowProvider.overrideWithValue(DateTime(2026, 9, 6, 12)),
       ],
       child: MaterialApp.router(routerConfig: router),
     ),
@@ -69,6 +72,34 @@ void main() {
     expect(find.text('SUGGESTED FOR FOCUS'), findsOneWidget);
     expect(find.text('Daily Brain Workout'), findsWidgets);
     expect(find.text('You chose focus.'), findsOneWidget);
+  });
+
+  testWidgets('Home focus persists and tunes default recommendations', (
+    WidgetTester tester,
+  ) async {
+    final preferences = await _preferences();
+    await _pumpHome(tester, preferences: preferences);
+
+    expect(find.text('Personalize recommendations'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('home-focus-strip')));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('What should Releaf help you with most?'),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.byKey(const Key('home-focus-mindfulness')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Build mindfulness'), findsOneWidget);
+    expect(find.text('SUGGESTED FOR YOUR FOCUS'), findsOneWidget);
+    expect(find.text('Mindfulness Basics'), findsOneWidget);
+    expect(
+      preferences.getString('releaf.home.focus.v1'),
+      HomeFocus.mindfulness.name,
+    );
   });
 
   testWidgets('Home remains overflow-free on a narrow phone', (
