@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/providers.dart';
 import '../../../routing/app_routes.dart';
 import '../../../theme/app_theme.dart';
 import '../../../theme/releaf_design_tokens.dart';
 import '../../../theme/widgets/releaf_sleep_artwork.dart';
+import '../../relief/application/relief_paywall_hooks.dart';
 import '../../sound/data/sound_catalog.dart';
 import '../../sound/domain/sound_content.dart';
 
@@ -27,6 +29,7 @@ class SleepScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final catalog = ref.watch(soundCatalogProvider);
+    final isPremium = ref.watch(subscriptionControllerProvider).isPremium;
     final sleepTones = _sleepToneIds
         .map(catalog.getById)
         .whereType<SoundContent>()
@@ -37,8 +40,35 @@ class SleepScreen extends ConsumerWidget {
         .toList(growable: false);
     final featured = catalog.getById('deep-drift');
 
-    void open(SoundContent track) {
-      context.push(AppRoutes.soundPlayerFor(track.id));
+    Future<void> open(SoundContent track) async {
+      if (!track.isPremium || isPremium) {
+        await context.push(AppRoutes.soundPlayerFor(track.id));
+        return;
+      }
+
+      final unlock = await showModalBottomSheet<bool>(
+        context: context,
+        useSafeArea: true,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        barrierColor: Colors.black.withValues(alpha: 0.72),
+        builder: (_) => _SleepPremiumSoundPreview(track: track),
+      );
+
+      if (unlock != true || !context.mounted) return;
+
+      await maybeShowPaywall(
+        context,
+        ref,
+        force: true,
+        softOffer: true,
+      );
+      if (!context.mounted) return;
+
+      final nowPremium = ref.read(subscriptionControllerProvider).isPremium;
+      if (nowPremium) {
+        await context.push(AppRoutes.soundPlayerFor(track.id));
+      }
     }
 
     return Theme(
@@ -84,6 +114,7 @@ class SleepScreen extends ConsumerWidget {
                                 const SizedBox(height: ReleafSpacing.md),
                                 _SoundRail(
                                   sounds: sleepTones,
+                                  isPremium: isPremium,
                                   onOpen: open,
                                 ),
                               ],
@@ -98,6 +129,7 @@ class SleepScreen extends ConsumerWidget {
                                 const SizedBox(height: ReleafSpacing.md),
                                 _SoundRail(
                                   sounds: natureSounds,
+                                  isPremium: isPremium,
                                   onOpen: open,
                                 ),
                               ],
@@ -363,10 +395,12 @@ class _SectionHeading extends StatelessWidget {
 class _SoundRail extends StatelessWidget {
   const _SoundRail({
     required this.sounds,
+    required this.isPremium,
     required this.onOpen,
   });
 
   final List<SoundContent> sounds;
+  final bool isPremium;
   final ValueChanged<SoundContent> onOpen;
 
   @override
@@ -386,6 +420,7 @@ class _SoundRail extends StatelessWidget {
             width: compact ? 232 : 270,
             child: _SoundCard(
               track: track,
+              isLocked: track.isPremium && !isPremium,
               onPressed: () => onOpen(track),
             ),
           );
@@ -398,10 +433,12 @@ class _SoundRail extends StatelessWidget {
 class _SoundCard extends StatelessWidget {
   const _SoundCard({
     required this.track,
+    required this.isLocked,
     required this.onPressed,
   });
 
   final SoundContent track;
+  final bool isLocked;
   final VoidCallback onPressed;
 
   @override
@@ -423,6 +460,12 @@ class _SoundCard extends StatelessWidget {
           child: Stack(
             fit: StackFit.expand,
             children: [
+              if (isLocked)
+                const Positioned(
+                  top: 10,
+                  right: 10,
+                  child: _SleepPremiumTag(),
+                ),
               const Positioned(
                 top: 0,
                 left: 0,
@@ -493,10 +536,14 @@ class _SoundCard extends StatelessWidget {
                           ),
                         ),
                         const Spacer(),
-                        const Icon(
-                          Icons.play_circle_outline_rounded,
+                        Icon(
+                          isLocked
+                              ? Icons.lock_outline_rounded
+                              : Icons.play_circle_outline_rounded,
                           size: 19,
-                          color: Color(0xFFD1D7DE),
+                          color: isLocked
+                              ? ReleafColors.premium
+                              : const Color(0xFFD1D7DE),
                         ),
                       ],
                     ),
@@ -506,6 +553,157 @@ class _SoundCard extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _SleepPremiumSoundPreview extends StatelessWidget {
+  const _SleepPremiumSoundPreview({required this.track});
+
+  final SoundContent track;
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.bottomCenter,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 680),
+        child: Material(
+          key: const Key('sleep-premium-preview'),
+          color: ReleafColors.backgroundRaised,
+          borderRadius: const BorderRadius.vertical(
+            top: Radius.circular(ReleafRadii.extraLarge),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(
+              ReleafSpacing.screen,
+              ReleafSpacing.lg,
+              ReleafSpacing.screen,
+              ReleafSpacing.xl,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const _SleepPremiumTag(),
+                    const Spacer(),
+                    IconButton(
+                      tooltip: 'Close preview',
+                      onPressed: () => Navigator.of(context).pop(false),
+                      icon: const Icon(Icons.close_rounded),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: ReleafSpacing.md),
+                Container(
+                  height: 170,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(ReleafRadii.large),
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: const Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      ReleafSleepArtwork(
+                        variant: ReleafSleepArtworkVariant.sound,
+                        intensity: 1,
+                      ),
+                      DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Color(0x12000000),
+                              Color(0xD507090D),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: ReleafSpacing.lg),
+                Text(
+                  track.title,
+                  style: ReleafTypography.display.copyWith(fontSize: 28),
+                ),
+                const SizedBox(height: ReleafSpacing.xs),
+                Text(
+                  track.subtitle,
+                  style: ReleafTypography.body.copyWith(
+                    color: ReleafColors.textSecondary,
+                    height: 1.5,
+                  ),
+                ),
+                const SizedBox(height: ReleafSpacing.sm),
+                Text(
+                  '${_soundCategoryLabel(track.category)} • Continuous loop • No voice',
+                  style: ReleafTypography.meta.copyWith(
+                    color: const Color(0xFFA9B8C4),
+                  ),
+                ),
+                const SizedBox(height: ReleafSpacing.lg),
+                Text(
+                  'This sleep sound is included with Releaf Premium. Sleep playback remains audio-only: no narration, spoken guidance or instructions are added.',
+                  style: ReleafTypography.meta.copyWith(
+                    color: ReleafColors.textMuted,
+                    height: 1.5,
+                  ),
+                ),
+                const SizedBox(height: ReleafSpacing.lg),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    key: const Key('sleep-premium-preview-unlock'),
+                    onPressed: () => Navigator.of(context).pop(true),
+                    icon: const Icon(Icons.lock_open_rounded),
+                    label: const Text('Unlock Premium'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SleepPremiumTag extends StatelessWidget {
+  const _SleepPremiumTag();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
+      decoration: BoxDecoration(
+        color: ReleafColors.premium.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(ReleafRadii.pill),
+        border: Border.all(
+          color: ReleafColors.premium.withValues(alpha: 0.26),
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(
+            Icons.workspace_premium_outlined,
+            size: 13,
+            color: ReleafColors.premium,
+          ),
+          const SizedBox(width: 5),
+          Text(
+            'PREMIUM',
+            style: ReleafTypography.eyebrow.copyWith(
+              color: ReleafColors.premium,
+              fontSize: 8,
+            ),
+          ),
+        ],
       ),
     );
   }
