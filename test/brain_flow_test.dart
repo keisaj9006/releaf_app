@@ -99,6 +99,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 250));
 
     expect(find.byType(BrainScreen), findsOneWidget);
+    expect(find.byKey(const Key('brain-emergency-action')), findsOneWidget);
     expect(find.text("TODAY'S WORKOUT"), findsOneWidget);
     expect(find.text('Three focused challenges.'), findsOneWidget);
     expect(find.text('THIS WEEK'), findsOneWidget);
