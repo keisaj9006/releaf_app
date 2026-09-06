@@ -44,7 +44,7 @@ void main() {
     );
     final nextDay = DailyInsightCatalog.forDate(DateTime(2026, 9, 7));
 
-    expect(DailyInsightCatalog.all, hasLength(14));
+    expect(DailyInsightCatalog.all, hasLength(20));
     expect(first.id, sameDay.id);
     expect(first.id, isNot(nextDay.id));
     expect(first.sourcePublisher, isNotEmpty);
@@ -80,7 +80,10 @@ void main() {
     final insight = DailyInsightCatalog.forDate(DateTime(2026, 9, 6));
     await _pumpHome(tester, preferences: await _preferences());
 
+    expect(find.text('DAILY INSIGHT'), findsOneWidget);
     expect(find.byKey(const Key('home-daily-insight')), findsOneWidget);
+    expect(find.text('NEW TODAY'), findsOneWidget);
+    expect(find.text('Read why this matters'), findsOneWidget);
     expect(find.text(insight.headline), findsOneWidget);
 
     await tester.ensureVisible(find.byKey(const Key('home-daily-insight')));
