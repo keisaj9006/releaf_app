@@ -336,6 +336,7 @@ void main() {
 
     expect(state.completionCountFor('sequence_echo'), 2);
     expect(state.trainingLevelFor('sequence_echo'), 3);
+    expect(state.trainingLevelFor('broken_mirror'), 1);
     expect(state.trainingLevelFor('memory'), 1);
   });
 
@@ -366,6 +367,38 @@ void main() {
     );
     expect(game.trainingLevel, 3);
     expect(find.text('L3'), findsOneWidget);
+  });
+
+  testWidgets('Game host scales Broken Mirror from saved training level', (
+    WidgetTester tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({});
+    final preferences = await SharedPreferences.getInstance();
+    final controller = BrainTrainingController(preferences);
+    for (var index = 0; index < 4; index++) {
+      await controller.recordCompletion(gameId: 'broken_mirror');
+    }
+    controller.dispose();
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(preferences),
+        ],
+        child: const MaterialApp(
+          home: GameHostScreen(gameId: 'broken_mirror'),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    final game = tester.widget<BrokenMirrorGameScreen>(
+      find.byType(BrokenMirrorGameScreen),
+    );
+    expect(game.level, 5);
+    expect(game.enableTimer, isTrue);
+    expect(game.seconds, 72);
+    expect(find.textContaining('Level 5:'), findsOneWidget);
   });
 
   testWidgets('Higher training level materially increases Sequence Echo', (
