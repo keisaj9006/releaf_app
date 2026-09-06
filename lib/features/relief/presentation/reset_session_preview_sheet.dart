@@ -162,6 +162,72 @@ class _ResetSessionPreviewSheetState
                                   });
                                 },
                               ),
+                              const SizedBox(height: ReleafSpacing.xs),
+                              _SessionPreferenceTile(
+                                key: const Key('reset-preview-voice-toggle'),
+                                icon: Icons.record_voice_over_rounded,
+                                title: 'Voice guidance',
+                                subtitle:
+                                    'Slow spoken guidance using the Releaf voice setup.',
+                                value: _options.voiceGuidanceEnabled,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _options = _options.copyWith(
+                                      voiceGuidanceEnabled: value,
+                                    );
+                                  });
+                                },
+                              ),
+                              if (_options.voiceGuidanceEnabled) ...[
+                                const SizedBox(height: ReleafSpacing.xs),
+                                _SessionVolumeTile(
+                                  key: const Key('reset-preview-voice-volume'),
+                                  icon: Icons.volume_up_rounded,
+                                  title: 'Voice volume',
+                                  value: _options.voiceVolume,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _options = _options.copyWith(
+                                        voiceVolume: value,
+                                      );
+                                    });
+                                  },
+                                ),
+                              ],
+                              const SizedBox(height: ReleafSpacing.xs),
+                              _SessionPreferenceTile(
+                                key: const Key('reset-preview-ambient-toggle'),
+                                icon: Icons.graphic_eq_rounded,
+                                title: 'Calming background',
+                                subtitle:
+                                    'Deep Drift plays quietly underneath the session.',
+                                value: _options.ambientSoundEnabled,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _options = _options.copyWith(
+                                      ambientSoundEnabled: value,
+                                    );
+                                  });
+                                },
+                              ),
+                              if (_options.ambientSoundEnabled) ...[
+                                const SizedBox(height: ReleafSpacing.xs),
+                                _SessionVolumeTile(
+                                  key: const Key(
+                                    'reset-preview-ambient-volume',
+                                  ),
+                                  icon: Icons.surround_sound_rounded,
+                                  title: 'Background volume',
+                                  value: _options.ambientVolume,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _options = _options.copyWith(
+                                        ambientVolume: value,
+                                      );
+                                    });
+                                  },
+                                ),
+                              ],
                             ],
                           ],
                         ),
@@ -516,6 +582,73 @@ class _SessionPreferenceTile extends StatelessWidget {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SessionVolumeTile extends StatelessWidget {
+  const _SessionVolumeTile({
+    super.key,
+    required this.icon,
+    required this.title,
+    required this.value,
+    required this.onChanged,
+  });
+
+  final IconData icon;
+  final String title;
+  final double value;
+  final ValueChanged<double> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: ReleafColors.surfaceSoft,
+        borderRadius: BorderRadius.circular(ReleafRadii.large),
+        border: Border.all(color: ReleafColors.borderSoft),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(
+          ReleafSpacing.md,
+          ReleafSpacing.sm,
+          ReleafSpacing.md,
+          ReleafSpacing.xs,
+        ),
+        child: Row(
+          children: [
+            Icon(icon, size: 19, color: ReleafColors.sage),
+            const SizedBox(width: ReleafSpacing.sm),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(title, style: ReleafTypography.cardTitle),
+                      ),
+                      Text(
+                        '${(value * 100).round()}%',
+                        style: ReleafTypography.meta.copyWith(
+                          color: ReleafColors.textSecondary,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Slider(
+                    value: value.clamp(0.0, 1.0).toDouble(),
+                    onChanged: onChanged,
+                    activeColor: ReleafColors.sage,
+                    inactiveColor: ReleafColors.surfaceElevated,
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
