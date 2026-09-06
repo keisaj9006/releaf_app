@@ -355,6 +355,7 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen> {
           ('Time left', '${_timeLeft}s'),
           ('Wall touches', '$_wallHits'),
           ('Maze', '${_level.columns}×${_level.rows}'),
+          ('Shortest route', '${_level.shortestPathMoves} moves'),
           ('Score', '$score'),
         ],
         primaryLabel: 'Finish',
@@ -395,6 +396,7 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen> {
           ('Level', 'L$_levelNumber'),
           ('Wall touches', '$_wallHits'),
           ('Maze', '${_level.columns}×${_level.rows}'),
+          ('Shortest route', '${_level.shortestPathMoves} moves'),
         ],
         primaryLabel: 'Retry',
         onPrimary: _restart,
@@ -440,6 +442,7 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen> {
                         timeLeft: _timeLeft,
                         wallHits: _wallHits,
                         entryLabel: _level.entryLabel,
+                        routeMoves: _level.shortestPathMoves,
                         started: _started,
                         paused: _paused,
                         motionAvailable: _motionAvailable,
@@ -449,20 +452,24 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen> {
                       const SizedBox(height: ReleafSpacing.sm),
                       Expanded(
                         child: Center(
-                          child: GestureDetector(
-                            key: const Key('labyrinth-board'),
-                            behavior: HitTestBehavior.opaque,
-                            onPanUpdate: (details) =>
-                                _onPanUpdate(details, boardSize),
-                            child: SizedBox(
-                              width: boardSize.width,
-                              height: boardSize.height,
-                              child: CustomPaint(
-                                painter: _MazeBoardPainter(
-                                  level: _level,
-                                  position: _position,
-                                  paused: _paused,
-                                  started: _started,
+                          child: Semantics(
+                            label:
+                                'Labyrinth board. Start ${_level.entryLabel.toLowerCase()} edge. Goal centre.',
+                            child: GestureDetector(
+                              key: const Key('labyrinth-board'),
+                              behavior: HitTestBehavior.opaque,
+                              onPanUpdate: (details) =>
+                                  _onPanUpdate(details, boardSize),
+                              child: SizedBox(
+                                width: boardSize.width,
+                                height: boardSize.height,
+                                child: CustomPaint(
+                                  painter: _MazeBoardPainter(
+                                    level: _level,
+                                    position: _position,
+                                    paused: _paused,
+                                    started: _started,
+                                  ),
                                 ),
                               ),
                             ),
@@ -931,6 +938,7 @@ class _MazeHeader extends StatelessWidget {
     required this.timeLeft,
     required this.wallHits,
     required this.entryLabel,
+    required this.routeMoves,
     required this.started,
     required this.paused,
     required this.motionAvailable,
@@ -942,6 +950,7 @@ class _MazeHeader extends StatelessWidget {
   final int timeLeft;
   final int wallHits;
   final String entryLabel;
+  final int routeMoves;
   final bool started;
   final bool paused;
   final bool motionAvailable;
@@ -1008,6 +1017,7 @@ class _MazeHeader extends StatelessWidget {
               ),
               _MazeStat(label: 'WALLS', value: '$wallHits'),
               _MazeStat(label: 'ENTRY', value: entryLabel),
+              _MazeStat(label: 'ROUTE', value: '$routeMoves'),
               _MazeStat(
                 label: 'CONTROL',
                 value: motionAvailable ? 'Tilt + touch' : 'Touch',
