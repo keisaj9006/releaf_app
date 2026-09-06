@@ -937,7 +937,6 @@ class _DailyInsightCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(ReleafRadii.extraLarge),
         onTap: onOpen,
         child: Ink(
-          height: compact ? 294 : 236,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(ReleafRadii.extraLarge),
             border: Border.all(
@@ -951,28 +950,35 @@ class _DailyInsightCard extends StatelessWidget {
               ),
             ],
           ),
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              ReleafArtwork(
-                variant: _dailyInsightArtwork(insight.category),
-                intensity: 0.62,
-              ),
-              const DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Color(0x42070C09),
-                      Color(0xA80A100D),
-                      Color(0xF2070B09),
-                    ],
-                    stops: [0, 0.48, 1],
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: compact ? 270 : 236,
+            ),
+            child: Stack(
+              children: [
+                Positioned.fill(
+                  child: ReleafArtwork(
+                    variant: _dailyInsightArtwork(insight.category),
+                    intensity: 0.62,
                   ),
                 ),
-              ),
-              Padding(
+                const Positioned.fill(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Color(0x42070C09),
+                          Color(0xA80A100D),
+                          Color(0xF2070B09),
+                        ],
+                        stops: [0, 0.48, 1],
+                      ),
+                    ),
+                  ),
+                ),
+                Padding(
                 padding: const EdgeInsets.all(ReleafSpacing.lg),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -1032,7 +1038,7 @@ class _DailyInsightCard extends StatelessWidget {
                         ),
                       ],
                     ),
-                    const Spacer(),
+                    SizedBox(height: compact ? 34 : 42),
                     Text(
                       insight.headline,
                       maxLines: 3,
@@ -1103,8 +1109,8 @@ class _DailyInsightCard extends StatelessWidget {
                     ),
                   ],
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
