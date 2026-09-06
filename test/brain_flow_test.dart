@@ -126,6 +126,13 @@ void main() {
     expect(find.text('VISUAL RECONSTRUCTION'), findsWidgets);
     expect(find.text('ATTENTION SWITCHING'), findsWidgets);
     expect(find.text('WORKING MEMORY'), findsWidgets);
+    expect(find.text('WORKING MEMORY UPDATE'), findsWidgets);
+    expect(find.text('VISUOSPATIAL MEMORY'), findsWidgets);
+    expect(find.text('SPATIAL REASONING'), findsWidgets);
+    expect(find.text('VISUAL SEARCH & SWITCHING'), findsWidgets);
+    expect(find.text('PLANNING & PROBLEM SOLVING'), findsWidgets);
+    expect(find.text('ASSOCIATIVE MAPPING'), findsWidgets);
+    expect(find.text('TRAINING'), findsNothing);
     expect(find.text('INHIBITORY CONTROL'), findsWidgets);
     expect(find.text('PATTERN REASONING'), findsWidgets);
     expect(find.text('SELECTIVE ATTENTION'), findsWidgets);
