@@ -66,12 +66,6 @@ class _FakeMeditationAudioDriver implements MeditationAudioDriver {
   }
 
   @override
-  Future<void> playAsset(String assetPath) async {
-    playAssetCalls += 1;
-    lastNarrationAssetPath = assetPath;
-  }
-
-  @override
   Future<void> setVolume(double volume) async {
     volumeCalls += 1;
     lastVolume = volume;
@@ -107,6 +101,12 @@ class _FakeMeditationVoiceDriver implements MeditationVoiceDriver {
   Future<void> speak(String text) async {
     speakCalls += 1;
     lastSpokenText = text;
+  }
+
+  @override
+  Future<void> playAsset(String assetPath) async {
+    playAssetCalls += 1;
+    lastNarrationAssetPath = assetPath;
   }
 
   @override
