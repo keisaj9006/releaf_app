@@ -28,7 +28,7 @@ class SoundCatalog {
       subtitle: 'A second ambient space from the current Releaf library.',
       assetPath: 'sounds/relief_02.mp3',
       category: SoundCategory.atmosphere,
-      accessTier: SoundAccessTier.free,
+      accessTier: SoundAccessTier.premium,
     ),
     SoundContent(
       id: 'brown-noise',
@@ -64,7 +64,7 @@ class SoundCatalog {
           'An even full-spectrum synthetic noise bed for a consistent masking layer.',
       assetPath: 'sounds/white_noise.mp3',
       category: SoundCategory.noise,
-      accessTier: SoundAccessTier.free,
+      accessTier: SoundAccessTier.premium,
     ),
     SoundContent(
       id: 'pink-noise',
@@ -73,7 +73,7 @@ class SoundCatalog {
           'A softer weighted synthetic noise bed with less high-frequency emphasis.',
       assetPath: 'sounds/pink_noise.mp3',
       category: SoundCategory.noise,
-      accessTier: SoundAccessTier.free,
+      accessTier: SoundAccessTier.premium,
     ),
     SoundContent(
       id: 'deep-drift',
@@ -82,7 +82,7 @@ class SoundCatalog {
           'An original slow tonal pad with a low, steady harmonic movement.',
       assetPath: 'sounds/deep_drift.mp3',
       category: SoundCategory.atmosphere,
-      accessTier: SoundAccessTier.free,
+      accessTier: SoundAccessTier.premium,
     ),
   ];
 
