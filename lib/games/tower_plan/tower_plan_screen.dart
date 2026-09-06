@@ -482,10 +482,9 @@ class _PegView extends StatelessWidget {
                         padding: const EdgeInsets.only(top: 4),
                         child: FractionallySizedBox(
                           widthFactor:
-                              (0.36 + (disc / discCount) * 0.58).clamp(
-                            0.36,
-                            0.94,
-                          ),
+                              (0.36 + (disc / discCount) * 0.58)
+                                  .clamp(0.36, 0.94)
+                                  .toDouble(),
                           child: Container(
                             key: Key('tower-plan-disc-$pegIndex-$disc'),
                             height: 22,
