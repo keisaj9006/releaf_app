@@ -451,6 +451,7 @@ class _SoundTrackTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ReleafPressableCard(
+      key: Key('sound-track-${track.id}'),
       onPressed: onPressed,
       padding: EdgeInsets.zero,
       child: Stack(
