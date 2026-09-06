@@ -119,37 +119,29 @@ class MeditationScreen extends ConsumerWidget {
                                 onPressed: () => open(featured),
                               ),
                               const SizedBox(height: ReleafSpacing.section),
-                              _CourseCard(
-                                courseKey:
-                                    const Key('meditation-foundations-course'),
-                                eyebrow: 'FOUNDATIONS',
-                                title: 'Learn the basics in sequence.',
-                                icon: Icons.menu_book_rounded,
-                                accent: const Color(0xFFB8AFC2),
-                                completed: completedFoundations,
-                                total: foundations.length,
-                                nextItem: nextFoundation,
-                                isLocked:
-                                    nextFoundation.isPremium && !isPremium,
-                                onPressed: () => open(nextFoundation),
+                              const _EditorialHeading(
+                                eyebrow: 'PROGRAMS',
+                                title: 'Build a practice over time.',
+                                description:
+                                    'Follow a short sequence instead of choosing from the whole library every day.',
                               ),
-                              if (nextDeeper != null) ...[
-                                const SizedBox(height: ReleafSpacing.sm),
-                                _CourseCard(
-                                  courseKey:
-                                      const Key('meditation-deeper-course'),
-                                  eyebrow: 'DEEPER PRACTICE',
-                                  title: 'Stay longer with one practice.',
-                                  icon: Icons.hourglass_bottom_rounded,
-                                  accent: const Color(0xFFC7A9D2),
-                                  completed: completedDeeper,
-                                  total: deeperPractice.length,
-                                  nextItem: nextDeeper,
-                                  isLocked:
-                                      nextDeeper.isPremium && !isPremium,
-                                  onPressed: () => open(nextDeeper),
-                                ),
-                              ],
+                              const SizedBox(height: ReleafSpacing.md),
+                              _ProgramRail(
+                                foundationsCompleted: completedFoundations,
+                                foundationsTotal: foundations.length,
+                                foundationsNext: nextFoundation,
+                                foundationsLocked:
+                                    nextFoundation.isPremium && !isPremium,
+                                onFoundations: () => open(nextFoundation),
+                                deeperCompleted: completedDeeper,
+                                deeperTotal: deeperPractice.length,
+                                deeperNext: nextDeeper,
+                                deeperLocked:
+                                    nextDeeper?.isPremium == true && !isPremium,
+                                onDeeper: nextDeeper == null
+                                    ? null
+                                    : () => open(nextDeeper),
+                              ),
                               if (recent.isNotEmpty) ...[
                                 const SizedBox(height: ReleafSpacing.section),
                                 const _EditorialHeading(
@@ -234,7 +226,7 @@ class MeditationScreen extends ConsumerWidget {
                                     'Browse a smaller collection instead of an endless feed.',
                               ),
                               const SizedBox(height: ReleafSpacing.md),
-                              _IntentionGrid(
+                              _IntentionRail(
                                 onTap: (category) {
                                   _showCategorySheet(
                                     context: context,
@@ -532,12 +524,89 @@ class _FeaturedPractice extends StatelessWidget {
   }
 }
 
-class _CourseCard extends StatelessWidget {
-  const _CourseCard({
-    required this.courseKey,
+class _ProgramRail extends StatelessWidget {
+  const _ProgramRail({
+    required this.foundationsCompleted,
+    required this.foundationsTotal,
+    required this.foundationsNext,
+    required this.foundationsLocked,
+    required this.onFoundations,
+    required this.deeperCompleted,
+    required this.deeperTotal,
+    required this.deeperNext,
+    required this.deeperLocked,
+    required this.onDeeper,
+  });
+
+  final int foundationsCompleted;
+  final int foundationsTotal;
+  final MeditationContent foundationsNext;
+  final bool foundationsLocked;
+  final VoidCallback onFoundations;
+  final int deeperCompleted;
+  final int deeperTotal;
+  final MeditationContent? deeperNext;
+  final bool deeperLocked;
+  final VoidCallback? onDeeper;
+
+  @override
+  Widget build(BuildContext context) {
+    final compact = MediaQuery.sizeOf(context).width < 360;
+
+    return SizedBox(
+      height: compact ? 238 : 222,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        children: [
+          SizedBox(
+            width: compact ? 270 : 310,
+            child: _ProgramCard(
+              cardKey: const Key('meditation-foundations-course'),
+              eyebrow: 'FOUNDATIONS',
+              title: 'Learn the basics',
+              description: 'Four guided sessions that build one skill at a time.',
+              artwork: ReleafMeditationArtworkVariant.editorial,
+              accent: const Color(0xFFC9BBCF),
+              completed: foundationsCompleted,
+              total: foundationsTotal,
+              nextItem: foundationsNext,
+              isLocked: foundationsLocked,
+              onPressed: onFoundations,
+            ),
+          ),
+          const SizedBox(width: ReleafSpacing.sm),
+          if (deeperNext != null)
+            SizedBox(
+              width: compact ? 270 : 310,
+              child: _ProgramCard(
+                cardKey: const Key('meditation-deeper-course'),
+                eyebrow: 'DEEPER PRACTICE',
+                title: 'Stay a little longer',
+                description:
+                    'Longer sessions for attention, uncertainty and whole-body awareness.',
+                artwork: ReleafMeditationArtworkVariant.body,
+                accent: const Color(0xFFD1B09E),
+                completed: deeperCompleted,
+                total: deeperTotal,
+                nextItem: deeperNext!,
+                isLocked: deeperLocked,
+                onPressed: onDeeper!,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ProgramCard extends StatelessWidget {
+  const _ProgramCard({
+    required this.cardKey,
     required this.eyebrow,
     required this.title,
-    required this.icon,
+    required this.description,
+    required this.artwork,
     required this.accent,
     required this.completed,
     required this.total,
@@ -546,10 +615,11 @@ class _CourseCard extends StatelessWidget {
     required this.onPressed,
   });
 
-  final Key courseKey;
+  final Key cardKey;
   final String eyebrow;
   final String title;
-  final IconData icon;
+  final String description;
+  final ReleafMeditationArtworkVariant artwork;
   final Color accent;
   final int completed;
   final int total;
@@ -561,27 +631,37 @@ class _CourseCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final progress = total == 0 ? 0.0 : completed / total;
 
-    return Container(
-      key: courseKey,
-      padding: const EdgeInsets.all(ReleafSpacing.lg),
-      decoration: BoxDecoration(
-        color: const Color(0xE7111614),
-        borderRadius: BorderRadius.circular(ReleafRadii.large),
-        border: Border.all(color: accent.withValues(alpha: 0.22)),
-        boxShadow: [
-          BoxShadow(
-            color: accent.withValues(alpha: 0.035),
-            blurRadius: 22,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+    return Material(
+      key: cardKey,
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(ReleafRadii.extraLarge),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onPressed,
+        child: Ink(
+          child: Stack(
+            fit: StackFit.expand,
             children: [
-              Expanded(
+              ReleafMeditationArtwork(
+                variant: artwork,
+                intensity: 0.90,
+              ),
+              const DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Color(0x18000000),
+                      Color(0x5C000000),
+                      Color(0xF00A0C0B),
+                    ],
+                    stops: [0, 0.50, 1],
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(ReleafSpacing.lg),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -589,94 +669,87 @@ class _CourseCard extends StatelessWidget {
                       eyebrow,
                       style: ReleafTypography.eyebrow.copyWith(
                         color: accent,
-                        fontSize: 10,
+                        fontSize: 9,
                         letterSpacing: 1.5,
                       ),
                     ),
-                    const SizedBox(height: 5),
+                    const Spacer(),
                     Text(
                       title,
-                      style: ReleafTypography.sectionTitle,
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: ReleafSpacing.md),
-              Text(
-                '$completed/$total',
-                style: ReleafTypography.cardTitle.copyWith(
-                  color: accent.withValues(alpha: 0.92),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: ReleafSpacing.md),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(ReleafRadii.pill),
-            child: LinearProgressIndicator(
-              minHeight: 6,
-              value: progress,
-              backgroundColor: const Color(0xFF24232A),
-              valueColor: AlwaysStoppedAnimation<Color>(accent),
-            ),
-          ),
-          const SizedBox(height: ReleafSpacing.md),
-          Row(
-            children: [
-              Container(
-                width: 42,
-                height: 42,
-                decoration: BoxDecoration(
-                  color: accent.withValues(alpha: 0.08),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: accent.withValues(alpha: 0.14),
-                  ),
-                ),
-                child: Icon(
-                  icon,
-                  color: accent,
-                  size: 20,
-                ),
-              ),
-              const SizedBox(width: ReleafSpacing.sm),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      completed >= total ? 'Course complete' : 'Up next',
-                      style: ReleafTypography.meta.copyWith(
-                        color: ReleafColors.textMuted,
-                        fontSize: 10,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      nextItem.title,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: ReleafTypography.cardTitle,
+                      style: ReleafTypography.sectionTitle.copyWith(
+                        fontSize: 20,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      description,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: ReleafTypography.meta.copyWith(
+                        color: ReleafColors.textPrimary.withValues(alpha: 0.72),
+                        height: 1.4,
+                      ),
+                    ),
+                    const SizedBox(height: ReleafSpacing.md),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ClipRRect(
+                            borderRadius:
+                                BorderRadius.circular(ReleafRadii.pill),
+                            child: LinearProgressIndicator(
+                              minHeight: 4,
+                              value: progress,
+                              backgroundColor:
+                                  Colors.white.withValues(alpha: 0.10),
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(accent),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: ReleafSpacing.sm),
+                        Text(
+                          '$completed/$total',
+                          style: ReleafTypography.meta.copyWith(
+                            color: accent,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: ReleafSpacing.sm),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            completed >= total
+                                ? 'Replay ${nextItem.title}'
+                                : 'Next · ${nextItem.title}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: ReleafTypography.meta.copyWith(
+                              color: ReleafColors.textSecondary,
+                            ),
+                          ),
+                        ),
+                        Icon(
+                          isLocked
+                              ? Icons.lock_outline_rounded
+                              : Icons.arrow_forward_rounded,
+                          size: 18,
+                          color:
+                              isLocked ? ReleafColors.premium : accent,
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
-              const SizedBox(width: ReleafSpacing.sm),
-              IconButton.filledTonal(
-                tooltip:
-                    isLocked ? 'Unlock next practice' : 'Open next practice',
-                onPressed: onPressed,
-                icon: Icon(
-                  isLocked
-                      ? Icons.lock_outline_rounded
-                      : completed >= total
-                          ? Icons.replay_rounded
-                          : Icons.arrow_forward_rounded,
-                ),
-              ),
             ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -972,8 +1045,8 @@ class _CategoryPill extends StatelessWidget {
   }
 }
 
-class _IntentionGrid extends StatelessWidget {
-  const _IntentionGrid({required this.onTap});
+class _IntentionRail extends StatelessWidget {
+  const _IntentionRail({required this.onTap});
 
   final ValueChanged<MeditationCategory> onTap;
 
@@ -987,35 +1060,32 @@ class _IntentionGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        const gap = ReleafSpacing.sm;
-        final singleColumn = constraints.maxWidth < 330;
-        final width = singleColumn
-            ? constraints.maxWidth
-            : (constraints.maxWidth - gap) / 2;
+    final compact = MediaQuery.sizeOf(context).width < 360;
 
-        return Wrap(
-          spacing: gap,
-          runSpacing: gap,
-          children: [
-            for (final category in _categories)
-              SizedBox(
-                width: width,
-                child: _IntentionCard(
-                  category: category,
-                  onTap: () => onTap(category),
-                ),
-              ),
-          ],
-        );
-      },
+    return SizedBox(
+      height: compact ? 152 : 164,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        itemCount: _categories.length,
+        separatorBuilder: (_, _) => const SizedBox(width: ReleafSpacing.sm),
+        itemBuilder: (context, index) {
+          final category = _categories[index];
+          return SizedBox(
+            width: compact ? 146 : 164,
+            child: _IntentionTile(
+              category: category,
+              onTap: () => onTap(category),
+            ),
+          );
+        },
+      ),
     );
   }
 }
 
-class _IntentionCard extends StatelessWidget {
-  const _IntentionCard({
+class _IntentionTile extends StatelessWidget {
+  const _IntentionTile({
     required this.category,
     required this.onTap,
   });
@@ -1027,59 +1097,57 @@ class _IntentionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: Colors.transparent,
-      borderRadius: BorderRadius.circular(ReleafRadii.medium),
+      borderRadius: BorderRadius.circular(ReleafRadii.large),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
         child: Ink(
-          height: 112,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(ReleafRadii.medium),
-            border: Border.all(
-              color: const Color(0xFF6F6974).withValues(alpha: 0.24),
-            ),
-          ),
           child: Stack(
             fit: StackFit.expand,
             children: [
               ReleafMeditationArtwork(
                 variant: _artworkFor(category),
-                intensity: 0.66,
+                intensity: 0.84,
               ),
               const DecoratedBox(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    begin: Alignment.centerRight,
-                    end: Alignment.centerLeft,
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
                     colors: [
-                      Color(0x1A000000),
-                      Color(0xD90A0D0C),
+                      Color(0x10000000),
+                      Color(0xC70A0C0B),
                     ],
+                    stops: [0.20, 1],
                   ),
                 ),
               ),
               Padding(
                 padding: const EdgeInsets.all(ReleafSpacing.md),
-                child: Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Icon(
                       _categoryIcon(category),
-                      color: const Color(0xFFD5CED7),
-                      size: 22,
+                      color: const Color(0xFFE0D8E2),
+                      size: 20,
                     ),
-                    const SizedBox(width: ReleafSpacing.sm),
-                    Expanded(
-                      child: Text(
-                        _categoryLabel(category),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: ReleafTypography.cardTitle,
+                    const Spacer(),
+                    Text(
+                      _categoryLabel(category),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: ReleafTypography.cardTitle.copyWith(
+                        fontSize: 15,
                       ),
                     ),
-                    const Icon(
-                      Icons.arrow_forward_ios_rounded,
-                      size: 14,
-                      color: ReleafColors.textSecondary,
+                    const SizedBox(height: 3),
+                    Text(
+                      'Explore',
+                      style: ReleafTypography.meta.copyWith(
+                        color: const Color(0xFFB8AFC2),
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ],
                 ),
