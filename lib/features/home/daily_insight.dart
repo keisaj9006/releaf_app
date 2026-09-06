@@ -243,6 +243,96 @@ class DailyInsightCatalog {
       sourceUrl:
           'https://www.cdc.gov/physical-activity-basics/health-benefits/adults.html',
     ),
+    DailyInsight(
+      id: 'movement-strength-two-days',
+      category: DailyInsightCategory.movement,
+      headline:
+          'Cardio is only part of the activity picture: adults are also advised to strengthen major muscle groups on 2 or more days a week.',
+      detail:
+          'WHO and CDC activity guidance includes muscle-strengthening alongside aerobic activity. Examples can include weights, resistance bands, body-weight exercises and some forms of yoga.',
+      evidenceLabel: 'WHO + CDC guideline',
+      evidenceNote:
+          'This is a population-level recommendation. Appropriate exercises and intensity depend on ability, experience and health conditions.',
+      sourcePublisher: 'World Health Organization',
+      sourceTitle: 'Physical activity',
+      sourceUrl:
+          'https://www.who.int/europe/news-room/fact-sheets/item/physical-activity',
+    ),
+    DailyInsight(
+      id: 'nutrition-fruit-veg-400',
+      category: DailyInsightCategory.nutrition,
+      headline:
+          'WHO recommends at least 400 g of fruit and vegetables a day for adults and children over 10 — roughly five portions.',
+      detail:
+          'The recommendation sits within a broader healthy-diet pattern that also includes legumes, nuts and whole grains. The total can come from a variety of fruits and vegetables rather than one specific food.',
+      evidenceLabel: 'WHO nutrition guidance',
+      evidenceNote:
+          'This is a general population recommendation, not an individualized diet plan. Medical conditions and dietary needs can change what is appropriate.',
+      sourcePublisher: 'World Health Organization',
+      sourceTitle: 'Healthy diet',
+      sourceUrl:
+          'https://www.who.int/en/news-room/fact-sheets/detail/healthy-diet',
+    ),
+    DailyInsight(
+      id: 'nutrition-free-sugars',
+      category: DailyInsightCategory.nutrition,
+      headline:
+          'WHO recommends keeping free sugars below 10% of daily energy intake, with further reduction potentially adding health benefits.',
+      detail:
+          'Free sugars include sugars added to foods and drinks plus sugars naturally present in honey, syrups and fruit juices. They are not the same thing as all naturally occurring sugars in whole foods.',
+      evidenceLabel: 'WHO guideline',
+      evidenceNote:
+          'The percentage is a population-level dietary recommendation. It is not a personalized calorie or carbohydrate target.',
+      sourcePublisher: 'World Health Organization',
+      sourceTitle: 'Healthy diet',
+      sourceUrl:
+          'https://www.who.int/en/news-room/fact-sheets/detail/healthy-diet',
+    ),
+    DailyInsight(
+      id: 'nutrition-hydration-guide',
+      category: DailyInsightCategory.nutrition,
+      headline:
+          'The UK Eatwell Guide suggests about 6–8 cups or glasses of fluid a day for most people — but needs rise with heat, illness and long periods of activity.',
+      detail:
+          'NHS guidance notes that water is a good default, but lower-fat milk and sugar-free drinks, including tea and coffee, can also contribute to fluid intake.',
+      evidenceLabel: 'NHS guidance',
+      evidenceNote:
+          'Six to eight cups is a general guide rather than a fixed requirement. Pregnancy, breastfeeding, environment, activity and illness can all change fluid needs.',
+      sourcePublisher: 'NHS',
+      sourceTitle: 'Water, drinks and hydration',
+      sourceUrl:
+          'https://www.nhs.uk/live-well/eat-well/food-guidelines-and-food-labels/water-drinks-nutrition/',
+    ),
+    DailyInsight(
+      id: 'sleep-caffeine-hours',
+      category: DailyInsightCategory.sleep,
+      headline:
+          'Caffeine can keep affecting the body for hours: NHS guidance notes that its effects may last up to around 7 hours.',
+      detail:
+          'Because caffeine is a stimulant, taking it later in the day can interfere with usual sleep rhythms for some people. Sensitivity varies considerably between individuals.',
+      evidenceLabel: 'NHS sleep guidance',
+      evidenceNote:
+          'This does not mean everyone needs the same caffeine cut-off time. Dose, metabolism, habit and individual sensitivity all matter.',
+      sourcePublisher: 'NHS',
+      sourceTitle: 'Self-help tips to fight tiredness',
+      sourceUrl:
+          'https://www.nhs.uk/live-well/sleep-and-tiredness/self-help-tips-to-fight-fatigue/',
+    ),
+    DailyInsight(
+      id: 'nutrition-salt-five-grams',
+      category: DailyInsightCategory.nutrition,
+      headline:
+          'WHO recommends keeping salt intake below 5 g a day for adults — about one teaspoon in total from all foods and added salt.',
+      detail:
+          'Most dietary salt can come from processed foods and condiments as well as salt added during cooking or at the table. WHO links lower sodium intake with lower blood pressure and cardiovascular risk.',
+      evidenceLabel: 'WHO guideline',
+      evidenceNote:
+          'This is a population recommendation. People with specific medical conditions may receive different individualized advice.',
+      sourcePublisher: 'World Health Organization',
+      sourceTitle: 'Healthy diet',
+      sourceUrl:
+          'https://www.who.int/health-topics/healthy-diet',
+    ),
   ];
 
   static DailyInsight forDate(DateTime date) {
