@@ -139,7 +139,293 @@ class FlutterMeditationVoiceDriver implements MeditationVoiceDriver {
   }
 
   List<String> _meditationSentences(String text) {
-    final matches = RegExp(r'[^.!?]+[.!?]+|[^.!?]+\$').allMatches(text);
+    final matches = RegExp(r'[^.!?]+[.!?]+|[^.!?]+;
+    return matches
+        .map((match) => match.group(0)?.trim() ?? '')
+        .where((sentence) => sentence.isNotEmpty)
+        .toList(growable: false);
+  }
+
+  Duration _pauseAfter(String sentence) {
+    if (sentence.endsWith('?') || sentence.endsWith('!')) {
+      return const Duration(milliseconds: 800);
+    }
+    return const Duration(milliseconds: 620);
+  }
+
+  @override
+  Future<void> speak(String text) async {
+    if (text.trim().isEmpty) return;
+
+    final generation = ++_speechGeneration;
+    await _tts.stop();
+    final sentences = _meditationSentences(text);
+
+    for (var index = 0; index < sentences.length; index++) {
+      if (generation != _speechGeneration) return;
+      await _tts.speak(sentences[index], focus: false);
+      if (generation != _speechGeneration) return;
+
+      if (index < sentences.length - 1) {
+        await Future<void>.delayed(_pauseAfter(sentences[index]));
+      }
+    }
+  }
+
+  @override
+  Future<void> setVolume(double volume) async {
+    await _tts.setVolume(volume.clamp(0.0, 1.0).toDouble());
+  }
+
+  @override
+  Future<void> stop() async {
+    _speechGeneration += 1;
+    await _tts.stop();
+  }
+
+  @override
+  Future<void> dispose() async {
+    _speechGeneration += 1;
+    await _tts.stop();
+  }
+}
+
+final meditationVoiceDriverProvider =
+    Provider.autoDispose<MeditationVoiceDriver>((ref) {
+  final driver = FlutterMeditationVoiceDriver();
+  ref.onDispose(() {
+    unawaited(driver.dispose());
+  });
+  return driver;
+});
+
+final meditationVoiceControllerProvider = StateNotifierProvider.autoDispose<
+    MeditationVoiceController, MeditationVoiceState>((ref) {
+  return MeditationVoiceController(
+    ref.watch(sharedPreferencesProvider),
+    ref.watch(meditationVoiceDriverProvider),
+  );
+});
+
+class MeditationVoiceController extends StateNotifier<MeditationVoiceState> {
+  MeditationVoiceController(
+    this._preferences,
+    this._driver,
+  ) : super(
+          MeditationVoiceState(
+            enabled: _preferences.getBool(_enabledKey) ?? true,
+            showCaptions: _preferences.getBool(_captionsKey) ?? false,
+            volume: (_preferences.getDouble(_volumeKey) ?? 0.92)
+                .clamp(0.0, 1.0)
+                .toDouble(),
+          ),
+        );
+
+  static const _enabledKey = 'meditation.voice.enabled';
+  static const _captionsKey = 'meditation.voice.captions';
+  static const _volumeKey = 'meditation.voice.volume';
+
+  final SharedPreferences _preferences;
+  final MeditationVoiceDriver _driver;
+
+  bool _configured = false;
+
+  Future<void> speakGuidance(String guidance) async {
+    if (!state.enabled || guidance.trim().isEmpty) return;
+
+    try {
+      if (!_configured) {
+        await _driver.configure(volume: state.volume);
+        _configured = true;
+      }
+      await _driver.speak(guidance);
+    } catch (_) {
+      // Voice guidance is additive. Platform TTS failure must never break
+      // meditation timing, ambience, navigation, or completion.
+    }
+  }
+
+  Future<void> stop() async {
+    try {
+      await _driver.stop();
+    } catch (_) {
+      // Keep the meditation usable if the platform voice engine fails.
+    }
+  }
+
+  Future<void> toggleEnabled() async {
+    final next = !state.enabled;
+    state = state.copyWith(enabled: next);
+    await _preferences.setBool(_enabledKey, next);
+
+    if (!next) {
+      await stop();
+    }
+  }
+
+  Future<void> toggleCaptions() async {
+    final next = !state.showCaptions;
+    state = state.copyWith(showCaptions: next);
+    await _preferences.setBool(_captionsKey, next);
+  }
+
+  Future<void> setVolume(double volume) async {
+    final safe = volume.clamp(0.0, 1.0).toDouble();
+    state = state.copyWith(volume: safe);
+    await _preferences.setDouble(_volumeKey, safe);
+
+    if (!_configured) return;
+
+    try {
+      await _driver.setVolume(safe);
+    } catch (_) {
+      // Persist the user's preference even if this device cannot update TTS.
+    }
+  }
+}
+).allMatches(text);
+    return matches
+        .map((match) => match.group(0)?.trim() ?? '')
+        .where((sentence) => sentence.isNotEmpty)
+        .toList(growable: false);
+  }
+
+  Duration _pauseAfter(String sentence) {
+    if (sentence.endsWith('?') || sentence.endsWith('!')) {
+      return const Duration(milliseconds: 800);
+    }
+    return const Duration(milliseconds: 620);
+  }
+
+  @override
+  Future<void> speak(String text) async {
+    if (text.trim().isEmpty) return;
+
+    final generation = ++_speechGeneration;
+    await _tts.stop();
+    final sentences = _meditationSentences(text);
+
+    for (var index = 0; index < sentences.length; index++) {
+      if (generation != _speechGeneration) return;
+      await _tts.speak(sentences[index], focus: false);
+      if (generation != _speechGeneration) return;
+
+      if (index < sentences.length - 1) {
+        await Future<void>.delayed(_pauseAfter(sentences[index]));
+      }
+    }
+  }
+
+  @override
+  Future<void> setVolume(double volume) async {
+    await _tts.setVolume(volume.clamp(0.0, 1.0).toDouble());
+  }
+
+  @override
+  Future<void> stop() async {
+    await _tts.stop();
+  }
+
+  @override
+  Future<void> dispose() async {
+    await _tts.stop();
+  }
+}
+
+final meditationVoiceDriverProvider =
+    Provider.autoDispose<MeditationVoiceDriver>((ref) {
+  final driver = FlutterMeditationVoiceDriver();
+  ref.onDispose(() {
+    unawaited(driver.dispose());
+  });
+  return driver;
+});
+
+final meditationVoiceControllerProvider = StateNotifierProvider.autoDispose<
+    MeditationVoiceController, MeditationVoiceState>((ref) {
+  return MeditationVoiceController(
+    ref.watch(sharedPreferencesProvider),
+    ref.watch(meditationVoiceDriverProvider),
+  );
+});
+
+class MeditationVoiceController extends StateNotifier<MeditationVoiceState> {
+  MeditationVoiceController(
+    this._preferences,
+    this._driver,
+  ) : super(
+          MeditationVoiceState(
+            enabled: _preferences.getBool(_enabledKey) ?? true,
+            showCaptions: _preferences.getBool(_captionsKey) ?? false,
+            volume: (_preferences.getDouble(_volumeKey) ?? 0.92)
+                .clamp(0.0, 1.0)
+                .toDouble(),
+          ),
+        );
+
+  static const _enabledKey = 'meditation.voice.enabled';
+  static const _captionsKey = 'meditation.voice.captions';
+  static const _volumeKey = 'meditation.voice.volume';
+
+  final SharedPreferences _preferences;
+  final MeditationVoiceDriver _driver;
+
+  bool _configured = false;
+
+  Future<void> speakGuidance(String guidance) async {
+    if (!state.enabled || guidance.trim().isEmpty) return;
+
+    try {
+      if (!_configured) {
+        await _driver.configure(volume: state.volume);
+        _configured = true;
+      }
+      await _driver.speak(guidance);
+    } catch (_) {
+      // Voice guidance is additive. Platform TTS failure must never break
+      // meditation timing, ambience, navigation, or completion.
+    }
+  }
+
+  Future<void> stop() async {
+    try {
+      await _driver.stop();
+    } catch (_) {
+      // Keep the meditation usable if the platform voice engine fails.
+    }
+  }
+
+  Future<void> toggleEnabled() async {
+    final next = !state.enabled;
+    state = state.copyWith(enabled: next);
+    await _preferences.setBool(_enabledKey, next);
+
+    if (!next) {
+      await stop();
+    }
+  }
+
+  Future<void> toggleCaptions() async {
+    final next = !state.showCaptions;
+    state = state.copyWith(showCaptions: next);
+    await _preferences.setBool(_captionsKey, next);
+  }
+
+  Future<void> setVolume(double volume) async {
+    final safe = volume.clamp(0.0, 1.0).toDouble();
+    state = state.copyWith(volume: safe);
+    await _preferences.setDouble(_volumeKey, safe);
+
+    if (!_configured) return;
+
+    try {
+      await _driver.setVolume(safe);
+    } catch (_) {
+      // Persist the user's preference even if this device cannot update TTS.
+    }
+  }
+}
+).allMatches(text);
     return matches
         .map((match) => match.group(0)?.trim() ?? '')
         .where((sentence) => sentence.isNotEmpty)
