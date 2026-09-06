@@ -27,14 +27,14 @@ class AudioplayersSoundPlaybackDriver implements SoundPlaybackDriver {
   final audio.AudioPlayer _player = audio.AudioPlayer();
 
   @override
-  Stream<Duration> get onDurationChanged => _driver.onDurationChanged;
+  Stream<Duration> get onDurationChanged => _player.onDurationChanged;
 
   @override
-  Stream<Duration> get onPositionChanged => _driver.onPositionChanged;
+  Stream<Duration> get onPositionChanged => _player.onPositionChanged;
 
   @override
   Stream<audio.PlayerState> get onPlayerStateChanged =>
-      _driver.onPlayerStateChanged;
+      _player.onPlayerStateChanged;
 
   @override
   Future<void> setReleaseMode(audio.ReleaseMode mode) =>
