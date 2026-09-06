@@ -239,7 +239,7 @@ class _MeditationPlayerScreenState
       ref.read(sessionManagerProvider.notifier).setPausedSession(
             title: item.title,
             subtitle:
-                'Meditation · \${_resumeTimeLabel(_remainingSeconds)} remaining',
+                'Meditation · ${_resumeTimeLabel(_remainingSeconds)} remaining',
             resumeRoute: AppRoutes.meditationSessionFor(item.id),
             extra: MeditationResumeState(
               remainingSeconds: _remainingSeconds,
@@ -331,7 +331,7 @@ class _MeditationPlayerScreenState
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Narration volume · \${(voice.volume * 100).round()}%',
+                              'Narration volume · ${(voice.volume * 100).round()}%',
                               style: ReleafTypography.meta.copyWith(
                                 color: ReleafColors.textSecondary,
                               ),
@@ -401,7 +401,7 @@ class _MeditationPlayerScreenState
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Background mix · \${(ambience.mix * 100).round()}%',
+                              'Background mix · ${(ambience.mix * 100).round()}%',
                               style: ReleafTypography.meta.copyWith(
                                 color: ReleafColors.textSecondary,
                               ),
@@ -1006,7 +1006,7 @@ class _MeditationPlaybackDock extends StatelessWidget {
               Text(
                 stepCount <= 1
                     ? 'Practice'
-                    : 'Part \${math.min(stepIndex + 1, stepCount)} of $stepCount',
+                    : 'Part ${math.min(stepIndex + 1, stepCount)} of $stepCount',
                 style: ReleafTypography.meta.copyWith(
                   color: ReleafColors.textMuted,
                   fontSize: 9,
@@ -1014,7 +1014,7 @@ class _MeditationPlaybackDock extends StatelessWidget {
               ),
               const Spacer(),
               Text(
-                '-\${_clockLabel(remainingSeconds)}',
+                '-${_clockLabel(remainingSeconds)}',
                 style: ReleafTypography.meta.copyWith(
                   color: ReleafColors.textMuted,
                   fontSize: 9,
@@ -1366,15 +1366,15 @@ String _clockLabel(int seconds) {
   final safe = math.max(0, seconds);
   final minutes = safe ~/ 60;
   final secs = safe % 60;
-  return '\${minutes.toString().padLeft(2, '0')}:\${secs.toString().padLeft(2, '0')}';
+  return '${minutes.toString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
 }
 
 String _resumeTimeLabel(int seconds) {
   final minutes = seconds ~/ 60;
   final remainder = seconds % 60;
-  if (minutes == 0) return '\${remainder}s';
-  if (remainder == 0) return '\${minutes}m';
-  return '\${minutes}m \${remainder}s';
+  if (minutes == 0) return '${remainder}s';
+  if (remainder == 0) return '${minutes}m';
+  return '${minutes}m ${remainder}s';
 }
 
 ReleafMeditationArtworkVariant _meditationArtworkFor(
