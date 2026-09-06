@@ -116,10 +116,10 @@ class _ReleafSessionLivingFormState extends State<ReleafSessionLivingForm>
           builder: (context, child) {
             final motion = _motionValue(_controller.value);
             final breathingScale = widget.breathing
-                ? 0.94 + (motion * 0.12)
+                ? 0.84 + (motion * 0.34)
                 : 0.955 + (motion * 0.075);
             final glowOpacity = widget.breathing
-                ? 0.15 + (motion * 0.18)
+                ? 0.10 + (motion * 0.30)
                 : 0.12 + (motion * 0.13);
             final driftX =
                 widget.breathing ? 0.0 : math.sin(_controller.value * math.pi * 2) * 5;
