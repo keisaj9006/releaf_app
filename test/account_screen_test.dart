@@ -45,6 +45,11 @@ class _FakeAccountAuthService implements AccountAuthService {
   Future<void> updateDisplayName(String displayName) async {}
 
   @override
+  Future<void> deleteAccount() async {
+    user = null;
+  }
+
+  @override
   Future<void> signOut() async {
     user = null;
   }
@@ -105,5 +110,7 @@ void main() {
     expect(find.text('member@example.com'), findsOneWidget);
     expect(find.byKey(const Key('account-edit-profile')), findsOneWidget);
     expect(find.byKey(const Key('account-sign-out')), findsOneWidget);
+    expect(find.byKey(const Key('account-delete')), findsOneWidget);
+    expect(find.byKey(const Key('account-privacy')), findsOneWidget);
   });
 }

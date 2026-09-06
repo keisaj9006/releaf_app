@@ -39,6 +39,7 @@ abstract class AccountAuthService {
   });
 
   Future<void> updateDisplayName(String displayName);
+  Future<void> deleteAccount();
   Future<void> signOut();
 }
 
@@ -123,6 +124,24 @@ class SupabaseAccountAuthService implements AccountAuthService {
         .from('profiles')
         .update({'display_name': cleanName})
         .eq('id', user.id);
+  }
+
+  @override
+  Future<void> deleteAccount() async {
+    final user = _client.auth.currentUser;
+    if (user == null) throw AuthException('You are not signed in.');
+
+    final response = await _client.functions.invoke('delete-account');
+    if (response.status < 200 || response.status >= 300) {
+      throw AuthException('Unable to delete your account right now.');
+    }
+
+    try {
+      await _client.auth.signOut();
+    } catch (_) {
+      // The server-side user is already deleted. A stale local session will
+      // be rejected by Supabase on the next auth refresh.
+    }
   }
 
   @override

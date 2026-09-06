@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/paywall/presentation/paywall_sheet.dart';
 import '../../../core/providers.dart';
+import '../../../routing/app_routes.dart';
 import '../../../theme/app_theme.dart';
 import '../../../theme/releaf_design_tokens.dart';
 import '../application/account_auth_service.dart';
@@ -108,6 +109,57 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
       await ref.read(accountAuthServiceProvider).signOut();
       await ref.read(revenueCatServiceProvider).clearUserIdentity();
       await ref.read(subscriptionControllerProvider.notifier).refresh();
+    } catch (error) {
+      if (mounted) setState(() => _errorMessage = _friendlyError(error));
+    } finally {
+      if (mounted) setState(() => _working = false);
+    }
+  }
+
+  Future<void> _deleteAccount() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: ReleafColors.surface,
+        title: const Text('Delete account?'),
+        content: const Text(
+          'This permanently deletes your Releaf account and profile from the account service. Local Brain and Reset progress stored on this device is not erased by this action.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Keep account'),
+          ),
+          FilledButton(
+            key: const Key('account-confirm-delete'),
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            style: FilledButton.styleFrom(
+              backgroundColor: Colors.redAccent,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Delete permanently'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    setState(() {
+      _working = true;
+      _errorMessage = null;
+      _statusMessage = null;
+    });
+
+    try {
+      await ref.read(accountAuthServiceProvider).deleteAccount();
+      await ref.read(revenueCatServiceProvider).clearUserIdentity();
+      await ref.read(subscriptionControllerProvider.notifier).refresh();
+      if (!mounted) return;
+      setState(() {
+        _statusMessage =
+            'Account deleted. Local on-device progress is still available.';
+      });
     } catch (error) {
       if (mounted) setState(() => _errorMessage = _friendlyError(error));
     } finally {
@@ -235,7 +287,15 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                                         working: _working,
                                         onEditName: () => _updateName(user),
                                         onSignOut: _signOut,
+                                        onDeleteAccount: _deleteAccount,
                                       ),
+                              ),
+                              const SizedBox(height: ReleafSpacing.md),
+                              OutlinedButton.icon(
+                                key: const Key('account-privacy'),
+                                onPressed: () => context.push(AppRoutes.privacy),
+                                icon: const Icon(Icons.privacy_tip_outlined),
+                                label: const Text('Privacy & data'),
                               ),
                               if (_statusMessage != null) ...[
                                 const SizedBox(height: ReleafSpacing.md),
@@ -596,12 +656,14 @@ class _SignedInCard extends StatelessWidget {
     required this.working,
     required this.onEditName,
     required this.onSignOut,
+    required this.onDeleteAccount,
   });
 
   final AccountUser user;
   final bool working;
   final VoidCallback onEditName;
   final VoidCallback onSignOut;
+  final VoidCallback onDeleteAccount;
 
   @override
   Widget build(BuildContext context) {
@@ -673,6 +735,16 @@ class _SignedInCard extends StatelessWidget {
             onPressed: working ? null : onSignOut,
             icon: const Icon(Icons.logout_rounded),
             label: const Text('Sign out'),
+          ),
+          const SizedBox(height: ReleafSpacing.xs),
+          TextButton.icon(
+            key: const Key('account-delete'),
+            onPressed: working ? null : onDeleteAccount,
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.redAccent,
+            ),
+            icon: const Icon(Icons.delete_outline_rounded),
+            label: const Text('Delete account'),
           ),
         ],
       ),
