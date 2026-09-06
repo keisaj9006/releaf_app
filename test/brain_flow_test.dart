@@ -64,6 +64,21 @@ void main() {
     expect(resolvedTypes['signal_scan'], SignalScanScreen);
   });
 
+  test('Every active Brain game participates in L1-L12 progression', () {
+    final activeIds = brainGames
+        .where((game) => game.enabled)
+        .map((game) => game.id)
+        .toSet();
+
+    expect(activeIds, hasLength(15));
+    expect(progressiveBrainGameIds, containsAll(activeIds));
+    expect(
+      progressiveBrainGameIds.difference(activeIds),
+      isEmpty,
+      reason: 'Progression should not contain stale or hidden Brain game IDs.',
+    );
+  });
+
   testWidgets('/brain renders the premium Brain hub with current games only', (
     WidgetTester tester,
   ) async {
