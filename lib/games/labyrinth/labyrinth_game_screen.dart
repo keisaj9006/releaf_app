@@ -95,8 +95,8 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen> {
             _motionCalibrationSum += raw;
             _motionCalibrationSamples++;
             if (_motionCalibrationSamples == _motionCalibrationSampleTarget) {
-              _motionBaseline =
-                  _motionCalibrationSum / _motionCalibrationSampleTarget;
+              _motionBaseline = _motionCalibrationSum /
+                  _motionCalibrationSampleTarget.toDouble();
               if (!_motionAvailable) {
                 setState(() => _motionAvailable = true);
               }
