@@ -10,6 +10,7 @@ class AppRoutes {
   static const dailyLoop = '/daily-loop';
   static const account = '/account';
   static const privacy = '/privacy';
+  static const passwordReset = '/account/reset-password';
 
   static const brainGame = '/brain/game/:gameId';
   static const brainResult = '/brain/result';
