@@ -778,7 +778,16 @@ class _MazeBoardPainter extends CustomPainter {
     );
     canvas.drawRRect(
       RRect.fromRectAndRadius(boardRect, boardRadius),
-      Paint()..color = const Color(0xFF0A1512),
+      Paint()
+        ..shader = const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFF0F1C17),
+            Color(0xFF09130F),
+            Color(0xFF07100D),
+          ],
+        ).createShader(boardRect),
     );
 
     final glowPaint = Paint()
@@ -797,6 +806,19 @@ class _MazeBoardPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round
       ..color = const Color(0xFF557C68);
 
+    final wallShadowPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = wallPaint.strokeWidth + 4
+      ..strokeCap = StrokeCap.round
+      ..color = const Color(0xFF020806).withValues(alpha: 0.68)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2.4);
+
+    final hedgeBodyPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = math.max(2.4, wallPaint.strokeWidth * 0.72).toDouble()
+      ..strokeCap = StrokeCap.round
+      ..color = const Color(0xFF426D59);
+
     final innerWallPaint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth =
@@ -805,7 +827,10 @@ class _MazeBoardPainter extends CustomPainter {
       ..color = const Color(0xFF9FC8B4).withValues(alpha: 0.35);
 
     void wall(Offset a, Offset b) {
+      const shadowOffset = Offset(0, 1.4);
+      canvas.drawLine(a + shadowOffset, b + shadowOffset, wallShadowPaint);
       canvas.drawLine(a, b, wallPaint);
+      canvas.drawLine(a, b, hedgeBodyPaint);
       canvas.drawLine(a, b, innerWallPaint);
     }
 
@@ -871,6 +896,21 @@ class _MazeBoardPainter extends CustomPainter {
         goal.dx - (goalLabel.width / 2),
         goal.dy - goalRadius - goalLabel.height - 5,
       ),
+    );
+
+    final start = Offset(
+      level.start.dx / level.columns * size.width,
+      level.start.dy / level.rows * size.height,
+    );
+    final startRadius =
+        math.min(cellWidth, cellHeight).toDouble() * 0.20;
+    canvas.drawCircle(
+      start,
+      startRadius * 1.45,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.5
+        ..color = const Color(0xFF76D5B8).withValues(alpha: 0.22),
     );
 
     final ball = Offset(
