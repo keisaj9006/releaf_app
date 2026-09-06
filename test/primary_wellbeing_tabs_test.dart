@@ -468,6 +468,45 @@ void main() {
     expect(find.text('Sleep'), findsOneWidget);
   });
 
+  testWidgets('Sound shortcuts round-trip through Meditation and Sleep', (
+    WidgetTester tester,
+  ) async {
+    await _pumpRoute(
+      tester,
+      location: AppRoutes.sound,
+      preferences: await _preferences(),
+    );
+
+    await tester.tap(find.byKey(const Key('sound-open-meditate')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.text('Meditate'), findsWidgets);
+    expect(find.byKey(const Key('meditation-back')), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('meditation-back')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.text('Sound'), findsWidgets);
+    expect(find.byKey(const Key('sound-open-sleep')), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('sound-open-sleep')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.text('Sleep'), findsWidgets);
+    expect(find.byKey(const Key('sleep-back')), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('sleep-back')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.text('Sound'), findsWidgets);
+    expect(find.byType(NavigationBar), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Meditate and Sleep stay overflow-free at 320px', (
     WidgetTester tester,
   ) async {
