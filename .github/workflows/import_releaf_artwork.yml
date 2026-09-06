@@ -1,0 +1,61 @@
+name: Import Releaf generated artwork
+
+on:
+  push:
+    branches:
+      - releaf-development
+    paths:
+      - .github/workflows/import_releaf_artwork.yml
+
+permissions:
+  contents: write
+
+jobs:
+  import-artwork:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout development branch
+        uses: actions/checkout@v4
+        with:
+          ref: releaf-development
+
+      - name: Download generated meditation artwork
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p assets/art/meditation
+
+          curl --fail --location --retry 3 \
+            'https://dnznrvs05pmza.cloudfront.net/gemini/gemini-3.1-flash-lite-image/images/7a2c641d-6782-479e-8812-f79a094a6aae/Premium_wellness_app_editorial_artwork__quiet_dawn_atmospher.jpg?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiOTFjZDNlNWRkNTIwNDI1MiIsImJ1Y2tldCI6InJ1bndheS10YXNrLWFydGlmYWN0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc4ODgxNTk2NX0.dQ1AZ0lCsiinZrbLCKjtPJFJ3oXY9AwE-_e5GIUjCvY' \
+            --output assets/art/meditation/editorial.jpg
+
+          curl --fail --location --retry 3 \
+            'https://dnznrvs05pmza.cloudfront.net/gemini/gemini-3.1-flash-lite-image/images/677bdb10-76a9-476a-ac5d-ccfdeb5fcde2/Premium_meditation_app_editorial_artwork_for_anxiety_relief_.jpg?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiMzk0YzkyYmQzNDBkMjAzOCIsImJ1Y2tldCI6InJ1bndheS10YXNrLWFydGlmYWN0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc4ODc3MjQxM30.7s6gl7LPgee4tT6ypk66ueFpT3zNxco7XvMsw57DLek' \
+            --output assets/art/meditation/anxiety.jpg
+
+          curl --fail --location --retry 3 \
+            'https://dnznrvs05pmza.cloudfront.net/gemini/gemini-3.1-flash-lite-image/images/3adc3c5a-ff19-4063-a2b2-a1d7ba3abaf3/Premium_meditation_editorial_artwork_for_focus_practice__a_s.jpg?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiNjA3ZjY0MjY0NDQ4MDZlMyIsImJ1Y2tldCI6InJ1bndheS10YXNrLWFydGlmYWN0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc4ODgyMzg0Nn0.MA0Hg8hvn4js2E-a_bb7EL9rdDkth2McLVjbvDUlkmQ' \
+            --output assets/art/meditation/focus.jpg
+
+          curl --fail --location --retry 3 \
+            'https://dnznrvs05pmza.cloudfront.net/gemini/gemini-3.1-flash-lite-image/images/8e8dc396-845d-4a94-b15e-2a754d6dc2fa/Premium_meditation_editorial_artwork_for_body_awareness__war.jpg?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiMWI2ZWZjY2UxZjIzZTFiOCIsImJ1Y2tldCI6InJ1bndheS10YXNrLWFydGlmYWN0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc4ODgzMTMxMH0.ejraFGQIKIQ3g1F95EG6RSHg5opTyL2odVPaFyqq9zc' \
+            --output assets/art/meditation/body.jpg
+
+          test -s assets/art/meditation/editorial.jpg
+          test -s assets/art/meditation/anxiety.jpg
+          test -s assets/art/meditation/focus.jpg
+          test -s assets/art/meditation/body.jpg
+
+      - name: Commit artwork to development
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "releaf-art-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add assets/art/meditation
+          if git diff --cached --quiet; then
+            echo "Artwork already imported."
+            exit 0
+          fi
+          git commit -m "asset: import generated Meditation artwork"
+          git push origin HEAD:releaf-development
