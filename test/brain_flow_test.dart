@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -11,6 +13,7 @@ import 'package:releaf_app/features/brain/presentation/brain_screen.dart';
 import 'package:releaf_app/features/brain/presentation/game_host_screen.dart';
 import 'package:releaf_app/features/brain/presentation/game_result_screen.dart';
 import 'package:releaf_app/features/progress/data/leaves_repository.dart';
+import 'package:releaf_app/games/math_race/math_puzzle_generator.dart';
 import 'package:releaf_app/games/math_race/math_race_screen.dart';
 import 'package:releaf_app/games/rule_shift/rule_shift_screen.dart';
 import 'package:releaf_app/games/sequence_echo/sequence_echo_screen.dart';
@@ -77,6 +80,41 @@ void main() {
       isEmpty,
       reason: 'Progression should not contain stale or hidden Brain game IDs.',
     );
+  });
+
+  test('Math Race generated answers always satisfy the displayed equation', () {
+    final generator = MathPuzzleGenerator(random: math.Random(42));
+
+    for (final level in <int>[1, 12, 22, 34]) {
+      for (var sample = 0; sample < 160; sample++) {
+        final puzzle = generator.generateForLevel(level: level);
+        final a =
+            puzzle.missing == MissingSlot.a ? puzzle.correctAnswer : puzzle.a;
+        final b =
+            puzzle.missing == MissingSlot.b ? puzzle.correctAnswer : puzzle.b;
+        final result = puzzle.missing == MissingSlot.res
+            ? puzzle.correctAnswer
+            : puzzle.res;
+
+        final valid = switch (puzzle.op) {
+          '+' => a + b == result,
+          '-' => a - b == result,
+          '×' => a * b == result,
+          '÷' => b != 0 && a % b == 0 && a ~/ b == result,
+          '^' => math.pow(a, b).toInt() == result,
+          '%' => (a * b) ~/ 100 == result,
+          _ => false,
+        };
+
+        expect(
+          valid,
+          isTrue,
+          reason:
+              'L$level: $a ${puzzle.op} $b must equal $result when ${puzzle.missing.name} is missing',
+        );
+        expect(puzzle.options, contains(puzzle.correctAnswer));
+      }
+    }
   });
 
   testWidgets('/brain renders the premium Brain hub with current games only', (
