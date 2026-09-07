@@ -829,10 +829,17 @@ void main() {
     await tester.pump();
 
     expect(find.byKey(const Key('n-back-continue')), findsOneWidget);
+    final continueButton = find.byKey(const Key('n-back-continue'));
+    await tester.tap(continueButton);
+    await tester.tap(continueButton);
+    await tester.pump(const Duration(milliseconds: 60));
+
+    // A duplicate touch must not skip the second reference item.
+    expect(find.byKey(const Key('n-back-continue')), findsOneWidget);
+
+    await tester.pump(const Duration(milliseconds: 80));
     await tester.tap(find.byKey(const Key('n-back-continue')));
-    await tester.pump();
-    await tester.tap(find.byKey(const Key('n-back-continue')));
-    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 140));
 
     expect(find.byKey(const Key('n-back-match')), findsOneWidget);
     expect(find.byKey(const Key('n-back-different')), findsOneWidget);
@@ -864,6 +871,42 @@ void main() {
     expect(find.text('9'), findsWidgets);
     expect(find.byKey(const Key('spatial-span-board')), findsOneWidget);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Spatial Span ignores a duplicate touch on a correct cell', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SpatialSpanScreen(
+          trainingLevel: 1,
+          onFinish: (_) {},
+        ),
+      ),
+    );
+    await tester.pump();
+
+    await tester.tap(find.byKey(const Key('spatial-span-start')));
+    await tester.pump(const Duration(milliseconds: 3600));
+
+    final random = math.Random(14754);
+    final firstCell = random.nextInt(16);
+    final firstTarget = find.byKey(Key('spatial-span-cell-$firstCell'));
+    await tester.ensureVisible(firstTarget);
+    await tester.tap(firstTarget);
+    await tester.tap(firstTarget);
+    await tester.pump(const Duration(milliseconds: 60));
+
+    expect(
+      find.text('1/4 correct. Keep going.'),
+      findsOneWidget,
+    );
+    expect(
+      find.text('Sequence broken. Reset your attention and try the next round.'),
+      findsNothing,
+    );
+
+    await tester.pump(const Duration(milliseconds: 100));
   });
 
   testWidgets('Mental Rotation scales grid with persistent level', (
@@ -919,6 +962,32 @@ void main() {
     expect(find.byKey(const Key('trail-switch-board')), findsOneWidget);
     expect(find.byKey(const Key('trail-switch-progress')), findsOneWidget);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Trail Switch ignores a duplicate tap on a completed target', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: TrailSwitchScreen(
+          trainingLevel: 1,
+          onFinish: (_) {},
+        ),
+      ),
+    );
+    await tester.pump();
+
+    final firstTarget = find.byKey(const Key('trail-switch-target-0'));
+    await tester.ensureVisible(firstTarget);
+    await tester.tap(firstTarget);
+    await tester.tap(firstTarget);
+    await tester.pump(const Duration(milliseconds: 60));
+
+    expect(find.text('Good. Next: A'), findsOneWidget);
+    expect(find.text('1/8'), findsOneWidget);
+    expect(find.text('Not yet. Next: A'), findsNothing);
+
+    await tester.pump(const Duration(milliseconds: 100));
   });
 
   testWidgets('Tower Plan scales discs and enforces legal moves', (
