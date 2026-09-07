@@ -886,7 +886,10 @@ void main() {
     );
     await tester.pump();
 
-    await tester.tap(find.byKey(const Key('spatial-span-start')));
+    final start = find.byKey(const Key('spatial-span-start'));
+    await tester.ensureVisible(start);
+    await tester.pump();
+    await tester.tap(start);
     await tester.pump(const Duration(milliseconds: 3600));
 
     final random = math.Random(14754);
