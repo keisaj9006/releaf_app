@@ -41,6 +41,8 @@ class _MeditationPlayerScreenState
   int _remainingSeconds = 0;
   bool _running = true;
   int _lastSpokenStepIndex = -1;
+  bool _allowPop = false;
+  bool _exiting = false;
 
   @override
   void initState() {
@@ -233,6 +235,8 @@ class _MeditationPlayerScreenState
   }
 
   Future<void> _exitMeditation() async {
+    if (_exiting) return;
+    _exiting = true;
     _timer?.cancel();
 
     final item =
@@ -259,7 +263,9 @@ class _MeditationPlayerScreenState
       ref.read(meditationVoiceControllerProvider.notifier).stop(),
     ]);
 
-    if (mounted) context.pop();
+    if (!mounted) return;
+    setState(() => _allowPop = true);
+    context.pop();
   }
 
   Future<void> _showControls(MeditationContent item) async {
@@ -484,11 +490,17 @@ class _MeditationPlayerScreenState
     final reducedMotion =
         MediaQuery.maybeOf(context)?.disableAnimations ?? false;
 
-    return Theme(
-      data: AppTheme.premiumDark(),
-      child: Scaffold(
-        backgroundColor: ReleafColors.background,
-        body: Stack(
+    return PopScope(
+      canPop: _allowPop,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop || _exiting) return;
+        unawaited(_exitMeditation());
+      },
+      child: Theme(
+        data: AppTheme.premiumDark(),
+        child: Scaffold(
+          backgroundColor: ReleafColors.background,
+          body: Stack(
           children: [
             Positioned.fill(
               child: _SlowMeditationBackdrop(
@@ -622,6 +634,7 @@ class _MeditationPlayerScreenState
             ),
           ],
         ),
+      ),
       ),
     );
   }
