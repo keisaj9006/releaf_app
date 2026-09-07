@@ -31,6 +31,7 @@ class _NBackScreenState extends State<NBackScreen> {
   int _correct = 0;
   int _mistakes = 0;
   bool _started = false;
+  bool _locked = false;
   bool _finished = false;
   String _feedback = 'Watch the first items, then compare each one with the item N steps back.';
 
@@ -99,61 +100,81 @@ class _NBackScreenState extends State<NBackScreen> {
       _index = 0;
       _correct = 0;
       _mistakes = 0;
+      _locked = false;
       _feedback =
           'Difficulty set to ${difficulty.label}. Watch the first items before answering.';
     });
   }
 
-  void _continueWarmup() {
-    if (_finished) return;
+  Future<void> _continueWarmup() async {
+    if (_finished || _locked) return;
     _started = true;
     if (_index >= _sequence.length - 1) {
       _complete();
       return;
     }
+
     setState(() {
+      _locked = true;
       _index++;
       _feedback = _index < _nBack
           ? 'Keep watching. You will answer after $_nBack reference items.'
           : 'Now compare this item with the one $_nBack step${_nBack == 1 ? '' : 's'} back.';
     });
+
+    await Future<void>.delayed(const Duration(milliseconds: 120));
+    if (mounted && !_finished) {
+      setState(() => _locked = false);
+    }
   }
 
-  void _answer(bool saysMatch) {
-    if (_finished || _index < _nBack) return;
+  Future<void> _answer(bool saysMatch) async {
+    if (_finished || _locked || _index < _nBack) return;
     _started = true;
 
     final actualMatch = _sequence[_index] == _sequence[_index - _nBack];
     final correct = saysMatch == actualMatch;
 
+    setState(() {
+      _locked = true;
+      if (correct) {
+        _correct++;
+      } else {
+        _mistakes++;
+      }
+      _feedback = correct
+          ? 'Correct.'
+          : actualMatch
+              ? 'That was a match.'
+              : 'That one was different.';
+    });
+
     if (correct) {
-      _correct++;
       HapticFeedback.selectionClick();
     } else {
-      _mistakes++;
       HapticFeedback.lightImpact();
     }
 
+    await Future<void>.delayed(const Duration(milliseconds: 180));
+    if (!mounted) return;
+
     if (_index >= _sequence.length - 1) {
-      setState(() {
-        _feedback = correct ? 'Correct.' : 'Not this time.';
-      });
+      _locked = false;
       _complete();
       return;
     }
 
     setState(() {
-      _feedback = correct
-          ? 'Correct. Keep updating the sequence.'
-          : actualMatch
-              ? 'That was a match. Update and continue.'
-              : 'That one was different. Update and continue.';
       _index++;
+      _locked = false;
+      _feedback =
+          'Compare this item with the one $_nBack step${_nBack == 1 ? '' : 's'} back.';
     });
   }
 
   void _complete() {
     if (_finished) return;
+    _locked = false;
     _finished = true;
     final answered = math.max(1, _correct + _mistakes).toInt();
     final accuracy = _correct / answered;
@@ -339,7 +360,7 @@ class _NBackScreenState extends State<NBackScreen> {
                             if (warmup)
                               FilledButton.icon(
                                 key: const Key('n-back-continue'),
-                                onPressed: _continueWarmup,
+                                onPressed: _locked ? null : _continueWarmup,
                                 icon: const Icon(Icons.arrow_forward_rounded),
                                 label: const Text('Continue'),
                                 style: FilledButton.styleFrom(
@@ -355,7 +376,8 @@ class _NBackScreenState extends State<NBackScreen> {
                                   Expanded(
                                     child: OutlinedButton(
                                       key: const Key('n-back-different'),
-                                      onPressed: () => _answer(false),
+                                      onPressed:
+                                          _locked ? null : () => _answer(false),
                                       style: OutlinedButton.styleFrom(
                                         padding: const EdgeInsets.symmetric(
                                           vertical: 15,
@@ -368,7 +390,8 @@ class _NBackScreenState extends State<NBackScreen> {
                                   Expanded(
                                     child: FilledButton(
                                       key: const Key('n-back-match'),
-                                      onPressed: () => _answer(true),
+                                      onPressed:
+                                          _locked ? null : () => _answer(true),
                                       style: FilledButton.styleFrom(
                                         backgroundColor: _accent,
                                         foregroundColor:
