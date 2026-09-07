@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:releaf_app/core/providers.dart';
+import 'package:releaf_app/core/session/session_manager.dart';
 import 'package:releaf_app/core/subscription/revenuecat_service.dart';
 import 'package:releaf_app/core/subscription/subscription_controller.dart';
 import 'package:releaf_app/core/subscription/subscription_state.dart';
@@ -704,6 +707,65 @@ void main() {
     await tester.tap(find.byKey(const Key('meditation-sound-toggle')));
     await tester.pump(const Duration(milliseconds: 300));
     expect(audioDriver.pauseCalls, greaterThanOrEqualTo(2));
+  });
+
+  testWidgets('System back cleanly exits meditation and preserves resume', (
+    WidgetTester tester,
+  ) async {
+    final preferences = await _preferences();
+    final audioDriver = _FakeMeditationAudioDriver();
+    final voiceDriver = _FakeMeditationVoiceDriver();
+    final router = createAppRouter(initialLocation: AppRoutes.meditate);
+    addTearDown(router.dispose);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(preferences),
+          meditationAudioDriverProvider.overrideWithValue(audioDriver),
+          meditationVoiceDriverProvider.overrideWithValue(voiceDriver),
+          subscriptionControllerProvider.overrideWith(
+            (ref) => _FixedSubscriptionController(isPremium: true),
+          ),
+        ],
+        child: MaterialApp.router(routerConfig: router),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    router
+        .push<void>(
+          AppRoutes.meditationSessionFor('mindfulness-basics-2'),
+        )
+        .ignore();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 1300));
+
+    expect(
+      find.byKey(const Key('meditation-ambient-visual')),
+      findsOneWidget,
+    );
+
+    final container = ProviderScope.containerOf(
+      tester.element(find.byKey(const Key('meditation-ambient-visual'))),
+    );
+
+    await tester.binding.handlePopRoute();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(find.byKey(const Key('meditation-back')), findsOneWidget);
+    expect(audioDriver.stopCalls, greaterThanOrEqualTo(1));
+    expect(voiceDriver.stopCalls, greaterThanOrEqualTo(1));
+
+    final paused = container.read(sessionManagerProvider);
+    expect(paused.hasActive, isTrue);
+    expect(
+      paused.resumeRoute,
+      AppRoutes.meditationSessionFor('mindfulness-basics-2'),
+    );
+    expect(paused.extra, isA<MeditationResumeState>());
   });
 
   testWidgets('Paused meditation resumes without auto-playing audio layers', (
