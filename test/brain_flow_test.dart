@@ -587,14 +587,18 @@ void main() {
 
     await tester.tap(find.byKey(const Key('brain-difficulty-easy')));
     await tester.pump();
+    await tester.ensureVisible(find.byKey(const Key('sequence-echo-start')));
+    await tester.pump();
     await tester.tap(find.byKey(const Key('sequence-echo-start')));
 
-    for (var i = 0; i < 8; i++) {
-      await tester.pump(const Duration(milliseconds: 400));
+    for (var i = 0; i < 10; i++) {
+      await tester.pump(const Duration(milliseconds: 650));
     }
 
     expect(find.text('Repeat the sequence.'), findsOneWidget);
 
+    await tester.ensureVisible(find.byKey(const Key('sequence-echo-cell-0')));
+    await tester.pump();
     await tester.tap(find.byKey(const Key('sequence-echo-cell-0')));
     await tester.pump(const Duration(milliseconds: 60));
 
