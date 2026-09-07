@@ -439,7 +439,7 @@ class _MeditationPlayerScreenState
                     ],
                     const SizedBox(height: ReleafSpacing.lg),
                     Text(
-                      'Releaf currently prioritises a female English system voice and a deliberately slow meditation pace. This remains a temporary narration layer; the production target is a dedicated recorded Releaf Guide so every device sounds identical.',
+                      'Voice guidance is designed to stay calm, spacious and unobtrusive. Voice, captions and ambience can be adjusted independently at any time.',
                       style: ReleafTypography.meta.copyWith(
                         color: ReleafColors.textMuted,
                         fontSize: 9.5,
