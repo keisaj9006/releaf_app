@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -459,6 +461,45 @@ void main() {
     await tester.tap(find.byTooltip('Exit reset'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 250));
+
+    final state = container.read(leavesNotifierProvider);
+    expect(state.reliefDone, isFalse);
+    expect(state.totalLeaves, 0);
+    expect(find.text('What do you need right now?'), findsOneWidget);
+  });
+
+  testWidgets('System back aborts Reset without awarding Relief', (
+    WidgetTester tester,
+  ) async {
+    final preferences = await _preferences();
+    final container = ProviderContainer(
+      overrides: [
+        sharedPreferencesProvider.overrideWithValue(preferences),
+        todayProvider.overrideWithValue('2026-09-04'),
+      ],
+    );
+    addTearDown(container.dispose);
+    final router = createAppRouter(initialLocation: AppRoutes.relief);
+    addTearDown(router.dispose);
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp.router(routerConfig: router),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
+
+    router.push<void>(AppRoutes.reliefSessionFor(freeSession.id)).ignore();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.text('01:00'), findsOneWidget);
+
+    await tester.binding.handlePopRoute();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
 
     final state = container.read(leavesNotifierProvider);
     expect(state.reliefDone, isFalse);
