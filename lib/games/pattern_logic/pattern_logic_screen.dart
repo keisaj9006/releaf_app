@@ -27,6 +27,7 @@ class _PatternLogicScreenState extends State<PatternLogicScreen> {
   int _round = 0;
   int _score = 0;
   bool? _lastCorrect;
+  bool _locked = false;
   bool _finished = false;
 
   int get _levelIndex => (widget.trainingLevel - 1).clamp(0, 11).toInt();
@@ -76,27 +77,43 @@ class _PatternLogicScreenState extends State<PatternLogicScreen> {
 
   _PatternPuzzle get _puzzle => _puzzles[_round.clamp(0, _puzzles.length - 1)];
 
-  void _answer(String answer) {
-    if (_finished) return;
+  Future<void> _answer(String answer) async {
+    if (_finished || _locked) return;
 
     final correct = answer == _puzzle.answer;
     HapticFeedback.selectionClick();
-    final nextRound = _round + 1;
 
     setState(() {
+      _locked = true;
       _lastCorrect = correct;
       if (correct) {
         _score += 100 * _multiplier;
       } else {
         _score = (_score - (10 * _multiplier)).clamp(0, 999999);
       }
-      _round = nextRound;
     });
 
+    // Keep feedback attached to the puzzle the user actually answered.
+    // The short lock also prevents a fast double tap from answering
+    // the next round with a stale button.
+    await Future<void>.delayed(const Duration(milliseconds: 260));
+    if (!mounted) return;
+
+    final nextRound = _round + 1;
     if (nextRound >= _puzzles.length) {
-      _finished = true;
+      setState(() {
+        _locked = false;
+        _finished = true;
+      });
       widget.onFinish?.call(_score);
+      return;
     }
+
+    setState(() {
+      _round = nextRound;
+      _lastCorrect = null;
+      _locked = false;
+    });
   }
 
   @override
@@ -191,13 +208,14 @@ class _PatternLogicScreenState extends State<PatternLogicScreen> {
                         BrainDifficultySelector(
                           value: _difficulty,
                           accent: _accent,
-                          enabled: _round == 0,
+                          enabled: _round == 0 && !_locked,
                           onChanged: (value) {
                             setState(() {
                               _difficulty = value;
                               _round = 0;
                               _score = 0;
                               _lastCorrect = null;
+                              _locked = false;
                               _finished = false;
                             });
                           },
@@ -317,7 +335,8 @@ class _PatternLogicScreenState extends State<PatternLogicScreen> {
                             final option = puzzle.options[index];
                             return OutlinedButton(
                               key: Key('pattern-logic-answer-$index'),
-                              onPressed: _finished ? null : () => _answer(option),
+                              onPressed:
+                                  _finished || _locked ? null : () => _answer(option),
                               style: OutlinedButton.styleFrom(
                                 foregroundColor: ReleafColors.textPrimary,
                                 backgroundColor:
