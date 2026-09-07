@@ -24,7 +24,9 @@ class MathPuzzle {
 }
 
 class MathPuzzleGenerator {
-  final Random _rng = Random();
+  MathPuzzleGenerator({Random? random}) : _rng = random ?? Random();
+
+  final Random _rng;
 
   /// Generuje zadanie na podstawie poziomu gry.
   /// Poziomy:
@@ -136,7 +138,7 @@ class MathPuzzleGenerator {
     switch (op) {
       case '+': return res - b;        // ? + b = res
       case '-': return res + b;        // ? - b = res
-      case '×': return res * b;        // ? × b = res
+      case '×': return res ~/ b;       // ? × b = res
       case '÷': return res * b;        // ? ÷ b = res
       case '^': return 0;              // nie używamy (tylko res)
       case '%': return 0;              // nie używamy (tylko res)
