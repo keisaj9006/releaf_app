@@ -141,11 +141,6 @@ GoRouter createAppRouter({String initialLocation = AppRoutes.home}) => GoRouter(
     ),
 
     GoRoute(
-      path: AppRoutes.sound,
-      pageBuilder: (context, state) => _fadePage(const SoundScreen()),
-    ),
-
-    GoRoute(
       path: AppRoutes.soundPlayer,
       pageBuilder: (context, state) {
         final trackId = state.pathParameters['trackId'] ?? '';
