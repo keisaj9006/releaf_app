@@ -122,7 +122,7 @@ class _SequenceEchoScreenState extends State<SequenceEchoScreen> {
       _pressedCorrect = correct;
     });
 
-    await Future<void>.delayed(const Duration(milliseconds: 150));
+    await Future<void>.delayed(const Duration(milliseconds: 220));
     if (!mounted) return;
 
     if (!correct) {
@@ -336,7 +336,12 @@ class _SequenceEchoScreenState extends State<SequenceEchoScreen> {
                                 return Semantics(
                                   button: true,
                                   enabled: _accepting,
-                                  label: 'Sequence cell ${index + 1}',
+                                  selected: pressed,
+                                  label: pressedCorrect
+                                      ? 'Sequence cell ${index + 1}, correct'
+                                      : pressedWrong
+                                          ? 'Sequence cell ${index + 1}, try again'
+                                          : 'Sequence cell ${index + 1}',
                                   child: Material(
                                     color: Colors.transparent,
                                     borderRadius: BorderRadius.circular(20),
@@ -346,6 +351,9 @@ class _SequenceEchoScreenState extends State<SequenceEchoScreen> {
                                           _accepting ? () => _tapCell(index) : null,
                                       borderRadius: BorderRadius.circular(20),
                                       child: AnimatedContainer(
+                                        key: Key(
+                                          'sequence-echo-cell-$index-${lit ? 'lit' : pressedCorrect ? 'correct' : pressedWrong ? 'wrong' : 'idle'}',
+                                        ),
                                         duration: const Duration(
                                           milliseconds: 120,
                                         ),
