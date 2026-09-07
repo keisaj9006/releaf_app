@@ -41,6 +41,7 @@ class _TrailSwitchScreenState extends State<TrailSwitchScreen> {
   int _nextOrder = 0;
   int _mistakes = 0;
   bool _started = false;
+  bool _tapLocked = false;
   bool _finished = false;
   String _feedback = 'Follow the sequence as quickly and accurately as you can.';
 
@@ -88,6 +89,7 @@ class _TrailSwitchScreenState extends State<TrailSwitchScreen> {
       _difficulty = difficulty;
       _nextOrder = 0;
       _mistakes = 0;
+      _tapLocked = false;
       _feedback = _instructionFor(difficulty);
       _resetBoard();
     });
@@ -152,27 +154,33 @@ class _TrailSwitchScreenState extends State<TrailSwitchScreen> {
     return result;
   }
 
-  void _tapNode(_TrailNode node) {
-    if (_finished) return;
+  Future<void> _tapNode(_TrailNode node) async {
+    if (_finished || _tapLocked) return;
     _started = true;
 
     if (node.order == _nextOrder) {
-      _nextOrder++;
       HapticFeedback.selectionClick();
+
+      setState(() {
+        _tapLocked = true;
+        _nextOrder++;
+        _feedback = _nextOrder >= _targets.length
+            ? 'Trail complete.'
+            : 'Good. Next: ${_targets[_nextOrder]}';
+      });
 
       if (_nextOrder >= _targets.length) {
         _finished = true;
+        _tapLocked = false;
         HapticFeedback.mediumImpact();
-        setState(() {
-          _feedback = 'Trail complete.';
-        });
         _completeSession();
         return;
       }
 
-      setState(() {
-        _feedback = 'Good. Next: ${_targets[_nextOrder]}';
-      });
+      await Future<void>.delayed(const Duration(milliseconds: 120));
+      if (mounted && !_finished) {
+        setState(() => _tapLocked = false);
+      }
       return;
     }
 
@@ -387,7 +395,7 @@ class _TrailSwitchScreenState extends State<TrailSwitchScreen> {
                                           key: Key(
                                             'trail-switch-${node.id}',
                                           ),
-                                          onTap: _finished
+                                          onTap: _finished || _tapLocked
                                               ? null
                                               : () => _tapNode(node),
                                           child: Ink(
