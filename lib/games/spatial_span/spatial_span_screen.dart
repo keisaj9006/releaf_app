@@ -33,6 +33,7 @@ class _SpatialSpanScreenState extends State<SpatialSpanScreen> {
   final List<int> _input = <int>[];
 
   int? _activeCell;
+  bool _tapLocked = false;
   int _round = 1;
   int _completedRounds = 0;
   int _correctTaps = 0;
@@ -137,6 +138,7 @@ class _SpatialSpanScreenState extends State<SpatialSpanScreen> {
       _sequence = sequence;
       _input.clear();
       _activeCell = null;
+      _tapLocked = false;
       _phase = _SpatialSpanPhase.showing;
       _feedback = 'Watch the spatial path.';
     });
@@ -161,7 +163,7 @@ class _SpatialSpanScreenState extends State<SpatialSpanScreen> {
   }
 
   void _tapCell(int index) {
-    if (_phase != _SpatialSpanPhase.input) return;
+    if (_phase != _SpatialSpanPhase.input || _tapLocked) return;
 
     final position = _input.length;
     if (position >= _sequence.length) return;
@@ -177,13 +179,17 @@ class _SpatialSpanScreenState extends State<SpatialSpanScreen> {
         _finishRound(success: true);
       } else {
         setState(() {
+          _tapLocked = true;
           _activeCell = index;
           _feedback =
               '${_input.length}/${_sequence.length} correct. Keep going.';
         });
         Future<void>.delayed(const Duration(milliseconds: 120), () {
           if (mounted && _phase == _SpatialSpanPhase.input) {
-            setState(() => _activeCell = null);
+            setState(() {
+              _tapLocked = false;
+              _activeCell = null;
+            });
           }
         });
       }
@@ -199,6 +205,7 @@ class _SpatialSpanScreenState extends State<SpatialSpanScreen> {
     _playbackToken++;
     setState(() {
       _activeCell = null;
+      _tapLocked = false;
       _phase = _SpatialSpanPhase.feedback;
       _feedback = success
           ? 'Span complete. The next round is slightly longer.'
@@ -223,6 +230,7 @@ class _SpatialSpanScreenState extends State<SpatialSpanScreen> {
       _input.clear();
       _sequence = const [];
       _activeCell = null;
+      _tapLocked = false;
       _phase = _SpatialSpanPhase.ready;
       _feedback =
           'Round $_round is ready. The span increases as the session continues.';
@@ -429,7 +437,7 @@ class _SpatialSpanScreenState extends State<SpatialSpanScreen> {
                                           key: Key(
                                             'spatial-span-cell-$index',
                                           ),
-                                          onTap: input
+                                          onTap: input && !_tapLocked
                                               ? () => _tapCell(index)
                                               : null,
                                           child: AnimatedContainer(
