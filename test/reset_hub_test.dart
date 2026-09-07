@@ -38,6 +38,18 @@ Future<void> _moveRailForward(WidgetTester tester, Key railKey) async {
 }
 
 void main() {
+  test('Emergency Calm stays free and locally defined', () {
+    const catalog = ResetCatalog();
+    final emergency = catalog.getById(ResetCatalog.emergencySessionId);
+
+    expect(emergency, isNotNull);
+    expect(emergency!.accessTier, ResetAccessTier.free);
+    expect(emergency.isEmergency, isTrue);
+    expect(emergency.instructions, isNotEmpty);
+    expect(emergency.program, isNotNull);
+    expect(emergency.program!.steps, isNotEmpty);
+  });
+
   testWidgets('Reset hub renders the current premium product hierarchy', (
     WidgetTester tester,
   ) async {
