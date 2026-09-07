@@ -27,6 +27,8 @@ class _SignalScanScreenState extends State<SignalScanScreen> {
   int _round = 0;
   int _score = 0;
   int? _wrongIndex;
+  bool _targetFound = false;
+  bool _locked = false;
   bool _finished = false;
 
   int get _levelIndex => (widget.trainingLevel - 1).clamp(0, 11).toInt();
@@ -97,29 +99,46 @@ class _SignalScanScreenState extends State<SignalScanScreen> {
     return distractors[(index * 3 + _round) % distractors.length];
   }
 
-  void _tap(int index) {
-    if (_finished) return;
+  Future<void> _tap(int index) async {
+    if (_finished || _locked) return;
     HapticFeedback.selectionClick();
 
     if (index != _targetIndex) {
       setState(() {
+        _targetFound = false;
         _wrongIndex = index;
         _score = (_score - (10 * _multiplier)).clamp(0, 999999);
       });
       return;
     }
 
-    final nextRound = _round + 1;
     setState(() {
+      _locked = true;
+      _targetFound = true;
       _wrongIndex = null;
       _score += 100 * _multiplier;
-      _round = nextRound;
     });
 
+    // Keep the successful target visible briefly before the next grid is
+    // generated and ignore duplicate taps during that transition.
+    await Future<void>.delayed(const Duration(milliseconds: 160));
+    if (!mounted) return;
+
+    final nextRound = _round + 1;
     if (nextRound >= _totalRounds) {
-      _finished = true;
+      setState(() {
+        _locked = false;
+        _finished = true;
+      });
       widget.onFinish?.call(_score);
+      return;
     }
+
+    setState(() {
+      _round = nextRound;
+      _targetFound = false;
+      _locked = false;
+    });
   }
 
   @override
@@ -221,6 +240,8 @@ class _SignalScanScreenState extends State<SignalScanScreen> {
                               _round = 0;
                               _score = 0;
                               _wrongIndex = null;
+                              _targetFound = false;
+                              _locked = false;
                               _finished = false;
                             });
                           },
@@ -311,6 +332,7 @@ class _SignalScanScreenState extends State<SignalScanScreen> {
                               ),
                               itemBuilder: (context, index) {
                                 final wrong = _wrongIndex == index;
+                                final found = _targetFound && index == _targetIndex;
                                 return Semantics(
                                   button: true,
                                   label: 'Scan item ${index + 1}',
@@ -319,22 +341,27 @@ class _SignalScanScreenState extends State<SignalScanScreen> {
                                     borderRadius: BorderRadius.circular(12),
                                     child: InkWell(
                                       key: Key('signal-scan-cell-$index'),
-                                      onTap: _finished ? null : () => _tap(index),
+                                      onTap:
+                                          _finished || _locked ? null : () => _tap(index),
                                       borderRadius: BorderRadius.circular(12),
                                       child: AnimatedContainer(
                                         duration: ReleafMotion.quick,
                                         alignment: Alignment.center,
                                         decoration: BoxDecoration(
-                                          color: wrong
-                                              ? const Color(0xFFE1A184)
-                                                  .withValues(alpha: 0.14)
-                                              : const Color(0xFF132022),
+                                          color: found
+                                              ? _accent.withValues(alpha: 0.18)
+                                              : wrong
+                                                  ? const Color(0xFFE1A184)
+                                                      .withValues(alpha: 0.14)
+                                                  : const Color(0xFF132022),
                                           borderRadius:
                                               BorderRadius.circular(12),
                                           border: Border.all(
-                                            color: wrong
-                                                ? const Color(0xFFE1A184)
-                                                : _accent.withValues(alpha: 0.12),
+                                            color: found
+                                                ? _accent
+                                                : wrong
+                                                    ? const Color(0xFFE1A184)
+                                                    : _accent.withValues(alpha: 0.12),
                                           ),
                                         ),
                                         child: FittedBox(
@@ -343,9 +370,11 @@ class _SignalScanScreenState extends State<SignalScanScreen> {
                                             _symbolFor(index),
                                             style: TextStyle(
                                               fontSize: _symbolSize,
-                                              color: wrong
-                                                  ? const Color(0xFFE1A184)
-                                                  : const Color(0xFFD8E9E6),
+                                              color: found
+                                                  ? _accent
+                                                  : wrong
+                                                      ? const Color(0xFFE1A184)
+                                                      : const Color(0xFFD8E9E6),
                                               fontWeight: FontWeight.w600,
                                             ),
                                           ),
@@ -360,14 +389,18 @@ class _SignalScanScreenState extends State<SignalScanScreen> {
                         ),
                         const SizedBox(height: ReleafSpacing.md),
                         Text(
-                          _wrongIndex == null
-                              ? 'Find the single target as efficiently as you can.'
-                              : 'That was a distractor. Keep scanning.',
+                          _targetFound
+                              ? 'Target found.'
+                              : _wrongIndex == null
+                                  ? 'Find the single target as efficiently as you can.'
+                                  : 'That was a distractor. Keep scanning.',
                           textAlign: TextAlign.center,
                           style: ReleafTypography.body.copyWith(
-                            color: _wrongIndex == null
-                                ? ReleafColors.textSecondary
-                                : const Color(0xFFE1A184),
+                            color: _targetFound
+                                ? _accent
+                                : _wrongIndex == null
+                                    ? ReleafColors.textSecondary
+                                    : const Color(0xFFE1A184),
                           ),
                         ),
                         const SizedBox(height: ReleafSpacing.sm),
