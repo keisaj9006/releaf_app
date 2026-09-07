@@ -649,6 +649,81 @@ void main() {
     expect(find.text('Good. Keep going.'), findsOneWidget);
   });
 
+  testWidgets('Pattern Logic keeps feedback on the answered puzzle', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: PatternLogicScreen(onFinish: (_) {}),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('1/7'), findsOneWidget);
+    final firstAnswer = find.byKey(const Key('pattern-logic-answer-0'));
+    await tester.tap(firstAnswer);
+    await tester.tap(firstAnswer);
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.text('Pattern found'), findsOneWidget);
+    expect(find.text('1/7'), findsOneWidget);
+
+    await tester.pump(const Duration(milliseconds: 220));
+    expect(find.text('2/7'), findsOneWidget);
+  });
+
+  testWidgets('Color Conflict blocks stale double answers between rounds', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ColorConflictScreen(onFinish: (_) {}),
+      ),
+    );
+    await tester.pump();
+
+    await tester.ensureVisible(find.byKey(const Key('color-conflict-start')));
+    await tester.tap(find.byKey(const Key('color-conflict-start')));
+    await tester.pump();
+
+    expect(find.text('1/11'), findsOneWidget);
+    final correctInk = find.byKey(const Key('color-conflict-answer-2'));
+    await tester.ensureVisible(correctInk);
+    await tester.tap(correctInk);
+    await tester.tap(correctInk);
+    await tester.pump(const Duration(milliseconds: 80));
+
+    expect(find.text('Correct'), findsOneWidget);
+    expect(find.text('1/11'), findsOneWidget);
+
+    await tester.pump(const Duration(milliseconds: 140));
+    expect(find.text('2/11'), findsOneWidget);
+  });
+
+  testWidgets('Signal Scan acknowledges a target before replacing the grid', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SignalScanScreen(onFinish: (_) {}),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('1/8'), findsOneWidget);
+    final firstTarget = find.byKey(const Key('signal-scan-cell-5'));
+    await tester.ensureVisible(firstTarget);
+    await tester.tap(firstTarget);
+    await tester.tap(firstTarget);
+    await tester.pump(const Duration(milliseconds: 80));
+
+    expect(find.text('Target found.'), findsOneWidget);
+    expect(find.text('1/8'), findsOneWidget);
+
+    await tester.pump(const Duration(milliseconds: 120));
+    expect(find.text('2/8'), findsOneWidget);
+  });
+
   testWidgets('New Brain difficulty levels materially change the task', (
     WidgetTester tester,
   ) async {
