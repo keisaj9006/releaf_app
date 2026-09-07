@@ -575,6 +575,38 @@ void main() {
     );
   });
 
+  testWidgets('Sequence Echo visibly acknowledges the tapped cell', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SequenceEchoScreen(onFinish: (_) {}),
+      ),
+    );
+    await tester.pump();
+
+    await tester.tap(find.byKey(const Key('brain-difficulty-easy')));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('sequence-echo-start')));
+
+    for (var i = 0; i < 8; i++) {
+      await tester.pump(const Duration(milliseconds: 400));
+    }
+
+    expect(find.text('Repeat the sequence.'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('sequence-echo-cell-0')));
+    await tester.pump(const Duration(milliseconds: 60));
+
+    expect(
+      find.byKey(const Key('sequence-echo-cell-0-correct')),
+      findsOneWidget,
+    );
+
+    await tester.pump(const Duration(milliseconds: 240));
+    expect(find.text('Good. Keep going.'), findsOneWidget);
+  });
+
   testWidgets('New Brain difficulty levels materially change the task', (
     WidgetTester tester,
   ) async {
