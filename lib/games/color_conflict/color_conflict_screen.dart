@@ -39,6 +39,7 @@ class _ColorConflictScreenState extends State<ColorConflictScreen> {
   int _timeLeft = 0;
   bool _started = false;
   bool _finished = false;
+  bool _locked = false;
   bool? _lastCorrect;
 
   int get _levelIndex => (widget.trainingLevel - 1).clamp(0, 11).toInt();
@@ -102,6 +103,7 @@ class _ColorConflictScreenState extends State<ColorConflictScreen> {
       _timeLeft = _sessionSeconds;
       _started = true;
       _finished = false;
+      _locked = false;
       _lastCorrect = null;
     });
 
@@ -116,24 +118,40 @@ class _ColorConflictScreenState extends State<ColorConflictScreen> {
     });
   }
 
-  void _answer(int index) {
-    if (!_started || _finished) return;
+  Future<void> _answer(int index) async {
+    if (!_started || _finished || _locked) return;
 
     final correct = index == _trial.answerIndex;
     HapticFeedback.selectionClick();
 
-    final nextRound = _round + 1;
     setState(() {
+      _locked = true;
       _lastCorrect = correct;
       if (correct) {
         _score += 100 * _multiplier;
       }
-      _round = nextRound;
     });
 
+    // Let the user see feedback on the word/ink pair they answered before
+    // replacing it. This also blocks accidental double submissions.
+    await Future<void>.delayed(const Duration(milliseconds: 180));
+    if (!mounted || _finished) return;
+
+    final nextRound = _round + 1;
     if (nextRound >= _totalRounds) {
+      setState(() {
+        _round = nextRound;
+        _locked = false;
+      });
       _finish();
+      return;
     }
+
+    setState(() {
+      _round = nextRound;
+      _lastCorrect = null;
+      _locked = false;
+    });
   }
 
   void _finish() {
@@ -350,7 +368,7 @@ class _ColorConflictScreenState extends State<ColorConflictScreen> {
                               final item = _colors[index];
                               return OutlinedButton(
                                 key: Key('color-conflict-answer-$index'),
-                                onPressed: () => _answer(index),
+                                onPressed: _locked ? null : () => _answer(index),
                                 style: OutlinedButton.styleFrom(
                                   foregroundColor: item.color,
                                   backgroundColor:
