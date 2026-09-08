@@ -89,6 +89,21 @@ class _ResetSessionPreviewSheetState
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              SizedBox(
+                height: 54,
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: ReleafSpacing.md),
+                    child: ReleafRoundIconButton(
+                      key: const Key('reset-preview-close'),
+                      icon: Icons.close_rounded,
+                      tooltip: 'Close session preview',
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                  ),
+                ),
+              ),
               Expanded(
                 child: SingleChildScrollView(
                   key: const Key('reset-preview-scroll'),
@@ -99,7 +114,6 @@ class _ResetSessionPreviewSheetState
                       _PreviewArtworkHeader(
                         session: session,
                         compact: compact,
-                        onClose: () => Navigator.of(context).pop(),
                       ),
                       Padding(
                         padding: EdgeInsets.fromLTRB(
@@ -420,12 +434,10 @@ class _PreviewArtworkHeader extends StatelessWidget {
   const _PreviewArtworkHeader({
     required this.session,
     required this.compact,
-    required this.onClose,
   });
 
   final ResetContent session;
   final bool compact;
-  final VoidCallback onClose;
 
   @override
   Widget build(BuildContext context) {
@@ -462,16 +474,6 @@ class _PreviewArtworkHeader extends StatelessWidget {
                   borderRadius: BorderRadius.circular(ReleafRadii.pill),
                 ),
               ),
-            ),
-          ),
-          Positioned(
-            top: ReleafSpacing.md,
-            right: ReleafSpacing.md,
-            child: ReleafRoundIconButton(
-              key: const Key('reset-preview-close'),
-              icon: Icons.close_rounded,
-              tooltip: 'Close session preview',
-              onPressed: onClose,
             ),
           ),
           Positioned(
