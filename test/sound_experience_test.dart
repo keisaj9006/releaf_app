@@ -9,6 +9,8 @@ import 'package:releaf_app/features/sound/application/sound_player_controller.da
 import 'package:releaf_app/features/sound/data/sound_catalog.dart';
 import 'package:releaf_app/features/sound/presentation/sound_player_gate.dart';
 import 'package:releaf_app/features/sound/presentation/sound_screen.dart';
+import 'package:releaf_app/routing/app_router.dart';
+import 'package:releaf_app/routing/app_routes.dart';
 
 class _FakeSoundPlaybackDriver implements SoundPlaybackDriver {
   @override
@@ -144,6 +146,42 @@ void main() {
     expect(find.text('White Noise'), findsOneWidget);
     expect(find.text('Pink Noise'), findsOneWidget);
     expect(find.text('Deep Drift'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Direct Sound player close falls back to Sound hub', (
+    WidgetTester tester,
+  ) async {
+    final preferences = await _preferences();
+    final router = createAppRouter(
+      initialLocation: AppRoutes.soundPlayerFor('brown-noise'),
+    );
+    addTearDown(router.dispose);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(preferences),
+          soundPlayerControllerProvider.overrideWith(
+            (ref) => SoundPlayerController(
+              const SoundCatalog(),
+              preferences,
+              driver: _FakeSoundPlaybackDriver(),
+            ),
+          ),
+        ],
+        child: MaterialApp.router(routerConfig: router),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.byTooltip('Close player'), findsOneWidget);
+    await tester.tap(find.byTooltip('Close player'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.byKey(const Key('sound-featured-card')), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
