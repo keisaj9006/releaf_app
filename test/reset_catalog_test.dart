@@ -22,6 +22,12 @@ void main() {
     'sound-anchor',
     'press-release',
     'make-room',
+    'cool-water-reset',
+    'pushups-activation',
+    'shoulder-drop-reset',
+    'eye-focus-reset',
+    'shake-it-out',
+    'micro-walk-reset',
     'one-small-next-step',
     'sleep-faster-routine',
     'morning-reset-ritual',
@@ -215,6 +221,31 @@ void main() {
     expect(sleep.program?.breathPattern?.holdAfterExhaleSeconds, 0);
     expect(sleep.methodLabel, contains('4–7–8'));
     expect(sleep.safetyNote, isNotNull);
+  });
+
+  test('No-Breath includes safe movement and sensory alternatives', () {
+    const ids = <String>{
+      'cool-water-reset',
+      'pushups-activation',
+      'shoulder-drop-reset',
+      'eye-focus-reset',
+      'shake-it-out',
+      'micro-walk-reset',
+    };
+
+    for (final id in ids) {
+      final session = catalog.getById(id)!;
+      expect(session.level, ResetLevel.quick, reason: id);
+      expect(session.quickCategory, QuickResetCategory.noBreath, reason: id);
+      expect(session.program?.type, ResetProgramType.guidedSteps, reason: id);
+      expect(session.summary, isNotNull, reason: id);
+      expect(session.safetyNote, isNotNull, reason: id);
+      expect(
+        session.instructions.join(' ').toLowerCase(),
+        isNot(contains('breathe in')),
+        reason: id,
+      );
+    }
   });
 
   test('Life Upgrade category contains the planned practical micro-routines', () {
