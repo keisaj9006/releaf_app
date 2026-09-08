@@ -561,6 +561,466 @@ class ResetCatalog {
       ),
     ),
     ResetContent(
+      id: 'sleep-faster-routine',
+      title: 'Sleep Faster Routine',
+      durationSeconds: 180,
+      level: ResetLevel.quick,
+      quickCategory: QuickResetCategory.lifeUpgrade,
+      modality: ResetModality.guidedPractice,
+      accessTier: ResetAccessTier.free,
+      summary:
+          'A short pre-sleep routine for reducing unfinished-task friction and lowering stimulation before bed.',
+      methodLabel: 'Pre-sleep downshift',
+      bestFor:
+          'The last few minutes before bed when your mind is still carrying tasks, screens or tomorrow.',
+      whyItMayHelp:
+          'The routine combines a simple mental off-load with lower stimulation and one repeatable bedtime cue. It is designed to reduce friction, not guarantee immediate sleep.',
+      safetyNote:
+          'If you are not sleepy, do not force sleep. Keep the routine gentle and return to it as a consistent cue over time.',
+      visualType: ResetVisualType.acceptanceSpace,
+      instructions: [
+        'Put tomorrow somewhere outside your head.',
+        'Reduce one source of stimulation.',
+        'Choose one simple cue that means the day is over.',
+      ],
+      program: ResetSessionProgram.guided(
+        steps: [
+          ResetSessionStep(
+            label: 'Arrive',
+            guidance:
+                'Stop adding new tasks. This short routine is only about closing the day.',
+            durationSeconds: 30,
+          ),
+          ResetSessionStep(
+            label: 'Off-load',
+            guidance:
+                'Name or write the one thing your mind is trying hardest to remember for tomorrow.',
+            durationSeconds: 45,
+          ),
+          ResetSessionStep(
+            label: 'Lower input',
+            guidance:
+                'Dim one source of stimulation: screen brightness, overhead light, sound, or active scrolling.',
+            durationSeconds: 45,
+          ),
+          ResetSessionStep(
+            label: 'Cue',
+            guidance:
+                'Choose one repeatable cue for sleep: plug in the phone, lower the light, or get into the same resting position.',
+            durationSeconds: 30,
+          ),
+          ResetSessionStep(
+            label: 'Finish',
+            guidance:
+                'Let unfinished things stay unfinished. Your next task is only to rest.',
+            durationSeconds: 30,
+          ),
+        ],
+      ),
+    ),
+    ResetContent(
+      id: 'morning-reset-ritual',
+      title: 'Morning Reset Ritual',
+      durationSeconds: 120,
+      level: ResetLevel.quick,
+      quickCategory: QuickResetCategory.lifeUpgrade,
+      modality: ResetModality.guidedPractice,
+      accessTier: ResetAccessTier.free,
+      summary:
+          'A two-minute morning sequence for orienting, moving and choosing the first useful priority.',
+      methodLabel: 'Morning orientation',
+      bestFor:
+          'Starting the day without immediately handing attention to notifications or a long task list.',
+      whyItMayHelp:
+          'The routine creates a small pause between waking and reacting, then turns the morning into one visible next action.',
+      safetyNote:
+          'Use a seated version if standing or moving is uncomfortable.',
+      visualType: ResetVisualType.nextStep,
+      instructions: [
+        'Orient to where you are.',
+        'Add a small amount of movement.',
+        'Choose one first priority.',
+      ],
+      program: ResetSessionProgram.guided(
+        steps: [
+          ResetSessionStep(
+            label: 'Orient',
+            guidance:
+                'Look around the room before looking at the task list. Notice where you are and what time of day it is.',
+            durationSeconds: 20,
+          ),
+          ResetSessionStep(
+            label: 'Posture',
+            guidance:
+                'Come a little more upright and let your feet or body feel supported.',
+            durationSeconds: 20,
+          ),
+          ResetSessionStep(
+            label: 'Move',
+            guidance:
+                'Add a small comfortable movement: stand, stretch, roll the shoulders, or walk a few steps.',
+            durationSeconds: 30,
+          ),
+          ResetSessionStep(
+            label: 'Choose',
+            guidance:
+                'Pick one priority that would make the next part of the morning easier.',
+            durationSeconds: 30,
+          ),
+          ResetSessionStep(
+            label: 'Begin',
+            guidance:
+                'Shrink that priority to its first visible action and start there.',
+            durationSeconds: 20,
+          ),
+        ],
+      ),
+    ),
+    ResetContent(
+      id: 'confidence-posture-reset',
+      title: 'Confidence Posture Reset',
+      durationSeconds: 90,
+      level: ResetLevel.quick,
+      quickCategory: QuickResetCategory.lifeUpgrade,
+      modality: ResetModality.guidedPractice,
+      accessTier: ResetAccessTier.premium,
+      summary:
+          'A grounded posture-and-attention reset before a meeting, conversation or task.',
+      methodLabel: 'Stable posture cue',
+      bestFor:
+          'Moments when nerves are making you physically collapse inward or over-monitor yourself.',
+      whyItMayHelp:
+          'The goal is not to manufacture confidence with a pose. It is to remove avoidable tension, create a stable stance and give attention somewhere useful to go.',
+      safetyNote:
+          'Do not force your spine, shoulders or neck into an uncomfortable position.',
+      visualType: ResetVisualType.bodyRelease,
+      instructions: [
+        'Find stable contact through your feet or seat.',
+        'Reduce unnecessary tension.',
+        'Choose where you want attention to go next.',
+      ],
+      program: ResetSessionProgram.guided(
+        steps: [
+          ResetSessionStep(
+            label: 'Ground',
+            guidance:
+                'Feel both feet or your seat against something stable.',
+            durationSeconds: 15,
+          ),
+          ResetSessionStep(
+            label: 'Lengthen',
+            guidance:
+                'Let the chest and head come a little more upright without forcing the shoulders back.',
+            durationSeconds: 20,
+          ),
+          ResetSessionStep(
+            label: 'Release',
+            guidance:
+                'Unclench the hands and soften the jaw.',
+            durationSeconds: 15,
+          ),
+          ResetSessionStep(
+            label: 'Look outward',
+            guidance:
+                'Move attention away from how you might look and toward the person, task or room in front of you.',
+            durationSeconds: 20,
+          ),
+          ResetSessionStep(
+            label: 'First line',
+            guidance:
+                'Choose your first sentence or first action. You only need to begin.',
+            durationSeconds: 20,
+          ),
+        ],
+      ),
+    ),
+    ResetContent(
+      id: 'deep-focus-method',
+      title: 'Deep Focus Method',
+      durationSeconds: 180,
+      level: ResetLevel.quick,
+      quickCategory: QuickResetCategory.lifeUpgrade,
+      modality: ResetModality.guidedPractice,
+      accessTier: ResetAccessTier.premium,
+      summary:
+          'A three-minute setup for reducing competing tasks and entering one focused work block.',
+      methodLabel: 'Single-task setup',
+      bestFor:
+          'Starting work when several tabs, tasks or unfinished thoughts are competing for attention.',
+      whyItMayHelp:
+          'The method reduces the number of active choices and defines one visible target before the work block begins.',
+      visualType: ResetVisualType.nextStep,
+      instructions: [
+        'Remove one distraction.',
+        'Choose one concrete outcome.',
+        'Start before trying to feel perfectly ready.',
+      ],
+      program: ResetSessionProgram.guided(
+        steps: [
+          ResetSessionStep(
+            label: 'Clear',
+            guidance:
+                'Close or move one thing that does not belong to the next work block.',
+            durationSeconds: 30,
+          ),
+          ResetSessionStep(
+            label: 'Choose',
+            guidance:
+                'Define one outcome for this block in a single sentence.',
+            durationSeconds: 30,
+          ),
+          ResetSessionStep(
+            label: 'Shrink',
+            guidance:
+                'Turn that outcome into the smallest visible first action.',
+            durationSeconds: 30,
+          ),
+          ResetSessionStep(
+            label: 'Start',
+            guidance:
+                'Begin that action now. Do not optimise the whole plan while you are starting.',
+            durationSeconds: 60,
+          ),
+          ResetSessionStep(
+            label: 'Commit',
+            guidance:
+                'Keep this one task active. Everything else can wait until the block ends.',
+            durationSeconds: 30,
+          ),
+        ],
+      ),
+    ),
+    ResetContent(
+      id: 'emotional-stability-drill',
+      title: 'Emotional Stability Drill',
+      durationSeconds: 150,
+      level: ResetLevel.quick,
+      quickCategory: QuickResetCategory.lifeUpgrade,
+      modality: ResetModality.guidedPractice,
+      accessTier: ResetAccessTier.premium,
+      summary:
+          'A short pause between a strong feeling and the action you take next.',
+      methodLabel: 'Name → separate → choose',
+      bestFor:
+          'Moments when a strong emotion is pushing you toward an immediate message, decision or reaction.',
+      whyItMayHelp:
+          'The drill creates a small distinction between what you feel, what you want to do and what you choose to do next.',
+      visualType: ResetVisualType.acceptanceSpace,
+      instructions: [
+        'Name the strongest feeling.',
+        'Notice the urge without obeying it immediately.',
+        'Choose the next response deliberately.',
+      ],
+      program: ResetSessionProgram.guided(
+        steps: [
+          ResetSessionStep(
+            label: 'Name',
+            guidance:
+                'Use one simple word for the strongest feeling here.',
+            durationSeconds: 30,
+          ),
+          ResetSessionStep(
+            label: 'Locate',
+            guidance:
+                'Notice where the activation is easiest to feel in the body.',
+            durationSeconds: 30,
+          ),
+          ResetSessionStep(
+            label: 'Separate',
+            guidance:
+                'Name the urge as an urge. You can feel it without acting on it yet.',
+            durationSeconds: 30,
+          ),
+          ResetSessionStep(
+            label: 'Choose',
+            guidance:
+                'Ask what response would still make sense ten minutes from now.',
+            durationSeconds: 30,
+          ),
+          ResetSessionStep(
+            label: 'Next',
+            guidance:
+                'Take only the next deliberate step.',
+            durationSeconds: 30,
+          ),
+        ],
+      ),
+    ),
+    ResetContent(
+      id: 'night-nervous-system-unwind',
+      title: 'Night Nervous System Unwind',
+      durationSeconds: 180,
+      level: ResetLevel.quick,
+      quickCategory: QuickResetCategory.lifeUpgrade,
+      modality: ResetModality.guidedPractice,
+      accessTier: ResetAccessTier.premium,
+      summary:
+          'A low-stimulation body-and-environment unwind for the end of the day.',
+      methodLabel: 'Night downshift',
+      bestFor:
+          'Evenings when your body is tired but your attention is still behaving as if the day is active.',
+      whyItMayHelp:
+          'The routine removes small sources of activation and gives the body a repeatable sequence for ending the day.',
+      safetyNote:
+          'Keep every movement small and comfortable. This is a wind-down routine, not a treatment for insomnia.',
+      visualType: ResetVisualType.bodyRelease,
+      instructions: [
+        'Lower one source of stimulation.',
+        'Release easy-to-miss tension.',
+        'Let tomorrow remain tomorrow.',
+      ],
+      program: ResetSessionProgram.guided(
+        steps: [
+          ResetSessionStep(
+            label: 'Dim',
+            guidance:
+                'Reduce one source of stimulation around you.',
+            durationSeconds: 30,
+          ),
+          ResetSessionStep(
+            label: 'Jaw',
+            guidance:
+                'Let the teeth separate and soften the tongue and jaw.',
+            durationSeconds: 30,
+          ),
+          ResetSessionStep(
+            label: 'Shoulders',
+            guidance:
+                'Let the shoulders drop only as far as feels natural.',
+            durationSeconds: 30,
+          ),
+          ResetSessionStep(
+            label: 'Off-load',
+            guidance:
+                'Name one unfinished thing and deliberately leave it for tomorrow.',
+            durationSeconds: 45,
+          ),
+          ResetSessionStep(
+            label: 'Settle',
+            guidance:
+                'Choose a quieter position and let the next few minutes contain less input.',
+            durationSeconds: 45,
+          ),
+        ],
+      ),
+    ),
+    ResetContent(
+      id: 'quick-mood-shift',
+      title: 'Quick Mood Shift',
+      durationSeconds: 120,
+      level: ResetLevel.quick,
+      quickCategory: QuickResetCategory.lifeUpgrade,
+      modality: ResetModality.guidedPractice,
+      accessTier: ResetAccessTier.premium,
+      summary:
+          'A brief behaviour-and-environment reset when you feel flat, stuck or mentally stale.',
+      methodLabel: 'Change state through action',
+      bestFor:
+          'Low-momentum moments when sitting and thinking harder is not helping.',
+      whyItMayHelp:
+          'The routine changes a few controllable inputs—movement, light, sensory context and one small action—without promising an instant emotional transformation.',
+      safetyNote:
+          'Choose movement that is safe and comfortable for your body.',
+      visualType: ResetVisualType.nextStep,
+      instructions: [
+        'Change one physical input.',
+        'Move briefly.',
+        'Do one small useful action.',
+      ],
+      program: ResetSessionProgram.guided(
+        steps: [
+          ResetSessionStep(
+            label: 'Move',
+            guidance:
+                'Stand, stretch, or change position for a few comfortable moments.',
+            durationSeconds: 30,
+          ),
+          ResetSessionStep(
+            label: 'Light',
+            guidance:
+                'If practical, move toward brighter natural light or a different part of the room.',
+            durationSeconds: 30,
+          ),
+          ResetSessionStep(
+            label: 'Sense',
+            guidance:
+                'Notice one sound, colour or temperature that is different from a moment ago.',
+            durationSeconds: 30,
+          ),
+          ResetSessionStep(
+            label: 'Act',
+            guidance:
+                'Complete one tiny useful action before deciding what your mood should be.',
+            durationSeconds: 30,
+          ),
+        ],
+      ),
+    ),
+    ResetContent(
+      id: 'body-recalibration',
+      title: 'Body Recalibration',
+      durationSeconds: 150,
+      level: ResetLevel.quick,
+      quickCategory: QuickResetCategory.lifeUpgrade,
+      modality: ResetModality.guidedPractice,
+      accessTier: ResetAccessTier.premium,
+      summary:
+          'A short head-to-toe check for unnecessary effort after sitting, scrolling or working in one position.',
+      methodLabel: 'Posture and tension check',
+      bestFor:
+          'After long periods in one position or when your body feels compressed, tense or disconnected from the task.',
+      whyItMayHelp:
+          'The sequence simply checks common tension points and adds small movement where useful.',
+      safetyNote:
+          'Nothing should hurt. Skip any movement that aggravates pain, injury or dizziness.',
+      visualType: ResetVisualType.bodyRelease,
+      instructions: [
+        'Check support through the feet or seat.',
+        'Release unnecessary effort.',
+        'Add one small comfortable movement.',
+      ],
+      program: ResetSessionProgram.guided(
+        steps: [
+          ResetSessionStep(
+            label: 'Support',
+            guidance:
+                'Notice how your feet, legs or seat are being supported.',
+            durationSeconds: 25,
+          ),
+          ResetSessionStep(
+            label: 'Jaw',
+            guidance:
+                'Check whether the jaw or face is working harder than it needs to.',
+            durationSeconds: 25,
+          ),
+          ResetSessionStep(
+            label: 'Shoulders',
+            guidance:
+                'Let the shoulders move once, then settle where they feel easiest.',
+            durationSeconds: 25,
+          ),
+          ResetSessionStep(
+            label: 'Hands',
+            guidance:
+                'Unclench the hands and let the fingers rest.',
+            durationSeconds: 25,
+          ),
+          ResetSessionStep(
+            label: 'Posture',
+            guidance:
+                'Adjust your position only enough to feel supported and alert.',
+            durationSeconds: 25,
+          ),
+          ResetSessionStep(
+            label: 'Move',
+            guidance:
+                'Finish with one small movement that feels useful: stand, walk, stretch or reset your working position.',
+            durationSeconds: 25,
+          ),
+        ],
+      ),
+    ),
+    ResetContent(
       id: 'before-panic-builds',
       title: 'Before Panic Builds',
       durationSeconds: 120,
