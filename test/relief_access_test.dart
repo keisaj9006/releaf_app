@@ -169,7 +169,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Simple equal breathing stays visually minimal', (
+  testWidgets('4–6 Calm Rhythm renders the breathing path', (
     WidgetTester tester,
   ) async {
     final preferences = await _preferences();
@@ -190,7 +190,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
 
     expect(find.byKey(const Key('reset-living-form')), findsOneWidget);
-    expect(find.byKey(const Key('reset-breath-path')), findsNothing);
+    expect(find.byKey(const Key('reset-breath-path')), findsOneWidget);
     expect(find.text('Breathe in'), findsOneWidget);
   });
 
