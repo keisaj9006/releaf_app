@@ -44,7 +44,11 @@ class _TrackingSoundPlaybackDriver implements SoundPlaybackDriver {
   Future<void> setVolume(double volume) async {}
 
   @override
-  Future<void> playAsset(String assetPath) async {
+  Future<void> playAsset(
+    String assetPath, {
+    String? trackId,
+    String? title,
+  }) async {
     _playerStates.add(audio.PlayerState.playing);
   }
 
