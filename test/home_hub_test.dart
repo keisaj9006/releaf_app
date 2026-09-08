@@ -44,16 +44,27 @@ void main() {
     );
     final nextDay = DailyInsightCatalog.forDate(DateTime(2026, 9, 7));
 
-    expect(DailyInsightCatalog.all, hasLength(20));
+    expect(DailyInsightCatalog.all, hasLength(30));
+    expect(
+      DailyInsightCatalog.all.map((insight) => insight.id).toSet(),
+      hasLength(30),
+    );
     expect(first.id, sameDay.id);
     expect(first.id, isNot(nextDay.id));
-    expect(first.sourcePublisher, isNotEmpty);
-    expect(first.sourceTitle, isNotEmpty);
-    expect(first.sourceUrl, startsWith('https://'));
-    expect(first.evidenceLabel, isNotEmpty);
-    expect(first.evidenceNote, isNotEmpty);
-    expect(first.teaser, isNotEmpty);
-    expect(first.teaser, isNot(first.headline));
+
+    for (final insight in DailyInsightCatalog.all) {
+      expect(insight.sourcePublisher, isNotEmpty, reason: insight.id);
+      expect(insight.sourceTitle, isNotEmpty, reason: insight.id);
+      expect(
+        insight.sourceUrl,
+        startsWith('https://'),
+        reason: insight.id,
+      );
+      expect(insight.evidenceLabel, isNotEmpty, reason: insight.id);
+      expect(insight.evidenceNote, isNotEmpty, reason: insight.id);
+      expect(insight.teaser, isNotEmpty, reason: insight.id);
+      expect(insight.teaser, isNot(insight.headline), reason: insight.id);
+    }
   });
 
 

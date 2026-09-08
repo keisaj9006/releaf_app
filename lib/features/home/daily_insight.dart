@@ -74,6 +74,26 @@ class DailyInsight {
           'That afternoon coffee may still be active much later than you think.',
         'nutrition-salt-five-grams' =>
           'How much salt is the daily guideline — and where is most of it hiding?',
+        'movement-break-up-sitting' =>
+          'Does “being active” also mean interrupting long stretches of sitting?',
+        'nutrition-fibre-25' =>
+          'How much naturally occurring fibre does WHO suggest aiming for each day?',
+        'sleep-screen-30' =>
+          'How long before bed does CDC suggest switching off electronic devices?',
+        'mind-breathing-evidence' =>
+          'Slow breathing can feel calming — but what does the evidence actually support?',
+        'nutrition-saturated-fat-10' =>
+          'What proportion of daily energy does WHO recommend keeping saturated fat below?',
+        'sleep-naps-afternoon' =>
+          'Can an afternoon nap make nighttime sleep harder for some people?',
+        'movement-single-session-bp' =>
+          'Can one workout affect blood pressure before any long-term training change happens?',
+        'mind-meditation-adverse-effects' =>
+          'Meditation is usually low risk — but is it completely risk-free?',
+        'connection-loneliness-isolation' =>
+          'Loneliness and social isolation sound similar. Are they actually the same thing?',
+        'nutrition-trans-fat-1' =>
+          'How small is WHO’s recommended upper limit for trans fat?',
         _ => headline,
       };
 }
@@ -379,6 +399,155 @@ class DailyInsightCatalog {
       sourceTitle: 'Healthy diet',
       sourceUrl:
           'https://www.who.int/health-topics/healthy-diet',
+    ),
+    DailyInsight(
+      id: 'movement-break-up-sitting',
+      category: DailyInsightCategory.movement,
+      headline:
+          'UK guidance says adults should break up long periods of inactivity with at least light physical activity when physically possible.',
+      detail:
+          'The UK Chief Medical Officers’ physical activity guidance recommends minimising sedentary time and interrupting prolonged inactivity with light movement. The guidance does not set one universal “stand up every X minutes” rule.',
+      evidenceLabel: 'UK CMO guideline',
+      evidenceNote:
+          'This is population-level guidance. Ability, disability, work demands and health conditions affect what kind of movement is practical and safe.',
+      sourcePublisher: 'UK Government · Chief Medical Officers',
+      sourceTitle: 'UK Chief Medical Officers’ physical activity guidelines',
+      sourceUrl:
+          'https://www.gov.uk/government/publications/physical-activity-guidelines-uk-chief-medical-officers-report/uk-chief-medical-officers-physical-activity-guidelines',
+    ),
+    DailyInsight(
+      id: 'nutrition-fibre-25',
+      category: DailyInsightCategory.nutrition,
+      headline:
+          'WHO recommends at least 25 g of naturally occurring dietary fibre a day for everyone older than 10 years.',
+      detail:
+          'WHO’s carbohydrate guideline emphasises fibre-rich carbohydrate sources such as whole grains, vegetables, fruits and pulses. The recommendation focuses on naturally occurring dietary fibre from foods.',
+      evidenceLabel: 'WHO carbohydrate guideline',
+      evidenceNote:
+          'This is a population target, not a personalised gastrointestinal treatment plan. Individual needs can differ with age and medical conditions.',
+      sourcePublisher: 'World Health Organization',
+      sourceTitle: 'Carbohydrate intake for adults and children: WHO guideline',
+      sourceUrl:
+          'https://www.who.int/publications/i/9789240073593',
+    ),
+    DailyInsight(
+      id: 'sleep-screen-30',
+      category: DailyInsightCategory.sleep,
+      headline:
+          'CDC sleep guidance recommends turning off electronic devices at least 30 minutes before bedtime.',
+      detail:
+          'CDC lists device-free time before bed alongside other sleep habits such as keeping a regular schedule and making the bedroom quiet, relaxing and cool.',
+      evidenceLabel: 'CDC sleep guidance',
+      evidenceNote:
+          'Thirty minutes is a practical public-health recommendation, not a guarantee that every person will fall asleep faster.',
+      sourcePublisher: 'Centers for Disease Control and Prevention',
+      sourceTitle: 'About Sleep',
+      sourceUrl: 'https://www.cdc.gov/sleep/about/index.html',
+    ),
+    DailyInsight(
+      id: 'mind-breathing-evidence',
+      category: DailyInsightCategory.mind,
+      headline:
+          'Slow diaphragmatic breathing may modestly lower blood pressure and cortisol, while evidence for reducing stress is still preliminary.',
+      detail:
+          'NCCIH summarises studies of slow or diaphragmatic breathing and notes modest effects on some physiological measures. A 2019 review of three studies with 880 participants found preliminary evidence of reduced stress.',
+      evidenceLabel: 'NIH evidence summary',
+      evidenceNote:
+          'Breathing exercises are relaxation tools, not a treatment substitute. Effects vary, and slow or deep breathing can feel uncomfortable for some people.',
+      sourcePublisher: 'NCCIH · National Institutes of Health',
+      sourceTitle: 'Stress',
+      sourceUrl: 'https://www.nccih.nih.gov/health/stress',
+    ),
+    DailyInsight(
+      id: 'nutrition-saturated-fat-10',
+      category: DailyInsightCategory.nutrition,
+      headline:
+          'WHO recommends keeping saturated fat to no more than 10% of total daily energy intake.',
+      detail:
+          'WHO’s updated fat guidance recommends replacing saturated fat where possible with unsaturated fats or carbohydrates from foods that naturally contain dietary fibre, such as whole grains, vegetables, fruits and pulses.',
+      evidenceLabel: 'WHO fat guideline',
+      evidenceNote:
+          'The percentage is a population-level dietary recommendation, not an instruction to calculate every meal or remove all dietary fat.',
+      sourcePublisher: 'World Health Organization',
+      sourceTitle:
+          'Saturated fatty acid and trans-fatty acid intake for adults and children: WHO guideline',
+      sourceUrl:
+          'https://www.who.int/publications/i/item/9789240073630',
+    ),
+    DailyInsight(
+      id: 'sleep-naps-afternoon',
+      category: DailyInsightCategory.sleep,
+      headline:
+          'NIH circadian guidance advises avoiding daytime naps, especially in the afternoon, when nighttime sleep is difficult.',
+      detail:
+          'NHLBI includes avoiding afternoon naps among habits that can help protect the sleep–wake cycle. It also notes an important exception: shift workers may benefit from a short nap before a shift.',
+      evidenceLabel: 'NIH circadian guidance',
+      evidenceNote:
+          'This is general sleep guidance rather than a universal ban on naps. Work schedules, sleep disorders, age and individual sleep need can change what is appropriate.',
+      sourcePublisher: 'NHLBI · National Institutes of Health',
+      sourceTitle: 'Circadian Rhythm Disorders — Treatment',
+      sourceUrl:
+          'https://www.nhlbi.nih.gov/health/circadian-rhythm-disorders/treatment',
+    ),
+    DailyInsight(
+      id: 'movement-single-session-bp',
+      category: DailyInsightCategory.movement,
+      headline:
+          'A single session of moderate-to-vigorous physical activity can reduce blood pressure in the short term.',
+      detail:
+          'CDC’s current adult physical-activity guidance lists reduced blood pressure among the immediate benefits of one session of moderate-to-vigorous activity, alongside improved sleep quality and reduced feelings of anxiety.',
+      evidenceLabel: 'CDC physical-activity guidance',
+      evidenceNote:
+          'The size and duration of the response vary between people. Exercise does not replace prescribed treatment for high blood pressure.',
+      sourcePublisher: 'Centers for Disease Control and Prevention',
+      sourceTitle: 'Health Benefits of Physical Activity for Adults',
+      sourceUrl:
+          'https://www.cdc.gov/physical-activity-basics/health-benefits/adults.html',
+    ),
+    DailyInsight(
+      id: 'mind-meditation-adverse-effects',
+      category: DailyInsightCategory.mind,
+      headline:
+          'Meditation is usually considered low risk, but a research review estimated negative effects in about 8% of participants.',
+      detail:
+          'NCCIH cites a 2020 review of 83 studies involving 6,703 participants. The most commonly reported negative experiences included anxiety and depression. A smaller analysis of mindfulness-based stress reduction did not find it more harmful than no treatment.',
+      evidenceLabel: 'Evidence review',
+      evidenceNote:
+          'The estimate combines different meditation practices and study designs. It does not mean 8% of every meditation user will have a negative reaction.',
+      sourcePublisher: 'NCCIH · National Institutes of Health',
+      sourceTitle: 'Meditation and Mindfulness: Effectiveness and Safety',
+      sourceUrl:
+          'https://www.nccih.nih.gov/health/meditation-and-mindfulness-effectiveness-and-safety',
+    ),
+    DailyInsight(
+      id: 'connection-loneliness-isolation',
+      category: DailyInsightCategory.connection,
+      headline:
+          'Loneliness and social isolation are different: loneliness is a subjective feeling, while isolation describes objectively having too few relationships or interactions.',
+      detail:
+          'WHO describes social connection across structure, function and quality. Someone can therefore have many contacts and still feel lonely, or have few contacts without experiencing loneliness in the same way.',
+      evidenceLabel: 'WHO public-health definition',
+      evidenceNote:
+          'The two experiences can overlap and both can matter for health, but they should not be treated as interchangeable labels.',
+      sourcePublisher: 'World Health Organization',
+      sourceTitle: 'Social connection',
+      sourceUrl:
+          'https://www.who.int/news-room/questions-and-answers/item/social-connection',
+    ),
+    DailyInsight(
+      id: 'nutrition-trans-fat-1',
+      category: DailyInsightCategory.nutrition,
+      headline:
+          'WHO recommends keeping trans fat below 1% of total daily energy and says industrially produced trans fat should be avoided.',
+      detail:
+          'WHO’s current guidance applies the less-than-1% limit to trans fat from all sources. Its trans-fat fact sheet notes that this is less than about 2.2 g a day on a 2,000-calorie diet.',
+      evidenceLabel: 'WHO guideline',
+      evidenceNote:
+          'The gram example depends on total energy intake. The broader public-health goal is to minimise trans fat, especially industrially produced trans fat.',
+      sourcePublisher: 'World Health Organization',
+      sourceTitle: 'Trans fat',
+      sourceUrl:
+          'https://www.who.int/news-room/fact-sheets/detail/trans-fat/',
     ),
   ];
 

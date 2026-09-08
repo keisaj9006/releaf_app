@@ -102,7 +102,7 @@ The launch catalog should rotate deterministically by local calendar date so the
 
 Avoid repeating closely related subjects on consecutive days when the catalog grows large enough to support editorial scheduling.
 
-Target after launch: at least **30 reviewed insights**, then grow toward 60–90 so repeated content is infrequent.
+Launch baseline: **30 reviewed insights**. After launch, grow toward 60–90 so repeated content becomes increasingly infrequent.
 
 ## Review cadence
 
