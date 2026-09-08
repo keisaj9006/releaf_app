@@ -70,12 +70,20 @@ void main() {
   testWidgets('Broken Mirror timer pauses while the app is backgrounded', (
     WidgetTester tester,
   ) async {
+    SharedPreferences.setMockInitialValues({});
+    final preferences = await SharedPreferences.getInstance();
+
     await tester.pumpWidget(
-      MaterialApp(
-        home: BrokenMirrorGameScreen(
-          enableTimer: true,
-          seconds: 5,
-          onFinish: () {},
+      ProviderScope(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(preferences),
+        ],
+        child: MaterialApp(
+          home: BrokenMirrorGameScreen(
+            enableTimer: true,
+            seconds: 5,
+            onFinish: () {},
+          ),
         ),
       ),
     );
