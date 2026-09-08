@@ -132,8 +132,15 @@ class GameHostScreen extends ConsumerWidget {
       trainingLevel: trainingLevel,
     );
 
-    return Scaffold(
-      body: SafeArea(child: child),
+    return PopScope(
+      canPop: context.canPop(),
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop || !context.mounted) return;
+        context.go(AppRoutes.brain);
+      },
+      child: Scaffold(
+        body: SafeArea(child: child),
+      ),
     );
   }
 
