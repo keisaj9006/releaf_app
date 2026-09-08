@@ -46,10 +46,10 @@ void main() {
       matching: find.byType(ListView),
     );
     expect(natureRail, findsOneWidget);
-    await tester.dragUntilVisible(
-      find.text('Forest Canopy'),
+    await tester.fling(
       natureRail,
-      const Offset(-220, 0),
+      const Offset(-700, 0),
+      1200,
     );
     await tester.pumpAndSettle();
     expect(find.text('Forest Canopy'), findsOneWidget);
