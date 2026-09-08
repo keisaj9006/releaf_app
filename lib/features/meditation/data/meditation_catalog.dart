@@ -144,29 +144,49 @@ class MeditationCatalog {
         MeditationStep(
           label: 'Arrive',
           guidance: 'Begin with one neutral sensation in the body.',
+          spokenGuidance:
+              'Begin by noticing one neutral sensation in the body. Maybe the weight of your hands, '
+              'the contact of your feet, or the support beneath you. There is nothing special to find. '
+              'Choose one ordinary sensation and let it give your attention somewhere simple to rest.',
           durationSeconds: 60,
         ),
         MeditationStep(
           label: 'Notice',
           guidance: 'Notice when a thought becomes the centre of attention.',
+          spokenGuidance:
+              'As you sit here, notice when a thought becomes the centre of attention. It may arrive '
+              'quietly or pull you in straight away. See if you can recognise the moment you are thinking, '
+              'without needing to finish the thought or work out what it means.',
           durationSeconds: 60,
         ),
         MeditationStep(
           label: 'Label',
           guidance:
               'Use a simple label such as thinking, planning, remembering, or judging.',
+          spokenGuidance:
+              'If it is useful, give the mental activity a light label. Thinking. Planning. Remembering. '
+              'Judging. Keep the label simple. The label is not there to judge the thought or make it '
+              'stop. It is just a small way of noticing what the mind is doing right now.',
           durationSeconds: 60,
         ),
         MeditationStep(
           label: 'Return',
           guidance:
               'Let the thought remain or leave on its own while attention returns to the body.',
+          spokenGuidance:
+              'Now bring some attention back to the body. The thought does not have to disappear first. '
+              'It can stay, change, or leave in its own time. Feel one physical sensation again and notice '
+              'that attention can return even while the mind continues to produce thoughts.',
           durationSeconds: 60,
         ),
         MeditationStep(
           label: 'Close',
           guidance:
               'Notice the room again and finish without deciding whether the practice was good or bad.',
+          spokenGuidance:
+              'Let attention widen to the room around you. Notice sound, light, and the position of the '
+              'body. There is no need to decide whether the practice worked or whether you did it well. '
+              'Simply notice that you spent a few minutes practising how to return.',
           durationSeconds: 60,
         ),
       ],
@@ -186,32 +206,56 @@ class MeditationCatalog {
         MeditationStep(
           label: 'Anchor',
           guidance: 'Begin with the breath or another simple body sensation.',
+          spokenGuidance:
+              'Begin with one simple anchor. You might notice the natural breath, the weight of the body, '
+              'or a point of contact beneath you. Stay with that sensation for a few moments, not to hold '
+              'attention perfectly, but to give yourself a clear place to begin.',
           durationSeconds: 60,
         ),
         MeditationStep(
           label: 'Sounds',
           guidance: 'Let sounds come and go without searching for them.',
+          spokenGuidance:
+              'Now allow sounds to enter awareness. You do not need to search for them or identify every '
+              'source. Notice a sound as it appears, changes, and fades. Let the next sound arrive on its '
+              'own, while the body remains supported where you are.',
           durationSeconds: 60,
         ),
         MeditationStep(
           label: 'Body',
           guidance: 'Include changing sensations throughout the body.',
+          spokenGuidance:
+              'Include more of the body now. Notice pressure, temperature, movement, tension, or ease '
+              'wherever these sensations are present. There is no need to scan every area. Let sensations '
+              'come into awareness and change without having to keep any one of them in place.',
           durationSeconds: 60,
         ),
         MeditationStep(
           label: 'Thoughts',
           guidance: 'Notice thoughts as another kind of changing experience.',
+          spokenGuidance:
+              'Thoughts can be included too. When one becomes noticeable, see if it can be experienced '
+              'as another changing event rather than something you must immediately follow. A thought may '
+              'stay for a while or pass quickly. Either way, notice what arrives next.',
           durationSeconds: 60,
         ),
         MeditationStep(
           label: 'Open',
           guidance:
               'Allow sounds, sensations, and thoughts to share the same field of attention.',
+          spokenGuidance:
+              'Let attention become a little wider. Sounds, body sensations, breathing, and thoughts can '
+              'all be present in the same field. You do not need to choose the most important one. Notice '
+              'how experience keeps changing when you are not trying to hold it still.',
           durationSeconds: 60,
         ),
         MeditationStep(
           label: 'Finish',
           guidance: 'Reconnect with the room and the next thing you intend to do.',
+          spokenGuidance:
+              'Begin to reconnect with the room more deliberately. Feel the body, notice the nearest '
+              'sounds, and let the eyes open when you are ready. Before moving on, remember the next '
+              'ordinary thing you intend to do, and take this wider attention with you.',
           durationSeconds: 60,
         ),
       ],
@@ -289,23 +333,39 @@ class MeditationCatalog {
         MeditationStep(
           label: 'Pause',
           guidance: 'Notice that you are anticipating something difficult.',
+          spokenGuidance:
+              'Take a moment to recognise that something difficult is ahead. You do not need to rehearse '
+              'the whole conversation, journey, or task right now. Simply notice the anticipation that is '
+              'already here, and give yourself permission to pause before moving into it.',
           durationSeconds: 60,
         ),
         MeditationStep(
           label: 'Ground',
           guidance: 'Feel both feet or another clear point of physical support.',
+          spokenGuidance:
+              'Bring attention to something physically reliable. Feel both feet on the floor, the chair '
+              'supporting you, or another clear point of contact. Let that sensation be simple and factual. '
+              'For this moment, you are here, supported by the surface beneath you.',
           durationSeconds: 60,
         ),
         MeditationStep(
           label: 'Allow',
           guidance:
               'Let the uncomfortable feeling be present without needing to solve it first.',
+          spokenGuidance:
+              'If discomfort is present, see if you can make a little room for it. You do not have to '
+              'like the feeling, and you do not have to remove it before you continue. Notice where it '
+              'shows up in the body, while keeping some attention on the support beneath you.',
           durationSeconds: 60,
         ),
         MeditationStep(
           label: 'Choose',
           guidance:
               'Name one quality you want to bring into the next moment, such as steadiness or clarity.',
+          spokenGuidance:
+              'As you prepare to move on, choose one quality you would like to bring with you. Steadiness. '
+              'Clarity. Patience. Courage. Keep it simple. You do not need to feel completely ready. Let '
+              'that one quality be a direction for the next small step.',
           durationSeconds: 60,
         ),
       ],
