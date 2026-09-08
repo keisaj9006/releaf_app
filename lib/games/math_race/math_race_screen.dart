@@ -24,12 +24,14 @@ class MathRaceScreen extends ConsumerStatefulWidget {
   ConsumerState<MathRaceScreen> createState() => _MathRaceScreenState();
 }
 
-class _MathRaceScreenState extends ConsumerState<MathRaceScreen> {
+class _MathRaceScreenState extends ConsumerState<MathRaceScreen>
+    with WidgetsBindingObserver {
   final _gen = MathPuzzleGenerator();
 
   static const int _sessionSeconds = 60;
   int _timeLeft = _sessionSeconds;
   Timer? _timer;
+  bool _pausedByLifecycle = false;
 
   int _level = 1;
   int _score = 0;
@@ -46,11 +48,13 @@ class _MathRaceScreenState extends ConsumerState<MathRaceScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _startSession();
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _timer?.cancel();
     super.dispose();
   }
@@ -66,6 +70,13 @@ class _MathRaceScreenState extends ConsumerState<MathRaceScreen> {
 
     _nextPuzzle();
 
+    _runTimer();
+  }
+
+  void _runTimer() {
+    _timer?.cancel();
+    if (_timeLeft <= 0) return;
+
     _timer = Timer.periodic(const Duration(seconds: 1), (t) {
       if (!mounted) return;
       setState(() {
@@ -76,6 +87,28 @@ class _MathRaceScreenState extends ConsumerState<MathRaceScreen> {
         }
       });
     });
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (_timeLeft <= 0) return;
+
+    if (state == AppLifecycleState.resumed) {
+      if (_pausedByLifecycle) {
+        _pausedByLifecycle = false;
+        _runTimer();
+      }
+      return;
+    }
+
+    if ((state == AppLifecycleState.inactive ||
+            state == AppLifecycleState.paused ||
+            state == AppLifecycleState.hidden ||
+            state == AppLifecycleState.detached) &&
+        (_timer?.isActive ?? false)) {
+      _timer?.cancel();
+      _pausedByLifecycle = true;
+    }
   }
 
   Future<void> _endSession() async {
