@@ -265,7 +265,11 @@ class _MeditationPlayerScreenState
 
     if (!mounted) return;
     setState(() => _allowPop = true);
-    context.pop();
+    if (context.canPop()) {
+      context.pop();
+    } else {
+      context.go(AppRoutes.meditate);
+    }
   }
 
   Future<void> _showControls(MeditationContent item) async {
