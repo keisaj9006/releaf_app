@@ -36,6 +36,8 @@ void main() {
     'equal-rhythm',
     '90s-calm-down',
     'longer-exhale',
+    'box-breathing',
+    'sleep-downshift',
     'wired-steady',
     'tension-body-scan',
     'overwhelm-stability',
@@ -75,7 +77,7 @@ void main() {
     expect(calm.program?.type, ResetProgramType.pacedBreathing);
     expect(calm.program?.breathPattern?.inhaleSeconds, 4);
     expect(calm.program?.breathPattern?.holdAfterInhaleSeconds, 0);
-    expect(calm.program?.breathPattern?.exhaleSeconds, 4);
+    expect(calm.program?.breathPattern?.exhaleSeconds, 6);
     expect(calm.program?.breathPattern?.holdAfterExhaleSeconds, 0);
     expect(
       calm.program?.breathPattern?.frameAtElapsedSeconds(4).phase,
@@ -170,7 +172,7 @@ void main() {
     );
   });
 
-  test('Longer Exhale uses the asymmetric 3–4 Wave 1 pattern', () {
+  test('Longer Exhale uses the asymmetric 3–6 pattern', () {
     final session = catalog.getById('longer-exhale')!;
 
     expect(session.level, ResetLevel.quick);
@@ -181,8 +183,27 @@ void main() {
     expect(session.program?.type, ResetProgramType.pacedBreathing);
     expect(session.program?.breathPattern?.inhaleSeconds, 3);
     expect(session.program?.breathPattern?.holdAfterInhaleSeconds, 0);
-    expect(session.program?.breathPattern?.exhaleSeconds, 4);
+    expect(session.program?.breathPattern?.exhaleSeconds, 6);
     expect(session.program?.breathPattern?.holdAfterExhaleSeconds, 0);
+  });
+
+  test('Box Breathing and Sleep Downshift keep their explicit hold timings', () {
+    final box = catalog.getById('box-breathing')!;
+    final sleep = catalog.getById('sleep-downshift')!;
+
+    expect(box.program?.breathPattern?.inhaleSeconds, 4);
+    expect(box.program?.breathPattern?.holdAfterInhaleSeconds, 4);
+    expect(box.program?.breathPattern?.exhaleSeconds, 4);
+    expect(box.program?.breathPattern?.holdAfterExhaleSeconds, 4);
+    expect(box.methodLabel, contains('4–4–4–4'));
+    expect(box.safetyNote, isNotNull);
+
+    expect(sleep.program?.breathPattern?.inhaleSeconds, 4);
+    expect(sleep.program?.breathPattern?.holdAfterInhaleSeconds, 7);
+    expect(sleep.program?.breathPattern?.exhaleSeconds, 8);
+    expect(sleep.program?.breathPattern?.holdAfterExhaleSeconds, 0);
+    expect(sleep.methodLabel, contains('4–7–8'));
+    expect(sleep.safetyNote, isNotNull);
   });
 
   test('3-minute Deep Reset remains a legacy-compatible premium mapping', () {
