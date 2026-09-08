@@ -6,6 +6,8 @@ import 'package:releaf_app/features/account/application/account_auth_service.dar
 import 'package:releaf_app/features/account/application/account_email_service.dart';
 import 'package:releaf_app/features/account/application/account_recovery_service.dart';
 import 'package:releaf_app/features/account/presentation/account_screen.dart';
+import 'package:releaf_app/routing/app_router.dart';
+import 'package:releaf_app/routing/app_routes.dart';
 
 class _FakeAccountRecoveryService implements AccountRecoveryService {
   String? lastResetEmail;
@@ -125,6 +127,40 @@ void main() {
 
     expect(find.byKey(const Key('account-name-field')), findsOneWidget);
     expect(find.text('Create account'), findsWidgets);
+  });
+
+  testWidgets('Direct Account back falls back to Home', (
+    WidgetTester tester,
+  ) async {
+    final router = createAppRouter(initialLocation: AppRoutes.account);
+    addTearDown(router.dispose);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          accountAuthServiceProvider.overrideWithValue(
+            _FakeAccountAuthService(),
+          ),
+          accountEmailServiceProvider.overrideWithValue(
+            _FakeAccountEmailService(),
+          ),
+          accountRecoveryServiceProvider.overrideWithValue(
+            _FakeAccountRecoveryService(),
+          ),
+        ],
+        child: MaterialApp.router(routerConfig: router),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
+
+    await tester.tap(find.byKey(const Key('account-close')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.text('RELEAF'), findsOneWidget);
+    expect(find.byType(NavigationBar), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('Forgot password sends recovery email for entered address', (
