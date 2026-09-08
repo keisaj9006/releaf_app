@@ -117,8 +117,11 @@ class _MeditationPlayerScreenState
               item,
               item.durationSeconds - _remainingSeconds,
             );
-      final nextRemaining =
+      final wallClockRemaining =
           SessionDeadlineClock.remainingSeconds(deadline);
+      final timerTickRemaining = math.max(0, _remainingSeconds - 1);
+      final nextRemaining =
+          math.min(wallClockRemaining, timerTickRemaining);
 
       if (nextRemaining <= 0) {
         timer.cancel();
