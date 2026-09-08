@@ -9,6 +9,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../meditation/application/meditation_voice_controller.dart';
 import '../../progress/data/leaves_repository.dart';
+import '../../sound/application/sound_player_controller.dart';
 import '../../../routing/app_routes.dart';
 import '../../../theme/releaf_design_tokens.dart';
 import '../../../theme/widgets/releaf_artwork.dart';
@@ -116,6 +117,16 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
   }
 
   Future<void> _startSessionAudio() async {
+    final soundState = ref.read(soundPlayerControllerProvider);
+    if (soundState.isPlaying) {
+      try {
+        await ref.read(soundPlayerControllerProvider.notifier).pause();
+      } catch (_) {
+        // Reset must remain usable even if the previous Sound Space fails
+        // to release audio focus cleanly.
+      }
+    }
+
     if (_ambientEnabled) {
       try {
         await _ambientPlayer.setReleaseMode(audio.ReleaseMode.loop);
