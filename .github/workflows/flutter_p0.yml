@@ -35,16 +35,22 @@ jobs:
         timeout-minutes: 5
         run: flutter test test/brain_flow_test.dart test/memory_stats_test.dart --reporter expanded
 
-      - name: Test Reset
+      - name: Test Reset model
         timeout-minutes: 5
         run: >-
           flutter test
           test/reset_audio_preferences_test.dart
           test/reset_catalog_test.dart
-          test/reset_hub_test.dart
           test/reset_session_engine_test.dart
-          test/relief_access_test.dart
           --reporter expanded
+
+      - name: Test Reset hub
+        timeout-minutes: 5
+        run: flutter test test/reset_hub_test.dart --reporter expanded
+
+      - name: Test Reset access
+        timeout-minutes: 5
+        run: flutter test test/relief_access_test.dart --reporter expanded
 
       - name: Test full suite
         timeout-minutes: 5
