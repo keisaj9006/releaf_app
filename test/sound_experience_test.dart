@@ -344,7 +344,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
 
-    expect(find.text('PREMIUM'), findsNWidgets(3));
+    expect(find.text('PREMIUM'), findsNWidgets(5));
 
     final premiumTrack = find.byKey(
       const Key('sound-track-releaf-atmosphere-02'),

@@ -41,6 +41,8 @@ void main() {
     expect(find.text('Releaf Atmosphere I'), findsOneWidget);
     expect(find.text('Releaf Atmosphere II'), findsOneWidget);
     expect(find.text('Ocean Wash'), findsOneWidget);
+    await tester.drag(find.text('Ocean Wash'), const Offset(-280, 0));
+    await tester.pumpAndSettle();
     expect(find.text('Forest Canopy'), findsOneWidget);
     expect(find.textContaining('sleep-frequency claims'), findsOneWidget);
 
