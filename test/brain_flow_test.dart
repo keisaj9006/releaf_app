@@ -654,6 +654,39 @@ void main() {
     await tester.pump();
   });
 
+  testWidgets('Labyrinth pauses physics and input while backgrounded', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: LabirynthGameScreen(
+          trainingLevel: 2,
+          onFinish: (_) {},
+          motionStream: const Stream<AccelerometerEvent>.empty(),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('Paused'), findsNothing);
+
+    tester.binding.handleAppLifecycleStateChanged(
+      AppLifecycleState.paused,
+    );
+    await tester.pump();
+
+    expect(find.text('Paused'), findsOneWidget);
+    expect(find.text('Resume'), findsOneWidget);
+
+    tester.binding.handleAppLifecycleStateChanged(
+      AppLifecycleState.resumed,
+    );
+    await tester.pump();
+
+    expect(find.text('Paused'), findsNothing);
+    expect(find.byKey(const Key('labyrinth-board')), findsOneWidget);
+  });
+
   testWidgets('Labyrinth stays usable on a 320px phone', (
     WidgetTester tester,
   ) async {
