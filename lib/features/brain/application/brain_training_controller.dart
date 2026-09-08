@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/providers.dart';
+import '../../../core/sync/progress_sync_event_store.dart';
 
 const progressiveBrainGameIds = <String>{
   'memory',
@@ -184,12 +185,16 @@ final brainTrainingControllerProvider =
     StateNotifierProvider<BrainTrainingController, BrainTrainingState>((ref) {
   return BrainTrainingController(
     ref.watch(sharedPreferencesProvider),
+    syncEvents: ref.read(progressSyncEventStoreProvider.notifier),
   );
 });
 
 class BrainTrainingController extends StateNotifier<BrainTrainingState> {
-  BrainTrainingController(this._prefs)
-      : super(
+  BrainTrainingController(
+    this._prefs, {
+    ProgressSyncEventStore? syncEvents,
+  })  : _syncEvents = syncEvents,
+        super(
           BrainTrainingState(
             records: _readRecords(_prefs),
           ),
@@ -199,16 +204,18 @@ class BrainTrainingController extends StateNotifier<BrainTrainingState> {
   static const _maxHistoryItems = 120;
 
   final SharedPreferences _prefs;
+  final ProgressSyncEventStore? _syncEvents;
 
   Future<void> recordCompletion({
     required String gameId,
     int? score,
   }) async {
+    final completedAt = DateTime.now();
     final next = <BrainSessionRecord>[
       BrainSessionRecord(
         gameId: gameId,
         score: score,
-        completedAt: DateTime.now(),
+        completedAt: completedAt,
       ),
       ...state.records,
     ].take(_maxHistoryItems).toList(growable: false);
@@ -218,6 +225,36 @@ class BrainTrainingController extends StateNotifier<BrainTrainingState> {
       _historyKey,
       next.map((record) => record.encode()).toList(growable: false),
     );
+
+    await _recordSyncEvent(
+      kind: ProgressSyncEventKind.brainSessionCompleted,
+      entityId: gameId,
+      occurredAt: completedAt,
+      payload: <String, Object?>{
+        if (score != null) 'score': score,
+      },
+    );
+  }
+
+  Future<void> _recordSyncEvent({
+    required ProgressSyncEventKind kind,
+    required String entityId,
+    DateTime? occurredAt,
+    Map<String, Object?> payload = const <String, Object?>{},
+  }) async {
+    final store = _syncEvents;
+    if (store == null) return;
+
+    try {
+      await store.appendNew(
+        kind: kind,
+        entityId: entityId,
+        occurredAt: occurredAt,
+        payload: payload,
+      );
+    } catch (_) {
+      // Sync preparation must never block local gameplay progress.
+    }
   }
 
   static List<BrainSessionRecord> _readRecords(SharedPreferences prefs) {

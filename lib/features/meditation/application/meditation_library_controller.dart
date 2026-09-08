@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/providers.dart';
+import '../../../core/sync/progress_sync_event_store.dart';
 
 class MeditationLibraryState {
   const MeditationLibraryState({
@@ -39,12 +40,16 @@ final meditationLibraryControllerProvider = StateNotifierProvider<
     MeditationLibraryController, MeditationLibraryState>((ref) {
   return MeditationLibraryController(
     ref.watch(sharedPreferencesProvider),
+    syncEvents: ref.read(progressSyncEventStoreProvider.notifier),
   );
 });
 
 class MeditationLibraryController extends StateNotifier<MeditationLibraryState> {
-  MeditationLibraryController(this._prefs)
-      : super(
+  MeditationLibraryController(
+    this._prefs, {
+    ProgressSyncEventStore? syncEvents,
+  })  : _syncEvents = syncEvents,
+        super(
           MeditationLibraryState(
             favoriteIds:
                 (_prefs.getStringList(_favoritesKey) ?? const <String>[]).toSet(),
@@ -60,6 +65,7 @@ class MeditationLibraryController extends StateNotifier<MeditationLibraryState> 
   static const _completedKey = 'meditation.completed_ids';
 
   final SharedPreferences _prefs;
+  final ProgressSyncEventStore? _syncEvents;
 
   Future<void> toggleFavorite(String id) async {
     final next = Set<String>.from(state.favoriteIds);
@@ -68,6 +74,11 @@ class MeditationLibraryController extends StateNotifier<MeditationLibraryState> 
     }
     state = state.copyWith(favoriteIds: next);
     await _prefs.setStringList(_favoritesKey, next.toList(growable: false));
+    await _recordSyncEvent(
+      kind: ProgressSyncEventKind.meditationFavoriteChanged,
+      entityId: id,
+      payload: <String, Object?>{'favorite': next.contains(id)},
+    );
   }
 
   Future<void> markRecent(String id) async {
@@ -78,6 +89,10 @@ class MeditationLibraryController extends StateNotifier<MeditationLibraryState> 
 
     state = state.copyWith(recentIds: next);
     await _prefs.setStringList(_recentsKey, next);
+    await _recordSyncEvent(
+      kind: ProgressSyncEventKind.meditationOpened,
+      entityId: id,
+    );
   }
 
   Future<void> markCompleted(String id) async {
@@ -86,5 +101,28 @@ class MeditationLibraryController extends StateNotifier<MeditationLibraryState> 
     final next = Set<String>.from(state.completedIds)..add(id);
     state = state.copyWith(completedIds: next);
     await _prefs.setStringList(_completedKey, next.toList(growable: false));
+    await _recordSyncEvent(
+      kind: ProgressSyncEventKind.meditationCompleted,
+      entityId: id,
+    );
+  }
+
+  Future<void> _recordSyncEvent({
+    required ProgressSyncEventKind kind,
+    required String entityId,
+    Map<String, Object?> payload = const <String, Object?>{},
+  }) async {
+    final store = _syncEvents;
+    if (store == null) return;
+
+    try {
+      await store.appendNew(
+        kind: kind,
+        entityId: entityId,
+        payload: payload,
+      );
+    } catch (_) {
+      // Sync preparation must never block local meditation progress.
+    }
   }
 }
