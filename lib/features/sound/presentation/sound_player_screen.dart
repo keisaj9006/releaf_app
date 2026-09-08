@@ -653,7 +653,9 @@ class _SleepTimer extends StatelessWidget {
         Text(
           remainingSeconds == null
               ? 'Sound will keep playing until you stop it.'
-              : 'Stops in ${_formatTimerCountdown(remainingSeconds!)}',
+              : remainingSeconds! <= soundSleepTimerFadeSeconds
+                  ? 'Fading out · ${_formatTimerCountdown(remainingSeconds!)}'
+                  : 'Stops in ${_formatTimerCountdown(remainingSeconds!)}',
           key: const Key('sound-sleep-timer-status'),
           style: ReleafTypography.meta.copyWith(
             color: remainingSeconds == null

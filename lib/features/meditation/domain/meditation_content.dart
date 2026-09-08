@@ -74,4 +74,20 @@ class MeditationContent {
   final bool unguided;
 
   bool get isPremium => accessTier == MeditationAccessTier.premium;
+
+  int get recordedNarrationStepCount => steps
+      .where(
+        (step) =>
+            step.narrationAssetPath != null &&
+            step.narrationAssetPath!.trim().isNotEmpty,
+      )
+      .length;
+
+  bool get hasAnyRecordedNarration =>
+      !unguided && recordedNarrationStepCount > 0;
+
+  bool get hasRecordedNarration =>
+      !unguided &&
+      steps.isNotEmpty &&
+      recordedNarrationStepCount == steps.length;
 }

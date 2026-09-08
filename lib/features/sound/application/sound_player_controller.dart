@@ -8,6 +8,24 @@ import '../../../core/providers.dart';
 import '../data/sound_catalog.dart';
 import '../domain/sound_content.dart';
 
+const int soundSleepTimerFadeSeconds = 20;
+
+double soundOutputVolumeForSleepTimer({
+  required double baseVolume,
+  int? remainingSeconds,
+}) {
+  final safeBase = baseVolume.clamp(0.0, 1.0).toDouble();
+  if (remainingSeconds == null ||
+      remainingSeconds > soundSleepTimerFadeSeconds) {
+    return safeBase;
+  }
+
+  final safeRemaining =
+      remainingSeconds.clamp(0, soundSleepTimerFadeSeconds).toInt();
+  final factor = safeRemaining / soundSleepTimerFadeSeconds;
+  return (safeBase * factor).clamp(0.0, 1.0).toDouble();
+}
+
 abstract class SoundPlaybackDriver {
   Stream<Duration> get onDurationChanged;
   Stream<Duration> get onPositionChanged;
@@ -85,6 +103,13 @@ class SoundPlayerState {
   final List<String> recentIds;
   final int? sleepTimerMinutes;
   final int? sleepTimerRemainingSeconds;
+
+  bool get isSleepTimerFading {
+    final remaining = sleepTimerRemainingSeconds;
+    return remaining != null &&
+        remaining > 0 &&
+        remaining <= soundSleepTimerFadeSeconds;
+  }
 
   SoundPlayerState copyWith({
     String? currentTrackId,
@@ -170,7 +195,12 @@ class SoundPlayerController extends StateNotifier<SoundPlayerState> {
 
   Future<void> play(SoundContent track) async {
     await _driver.setReleaseMode(audio.ReleaseMode.loop);
-    await _driver.setVolume(state.volume);
+    await _driver.setVolume(
+      soundOutputVolumeForSleepTimer(
+        baseVolume: state.volume,
+        remainingSeconds: state.sleepTimerRemainingSeconds,
+      ),
+    );
 
     if (state.currentTrackId == track.id) {
       await _driver.resume();
@@ -227,7 +257,12 @@ class SoundPlayerController extends StateNotifier<SoundPlayerState> {
   Future<void> setVolume(double volume) async {
     final safe = volume.clamp(0.0, 1.0).toDouble();
     state = state.copyWith(volume: safe);
-    await _driver.setVolume(safe);
+    await _driver.setVolume(
+      soundOutputVolumeForSleepTimer(
+        baseVolume: safe,
+        remainingSeconds: state.sleepTimerRemainingSeconds,
+      ),
+    );
   }
 
   Future<void> stop() async {
@@ -260,7 +295,14 @@ class SoundPlayerController extends StateNotifier<SoundPlayerState> {
 
     if (minutes == null) {
       state = state.copyWith(clearSleepTimer: true);
+      if (state.currentTrackId != null) {
+        await _driver.setVolume(state.volume);
+      }
       return;
+    }
+
+    if (state.currentTrackId != null) {
+      await _driver.setVolume(state.volume);
     }
 
     final totalSeconds = minutes * 60;
@@ -287,13 +329,30 @@ class SoundPlayerController extends StateNotifier<SoundPlayerState> {
         state = state.copyWith(
           sleepTimerRemainingSeconds: remaining,
         );
+
+        if (state.currentTrackId != null) {
+          await _driver.setVolume(
+            soundOutputVolumeForSleepTimer(
+              baseVolume: state.volume,
+              remainingSeconds: remaining,
+            ),
+          );
+        }
         return;
       }
 
       timer.cancel();
       _sleepTimer = null;
       _sleepTimerDeadline = null;
+
+      if (state.currentTrackId != null) {
+        await _driver.setVolume(0);
+      }
       await _driver.pause();
+      if (state.currentTrackId != null) {
+        await _driver.setVolume(state.volume);
+      }
+
       if (!mounted) return;
       state = state.copyWith(
         isPlaying: false,

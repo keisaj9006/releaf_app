@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:releaf_app/features/meditation/data/meditation_catalog.dart';
+import 'package:releaf_app/features/meditation/presentation/meditation_player_screen.dart';
 
 void main() {
   test('Mindfulness Basics is wired for recorded Releaf Guide narration', () {
@@ -10,6 +11,12 @@ void main() {
 
     expect(session, isNotNull);
     expect(session!.steps, hasLength(4));
+    expect(session.hasRecordedNarration, isTrue);
+    expect(session.hasAnyRecordedNarration, isTrue);
+    expect(
+      meditationVoiceSourceLabel(session),
+      contains('Recorded Releaf Guide'),
+    );
 
     expect(
       session.steps.map((step) => step.narrationAssetPath).toList(),
@@ -38,4 +45,22 @@ void main() {
       );
     }
   });
+
+  test('Sessions without recorded narration are labelled as device fallback', () {
+    const catalog = MeditationCatalog();
+    final session = catalog.getById('breath-and-body-4');
+
+    expect(session, isNotNull);
+    expect(session!.hasRecordedNarration, isFalse);
+    expect(session.hasAnyRecordedNarration, isFalse);
+    expect(
+      meditationVoiceSourceLabel(session),
+      'Device English voice fallback · slow pace',
+    );
+    expect(
+      meditationGuidanceSourceEyebrow(session),
+      'GUIDED · DEVICE VOICE',
+    );
+  });
+
 }

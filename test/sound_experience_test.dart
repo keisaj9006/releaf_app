@@ -96,6 +96,34 @@ void main() {
     );
   });
 
+  test('Sleep timer fade preserves the base volume curve', () {
+    expect(
+      soundOutputVolumeForSleepTimer(baseVolume: 0.8),
+      closeTo(0.8, 0.0001),
+    );
+    expect(
+      soundOutputVolumeForSleepTimer(
+        baseVolume: 0.8,
+        remainingSeconds: soundSleepTimerFadeSeconds + 1,
+      ),
+      closeTo(0.8, 0.0001),
+    );
+    expect(
+      soundOutputVolumeForSleepTimer(
+        baseVolume: 0.8,
+        remainingSeconds: 10,
+      ),
+      closeTo(0.4, 0.0001),
+    );
+    expect(
+      soundOutputVolumeForSleepTimer(
+        baseVolume: 0.8,
+        remainingSeconds: 0,
+      ),
+      0,
+    );
+  });
+
   test('Sleep timer stores a visible real-time countdown', () async {
     final preferences = await _preferences();
     final controller = SoundPlayerController(

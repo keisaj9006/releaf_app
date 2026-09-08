@@ -21,6 +21,43 @@ import '../data/meditation_catalog.dart';
 import '../domain/meditation_content.dart';
 import '../domain/meditation_resume_state.dart';
 
+int meditationRemainingAfterSeek({
+  required int durationSeconds,
+  required int remainingSeconds,
+  required int deltaSeconds,
+}) {
+  if (durationSeconds <= 1) {
+    return remainingSeconds.clamp(0, math.max(0, durationSeconds)).toInt();
+  }
+
+  final safeRemaining = remainingSeconds.clamp(1, durationSeconds).toInt();
+  final elapsed = durationSeconds - safeRemaining;
+  final maxElapsed = durationSeconds - 1;
+  final nextElapsed =
+      (elapsed + deltaSeconds).clamp(0, maxElapsed).toInt();
+  return durationSeconds - nextElapsed;
+}
+
+String meditationVoiceSourceLabel(MeditationContent item) {
+  if (item.unguided) return 'No guide voice';
+  if (item.hasRecordedNarration) {
+    return 'Recorded Releaf Guide · female English voice · slow pace';
+  }
+  if (item.hasAnyRecordedNarration) {
+    return 'Recorded Releaf Guide + device voice fallback';
+  }
+  return 'Device English voice fallback · slow pace';
+}
+
+String meditationGuidanceSourceEyebrow(MeditationContent item) {
+  if (item.unguided) return 'UNGUIDED MEDITATION';
+  if (item.hasRecordedNarration) {
+    return 'GUIDED · RECORDED RELEAF GUIDE';
+  }
+  if (item.hasAnyRecordedNarration) return 'GUIDED · MIXED VOICE';
+  return 'GUIDED · DEVICE VOICE';
+}
+
 class MeditationPlayerScreen extends ConsumerStatefulWidget {
   const MeditationPlayerScreen({
     super.key,
@@ -199,15 +236,16 @@ class _MeditationPlayerScreenState
         ref.read(meditationCatalogProvider).getById(widget.meditationId);
     if (item == null || item.durationSeconds <= 1) return;
 
-    final elapsed = item.durationSeconds - _remainingSeconds;
-    final maxElapsed = item.durationSeconds - 1;
-    final nextElapsed =
-        (elapsed + seconds).clamp(0, maxElapsed).toInt();
+    final nextRemaining = meditationRemainingAfterSeek(
+      durationSeconds: item.durationSeconds,
+      remainingSeconds: _remainingSeconds,
+      deltaSeconds: seconds,
+    );
 
     HapticFeedback.selectionClick();
 
     setState(() {
-      _remainingSeconds = item.durationSeconds - nextElapsed;
+      _remainingSeconds = nextRemaining;
     });
     if (_running) {
       _deadline = SessionDeadlineClock.deadlineFor(_remainingSeconds);
@@ -356,8 +394,7 @@ class _MeditationPlayerScreenState
                         key: const Key('meditation-voice-control'),
                         icon: Icons.record_voice_over_outlined,
                         title: 'Guide voice',
-                        subtitle:
-                            'Releaf Guide · female English voice · slow pace',
+                        subtitle: meditationVoiceSourceLabel(item),
                         trailing: Switch.adaptive(
                           key: const Key('meditation-voice-toggle'),
                           value: voice.enabled,
@@ -623,8 +660,8 @@ class _MeditationPlayerScreenState
                               hasAmbience: item.backgroundSoundId != null,
                               ambienceEnabled: audioState.enabled,
                               compact: compact,
-                              onBack15: () => _seekBy(-15),
-                              onForward15: () => _seekBy(15),
+                              onBack10: () => _seekBy(-10),
+                              onForward10: () => _seekBy(10),
                               onPrimary: () {
                                 unawaited(_togglePause());
                               },
@@ -711,9 +748,7 @@ class _MeditationHeader extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                item.unguided
-                    ? 'UNGUIDED MEDITATION'
-                    : 'GUIDED · RELEAF VOICE',
+                meditationGuidanceSourceEyebrow(item),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: ReleafTypography.eyebrow.copyWith(
@@ -975,8 +1010,8 @@ class _MeditationPlaybackDock extends StatelessWidget {
     required this.hasAmbience,
     required this.ambienceEnabled,
     required this.compact,
-    required this.onBack15,
-    required this.onForward15,
+    required this.onBack10,
+    required this.onForward10,
     required this.onPrimary,
     required this.onVoice,
     required this.onCaptions,
@@ -997,8 +1032,8 @@ class _MeditationPlaybackDock extends StatelessWidget {
   final bool hasAmbience;
   final bool ambienceEnabled;
   final bool compact;
-  final VoidCallback onBack15;
-  final VoidCallback onForward15;
+  final VoidCallback onBack10;
+  final VoidCallback onForward10;
   final VoidCallback onPrimary;
   final VoidCallback onVoice;
   final VoidCallback onCaptions;
@@ -1078,10 +1113,10 @@ class _MeditationPlaybackDock extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               _SeekControl(
-                key: const Key('meditation-back-15'),
+                key: const Key('meditation-back-10'),
                 icon: Icons.replay_10_rounded,
-                label: '15',
-                onPressed: completed ? null : onBack15,
+                label: '10',
+                onPressed: completed ? null : onBack10,
               ),
               SizedBox(width: compact ? 22 : 34),
               Material(
@@ -1108,10 +1143,10 @@ class _MeditationPlaybackDock extends StatelessWidget {
               ),
               SizedBox(width: compact ? 22 : 34),
               _SeekControl(
-                key: const Key('meditation-forward-15'),
+                key: const Key('meditation-forward-10'),
                 icon: Icons.forward_10_rounded,
-                label: '15',
-                onPressed: completed ? null : onForward15,
+                label: '10',
+                onPressed: completed ? null : onForward10,
               ),
             ],
           ),
