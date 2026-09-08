@@ -561,7 +561,7 @@ void main() {
     expect(find.text('IS THE NUMBER ODD?'), findsOneWidget);
   });
 
-  test('Persistent Brain levels advance from completed sessions', () {
+  test('Persistent Brain levels advance after two completed sessions per step', () {
     final now = DateTime.now();
     final state = BrainTrainingState(
       records: [
@@ -579,7 +579,8 @@ void main() {
     );
 
     expect(state.completionCountFor('sequence_echo'), 2);
-    expect(state.trainingLevelFor('sequence_echo'), 3);
+    expect(state.trainingLevelFor('sequence_echo'), 2);
+    expect(state.sessionsUntilNextTrainingLevelFor('sequence_echo'), 2);
     expect(state.trainingLevelFor('broken_mirror'), 1);
     expect(state.trainingLevelFor('labyrinth'), 1);
     expect(state.trainingLevelFor('math_race'), 1);
@@ -598,8 +599,12 @@ void main() {
     SharedPreferences.setMockInitialValues({});
     final preferences = await SharedPreferences.getInstance();
     final controller = BrainTrainingController(preferences);
-    await controller.recordCompletion(gameId: 'sequence_echo', score: 300);
-    await controller.recordCompletion(gameId: 'sequence_echo', score: 400);
+    for (var index = 0; index < 4; index++) {
+      await controller.recordCompletion(
+        gameId: 'sequence_echo',
+        score: 300 + (index * 50),
+      );
+    }
     controller.dispose();
 
     await tester.pumpWidget(
@@ -628,7 +633,7 @@ void main() {
     final preferences = await SharedPreferences.getInstance();
     final controller = BrainTrainingController(preferences);
 
-    for (var index = 0; index < 3; index++) {
+    for (var index = 0; index < 6; index++) {
       await controller.recordCompletion(gameId: 'memory', score: 300 + index);
     }
     controller.dispose();
@@ -857,7 +862,7 @@ void main() {
     SharedPreferences.setMockInitialValues({});
     final preferences = await SharedPreferences.getInstance();
     final controller = BrainTrainingController(preferences);
-    for (var index = 0; index < 4; index++) {
+    for (var index = 0; index < 8; index++) {
       await controller.recordCompletion(gameId: 'broken_mirror');
     }
     controller.dispose();
@@ -1639,6 +1644,17 @@ void main() {
 
     expect(find.byType(GameResultScreen), findsOneWidget);
     expect(find.text('123'), findsOneWidget);
+    expect(find.byKey(const Key('brain-training-value')), findsOneWidget);
+    expect(find.text('WHAT YOU TRAINED'), findsOneWidget);
+    expect(
+      find.textContaining('Recall locations and recognise visual pairs'),
+      findsOneWidget,
+    );
+    expect(find.text('TRAINING LEVEL 1'), findsOneWidget);
+    expect(
+      find.textContaining('1 more completed session at this training level'),
+      findsOneWidget,
+    );
     expect(container.read(leavesNotifierProvider).brainDone, isTrue);
     expect(container.read(leavesNotifierProvider).totalLeaves, 2);
 
