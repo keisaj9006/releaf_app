@@ -8,6 +8,7 @@ class ResetSessionStep {
     required this.guidance,
     required this.durationSeconds,
     this.advanceActionLabel,
+    this.narrationAssetPath,
   }) : assert(label != ''),
        assert(guidance != ''),
        assert(durationSeconds > 0);
@@ -16,6 +17,7 @@ class ResetSessionStep {
   final String guidance;
   final int durationSeconds;
   final String? advanceActionLabel;
+  final String? narrationAssetPath;
 }
 
 class ResetSessionProgram {
