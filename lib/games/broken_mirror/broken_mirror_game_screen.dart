@@ -43,8 +43,16 @@ class _BrokenMirrorGameScreenState extends ConsumerState<BrokenMirrorGameScreen>
 
   int get _levelIndex => (widget.level - 1).clamp(0, 11).toInt();
 
+  int get _fragmentCount {
+    if (widget.level >= 12) return 8;
+    if (widget.level >= 10) return 7;
+    if (widget.level >= 7) return 6;
+    if (widget.level >= 4) return 5;
+    return 4;
+  }
+
   double get _snapFraction =>
-      (0.12 - (_levelIndex * 0.004)).clamp(0.075, 0.12).toDouble();
+      (0.13 - (_levelIndex * 0.0035)).clamp(0.09, 0.13).toDouble();
 
   @override
   void initState() {
@@ -131,15 +139,42 @@ class _BrokenMirrorGameScreenState extends ConsumerState<BrokenMirrorGameScreen>
         ],
         targetCenter: const Offset(0.55, 0.68),
       ),
+      _Shard(
+        id: 6,
+        polygon: const [
+          Offset(0.80, 0.12),
+          Offset(0.92, 0.18),
+          Offset(0.90, 0.44),
+          Offset(0.72, 0.28),
+        ],
+        targetCenter: const Offset(0.83, 0.27),
+      ),
+      _Shard(
+        id: 7,
+        polygon: const [
+          Offset(0.70, 0.52),
+          Offset(0.90, 0.46),
+          Offset(0.88, 0.78),
+          Offset(0.78, 0.82),
+        ],
+        targetCenter: const Offset(0.81, 0.65),
+      ),
     ];
 
+    final random = math.Random(7301 + (widget.level * 997));
     _shards = shards
-        .map((s) => s.copyWith(
-      position: Offset(
-        20 + math.Random().nextDouble() * 120,
-        20 + math.Random().nextDouble() * 120,
-      ),
-    ))
+        .take(_fragmentCount)
+        .toList(growable: false)
+        .asMap()
+        .entries
+        .map(
+          (entry) => entry.value.copyWith(
+            position: Offset(
+              18 + ((entry.key % 3) * 54) + (random.nextDouble() * 14),
+              18 + ((entry.key ~/ 3) * 54) + (random.nextDouble() * 14),
+            ),
+          ),
+        )
         .toList();
   }
 
@@ -385,8 +420,8 @@ class _BrokenMirrorGameScreenState extends ConsumerState<BrokenMirrorGameScreen>
                             const SizedBox(height: ReleafSpacing.lg),
                             Text(
                               widget.enableTimer
-                                  ? 'Level ${widget.level}: place every fragment before time runs out.'
-                                  : 'Level ${widget.level}: drag each fragment into its matching place.',
+                                  ? 'Level ${widget.level}: place all ${_shards.length} fragments before time runs out.'
+                                  : 'Level ${widget.level}: place all ${_shards.length} fragments into their matching positions.',
                               textAlign: TextAlign.center,
                               style: ReleafTypography.body.copyWith(
                                 color: ReleafColors.textPrimary.withValues(
@@ -513,6 +548,41 @@ class _BoardFrame extends StatelessWidget {
 }
 
 // ---------------- Game model & painters ----------------
+
+@visibleForTesting
+class BrokenMirrorLevelProfile {
+  const BrokenMirrorLevelProfile({
+    required this.level,
+    required this.fragmentCount,
+    required this.snapFraction,
+  });
+
+  final int level;
+  final int fragmentCount;
+  final double snapFraction;
+}
+
+@visibleForTesting
+BrokenMirrorLevelProfile brokenMirrorLevelProfileForTesting(int rawLevel) {
+  final level = rawLevel.clamp(1, 12).toInt();
+  final index = level - 1;
+  final fragmentCount = level >= 12
+      ? 8
+      : level >= 10
+          ? 7
+          : level >= 7
+              ? 6
+              : level >= 4
+                  ? 5
+                  : 4;
+
+  return BrokenMirrorLevelProfile(
+    level: level,
+    fragmentCount: fragmentCount,
+    snapFraction:
+        (0.13 - (index * 0.0035)).clamp(0.09, 0.13).toDouble(),
+  );
+}
 
 class _Shard {
   final int id;
