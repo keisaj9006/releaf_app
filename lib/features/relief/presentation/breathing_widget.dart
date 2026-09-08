@@ -9,6 +9,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../meditation/application/meditation_voice_controller.dart';
 import '../../progress/data/leaves_repository.dart';
+import '../../../routing/app_routes.dart';
 import '../../../theme/releaf_design_tokens.dart';
 import '../../../theme/widgets/releaf_artwork.dart';
 import '../../../theme/widgets/releaf_body_release_visual.dart';
@@ -458,7 +459,12 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
   void _abortSession() {
     _timer?.cancel();
     unawaited(_stopSessionAudio());
-    if (mounted) context.pop();
+    if (!mounted) return;
+    if (context.canPop()) {
+      context.pop();
+    } else {
+      context.go(AppRoutes.relief);
+    }
   }
 
   void _activateSimplifiedPath() {
@@ -541,7 +547,12 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
   }
 
   void _submitFeedbackAndClose(bool helpedALot) {
-    if (mounted) context.pop(helpedALot);
+    if (!mounted) return;
+    if (context.canPop()) {
+      context.pop(helpedALot);
+    } else {
+      context.go(AppRoutes.relief);
+    }
   }
 
   @override
