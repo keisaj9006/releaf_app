@@ -641,6 +641,40 @@ void main() {
     await tester.pump();
   });
 
+  test('Labyrinth progression grows through maze complexity, not ball speed', () {
+    final profiles = List<LabyrinthLevelProfile>.generate(
+      12,
+      (index) => labyrinthLevelProfileForTesting(index + 1),
+    );
+
+    for (var index = 1; index < profiles.length; index++) {
+      expect(
+        profiles[index].columns,
+        greaterThanOrEqualTo(profiles[index - 1].columns),
+      );
+      expect(
+        profiles[index].rows,
+        greaterThanOrEqualTo(profiles[index - 1].rows),
+      );
+    }
+
+    expect(
+      profiles.last.shortestPathMoves,
+      greaterThan(profiles.first.shortestPathMoves + 20),
+    );
+    expect(
+      profiles.last.shortestPathTurns,
+      greaterThanOrEqualTo(profiles.first.shortestPathTurns),
+    );
+    expect(profiles.first.timeLimitSeconds, greaterThanOrEqualTo(50));
+    expect(profiles.last.timeLimitSeconds, lessThanOrEqualTo(150));
+
+    for (final profile in profiles) {
+      expect(profile.shortestPathMoves, greaterThan(0), reason: 'L${profile.level}');
+      expect(profile.deadEnds, greaterThan(0), reason: 'L${profile.level}');
+    }
+  });
+
   testWidgets('Labyrinth exposes progressive level and touch fallback', (
     WidgetTester tester,
   ) async {
