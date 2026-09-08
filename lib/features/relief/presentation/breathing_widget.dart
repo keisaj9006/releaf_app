@@ -116,8 +116,11 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
       final deadline = _deadline;
       if (deadline == null) return;
 
-      final nextRemaining =
+      final wallClockRemaining =
           SessionDeadlineClock.remainingSeconds(deadline);
+      final timerTickRemaining = math.max(0, _remainingSeconds - 1);
+      final nextRemaining =
+          math.min(wallClockRemaining, timerTickRemaining);
 
       if (nextRemaining > 0) {
         if (nextRemaining != _remainingSeconds) {
