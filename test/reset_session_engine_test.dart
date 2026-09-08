@@ -72,6 +72,17 @@ void main() {
     });
   });
 
+  test('Reset session steps may point to recorded narration assets', () {
+    const step = ResetSessionStep(
+      label: 'Arrive',
+      guidance: 'Settle in.',
+      durationSeconds: 10,
+      narrationAssetPath: 'narration/reset/arrive.mp3',
+    );
+
+    expect(step.narrationAssetPath, 'narration/reset/arrive.mp3');
+  });
+
   group('ResetSessionProgram', () {
     test('guided program resolves uneven step durations', () {
       const program = ResetSessionProgram.guided(
