@@ -788,7 +788,11 @@ void main() {
       paused.resumeRoute,
       AppRoutes.meditationSessionFor('mindfulness-basics-2'),
     );
-    expect(paused.extra, isA<MeditationResumeState>());
+    expect(paused.extra, isA<Map<String, dynamic>>());
+    final resumePayload = paused.extra! as Map<String, dynamic>;
+    expect(resumePayload['type'], 'meditation');
+    expect(resumePayload['remainingSeconds'], isA<int>());
+    expect(resumePayload['remainingSeconds'], greaterThan(0));
   });
 
   testWidgets('Direct meditation close falls back to Meditation hub', (
