@@ -371,6 +371,13 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen>
 
   void _togglePause() {
     if (_finished) return;
+
+    final resuming = _paused;
+    if (resuming) {
+      _velocity = Offset.zero;
+      _resetMotionCalibration();
+    }
+
     setState(() {
       _paused = !_paused;
       if (_paused) _velocity = Offset.zero;
@@ -380,10 +387,10 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen>
   void _restart() {
     Navigator.of(context).pop();
     _countdown?.cancel();
+    _resetMotionCalibration();
     setState(() {
       _position = _level.start;
       _velocity = Offset.zero;
-      _tilt = Offset.zero;
       _timeLeft = _level.timeLimitSeconds;
       _wallHits = 0;
       _started = false;
