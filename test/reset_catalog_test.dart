@@ -38,6 +38,9 @@ void main() {
     'longer-exhale',
     'box-breathing',
     'sleep-downshift',
+    'energy-up-breath',
+    'focus-breath',
+    'anxiety-slow-cycle',
     'wired-steady',
     'tension-body-scan',
     'overwhelm-stability',
@@ -204,6 +207,27 @@ void main() {
     expect(sleep.program?.breathPattern?.holdAfterExhaleSeconds, 0);
     expect(sleep.methodLabel, contains('4–7–8'));
     expect(sleep.safetyNote, isNotNull);
+  });
+
+  test('remaining Breath Programs expose distinct pacing and education', () {
+    final energy = catalog.getById('energy-up-breath')!;
+    final focus = catalog.getById('focus-breath')!;
+    final anxiety = catalog.getById('anxiety-slow-cycle')!;
+
+    expect(energy.program?.breathPattern?.inhaleSeconds, 3);
+    expect(energy.program?.breathPattern?.exhaleSeconds, 3);
+    expect(energy.methodLabel, contains('3–3'));
+    expect(energy.safetyNote, contains('hyperventilation'));
+
+    expect(focus.program?.breathPattern?.inhaleSeconds, 4);
+    expect(focus.program?.breathPattern?.exhaleSeconds, 4);
+    expect(focus.methodLabel, contains('4–4'));
+    expect(focus.bestFor, isNotNull);
+
+    expect(anxiety.program?.breathPattern?.inhaleSeconds, 5);
+    expect(anxiety.program?.breathPattern?.exhaleSeconds, 7);
+    expect(anxiety.methodLabel, contains('5–7'));
+    expect(anxiety.whyItMayHelp, contains('5 breaths per minute'));
   });
 
   test('3-minute Deep Reset remains a legacy-compatible premium mapping', () {
