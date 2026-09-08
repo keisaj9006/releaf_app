@@ -519,6 +519,23 @@ void main() {
     expect(router.routeInformationProvider.value.uri.path, AppRoutes.brain);
   });
 
+  test('Rule Shift progression adds rules and increases switching pressure', () {
+    final l1 = ruleShiftLevelProfileForTesting(1);
+    final l4 = ruleShiftLevelProfileForTesting(4);
+    final l7 = ruleShiftLevelProfileForTesting(7);
+    final l12 = ruleShiftLevelProfileForTesting(12);
+
+    expect(l1.ruleCount, 2);
+    expect(l1.switchBlockSize, 3);
+    expect(l4.ruleCount, 3);
+    expect(l4.switchBlockSize, 2);
+    expect(l7.ruleCount, 4);
+    expect(l7.switchBlockSize, 1);
+    expect(l12.ruleCount, 4);
+    expect(l12.switchBlockSize, 1);
+    expect(l12.trialCount, greaterThan(l1.trialCount));
+  });
+
   testWidgets('Rule Shift is a real playable Brain exercise', (
     WidgetTester tester,
   ) async {
