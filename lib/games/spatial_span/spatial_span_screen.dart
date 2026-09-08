@@ -23,7 +23,8 @@ class SpatialSpanScreen extends StatefulWidget {
   State<SpatialSpanScreen> createState() => _SpatialSpanScreenState();
 }
 
-class _SpatialSpanScreenState extends State<SpatialSpanScreen> {
+class _SpatialSpanScreenState extends State<SpatialSpanScreen>
+    with WidgetsBindingObserver {
   static const _accent = Color(0xFF82C9E8);
   static const _roundsPerSession = 3;
 
@@ -89,12 +90,49 @@ class _SpatialSpanScreenState extends State<SpatialSpanScreen> {
         BrainDifficulty.hard => 3,
       };
 
-  bool get _canChangeDifficulty => _phase == _SpatialSpanPhase.ready && _round == 1;
+  bool get _canChangeDifficulty =>
+      _phase == _SpatialSpanPhase.ready && _round == 1;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
 
   @override
   void dispose() {
     _playbackToken++;
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.inactive &&
+        state != AppLifecycleState.paused &&
+        state != AppLifecycleState.hidden &&
+        state != AppLifecycleState.detached) {
+      return;
+    }
+
+    if (_phase != _SpatialSpanPhase.showing &&
+        _phase != _SpatialSpanPhase.input) {
+      return;
+    }
+
+    _playbackToken++;
+    if (!mounted) return;
+
+    final partialCorrectTaps = _input.length;
+    setState(() {
+      _correctTaps = math.max(0, _correctTaps - partialCorrectTaps);
+      _sequence = const [];
+      _input.clear();
+      _activeCell = null;
+      _tapLocked = false;
+      _phase = _SpatialSpanPhase.ready;
+      _feedback = 'Sequence paused. Show the spatial path again when ready.';
+    });
   }
 
   void _changeDifficulty(BrainDifficulty difficulty) {
