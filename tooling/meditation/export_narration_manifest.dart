@@ -5,6 +5,7 @@ import 'package:releaf_app/features/meditation/data/meditation_catalog.dart';
 
 const _guideProfile = <String, Object?>{
   'name': 'Releaf Guide',
+  'provider': 'ElevenCreative',
   'voice': 'selected female British-English meditation narrator',
   'delivery': 'natural, warm, calm, intimate, premium; no whisper or ASMR',
   'speedReference': 0.75,

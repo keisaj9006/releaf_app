@@ -23,7 +23,7 @@ Use one narrator consistently across the guided library.
 - no obvious synthetic cadence
 - reference pace: **0.75×**
 
-The exact provider voice ID was not preserved in the project record. Do not
+The selected narration provider is **ElevenCreative**. The exact provider voice ID was not preserved in the project record. Do not
 batch-render the remaining library until that exact voice is recovered or one
 replacement voice is explicitly locked as the new canonical Releaf Guide.
 
