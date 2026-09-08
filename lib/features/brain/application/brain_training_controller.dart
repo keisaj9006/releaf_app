@@ -22,6 +22,7 @@ const progressiveBrainGameIds = <String>{
 };
 
 const maxBrainTrainingLevel = 12;
+const brainSessionsPerTrainingLevel = 2;
 
 bool usesProgressiveBrainLevel(String gameId) =>
     progressiveBrainGameIds.contains(gameId);
@@ -110,9 +111,20 @@ class BrainTrainingState {
 
   int trainingLevelFor(String gameId) {
     if (!usesProgressiveBrainLevel(gameId)) return 1;
-    return (completionCountFor(gameId) + 1)
+    final completed = completionCountFor(gameId);
+    return (1 + (completed ~/ brainSessionsPerTrainingLevel))
         .clamp(1, maxBrainTrainingLevel)
         .toInt();
+  }
+
+  int sessionsUntilNextTrainingLevelFor(String gameId) {
+    if (!usesProgressiveBrainLevel(gameId)) return 0;
+    final level = trainingLevelFor(gameId);
+    if (level >= maxBrainTrainingLevel) return 0;
+
+    final completed = completionCountFor(gameId);
+    final withinLevel = completed % brainSessionsPerTrainingLevel;
+    return brainSessionsPerTrainingLevel - withinLevel;
   }
 
   bool playedToday(String gameId) {
