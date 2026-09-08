@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/session/session_deadline_clock.dart';
 import '../../../core/session/session_manager.dart';
 import '../../../routing/app_routes.dart';
 import '../../../theme/app_theme.dart';
@@ -38,6 +39,7 @@ class MeditationPlayerScreen extends ConsumerStatefulWidget {
 class _MeditationPlayerScreenState
     extends ConsumerState<MeditationPlayerScreen> {
   Timer? _timer;
+  DateTime? _deadline;
   int _remainingSeconds = 0;
   bool _running = true;
   int _lastSpokenStepIndex = -1;
@@ -94,10 +96,18 @@ class _MeditationPlayerScreenState
 
   void _startTimer() {
     _timer?.cancel();
-    if (!_running || _remainingSeconds <= 0) return;
+    if (!_running || _remainingSeconds <= 0) {
+      _deadline = null;
+      return;
+    }
+
+    _deadline = SessionDeadlineClock.deadlineFor(_remainingSeconds);
 
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (!mounted || !_running) return;
+
+      final deadline = _deadline;
+      if (deadline == null) return;
 
       final item =
           ref.read(meditationCatalogProvider).getById(widget.meditationId);
@@ -107,9 +117,12 @@ class _MeditationPlayerScreenState
               item,
               item.durationSeconds - _remainingSeconds,
             );
+      final nextRemaining =
+          SessionDeadlineClock.remainingSeconds(deadline);
 
-      if (_remainingSeconds <= 1) {
+      if (nextRemaining <= 0) {
         timer.cancel();
+        _deadline = null;
         HapticFeedback.mediumImpact();
 
         setState(() {
@@ -135,7 +148,9 @@ class _MeditationPlayerScreenState
         return;
       }
 
-      setState(() => _remainingSeconds -= 1);
+      if (nextRemaining != _remainingSeconds) {
+        setState(() => _remainingSeconds = nextRemaining);
+      }
 
       if (item != null && !item.unguided) {
         final nextStepIndex = _stepIndexAt(
@@ -168,6 +183,7 @@ class _MeditationPlayerScreenState
       unawaited(_announceCurrentStep(force: true));
     } else {
       _timer?.cancel();
+      _deadline = null;
       unawaited(ambience.pauseForSession());
       unawaited(voice.stop());
     }
@@ -190,6 +206,9 @@ class _MeditationPlayerScreenState
     setState(() {
       _remainingSeconds = item.durationSeconds - nextElapsed;
     });
+    if (_running) {
+      _deadline = SessionDeadlineClock.deadlineFor(_remainingSeconds);
+    }
 
     _lastSpokenStepIndex = -1;
     if (_running && !item.unguided) {
@@ -238,6 +257,7 @@ class _MeditationPlayerScreenState
     if (_exiting) return;
     _exiting = true;
     _timer?.cancel();
+    _deadline = null;
 
     final item =
         ref.read(meditationCatalogProvider).getById(widget.meditationId);
