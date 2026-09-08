@@ -457,6 +457,29 @@ void main() {
     expect(find.byType(NavigationBar), findsNothing);
   });
 
+  testWidgets('Direct Meditation and Sleep back fall back to Home', (
+    WidgetTester tester,
+  ) async {
+    for (final target in <(String, Key)>[
+      (AppRoutes.meditate, const Key('meditation-back')),
+      (AppRoutes.sleep, const Key('sleep-back')),
+    ]) {
+      await _pumpRoute(
+        tester,
+        location: target.$1,
+        preferences: await _preferences(),
+      );
+
+      await tester.tap(find.byKey(target.$2));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      expect(find.text('RELEAF'), findsOneWidget);
+      expect(find.byType(NavigationBar), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    }
+  });
+
   testWidgets('Sound is the fourth primary destination and opens wellbeing spaces', (
     WidgetTester tester,
   ) async {
