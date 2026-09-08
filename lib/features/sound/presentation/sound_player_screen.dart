@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:audio_session/audio_session.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/audio/releaf_audio_session.dart';
 import '../../../routing/app_routes.dart';
 import '../../../theme/app_theme.dart';
 import '../../../theme/releaf_design_tokens.dart';
@@ -28,15 +30,67 @@ class SoundPlayerScreen extends ConsumerStatefulWidget {
 class _SoundPlayerScreenState extends ConsumerState<SoundPlayerScreen>
     with WidgetsBindingObserver {
   bool _started = false;
+  StreamSubscription<AudioInterruptionEvent>? _interruptionSubscription;
+  StreamSubscription<void>? _becomingNoisySubscription;
+  bool _resumeAfterInterruption = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    unawaited(_configureAudioSession());
+  }
+
+  Future<void> _configureAudioSession() async {
+    final session = await configureReleafAudioSession(ReleafAudioMode.sound);
+    if (!mounted) return;
+
+    _interruptionSubscription?.cancel();
+    _becomingNoisySubscription?.cancel();
+
+    _interruptionSubscription =
+        session.interruptionEventStream.listen(_handleAudioInterruption);
+    _becomingNoisySubscription =
+        session.becomingNoisyEventStream.listen((_) {
+      _resumeAfterInterruption = false;
+      unawaited(ref.read(soundPlayerControllerProvider.notifier).pause());
+    });
+  }
+
+  void _handleAudioInterruption(AudioInterruptionEvent event) {
+    final controller = ref.read(soundPlayerControllerProvider.notifier);
+
+    if (event.begin) {
+      if (!releafShouldPauseForInterruption(
+        ReleafAudioMode.sound,
+        event.type,
+      )) {
+        return;
+      }
+
+      final wasPlaying = ref.read(soundPlayerControllerProvider).isPlaying;
+      _resumeAfterInterruption = wasPlaying;
+      if (wasPlaying) {
+        unawaited(controller.pause());
+      }
+      return;
+    }
+
+    final shouldResume = _resumeAfterInterruption &&
+        releafShouldAutoResumeAfterInterruption(
+          ReleafAudioMode.sound,
+          event.type,
+        );
+    _resumeAfterInterruption = false;
+    if (shouldResume) {
+      unawaited(controller.resume());
+    }
   }
 
   @override
   void dispose() {
+    _interruptionSubscription?.cancel();
+    _becomingNoisySubscription?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }

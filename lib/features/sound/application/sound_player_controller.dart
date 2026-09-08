@@ -240,6 +240,11 @@ class SoundPlayerController extends StateNotifier<SoundPlayerState> {
     await _driver.pause();
   }
 
+  Future<void> resume() async {
+    if (state.currentTrackId == null || state.isPlaying) return;
+    await _driver.resume();
+  }
+
   Future<void> seekRelative(Duration delta) async {
     if (state.currentTrackId == null) return;
 

@@ -15,6 +15,7 @@ import 'package:releaf_app/routing/app_routes.dart';
 class _FakeSoundPlaybackDriver implements SoundPlaybackDriver {
   final List<double> volumeCalls = <double>[];
   int pauseCalls = 0;
+  int resumeCalls = 0;
 
   @override
   Stream<Duration> get onDurationChanged => const Stream<Duration>.empty();
@@ -38,7 +39,9 @@ class _FakeSoundPlaybackDriver implements SoundPlaybackDriver {
   Future<void> playAsset(String assetPath) async {}
 
   @override
-  Future<void> resume() async {}
+  Future<void> resume() async {
+    resumeCalls += 1;
+  }
 
   @override
   Future<void> pause() async {
@@ -101,6 +104,24 @@ void main() {
       canAccessSoundTrack(free, isPremiumUser: false),
       isTrue,
     );
+  });
+
+  test('Sound controller can explicitly resume the interrupted track', () async {
+    final preferences = await _preferences();
+    final driver = _FakeSoundPlaybackDriver();
+    final controller = SoundPlayerController(
+      const SoundCatalog(),
+      preferences,
+      driver: driver,
+    );
+    addTearDown(controller.dispose);
+
+    final track = const SoundCatalog().getById('deep-drift')!;
+    await controller.play(track);
+    await controller.resume();
+
+    expect(controller.state.currentTrackId, track.id);
+    expect(driver.resumeCalls, 1);
   });
 
   test('Sleep timer fade preserves the base volume curve', () {

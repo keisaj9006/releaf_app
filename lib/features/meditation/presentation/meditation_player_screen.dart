@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:audio_session/audio_session.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/audio/releaf_audio_session.dart';
 import '../../../core/session/session_deadline_clock.dart';
 import '../../../core/session/session_manager.dart';
 import '../../../routing/app_routes.dart';
@@ -82,6 +84,9 @@ class _MeditationPlayerScreenState
   int _lastSpokenStepIndex = -1;
   bool _allowPop = false;
   bool _exiting = false;
+  StreamSubscription<AudioInterruptionEvent>? _interruptionSubscription;
+  StreamSubscription<void>? _becomingNoisySubscription;
+  bool _resumeAfterInterruption = false;
 
   @override
   void initState() {
@@ -97,6 +102,7 @@ class _MeditationPlayerScreenState
         : resumed.clamp(1, fullDuration).toInt();
     _running = widget.resumeState == null;
     _startTimer();
+    unawaited(_configureAudioSession());
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted || item == null) return;
@@ -129,6 +135,68 @@ class _MeditationPlayerScreenState
         unawaited(_announceCurrentStep(force: true));
       }
     });
+  }
+
+  Future<void> _configureAudioSession() async {
+    final session =
+        await configureReleafAudioSession(ReleafAudioMode.guidedMeditation);
+    if (!mounted) return;
+
+    _interruptionSubscription?.cancel();
+    _becomingNoisySubscription?.cancel();
+
+    _interruptionSubscription =
+        session.interruptionEventStream.listen(_handleAudioInterruption);
+    _becomingNoisySubscription =
+        session.becomingNoisyEventStream.listen((_) {
+      _resumeAfterInterruption = false;
+      unawaited(_pauseForSystemInterruption());
+    });
+  }
+
+  void _handleAudioInterruption(AudioInterruptionEvent event) {
+    if (event.begin) {
+      if (!releafShouldPauseForInterruption(
+        ReleafAudioMode.guidedMeditation,
+        event.type,
+      )) {
+        return;
+      }
+
+      _resumeAfterInterruption = _running;
+      if (_running) {
+        unawaited(_pauseForSystemInterruption());
+      }
+      return;
+    }
+
+    final shouldResume = _resumeAfterInterruption &&
+        releafShouldAutoResumeAfterInterruption(
+          ReleafAudioMode.guidedMeditation,
+          event.type,
+        );
+    _resumeAfterInterruption = false;
+    if (shouldResume) {
+      unawaited(_resumeAfterSystemInterruption());
+    }
+  }
+
+  Future<void> _pauseForSystemInterruption() async {
+    if (!_running || _remainingSeconds <= 0) return;
+    await _setSessionRunning(false, userInitiated: false);
+  }
+
+  Future<void> _resumeAfterSystemInterruption() async {
+    if (_running || _remainingSeconds <= 0) return;
+    await _setSessionRunning(true, userInitiated: false);
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _interruptionSubscription?.cancel();
+    _becomingNoisySubscription?.cancel();
+    super.dispose();
   }
 
   void _startTimer() {
@@ -210,14 +278,30 @@ class _MeditationPlayerScreenState
       return;
     }
 
-    HapticFeedback.selectionClick();
-    setState(() => _running = !_running);
+    await _setSessionRunning(!_running, userInitiated: true);
+  }
+
+  Future<void> _setSessionRunning(
+    bool running, {
+    required bool userInitiated,
+  }) async {
+    if (_remainingSeconds <= 0 || _running == running) return;
+
+    if (userInitiated) {
+      HapticFeedback.selectionClick();
+    }
+
+    if (mounted) {
+      setState(() => _running = running);
+    } else {
+      _running = running;
+    }
 
     final ambience =
         ref.read(meditationAudioControllerProvider.notifier);
     final voice = ref.read(meditationVoiceControllerProvider.notifier);
 
-    if (_running) {
+    if (running) {
       _startTimer();
       unawaited(ambience.resumeForSession());
       unawaited(_announceCurrentStep(force: true));
