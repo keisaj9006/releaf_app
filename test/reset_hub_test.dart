@@ -313,7 +313,12 @@ void main() {
 
     final sessionCard =
         find.byKey(const Key('reset-session-equal-rhythm'));
-    await tester.ensureVisible(sessionCard);
+    await tester.dragUntilVisible(
+      sessionCard,
+      find.byType(CustomScrollView).first,
+      const Offset(0, -280),
+    );
+    await tester.pumpAndSettle();
     await tester.tap(sessionCard);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
@@ -402,6 +407,24 @@ void main() {
 
     expect(find.text('02:00'), findsOneWidget);
     expect(find.text('Unlock Premium'), findsNothing);
+  });
+
+  testWidgets('Breathing guide remains readable on a narrow phone', (
+    WidgetTester tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(320, 760));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await _pumpResetHub(tester, preferences: await _preferences());
+
+    await tester.tap(find.byKey(const Key('reset-category-breath')));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const Key('reset-breathing-method-guide')),
+      findsOneWidget,
+    );
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('Reset remains overflow-free on a narrow phone', (
