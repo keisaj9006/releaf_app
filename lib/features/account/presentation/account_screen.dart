@@ -388,7 +388,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                               ],
                               const SizedBox(height: ReleafSpacing.lg),
                               Text(
-                                'Your account keeps identity and Premium access consistent across devices. Emergency support remains available without a paywall.',
+                                'Your account keeps identity and Premium access consistent across devices. Brain, Reset and meditation progress currently stays on this device and is not a cloud backup. Emergency support remains available without a paywall.',
                                 textAlign: TextAlign.center,
                                 style: ReleafTypography.meta.copyWith(
                                   color: ReleafColors.textMuted,

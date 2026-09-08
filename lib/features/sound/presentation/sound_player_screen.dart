@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -24,8 +25,29 @@ class SoundPlayerScreen extends ConsumerStatefulWidget {
   ConsumerState<SoundPlayerScreen> createState() => _SoundPlayerScreenState();
 }
 
-class _SoundPlayerScreenState extends ConsumerState<SoundPlayerScreen> {
+class _SoundPlayerScreenState extends ConsumerState<SoundPlayerScreen>
+    with WidgetsBindingObserver {
   bool _started = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed) return;
+    unawaited(
+      ref.read(soundPlayerControllerProvider.notifier).syncSleepTimerNow(),
+    );
+  }
 
   @override
   void didChangeDependencies() {

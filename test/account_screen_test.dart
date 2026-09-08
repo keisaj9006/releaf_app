@@ -264,5 +264,13 @@ void main() {
     expect(find.byKey(const Key('account-sign-out')), findsOneWidget);
     expect(find.byKey(const Key('account-delete')), findsOneWidget);
     expect(find.byKey(const Key('account-privacy')), findsOneWidget);
+    expect(
+      find.textContaining('progress currently stays on this device'),
+      findsOneWidget,
+    );
+    expect(
+      find.textContaining('not a cloud backup'),
+      findsOneWidget,
+    );
   });
 }

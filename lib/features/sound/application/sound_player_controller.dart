@@ -155,7 +155,9 @@ class SoundPlayerController extends StateNotifier<SoundPlayerState> {
     this._catalog,
     this._prefs, {
     SoundPlaybackDriver? driver,
+    DateTime Function()? now,
   })  : _driver = driver ?? AudioplayersSoundPlaybackDriver(),
+        _now = now ?? DateTime.now,
         super(
           SoundPlayerState(
             favoriteIds:
@@ -186,6 +188,7 @@ class SoundPlayerController extends StateNotifier<SoundPlayerState> {
   final SoundCatalog _catalog;
   final SharedPreferences _prefs;
   final SoundPlaybackDriver _driver;
+  final DateTime Function() _now;
 
   StreamSubscription<Duration>? _durationSubscription;
   StreamSubscription<Duration>? _positionSubscription;
@@ -306,7 +309,7 @@ class SoundPlayerController extends StateNotifier<SoundPlayerState> {
     }
 
     final totalSeconds = minutes * 60;
-    _sleepTimerDeadline = DateTime.now().add(Duration(minutes: minutes));
+    _sleepTimerDeadline = _now().add(Duration(minutes: minutes));
     state = state.copyWith(
       sleepTimerMinutes: minutes,
       sleepTimerRemainingSeconds: totalSeconds,
@@ -318,47 +321,53 @@ class SoundPlayerController extends StateNotifier<SoundPlayerState> {
         return;
       }
 
-      final deadline = _sleepTimerDeadline;
-      if (deadline == null) {
+      await syncSleepTimerNow();
+      if (_sleepTimerDeadline == null) {
         timer.cancel();
-        return;
       }
-
-      final remaining = deadline.difference(DateTime.now()).inSeconds + 1;
-      if (remaining > 0) {
-        state = state.copyWith(
-          sleepTimerRemainingSeconds: remaining,
-        );
-
-        if (state.currentTrackId != null) {
-          await _driver.setVolume(
-            soundOutputVolumeForSleepTimer(
-              baseVolume: state.volume,
-              remainingSeconds: remaining,
-            ),
-          );
-        }
-        return;
-      }
-
-      timer.cancel();
-      _sleepTimer = null;
-      _sleepTimerDeadline = null;
-
-      if (state.currentTrackId != null) {
-        await _driver.setVolume(0);
-      }
-      await _driver.pause();
-      if (state.currentTrackId != null) {
-        await _driver.setVolume(state.volume);
-      }
-
-      if (!mounted) return;
-      state = state.copyWith(
-        isPlaying: false,
-        clearSleepTimer: true,
-      );
     });
+  }
+
+  Future<void> syncSleepTimerNow() async {
+    if (!mounted) return;
+
+    final deadline = _sleepTimerDeadline;
+    if (deadline == null) return;
+
+    final remaining = deadline.difference(_now()).inSeconds + 1;
+    if (remaining > 0) {
+      state = state.copyWith(
+        sleepTimerRemainingSeconds: remaining,
+      );
+
+      if (state.currentTrackId != null) {
+        await _driver.setVolume(
+          soundOutputVolumeForSleepTimer(
+            baseVolume: state.volume,
+            remainingSeconds: remaining,
+          ),
+        );
+      }
+      return;
+    }
+
+    _sleepTimer?.cancel();
+    _sleepTimer = null;
+    _sleepTimerDeadline = null;
+
+    if (state.currentTrackId != null) {
+      await _driver.setVolume(0);
+    }
+    await _driver.pause();
+    if (state.currentTrackId != null) {
+      await _driver.setVolume(state.volume);
+    }
+
+    if (!mounted) return;
+    state = state.copyWith(
+      isPlaying: false,
+      clearSleepTimer: true,
+    );
   }
 
   Future<void> _markRecent(String trackId) async {

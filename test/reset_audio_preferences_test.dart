@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:releaf_app/features/relief/application/reset_audio_preferences.dart';
+import 'package:releaf_app/features/relief/domain/models/reset_launch_options.dart';
 
 void main() {
   test('Reset device voice is opt-in by default', () async {
@@ -10,6 +11,12 @@ void main() {
     final controller = ResetAudioPreferencesController(preferences);
 
     expect(controller.state.voiceEnabled, isFalse);
+  });
+
+  test('Reset launch options also keep device voice off by default', () {
+    const options = ResetLaunchOptions();
+    expect(options.voiceGuidanceEnabled, isFalse);
+    expect(options.ambientSoundEnabled, isTrue);
   });
 
   test('Reset audio preferences persist across controller instances', () async {

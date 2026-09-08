@@ -886,7 +886,7 @@ class ResetCatalog {
     ),
     ResetContent(
       id: 'sleep-faster-routine',
-      title: 'Sleep Faster Routine',
+      title: 'Pre-Sleep Downshift',
       durationSeconds: 180,
       level: ResetLevel.quick,
       quickCategory: QuickResetCategory.lifeUpgrade,
@@ -1002,7 +1002,7 @@ class ResetCatalog {
     ),
     ResetContent(
       id: 'confidence-posture-reset',
-      title: 'Confidence Posture Reset',
+      title: 'Grounded Posture Reset',
       durationSeconds: 90,
       level: ResetLevel.quick,
       quickCategory: QuickResetCategory.lifeUpgrade,
@@ -1060,7 +1060,7 @@ class ResetCatalog {
     ),
     ResetContent(
       id: 'deep-focus-method',
-      title: 'Deep Focus Method',
+      title: 'Single-Task Setup',
       durationSeconds: 180,
       level: ResetLevel.quick,
       quickCategory: QuickResetCategory.lifeUpgrade,
@@ -1116,7 +1116,7 @@ class ResetCatalog {
     ),
     ResetContent(
       id: 'emotional-stability-drill',
-      title: 'Emotional Stability Drill',
+      title: 'Pause Before Reacting',
       durationSeconds: 150,
       level: ResetLevel.quick,
       quickCategory: QuickResetCategory.lifeUpgrade,
@@ -1172,7 +1172,7 @@ class ResetCatalog {
     ),
     ResetContent(
       id: 'night-nervous-system-unwind',
-      title: 'Night Nervous System Unwind',
+      title: 'Night Unwind',
       durationSeconds: 180,
       level: ResetLevel.quick,
       quickCategory: QuickResetCategory.lifeUpgrade,
@@ -1230,7 +1230,7 @@ class ResetCatalog {
     ),
     ResetContent(
       id: 'quick-mood-shift',
-      title: 'Quick Mood Shift',
+      title: 'Momentum Reset',
       durationSeconds: 120,
       level: ResetLevel.quick,
       quickCategory: QuickResetCategory.lifeUpgrade,
@@ -1282,7 +1282,7 @@ class ResetCatalog {
     ),
     ResetContent(
       id: 'body-recalibration',
-      title: 'Body Recalibration',
+      title: 'Body Tension Check',
       durationSeconds: 150,
       level: ResetLevel.quick,
       quickCategory: QuickResetCategory.lifeUpgrade,

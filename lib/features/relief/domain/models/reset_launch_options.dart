@@ -6,7 +6,7 @@ class ResetLaunchOptions {
   const ResetLaunchOptions({
     this.showGuidanceText = true,
     this.showSessionTimer = true,
-    this.voiceGuidanceEnabled = true,
+    this.voiceGuidanceEnabled = false,
     this.voiceVolume = 0.78,
     this.ambientSoundEnabled = true,
     this.ambientVolume = 0.16,

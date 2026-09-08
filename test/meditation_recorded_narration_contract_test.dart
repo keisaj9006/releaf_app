@@ -46,6 +46,29 @@ void main() {
     }
   });
 
+  test('Every declared Releaf Guide asset exists and contains audio', () {
+    const catalog = MeditationCatalog();
+    var declaredAssets = 0;
+
+    for (final session in catalog.getAll()) {
+      for (final step in session.steps) {
+        final path = step.narrationAssetPath?.trim();
+        if (path == null || path.isEmpty) continue;
+
+        declaredAssets += 1;
+        final asset = File('assets/$path');
+        expect(asset.existsSync(), isTrue, reason: '${asset.path} must exist');
+        expect(
+          asset.lengthSync(),
+          greaterThan(10000),
+          reason: '${asset.path} must contain production narration',
+        );
+      }
+    }
+
+    expect(declaredAssets, greaterThan(0));
+  });
+
   test('Sessions without recorded narration are labelled as device fallback', () {
     const catalog = MeditationCatalog();
     final session = catalog.getById('breath-and-body-4');
@@ -62,5 +85,4 @@ void main() {
       'GUIDED · DEVICE VOICE',
     );
   });
-
 }

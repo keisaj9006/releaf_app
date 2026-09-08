@@ -13,6 +13,9 @@ import 'package:releaf_app/routing/app_router.dart';
 import 'package:releaf_app/routing/app_routes.dart';
 
 class _FakeSoundPlaybackDriver implements SoundPlaybackDriver {
+  final List<double> volumeCalls = <double>[];
+  int pauseCalls = 0;
+
   @override
   Stream<Duration> get onDurationChanged => const Stream<Duration>.empty();
 
@@ -27,7 +30,9 @@ class _FakeSoundPlaybackDriver implements SoundPlaybackDriver {
   Future<void> setReleaseMode(audio.ReleaseMode mode) async {}
 
   @override
-  Future<void> setVolume(double volume) async {}
+  Future<void> setVolume(double volume) async {
+    volumeCalls.add(volume);
+  }
 
   @override
   Future<void> playAsset(String assetPath) async {}
@@ -36,7 +41,9 @@ class _FakeSoundPlaybackDriver implements SoundPlaybackDriver {
   Future<void> resume() async {}
 
   @override
-  Future<void> pause() async {}
+  Future<void> pause() async {
+    pauseCalls += 1;
+  }
 
   @override
   Future<void> stop() async {}
@@ -145,6 +152,38 @@ void main() {
 
     expect(controller.state.sleepTimerMinutes, isNull);
     expect(controller.state.sleepTimerRemainingSeconds, isNull);
+  });
+
+  test('Sleep timer resync expires a deadline that passed in background', () async {
+    final preferences = await _preferences();
+    final driver = _FakeSoundPlaybackDriver();
+    var now = DateTime(2026, 9, 8, 22);
+
+    final controller = SoundPlayerController(
+      const SoundCatalog(),
+      preferences,
+      driver: driver,
+      now: () => now,
+    );
+    addTearDown(controller.dispose);
+
+    final track = const SoundCatalog().getById('deep-drift')!;
+    await controller.play(track);
+    await controller.setSleepTimer(15);
+
+    expect(controller.state.sleepTimerMinutes, 15);
+    expect(controller.state.sleepTimerRemainingSeconds, 900);
+
+    now = now.add(const Duration(minutes: 16));
+    await controller.syncSleepTimerNow();
+
+    expect(controller.state.sleepTimerMinutes, isNull);
+    expect(controller.state.sleepTimerRemainingSeconds, isNull);
+    expect(driver.pauseCalls, 1);
+    expect(
+      driver.volumeCalls.sublist(driver.volumeCalls.length - 2),
+      [0.0, controller.state.volume],
+    );
   });
 
   testWidgets('Sound library renders its own audio-first visual language', (

@@ -376,7 +376,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
                         contentPadding: EdgeInsets.zero,
                         title: const Text('Voice guidance'),
                         subtitle: const Text(
-                          'Slow spoken guidance. Turn it off for a silent visual session.',
+                          'Device English voice fallback. Turn it off for a silent visual session.',
                         ),
                         value: _voiceEnabled,
                         onChanged: (value) {

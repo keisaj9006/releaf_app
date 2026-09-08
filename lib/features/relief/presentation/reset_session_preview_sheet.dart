@@ -255,7 +255,7 @@ class _ResetSessionPreviewSheetState
                                 icon: Icons.record_voice_over_rounded,
                                 title: 'Voice guidance',
                                 subtitle:
-                                    'Optional spoken guidance. Releaf recordings take priority; device speech is fallback only.',
+                                    'Optional device English voice fallback · off by default. Recorded Releaf Guide will replace fallback where available.',
                                 value: _options.voiceGuidanceEnabled,
                                 onChanged: (value) {
                                   setState(() {
