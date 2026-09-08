@@ -657,6 +657,10 @@ void main() {
   testWidgets('Labyrinth pauses physics and input while backgrounded', (
     WidgetTester tester,
   ) async {
+    tester.binding.handleAppLifecycleStateChanged(
+      AppLifecycleState.resumed,
+    );
+
     await tester.pumpWidget(
       MaterialApp(
         home: LabirynthGameScreen(
