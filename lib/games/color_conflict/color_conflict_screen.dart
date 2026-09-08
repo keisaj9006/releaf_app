@@ -22,7 +22,8 @@ class ColorConflictScreen extends StatefulWidget {
   State<ColorConflictScreen> createState() => _ColorConflictScreenState();
 }
 
-class _ColorConflictScreenState extends State<ColorConflictScreen> {
+class _ColorConflictScreenState extends State<ColorConflictScreen>
+    with WidgetsBindingObserver {
   static const _accent = Color(0xFFE099B5);
   static const _colors = <_ConflictColor>[
     _ConflictColor('BLUE', Color(0xFF7AA7FF)),
@@ -34,6 +35,7 @@ class _ColorConflictScreenState extends State<ColorConflictScreen> {
 
   BrainDifficulty _difficulty = BrainDifficulty.medium;
   Timer? _timer;
+  bool _pausedByLifecycle = false;
   int _round = 0;
   int _score = 0;
   int _timeLeft = 0;
@@ -90,7 +92,14 @@ class _ColorConflictScreenState extends State<ColorConflictScreen> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _timer?.cancel();
     super.dispose();
   }
@@ -107,6 +116,13 @@ class _ColorConflictScreenState extends State<ColorConflictScreen> {
       _lastCorrect = null;
     });
 
+    _runTimer();
+  }
+
+  void _runTimer() {
+    _timer?.cancel();
+    if (!_started || _finished || _timeLeft <= 0) return;
+
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (!mounted || _finished) return;
       if (_timeLeft <= 1) {
@@ -116,6 +132,28 @@ class _ColorConflictScreenState extends State<ColorConflictScreen> {
       }
       setState(() => _timeLeft -= 1);
     });
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (!_started || _finished || _timeLeft <= 0) return;
+
+    if (state == AppLifecycleState.resumed) {
+      if (_pausedByLifecycle) {
+        _pausedByLifecycle = false;
+        _runTimer();
+      }
+      return;
+    }
+
+    if ((state == AppLifecycleState.inactive ||
+            state == AppLifecycleState.paused ||
+            state == AppLifecycleState.hidden ||
+            state == AppLifecycleState.detached) &&
+        (_timer?.isActive ?? false)) {
+      _timer?.cancel();
+      _pausedByLifecycle = true;
+    }
   }
 
   Future<void> _answer(int index) async {
