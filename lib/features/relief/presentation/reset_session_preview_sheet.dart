@@ -121,6 +121,70 @@ class _ResetSessionPreviewSheetState
                                 height: 1.5,
                               ),
                             ),
+                            if (session.methodLabel != null ||
+                                session.bestFor != null ||
+                                session.whyItMayHelp != null) ...[
+                              const SizedBox(height: ReleafSpacing.lg),
+                              const Text(
+                                'METHOD',
+                                style: ReleafTypography.eyebrow,
+                              ),
+                              const SizedBox(height: ReleafSpacing.sm),
+                              if (session.methodLabel != null)
+                                Text(
+                                  session.methodLabel!,
+                                  style: ReleafTypography.sectionTitle,
+                                ),
+                              if (session.bestFor != null) ...[
+                                const SizedBox(height: ReleafSpacing.xs),
+                                Text(
+                                  'Best for: ${session.bestFor!}',
+                                  style: ReleafTypography.body.copyWith(
+                                    color: ReleafColors.textPrimary
+                                        .withValues(alpha: 0.82),
+                                    height: 1.45,
+                                  ),
+                                ),
+                              ],
+                              if (session.whyItMayHelp != null) ...[
+                                const SizedBox(height: ReleafSpacing.xs),
+                                Text(
+                                  'Why this method: ${session.whyItMayHelp!}',
+                                  style: ReleafTypography.body.copyWith(
+                                    color: ReleafColors.textPrimary
+                                        .withValues(alpha: 0.82),
+                                    height: 1.45,
+                                  ),
+                                ),
+                              ],
+                              if (session.safetyNote != null) ...[
+                                const SizedBox(height: ReleafSpacing.sm),
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Padding(
+                                      padding: EdgeInsets.only(top: 2),
+                                      child: Icon(
+                                        Icons.info_outline_rounded,
+                                        size: 18,
+                                        color: ReleafColors.sage,
+                                      ),
+                                    ),
+                                    const SizedBox(width: ReleafSpacing.xs),
+                                    Expanded(
+                                      child: Text(
+                                        session.safetyNote!,
+                                        style: ReleafTypography.meta.copyWith(
+                                          color: ReleafColors.textPrimary
+                                              .withValues(alpha: 0.72),
+                                          height: 1.4,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ],
                             const SizedBox(height: ReleafSpacing.lg),
                             const Text(
                               'WHAT TO EXPECT',
@@ -759,7 +823,7 @@ String _previewSubtitle(ResetContent session) {
     'press-release' => 'A gentle body reset using brief pressure and release.',
     'make-room' => 'An acceptance-based practice for making space around a difficult moment.',
     'one-small-next-step' => 'A practical reset for turning overwhelm into one doable action.',
-    'equal-rhythm' => 'A smooth five-count in and five-count out breathing practice.',
+    'equal-rhythm' => 'A balanced five-count in and five-count out breathing practice.',
     'before-interview' => 'A short reset for the minutes before an interview.',
     'before-presentation' => 'A short reset for the minutes before speaking in front of others.',
     'after-conflict' => 'A guided reset for the activation that can remain after a difficult interaction.',
@@ -774,8 +838,10 @@ String _previewSubtitle(ResetContent session) {
     'evening-unwind' => 'An 8-minute evening protocol for setting down the unfinished day.',
     'anger-release' => 'An 8-minute body-led protocol for creating space before the next response.',
     'overthinking-let-go' => 'An 8-minute thought-unhooking protocol for repetitive thinking.',
-    '90s-calm-down' => 'A short breathing practice to slow the pace.',
-    'longer-exhale' => 'A gentle paced-breathing reset with a slightly longer exhale.',
+    '90s-calm-down' => 'A 4–6 breathing practice with a longer, comfortable exhale.',
+    'longer-exhale' => 'A 3–6 paced-breathing reset with a clear long-exhale emphasis.',
+    'box-breathing' => 'A structured 4–4–4–4 breathing practice with comfortable holds.',
+    'sleep-downshift' => 'A bedtime 4–7–8 practice for users who are comfortable with breath holds.',
     '5min-focus' => 'A focused sensory anchor for scattered attention.',
     '3min-breath' => 'The current focused Deep Reset breathing protocol.',
     _ => session.summary ?? 'A guided reset for the present moment.',
@@ -810,8 +876,10 @@ String _sessionPurpose(ResetContent session) {
     'evening-unwind' => 'Let unfinished things remain unfinished, notice physical support, and create room around what the day is still carrying.',
     'anger-release' => 'Notice activation, use comfortable pressure and release, then create space before choosing what to do next.',
     'overthinking-let-go' => 'Name the recurring thought, unhook from it, create distance, and return attention to something real and present.',
-    '90s-calm-down' => 'Slow the pace and soften tension with a brief breathing sequence.',
-    'longer-exhale' => 'Use a gentle 3-count inhale and a slightly longer 4-count exhale without holding the breath.',
+    '90s-calm-down' => 'Use a gentle 4-count inhale and a smooth 6-count exhale without holding the breath.',
+    'longer-exhale' => 'Use a gentle 3-count inhale and a long 6-count exhale without holding the breath.',
+    'box-breathing' => 'Use four equal 4-count phases to create a structured attentional rhythm.',
+    'sleep-downshift' => 'Use a slow 4–7–8 pattern as a bedtime downshift, only while the hold remains comfortable.',
     '5min-focus' => 'Anchor attention through your senses and one clear point of focus.',
     '3min-breath' => 'Use a steady breathing pattern to create a longer, more focused reset.',
     _ => session.summary ?? 'A guided reset for the present moment.',
