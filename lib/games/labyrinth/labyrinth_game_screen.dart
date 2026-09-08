@@ -912,7 +912,6 @@ class _MazeLevel {
       }
     }
 
-    directions.reverse();
     var turns = 0;
     for (var index = 1; index < directions.length; index++) {
       if (directions[index] != directions[index - 1]) turns++;
