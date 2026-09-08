@@ -191,14 +191,6 @@ class _MeditationPlayerScreenState
     await _setSessionRunning(true, userInitiated: false);
   }
 
-  @override
-  void dispose() {
-    _timer?.cancel();
-    _interruptionSubscription?.cancel();
-    _becomingNoisySubscription?.cancel();
-    super.dispose();
-  }
-
   void _startTimer() {
     _timer?.cancel();
     if (!_running || _remainingSeconds <= 0) {
@@ -607,6 +599,8 @@ class _MeditationPlayerScreenState
   @override
   void dispose() {
     _timer?.cancel();
+    _interruptionSubscription?.cancel();
+    _becomingNoisySubscription?.cancel();
     // The autoDispose voice provider owns platform cleanup. ConsumerState.ref
     // must not be read once teardown has started.
     super.dispose();
