@@ -1098,12 +1098,18 @@ class ResetCatalog {
     ),
     ResetContent(
       id: 'equal-rhythm',
-      title: 'Equal Rhythm',
+      title: '5–5 Balanced',
       durationSeconds: 120,
       level: ResetLevel.quick,
       quickCategory: QuickResetCategory.breath,
       modality: ResetModality.breathing,
       accessTier: ResetAccessTier.free,
+      methodLabel: '5–5 balanced breathing',
+      bestFor: 'Everyday settling, steady focus, and learning paced breathing.',
+      whyItMayHelp:
+          'A 10-second breathing cycle is 6 breaths per minute, a commonly studied slow-breathing range.',
+      safetyNote:
+          'Keep the breath comfortable rather than deep. Stop the paced pattern if you feel light-headed.',
       instructions: [
         'Let the breath stay easy and comfortable.',
         'Follow an even five-count in and five-count out.',
@@ -1139,23 +1145,29 @@ class ResetCatalog {
     ),
     ResetContent(
       id: '90s-calm-down',
-      title: '90s Calm Down',
+      title: '4–6 Calm Rhythm',
       durationSeconds: 90,
       level: ResetLevel.quick,
       quickCategory: QuickResetCategory.breath,
       modality: ResetModality.breathing,
       accessTier: ResetAccessTier.free,
+      methodLabel: '4–6 extended-exhale breathing',
+      bestFor: 'Stress, nervous energy, and a breathing pace that feels too fast.',
+      whyItMayHelp:
+          'The 10-second cycle slows breathing to 6 breaths per minute and lengthens the exhale without adding a breath hold.',
+      safetyNote:
+          'Breathe gently. If 6 seconds out feels strained, shorten the exhale and keep it comfortable.',
       instructions: [
         'Let your breathing stay comfortable.',
-        'Follow a gentle four-count in and four-count out.',
-        'Keep the breath easy rather than making it bigger.',
+        'Breathe in gently for 4 seconds.',
+        'Breathe out smoothly for 6 seconds.',
         'Let go of the count and return to your natural breathing.',
       ],
       program: ResetSessionProgram.breathing(
         breathPattern: BreathPattern(
           inhaleSeconds: 4,
-          exhaleSeconds: 4,
-          label: 'Gentle 4–4',
+          exhaleSeconds: 6,
+          label: 'Calm 4–6',
         ),
         steps: [
           ResetSessionStep(
@@ -1166,7 +1178,8 @@ class ResetCatalog {
           ),
           ResetSessionStep(
             label: 'Rhythm',
-            guidance: 'Follow the rhythm. Keep the breath gentle and easy.',
+            guidance:
+                'Follow the rhythm: a gentle 4-count in and a smooth 6-count out.',
             durationSeconds: 60,
           ),
           ResetSessionStep(
@@ -1180,23 +1193,29 @@ class ResetCatalog {
     ),
     ResetContent(
       id: 'longer-exhale',
-      title: 'Longer Exhale',
+      title: 'Long Exhale Reset',
       durationSeconds: 120,
       level: ResetLevel.quick,
       quickCategory: QuickResetCategory.breath,
       modality: ResetModality.breathing,
       accessTier: ResetAccessTier.free,
+      methodLabel: '3–6 long-exhale breathing',
+      bestFor: 'A stronger downshift when equal breathing still feels too busy.',
+      whyItMayHelp:
+          'This 1:2 inhale-to-exhale pattern emphasises a slow exhale. Research supports slow breathing overall, while the ideal inhale-to-exhale ratio is not settled.',
+      safetyNote:
+          'Do not empty the lungs forcefully. Make the exhale smaller or shorter if the pattern creates air hunger.',
       instructions: [
         'Let your shoulders soften and keep the breath gentle.',
         'Breathe in for 3 seconds.',
-        'Breathe out for 4 seconds.',
+        'Breathe out for 6 seconds.',
         'Let go of the count and return to a comfortable natural rhythm.',
       ],
       program: ResetSessionProgram.breathing(
         breathPattern: BreathPattern(
           inhaleSeconds: 3,
-          exhaleSeconds: 4,
-          label: 'Longer exhale 3–4',
+          exhaleSeconds: 6,
+          label: 'Long exhale 3–6',
         ),
         steps: [
           ResetSessionStep(
@@ -1208,7 +1227,7 @@ class ResetCatalog {
           ResetSessionStep(
             label: 'Rhythm',
             guidance:
-                'Follow the rhythm: a gentle 3-count in and a slightly longer 4-count out.',
+                'Follow the rhythm: a gentle 3-count in and a long, easy 6-count out.',
             durationSeconds: 98,
           ),
           ResetSessionStep(
@@ -1216,6 +1235,105 @@ class ResetCatalog {
             guidance:
                 'Let go of the count and return to a comfortable natural rhythm.',
             durationSeconds: 10,
+          ),
+        ],
+      ),
+    ),
+    ResetContent(
+      id: 'box-breathing',
+      title: 'Box Breathing',
+      durationSeconds: 120,
+      level: ResetLevel.quick,
+      quickCategory: QuickResetCategory.breath,
+      modality: ResetModality.breathing,
+      accessTier: ResetAccessTier.premium,
+      methodLabel: '4–4–4–4 box breathing',
+      bestFor: 'Structured focus, composure, and people who find counting helpful.',
+      whyItMayHelp:
+          'Equal inhale, hold, exhale and hold phases create a highly structured attentional rhythm. The holds make it a different experience from continuous slow breathing.',
+      safetyNote:
+          'Breath holds can feel uncomfortable during panic or air hunger. Skip this method if holding increases distress.',
+      instructions: [
+        'Breathe in gently for 4 seconds.',
+        'Hold comfortably for 4 seconds.',
+        'Breathe out for 4 seconds, then pause for 4 seconds.',
+        'Keep every phase easy rather than forcing a full breath.',
+      ],
+      program: ResetSessionProgram.breathing(
+        breathPattern: BreathPattern(
+          inhaleSeconds: 4,
+          holdAfterInhaleSeconds: 4,
+          exhaleSeconds: 4,
+          holdAfterExhaleSeconds: 4,
+          label: 'Box 4–4–4–4',
+        ),
+        steps: [
+          ResetSessionStep(
+            label: 'Settle',
+            guidance:
+                'Settle into a comfortable position. Keep every phase gentle.',
+            durationSeconds: 16,
+          ),
+          ResetSessionStep(
+            label: 'Box',
+            guidance:
+                'Follow four equal phases: in, hold, out, hold. Do not strain.',
+            durationSeconds: 88,
+          ),
+          ResetSessionStep(
+            label: 'Release',
+            guidance:
+                'Let go of the count and return to your natural breathing.',
+            durationSeconds: 16,
+          ),
+        ],
+      ),
+    ),
+    ResetContent(
+      id: 'sleep-downshift',
+      title: 'Sleep Downshift 4–7–8',
+      durationSeconds: 120,
+      level: ResetLevel.quick,
+      quickCategory: QuickResetCategory.breath,
+      modality: ResetModality.breathing,
+      accessTier: ResetAccessTier.premium,
+      methodLabel: '4–7–8 breathing',
+      bestFor: 'Bedtime wind-down when you are comfortable with a longer breath hold.',
+      whyItMayHelp:
+          'The method combines a deliberately slow pace, counting and a prolonged exhale. The exact 4–7–8 numbers should be treated as a pacing method, not a magic formula.',
+      safetyNote:
+          'Use this only when the hold feels easy. Switch to 4–6 Calm Rhythm if you feel air hunger, dizziness or more anxiety.',
+      instructions: [
+        'Breathe in gently for 4 seconds.',
+        'Hold comfortably for 7 seconds.',
+        'Breathe out slowly for 8 seconds.',
+        'Keep the breath quiet and stop forcing the count if it becomes uncomfortable.',
+      ],
+      program: ResetSessionProgram.breathing(
+        breathPattern: BreathPattern(
+          inhaleSeconds: 4,
+          holdAfterInhaleSeconds: 7,
+          exhaleSeconds: 8,
+          label: 'Sleep 4–7–8',
+        ),
+        steps: [
+          ResetSessionStep(
+            label: 'Settle',
+            guidance:
+                'Let your body be supported. Keep the breath smaller than you think you need.',
+            durationSeconds: 18,
+          ),
+          ResetSessionStep(
+            label: 'Downshift',
+            guidance:
+                'Follow four in, seven hold, eight out. Stay comfortable and never force the hold.',
+            durationSeconds: 84,
+          ),
+          ResetSessionStep(
+            label: 'Release',
+            guidance:
+                'Drop the count and let breathing return to its own rhythm.',
+            durationSeconds: 18,
           ),
         ],
       ),
