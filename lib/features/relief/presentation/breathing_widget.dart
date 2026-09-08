@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/session/session_deadline_clock.dart';
 import '../../meditation/application/meditation_voice_controller.dart';
 import '../../progress/data/leaves_repository.dart';
 import '../../sound/application/sound_player_controller.dart';
@@ -48,6 +49,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
   int _remainingSeconds = 0;
   int _activeDurationSeconds = 0;
   Timer? _timer;
+  DateTime? _deadline;
   SessionPhase _phase = SessionPhase.running;
   bool _awarded = false;
   bool _usingSimplifiedProgram = false;
@@ -98,18 +100,34 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
 
   void _startTimer() {
     _timer?.cancel();
+    if (_remainingSeconds <= 0 || _phase != SessionPhase.running) {
+      _deadline = null;
+      return;
+    }
+
+    _deadline = SessionDeadlineClock.deadlineFor(_remainingSeconds);
+
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (!mounted) {
         timer.cancel();
         return;
       }
 
-      if (_remainingSeconds > 1) {
-        setState(() => _remainingSeconds--);
+      final deadline = _deadline;
+      if (deadline == null) return;
+
+      final nextRemaining =
+          SessionDeadlineClock.remainingSeconds(deadline);
+
+      if (nextRemaining > 0) {
+        if (nextRemaining != _remainingSeconds) {
+          setState(() => _remainingSeconds = nextRemaining);
+        }
         unawaited(_syncSpokenGuidance());
         return;
       }
 
+      _deadline = null;
       setState(() => _remainingSeconds = 0);
       timer.cancel();
       _triggerFeedbackPhase();
@@ -446,6 +464,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
   Future<void> _triggerFeedbackPhase() async {
     if (!mounted) return;
 
+    _deadline = null;
     HapticFeedback.mediumImpact();
     unawaited(_stopSessionAudio());
     setState(() => _phase = SessionPhase.feedback);
@@ -469,6 +488,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
 
   void _abortSession() {
     _timer?.cancel();
+    _deadline = null;
     unawaited(_stopSessionAudio());
     if (!mounted) return;
     if (context.canPop()) {
@@ -541,6 +561,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
 
     if (currentIndex >= steps.length - 1) {
       _timer?.cancel();
+      _deadline = null;
       setState(() => _remainingSeconds = 0);
       _triggerFeedbackPhase();
       return;
@@ -554,6 +575,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
 
     HapticFeedback.lightImpact();
     setState(() => _remainingSeconds = nextRemaining);
+    _deadline = SessionDeadlineClock.deadlineFor(_remainingSeconds);
     unawaited(_syncSpokenGuidance(force: true));
   }
 
@@ -569,6 +591,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
   @override
   void dispose() {
     _timer?.cancel();
+    _deadline = null;
     unawaited(_voiceDriver.dispose());
     unawaited(_ambientPlayer.dispose());
     super.dispose();
