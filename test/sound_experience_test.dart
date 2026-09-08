@@ -165,7 +165,7 @@ void main() {
 
     await first.setVolume(0.41);
     expect(first.state.volume, closeTo(0.41, 0.0001));
-    await first.dispose();
+    first.dispose();
 
     final restored = SoundPlayerController(
       const SoundCatalog(),
