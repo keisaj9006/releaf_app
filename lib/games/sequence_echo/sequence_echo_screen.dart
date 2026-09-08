@@ -20,7 +20,8 @@ class SequenceEchoScreen extends StatefulWidget {
   State<SequenceEchoScreen> createState() => _SequenceEchoScreenState();
 }
 
-class _SequenceEchoScreenState extends State<SequenceEchoScreen> {
+class _SequenceEchoScreenState extends State<SequenceEchoScreen>
+    with WidgetsBindingObserver {
   static const _accent = Color(0xFF8FA8E8);
   static const _baseSequence = <int>[
     0, 4, 8, 2, 6, 1, 7, 3, 5, 0, 8, 4, 2, 7, 1, 6, 3, 5,
@@ -32,6 +33,8 @@ class _SequenceEchoScreenState extends State<SequenceEchoScreen> {
   int? _litCell;
   int? _pressedCell;
   bool? _pressedCorrect;
+  bool _tapLocked = false;
+  int _playbackToken = 0;
   int _inputIndex = 0;
   bool _showing = false;
   bool _accepting = false;
@@ -81,9 +84,48 @@ class _SequenceEchoScreenState extends State<SequenceEchoScreen> {
     );
   }
 
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    _playbackToken++;
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (_finished) return;
+
+    if (state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.paused ||
+        state == AppLifecycleState.hidden ||
+        state == AppLifecycleState.detached) {
+      if (!_showing && !_accepting && !_tapLocked) return;
+
+      _playbackToken++;
+      if (!mounted) return;
+      setState(() {
+        _litCell = null;
+        _pressedCell = null;
+        _pressedCorrect = null;
+        _tapLocked = false;
+        _showing = false;
+        _accepting = false;
+        _inputIndex = 0;
+        _status = 'Sequence paused. Show it again when you are ready.';
+      });
+    }
+  }
+
   Future<void> _showSequence() async {
     if (_showing || _accepting || _finished) return;
 
+    final token = ++_playbackToken;
     setState(() {
       _showing = true;
       _inputIndex = 0;
@@ -96,12 +138,13 @@ class _SequenceEchoScreenState extends State<SequenceEchoScreen> {
       setState(() => _litCell = cell);
       HapticFeedback.selectionClick();
       await Future<void>.delayed(Duration(milliseconds: _flashMs));
-      if (!mounted) return;
+      if (!mounted || token != _playbackToken) return;
       setState(() => _litCell = null);
       await Future<void>.delayed(const Duration(milliseconds: 120));
+      if (!mounted || token != _playbackToken) return;
     }
 
-    if (!mounted) return;
+    if (!mounted || token != _playbackToken) return;
     setState(() {
       _showing = false;
       _accepting = true;
@@ -110,25 +153,28 @@ class _SequenceEchoScreenState extends State<SequenceEchoScreen> {
   }
 
   Future<void> _tapCell(int index) async {
-    if (!_accepting || _finished) return;
+    if (!_accepting || _tapLocked || _finished) return;
 
+    final token = ++_playbackToken;
     final sequence = _sequence;
     final expected = sequence[_inputIndex];
     final correct = index == expected;
 
     HapticFeedback.selectionClick();
     setState(() {
+      _tapLocked = true;
       _pressedCell = index;
       _pressedCorrect = correct;
     });
 
     await Future<void>.delayed(const Duration(milliseconds: 220));
-    if (!mounted) return;
+    if (!mounted || token != _playbackToken) return;
 
     if (!correct) {
       setState(() {
         _pressedCell = null;
         _pressedCorrect = null;
+        _tapLocked = false;
         _accepting = false;
         _inputIndex = 0;
         _score = (_score - (20 * _multiplier)).clamp(0, 999999);
@@ -142,6 +188,7 @@ class _SequenceEchoScreenState extends State<SequenceEchoScreen> {
       setState(() {
         _pressedCell = null;
         _pressedCorrect = null;
+        _tapLocked = false;
         _inputIndex = nextIndex;
         _status = 'Good. Keep going.';
       });
@@ -154,6 +201,7 @@ class _SequenceEchoScreenState extends State<SequenceEchoScreen> {
     setState(() {
       _pressedCell = null;
       _pressedCorrect = null;
+      _tapLocked = false;
       _accepting = false;
       _inputIndex = 0;
       _score = nextScore;
@@ -335,7 +383,7 @@ class _SequenceEchoScreenState extends State<SequenceEchoScreen> {
                                     pressed && _pressedCorrect == false;
                                 return Semantics(
                                   button: true,
-                                  enabled: _accepting,
+                                  enabled: _accepting && !_tapLocked,
                                   selected: pressed,
                                   label: pressedCorrect
                                       ? 'Sequence cell ${index + 1}, correct'
@@ -347,8 +395,9 @@ class _SequenceEchoScreenState extends State<SequenceEchoScreen> {
                                     borderRadius: BorderRadius.circular(20),
                                     child: InkWell(
                                       key: Key('sequence-echo-cell-$index'),
-                                      onTap:
-                                          _accepting ? () => _tapCell(index) : null,
+                                      onTap: _accepting && !_tapLocked
+                                          ? () => _tapCell(index)
+                                          : null,
                                       borderRadius: BorderRadius.circular(20),
                                       child: AnimatedContainer(
                                         key: Key(
