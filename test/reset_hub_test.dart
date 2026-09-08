@@ -112,7 +112,7 @@ void main() {
 
     expect(find.text('BREATH'), findsWidgets);
     expect(find.byKey(const Key('reset-clear-category-filter')), findsOneWidget);
-    expect(find.text('Equal Rhythm'), findsOneWidget);
+    expect(find.text('5–5 Balanced'), findsOneWidget);
     expect(find.text('60s Grounding'), findsNothing);
 
     await tester.tap(find.byKey(const Key('reset-clear-category-filter')));
