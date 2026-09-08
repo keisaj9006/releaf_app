@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:releaf_app/core/providers.dart';
 import 'package:releaf_app/features/account/application/account_auth_service.dart';
 import 'package:releaf_app/features/account/application/account_email_service.dart';
 import 'package:releaf_app/features/account/application/account_recovery_service.dart';
@@ -132,12 +134,15 @@ void main() {
   testWidgets('Direct Account back falls back to Home', (
     WidgetTester tester,
   ) async {
+    SharedPreferences.setMockInitialValues({});
+    final preferences = await SharedPreferences.getInstance();
     final router = createAppRouter(initialLocation: AppRoutes.account);
     addTearDown(router.dispose);
 
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          sharedPreferencesProvider.overrideWithValue(preferences),
           accountAuthServiceProvider.overrideWithValue(
             _FakeAccountAuthService(),
           ),
