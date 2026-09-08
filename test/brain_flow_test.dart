@@ -835,6 +835,22 @@ void main() {
     await tester.pump();
   });
 
+  test('Broken Mirror progression adds spatial load before precision pressure', () {
+    final l1 = brokenMirrorLevelProfileForTesting(1);
+    final l4 = brokenMirrorLevelProfileForTesting(4);
+    final l7 = brokenMirrorLevelProfileForTesting(7);
+    final l10 = brokenMirrorLevelProfileForTesting(10);
+    final l12 = brokenMirrorLevelProfileForTesting(12);
+
+    expect(l1.fragmentCount, 4);
+    expect(l4.fragmentCount, 5);
+    expect(l7.fragmentCount, 6);
+    expect(l10.fragmentCount, 7);
+    expect(l12.fragmentCount, 8);
+    expect(l12.snapFraction, lessThan(l1.snapFraction));
+    expect(l12.snapFraction, greaterThanOrEqualTo(0.09));
+  });
+
   testWidgets('Game host scales Broken Mirror from saved training level', (
     WidgetTester tester,
   ) async {
@@ -1535,7 +1551,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 120));
 
     final board = find.byKey(const Key('broken-mirror-board'));
-    final shard = find.byKey(const Key('broken-mirror-shard-5'));
+    final shard = find.byKey(const Key('broken-mirror-shard-3'));
     expect(board, findsOneWidget);
     expect(shard, findsOneWidget);
     expect(tester.takeException(), isNull);
@@ -1544,8 +1560,8 @@ void main() {
     final shardRect = tester.getRect(shard);
     final target = boardRect.topLeft +
         Offset(
-          boardRect.width * 0.55,
-          boardRect.height * 0.68,
+          boardRect.width * 0.53,
+          boardRect.height * 0.41,
         );
 
     final gesture = await tester.startGesture(shardRect.center);
@@ -1554,7 +1570,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 120));
 
-    expect(find.byKey(const Key('broken-mirror-shard-5')), findsNothing);
+    expect(find.byKey(const Key('broken-mirror-shard-3')), findsNothing);
     expect(tester.takeException(), isNull);
   });
 
