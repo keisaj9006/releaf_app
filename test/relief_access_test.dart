@@ -25,7 +25,7 @@ Future<SharedPreferences> _preferences() async {
 }
 
 class _TrackingSoundPlaybackDriver implements SoundPlaybackDriver {
-  final _playerStates = StreamController<audio.PlayerState>.broadcast();
+  final _playerStates = StreamController<audio.PlayerState>.broadcast(sync: true);
   int pauseCalls = 0;
 
   @override
@@ -146,7 +146,6 @@ void main() {
       driver: driver,
     );
     await soundController.play(const SoundCatalog().getById('soft-rain')!);
-    await Future<void>.delayed(Duration.zero);
     expect(soundController.state.isPlaying, isTrue);
 
     final router = createAppRouter(
