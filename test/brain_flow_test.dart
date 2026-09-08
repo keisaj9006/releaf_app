@@ -488,6 +488,37 @@ void main() {
     }
   });
 
+  testWidgets('Direct Brain game back falls safely to Brain', (
+    WidgetTester tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({});
+    final preferences = await SharedPreferences.getInstance();
+    final router = createAppRouter(
+      initialLocation: AppRoutes.brainGameFor('sequence_echo'),
+    );
+    addTearDown(router.dispose);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(preferences),
+        ],
+        child: MaterialApp.router(routerConfig: router),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
+
+    expect(find.byType(SequenceEchoScreen), findsOneWidget);
+
+    await tester.binding.handlePopRoute();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.byType(BrainScreen), findsOneWidget);
+    expect(find.byType(SequenceEchoScreen), findsNothing);
+  });
+
   testWidgets('Rule Shift is a real playable Brain exercise', (
     WidgetTester tester,
   ) async {
@@ -843,6 +874,71 @@ void main() {
     expect(find.text('Good. Keep going.'), findsOneWidget);
   });
 
+  testWidgets('Sequence Echo ignores duplicate taps and cancels hidden playback', (
+    WidgetTester tester,
+  ) async {
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SequenceEchoScreen(onFinish: (_) {}),
+      ),
+    );
+    await tester.pump();
+
+    await tester.tap(find.byKey(const Key('brain-difficulty-easy')));
+    await tester.pump();
+    await tester.ensureVisible(find.byKey(const Key('sequence-echo-start')));
+    await tester.tap(find.byKey(const Key('sequence-echo-start')));
+
+    for (var i = 0; i < 10; i++) {
+      await tester.pump(const Duration(milliseconds: 650));
+    }
+
+    await tester.ensureVisible(find.byKey(const Key('sequence-echo-cell-0')));
+    await tester.tap(find.byKey(const Key('sequence-echo-cell-0')));
+    await tester.tap(find.byKey(const Key('sequence-echo-cell-0')));
+    await tester.pump(const Duration(milliseconds: 240));
+
+    await tester.tap(find.byKey(const Key('sequence-echo-cell-4')));
+    await tester.pump(const Duration(milliseconds: 60));
+    expect(
+      find.byKey(const Key('sequence-echo-cell-4-correct')),
+      findsOneWidget,
+    );
+
+    await tester.pump(const Duration(milliseconds: 240));
+
+    // Start a fresh replay and background the app while the pattern is visible.
+    await tester.binding.handlePopRoute();
+    await tester.pump();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SequenceEchoScreen(onFinish: (_) {}),
+      ),
+    );
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('brain-difficulty-easy')));
+    await tester.pump();
+    await tester.ensureVisible(find.byKey(const Key('sequence-echo-start')));
+    await tester.tap(find.byKey(const Key('sequence-echo-start')));
+    await tester.pump(const Duration(milliseconds: 100));
+
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+    await tester.pump();
+
+    expect(
+      find.text('Sequence paused. Show it again when you are ready.'),
+      findsOneWidget,
+    );
+
+    await tester.pump(const Duration(seconds: 3));
+    expect(find.text('Repeat the sequence.'), findsNothing);
+
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pump();
+  });
+
   testWidgets('Pattern Logic keeps feedback on the answered puzzle', (
     WidgetTester tester,
   ) async {
@@ -1104,6 +1200,45 @@ void main() {
     );
 
     await tester.pump(const Duration(milliseconds: 100));
+  });
+
+  testWidgets('Spatial Span cancels hidden sequence playback without penalty', (
+    WidgetTester tester,
+  ) async {
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SpatialSpanScreen(
+          trainingLevel: 1,
+          onFinish: (_) {},
+        ),
+      ),
+    );
+    await tester.pump();
+
+    final start = find.byKey(const Key('spatial-span-start'));
+    await tester.ensureVisible(start);
+    await tester.tap(start);
+    await tester.pump(const Duration(milliseconds: 500));
+
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+    await tester.pump();
+
+    expect(
+      find.text('Sequence paused. Show the spatial path again when ready.'),
+      findsOneWidget,
+    );
+    expect(find.byKey(const Key('spatial-span-start')), findsOneWidget);
+
+    await tester.pump(const Duration(seconds: 4));
+    expect(
+      find.text('Your turn. Tap the same locations in the same order.'),
+      findsNothing,
+    );
+
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pump();
   });
 
   testWidgets('Mental Rotation scales grid with persistent level', (
