@@ -87,6 +87,17 @@ void main() {
     }
   });
 
+  test('every Quick Reset explains method use case rationale and safety', () {
+    for (final session in catalog.getAll().where(
+      (item) => item.level == ResetLevel.quick,
+    )) {
+      expect(session.methodLabel?.trim(), isNotEmpty, reason: session.id);
+      expect(session.bestFor?.trim(), isNotEmpty, reason: session.id);
+      expect(session.whyItMayHelp?.trim(), isNotEmpty, reason: session.id);
+      expect(session.safetyNote?.trim(), isNotEmpty, reason: session.id);
+    }
+  });
+
   test('current breathing sessions use canonical BreathPattern timings', () {
     final calm = catalog.getById('90s-calm-down')!;
     final deep = catalog.getById('3min-breath')!;

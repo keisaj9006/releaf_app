@@ -75,6 +75,15 @@ class ResetCatalog {
       quickCategory: QuickResetCategory.noBreath,
       modality: ResetModality.grounding,
       accessTier: ResetAccessTier.free,
+      summary:
+          'A one-minute body-contact grounding practice for returning attention to physical support.',
+      methodLabel: 'Body-contact grounding',
+      bestFor:
+          'Fast settling when attention feels scattered, tense or pulled into repetitive thinking.',
+      whyItMayHelp:
+          'The exercise narrows attention to concrete body contact and present-moment sensation instead of asking you to solve the thought.',
+      safetyNote:
+          'Keep the position comfortable. If closing attention onto body sensations feels unpleasant, switch to an external object or sound anchor.',
       instructions: [
         'Sit comfortably and place your feet on the ground.',
         'Notice three physical sensations where your body meets the floor or chair.',
@@ -116,6 +125,15 @@ class ResetCatalog {
       quickCategory: QuickResetCategory.noBreath,
       modality: ResetModality.grounding,
       accessTier: ResetAccessTier.free,
+      summary:
+          'A full 5–4–3–2–1 sensory grounding sequence with a shorter 3–2–1 option.',
+      methodLabel: '5–4–3–2–1 sensory grounding',
+      bestFor:
+          'Feeling detached, overwhelmed or caught in internal monitoring when external orientation feels useful.',
+      whyItMayHelp:
+          'The sequence deliberately moves attention through several senses and back toward concrete details in the environment.',
+      safetyNote:
+          'Use only senses that are comfortable and available. You may skip smell or taste and use the shorter 3–2–1 path at any time.',
       visualType: ResetVisualType.sensoryHalo,
       instructions: [
         'Look around the space you are in.',
@@ -193,6 +211,15 @@ class ResetCatalog {
       quickCategory: QuickResetCategory.noBreath,
       modality: ResetModality.guidedPractice,
       accessTier: ResetAccessTier.free,
+      summary:
+          'A brief tension-awareness and release sequence for the jaw and shoulders.',
+      methodLabel: 'Jaw + shoulder release',
+      bestFor:
+          'Desk tension, clenching or moments when the upper body feels rigid.',
+      whyItMayHelp:
+          'Alternating small muscular effort with release makes the contrast easier to notice without requiring the body to become fully relaxed.',
+      safetyNote:
+          'Use a small comfortable range. Stop if jaw, neck or shoulder movement is painful or causes dizziness.',
       visualType: ResetVisualType.bodyRelease,
       instructions: [
         'Notice your jaw and shoulders without changing anything yet.',
@@ -255,6 +282,15 @@ class ResetCatalog {
       quickCategory: QuickResetCategory.noBreath,
       modality: ResetModality.guidedPractice,
       accessTier: ResetAccessTier.free,
+      summary:
+          'A short cognitive-defusion practice for creating distance from a recurring thought.',
+      methodLabel: 'Name + unhook',
+      bestFor:
+          'Repetitive thoughts that keep demanding attention even when you do not need to solve them immediately.',
+      whyItMayHelp:
+          'Adding the phrase I am noticing the thought that can help frame a thought as a mental event rather than an instruction that must be followed.',
+      safetyNote:
+          'Do not use the exercise to argue with or suppress a thought. If the content becomes more distressing, stop and orient to the room or seek appropriate support.',
       visualType: ResetVisualType.thoughtUnhook,
       instructions: [
         'Notice what your mind keeps returning to.',
@@ -305,6 +341,15 @@ class ResetCatalog {
       quickCategory: QuickResetCategory.noBreath,
       modality: ResetModality.grounding,
       accessTier: ResetAccessTier.free,
+      summary:
+          'A visual and tactile attention anchor using one ordinary object nearby.',
+      methodLabel: 'Single-object sensory anchor',
+      bestFor:
+          'Mental noise, distraction or moments when an external focus feels easier than body-based grounding.',
+      whyItMayHelp:
+          'Looking closely at shape, texture and contact gives attention a simple external target with clear sensory detail.',
+      safetyNote:
+          'Choose a safe ordinary object. Do not use anything hot, sharp, breakable or otherwise unsafe to handle.',
       visualType: ResetVisualType.objectFocus,
       instructions: [
         'Choose one ordinary object near you.',
@@ -363,6 +408,15 @@ class ResetCatalog {
       quickCategory: QuickResetCategory.noBreath,
       modality: ResetModality.grounding,
       accessTier: ResetAccessTier.free,
+      summary:
+          'A listening practice that moves from near sounds to farther and layered sounds.',
+      methodLabel: 'Near-to-far sound anchor',
+      bestFor:
+          'Overthinking or visual overload when listening feels like the easiest route back to the environment.',
+      whyItMayHelp:
+          'Shifting between near, far and layered sounds broadens attention without requiring you to change the sounds themselves.',
+      safetyNote:
+          'Keep environmental awareness when near traffic, work equipment or other situations where important sounds must not be ignored.',
       visualType: ResetVisualType.soundRipple,
       instructions: [
         'Let your attention move toward the sounds already around you.',
@@ -415,6 +469,15 @@ class ResetCatalog {
       quickCategory: QuickResetCategory.noBreath,
       modality: ResetModality.guidedPractice,
       accessTier: ResetAccessTier.free,
+      summary:
+          'A gentle pressure-and-release exercise using the hands or feet against a stable surface.',
+      methodLabel: 'Gentle pressure + release',
+      bestFor:
+          'Physical bracing, restless energy or moments when a simple muscular contrast feels useful.',
+      whyItMayHelp:
+          'A small voluntary press followed by release can make the difference between active effort and support easier to notice.',
+      safetyNote:
+          'Use light comfortable pressure only. Stop for pain, cramping, numbness or joint discomfort.',
       visualType: ResetVisualType.bodyRelease,
       instructions: [
         'Notice where your body is supported.',
@@ -468,6 +531,15 @@ class ResetCatalog {
       quickCategory: QuickResetCategory.noBreath,
       modality: ResetModality.guidedPractice,
       accessTier: ResetAccessTier.free,
+      summary:
+          'An acceptance-based pause for allowing a difficult feeling or thought without letting it choose the next action.',
+      methodLabel: 'Notice + allow + choose',
+      bestFor:
+          'Moments when fighting an emotion or thought is adding a second layer of struggle.',
+      whyItMayHelp:
+          'The practice separates allowing an internal experience to exist from automatically acting on it.',
+      safetyNote:
+          'This is not a request to tolerate danger or harmful treatment. If the situation itself is unsafe, prioritise practical safety and support.',
       visualType: ResetVisualType.acceptanceSpace,
       instructions: [
         'Notice the feeling or thought that is here right now.',
@@ -841,6 +913,15 @@ class ResetCatalog {
       quickCategory: QuickResetCategory.lifeUpgrade,
       modality: ResetModality.guidedPractice,
       accessTier: ResetAccessTier.free,
+      summary:
+          'A short planning reset that turns a broad problem into one visible next action.',
+      methodLabel: 'Shrink to one next action',
+      bestFor:
+          'Overwhelm, procrastination or a task that feels too large to start.',
+      whyItMayHelp:
+          'Reducing a broad goal to one concrete physical action lowers the amount of information that must be held and chosen at once.',
+      safetyNote:
+          'Choose an action that is realistic and safe. If the task involves urgent health, legal or safety decisions, use appropriate professional help instead of relying on the reset.',
       visualType: ResetVisualType.nextStep,
       instructions: [
         'Pause and name what needs your attention next.',
@@ -1066,6 +1147,8 @@ class ResetCatalog {
       quickCategory: QuickResetCategory.lifeUpgrade,
       modality: ResetModality.guidedPractice,
       accessTier: ResetAccessTier.premium,
+      safetyNote:
+          'Use this as a task-setup aid rather than a productivity demand. Take a break if sustained focus is becoming physically uncomfortable or counterproductive.',
       summary:
           'A three-minute setup for reducing competing tasks and entering one focused work block.',
       methodLabel: 'Single-task setup',
@@ -1122,6 +1205,8 @@ class ResetCatalog {
       quickCategory: QuickResetCategory.lifeUpgrade,
       modality: ResetModality.guidedPractice,
       accessTier: ResetAccessTier.premium,
+      safetyNote:
+          'Do not use the pause to remain in an unsafe situation. If there is risk of harm, prioritise distance, safety and appropriate support.',
       summary:
           'A short pause between a strong feeling and the action you take next.',
       methodLabel: 'Name → separate → choose',
@@ -1352,6 +1437,15 @@ class ResetCatalog {
       quickCategory: QuickResetCategory.situational,
       modality: ResetModality.grounding,
       accessTier: ResetAccessTier.free,
+      summary:
+          'A no-hold sensory orientation routine for early rising panic or strong activation.',
+      methodLabel: 'Orient + widen + next step',
+      bestFor:
+          'Early signs of panic or escalating self-monitoring when breath counting feels unhelpful.',
+      whyItMayHelp:
+          'The routine shifts attention toward stable external cues and physical support instead of asking you to control breathing or eliminate sensations.',
+      safetyNote:
+          'If symptoms are new, severe or include concerning chest pain, fainting or significant breathing difficulty, seek medical assessment rather than assuming they are anxiety.',
       visualType: ResetVisualType.sensoryHalo,
       instructions: [
         'Look around and name where you are.',
@@ -1421,6 +1515,15 @@ class ResetCatalog {
       quickCategory: QuickResetCategory.situational,
       modality: ResetModality.guidedPractice,
       accessTier: ResetAccessTier.free,
+      summary:
+          'A short pre-exam routine that narrows attention from the whole subject to the first concrete action.',
+      methodLabel: 'Reduce load + first step',
+      bestFor:
+          'Final-minute overload, frantic revision or difficulty starting once the exam begins.',
+      whyItMayHelp:
+          'The exercise stops last-minute task switching and gives attention one defined starting point instead of the whole exam at once.',
+      safetyNote:
+          'Use this as a focus routine, not a substitute for required exam accommodations, medication plans or other support already arranged.',
       visualType: ResetVisualType.nextStep,
       instructions: [
         'Stop trying to revise everything in the final minutes.',
@@ -1473,6 +1576,15 @@ class ResetCatalog {
       quickCategory: QuickResetCategory.situational,
       modality: ResetModality.guidedPractice,
       accessTier: ResetAccessTier.free,
+      summary:
+          'A pre-interview routine for reducing mental load and choosing one clear opening action.',
+      methodLabel: 'Message + stable posture + first step',
+      bestFor:
+          'Interview nerves, over-preparing or trying to rehearse every possible question at once.',
+      whyItMayHelp:
+          'Selecting one message and one opening action gives attention a smaller target than mentally simulating the whole conversation.',
+      safetyNote:
+          'Keep posture changes comfortable and do not force yourself to suppress visible nervousness. The goal is preparation, not perfect calm.',
       visualType: ResetVisualType.nextStep,
       instructions: [
         'Notice the urge to prepare everything at once.',
@@ -1524,6 +1636,15 @@ class ResetCatalog {
       quickCategory: QuickResetCategory.situational,
       modality: ResetModality.guidedPractice,
       accessTier: ResetAccessTier.free,
+      summary:
+          'A pre-presentation body-and-attention routine focused on releasing extra effort and choosing the opening line.',
+      methodLabel: 'Release + ground + first line',
+      bestFor:
+          'Tension and mental overload immediately before speaking to a group.',
+      whyItMayHelp:
+          'Combining a small body release with one chosen opening action reduces the number of things you are trying to manage at the start.',
+      safetyNote:
+          'Use only gentle pressure through the feet and comfortable shoulder or jaw release. Stop any movement that causes pain.',
       visualType: ResetVisualType.bodyRelease,
       instructions: [
         'Notice where you are holding tension.',
@@ -1572,6 +1693,15 @@ class ResetCatalog {
       quickCategory: QuickResetCategory.situational,
       modality: ResetModality.guidedPractice,
       accessTier: ResetAccessTier.free,
+      summary:
+          'A post-conflict pause for naming activation and choosing whether the next step is pause, repair or distance.',
+      methodLabel: 'Name + allow + choose',
+      bestFor:
+          'The period immediately after an argument when the urge to message, decide or react is still strong.',
+      whyItMayHelp:
+          'The routine inserts time between feeling an urge and choosing an action without requiring the emotion to disappear first.',
+      safetyNote:
+          'If the conflict involves threats, coercion or violence, prioritise safety and outside support rather than using the exercise to stay engaged.',
       visualType: ResetVisualType.acceptanceSpace,
       instructions: [
         'Notice what is still activated in you after the conflict.',
@@ -1623,6 +1753,15 @@ class ResetCatalog {
       quickCategory: QuickResetCategory.situational,
       modality: ResetModality.grounding,
       accessTier: ResetAccessTier.free,
+      summary:
+          'A rapid external sensory grounding sequence for a sudden spike of panic-like activation.',
+      methodLabel: '5–4–3 sensory orientation',
+      bestFor:
+          'A sudden surge of fear when external grounding feels easier than deliberate breathing.',
+      whyItMayHelp:
+          'Counting visible, physical and auditory details gives attention concrete information from the current environment.',
+      safetyNote:
+          'Panic-like symptoms can overlap with medical problems. Seek urgent medical help for new or severe chest pain, fainting, severe breathing difficulty or other concerning symptoms.',
       visualType: ResetVisualType.sensoryHalo,
       instructions: [
         'Look around and remind yourself where you are.',
@@ -1687,6 +1826,15 @@ class ResetCatalog {
       quickCategory: QuickResetCategory.situational,
       modality: ResetModality.guidedPractice,
       accessTier: ResetAccessTier.free,
+      summary:
+          'A night-time thought-unhooking routine that avoids turning bedtime into another problem-solving session.',
+      methodLabel: 'Name thought + unhook + sensory return',
+      bestFor:
+          'Repetitive night-time thinking when trying harder to solve the issue is keeping attention activated.',
+      whyItMayHelp:
+          'The practice labels thinking as thinking, then redirects attention to one simple sensation without demanding that thoughts stop.',
+      safetyNote:
+          'If persistent sleep difficulty is affecting daytime function or continues for a prolonged period, consider discussing it with a healthcare professional.',
       visualType: ResetVisualType.thoughtUnhook,
       instructions: [
         'Notice the thought your mind keeps returning to.',
@@ -1736,6 +1884,15 @@ class ResetCatalog {
       quickCategory: QuickResetCategory.situational,
       modality: ResetModality.grounding,
       accessTier: ResetAccessTier.free,
+      summary:
+          'An external-focus routine for moments of strong self-monitoring in social situations.',
+      methodLabel: 'External anchor + one social action',
+      bestFor:
+          'Feeling watched, judged or preoccupied with how you appear during an interaction.',
+      whyItMayHelp:
+          'Moving attention toward a neutral object, physical support and one simple action reduces the amount of attention spent continuously checking yourself.',
+      safetyNote:
+          'The goal is not to ignore genuinely unsafe or hostile behaviour. Leave or seek support when a social situation is not safe.',
       visualType: ResetVisualType.objectFocus,
       instructions: [
         'Choose one neutral object in the room.',
@@ -1788,6 +1945,15 @@ class ResetCatalog {
       quickCategory: QuickResetCategory.situational,
       modality: ResetModality.grounding,
       accessTier: ResetAccessTier.free,
+      summary:
+          'A travel-specific grounding routine using support, sound and one concrete next travel step.',
+      methodLabel: 'Support + sound + next step',
+      bestFor:
+          'Queues, delays, transfers or travel overload when the whole journey feels mentally too large.',
+      whyItMayHelp:
+          'The routine combines environmental orientation with one practical next action so attention does not have to hold the entire journey at once.',
+      safetyNote:
+          'Keep full awareness around platforms, roads, luggage and announcements. Do not use the screen when doing so would reduce travel safety.',
       visualType: ResetVisualType.soundRipple,
       instructions: [
         'Notice one stable point of contact beneath you.',
@@ -1838,6 +2004,15 @@ class ResetCatalog {
       quickCategory: QuickResetCategory.situational,
       modality: ResetModality.guidedPractice,
       accessTier: ResetAccessTier.free,
+      summary:
+          'A work reset that reduces a crowded workload to one visible action and clears competing tasks from attention.',
+      methodLabel: 'Choose + shrink + clear',
+      bestFor:
+          'Too many open tasks, task switching or difficulty deciding what to do first.',
+      whyItMayHelp:
+          'Defining one next action creates a smaller decision space than repeatedly reviewing the full workload.',
+      safetyNote:
+          'Do not use the exercise to push through exhaustion, pain or unsafe working conditions. Take breaks and follow workplace safety requirements.',
       visualType: ResetVisualType.nextStep,
       instructions: [
         'Stop trying to hold the whole workload in your head.',
@@ -2703,6 +2878,15 @@ class ResetCatalog {
       quickCategory: QuickResetCategory.noBreath,
       modality: ResetModality.grounding,
       accessTier: ResetAccessTier.premium,
+      summary:
+          'A longer 5–4–3–2–1 sensory anchor for deliberately returning attention to the immediate environment.',
+      methodLabel: '5–4–3–2–1 focus anchor',
+      bestFor:
+          'A longer grounding break when you want a structured sensory sequence rather than a breathing exercise.',
+      whyItMayHelp:
+          'Moving systematically through sight, touch, sound, smell and taste provides a repeatable external attention sequence.',
+      safetyNote:
+          'Use only senses that are comfortable and available. Skip smell or taste when needed, and remain aware of your surroundings.',
       taxonomyStatus: ResetTaxonomyStatus.legacyCompatible,
       instructions: [
         'Name five things you can see around you.',
