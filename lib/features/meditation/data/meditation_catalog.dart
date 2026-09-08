@@ -439,31 +439,55 @@ class MeditationCatalog {
         MeditationStep(
           label: 'Stop',
           guidance: 'For this minute, stop switching between tasks.',
+          spokenGuidance:
+              'For this minute, stop switching. Let the tabs, messages, and unfinished tasks wait. '
+              'You do not need to decide what deserves attention yet. Give the mind one clear signal: '
+              'for the next few moments, there is only this pause.',
           durationSeconds: 60,
         ),
         MeditationStep(
           label: 'Body',
           guidance: 'Notice posture, jaw, shoulders, and one point of support.',
+          spokenGuidance:
+              'Notice how the body has been holding the work. Feel the jaw, the shoulders, the hands, '
+              'and the way you are sitting or standing. Find one point of support beneath you and let '
+              'that physical contact bring attention out of the task and back into the room.',
           durationSeconds: 60,
         ),
         MeditationStep(
           label: 'Anchor',
           guidance: 'Stay with one simple sensation.',
+          spokenGuidance:
+              'Choose one simple sensation to stay with. It might be the feeling of your feet, the '
+              'temperature of the air, or the natural movement of breathing. Let that one sensation be '
+              'the place you return to, without trying to concentrate perfectly.',
           durationSeconds: 60,
         ),
         MeditationStep(
           label: 'Drift',
           guidance: 'Notice distraction when it appears.',
+          spokenGuidance:
+              'Sooner or later, attention will move. A thought, sound, message, or plan may pull you '
+              'away. When you notice that, let the noticing itself count. You do not need to be annoyed '
+              'with the distraction. You have simply recognised where attention went.',
           durationSeconds: 60,
         ),
         MeditationStep(
           label: 'Return',
           guidance: 'Return gently instead of trying to hold attention rigidly.',
+          spokenGuidance:
+              'Come back to the anchor gently. No tightening, no forcing. If attention moves again, '
+              'return again. This is the practice: not never becoming distracted, but noticing sooner '
+              'and choosing where attention goes next.',
           durationSeconds: 60,
         ),
         MeditationStep(
           label: 'Next',
           guidance: 'Choose one concrete next action and finish the practice.',
+          spokenGuidance:
+              'Before you return to work, choose one concrete next action. One email. One paragraph. '
+              'One decision. Let the rest remain outside the frame for now. When this practice ends, '
+              'give that single action your first piece of attention.',
           durationSeconds: 60,
         ),
       ],
@@ -481,26 +505,46 @@ class MeditationCatalog {
         MeditationStep(
           label: 'Face',
           guidance: 'Notice the face, jaw, and the space around the eyes.',
+          spokenGuidance:
+              'Bring attention to the face. Notice the forehead, the space around the eyes, the cheeks, '
+              'and the jaw. You do not need to relax anything deliberately. Just notice where there is '
+              'movement, pressure, warmth, tightness, or very little sensation at all.',
           durationSeconds: 60,
         ),
         MeditationStep(
           label: 'Shoulders',
           guidance: 'Move attention through the neck and shoulders.',
+          spokenGuidance:
+              'Let attention move through the neck and shoulders. Notice their weight and position. '
+              'If there is tension, you do not need to push it away. Feel the difference between the '
+              'muscles that are working and the areas that can simply be supported.',
           durationSeconds: 60,
         ),
         MeditationStep(
           label: 'Center',
           guidance: 'Notice the chest, back, and abdomen.',
+          spokenGuidance:
+              'Move into the centre of the body. Notice the chest, the upper and lower back, and the '
+              'abdomen. Feel any small movement that comes with breathing, as well as pressure or contact '
+              'from clothing and the surface beneath you.',
           durationSeconds: 60,
         ),
         MeditationStep(
           label: 'Legs',
           guidance: 'Notice the hips, legs, and feet.',
+          spokenGuidance:
+              'Now notice the hips, thighs, knees, lower legs, and feet. Feel where the legs are heavy, '
+              'warm, cool, supported, or restless. There is nothing you need to change. Let attention '
+              'move slowly enough to register what is already here.',
           durationSeconds: 60,
         ),
         MeditationStep(
           label: 'Whole Body',
           guidance: 'Notice the whole body as one field of sensation.',
+          spokenGuidance:
+              'Let the separate areas come together into one sense of the whole body. Face, shoulders, '
+              'centre, legs, and feet can all be present at once. Notice the body being supported here '
+              'without needing to check each part individually.',
           durationSeconds: 60,
         ),
       ],
@@ -518,23 +562,39 @@ class MeditationCatalog {
         MeditationStep(
           label: 'Notice',
           guidance: 'Notice the jaw, eyes, hands, and shoulders.',
+          spokenGuidance:
+              'Notice a few places that often work harder than necessary: the jaw, the muscles around '
+              'the eyes, the hands, and the shoulders. Do not correct them yet. First, simply notice '
+              'how much effort each area is using right now.',
           durationSeconds: 60,
         ),
         MeditationStep(
           label: 'Compare',
           guidance:
               'Notice the difference between effort that is useful and effort that is not needed.',
+          spokenGuidance:
+              'Some muscular effort is useful. It helps you sit, hold the phone, or keep your head '
+              'upright. See if you can distinguish that useful effort from extra gripping or bracing '
+              'that is not doing a job for you in this moment.',
           durationSeconds: 60,
         ),
         MeditationStep(
           label: 'Soften',
           guidance:
               'Experiment with using slightly less muscular effort without forcing relaxation.',
+          spokenGuidance:
+              'Experiment with using a little less effort. Perhaps let the jaw be less fixed, the hands '
+              'less clenched, or the shoulders less lifted. Keep the change small. You are not trying '
+              'to make the body completely relaxed, only to stop doing work that is not needed.',
           durationSeconds: 60,
         ),
         MeditationStep(
           label: 'Whole Body',
           guidance: 'Notice the whole body and let it settle in its own way.',
+          spokenGuidance:
+              'Now notice the whole body together. Let it settle in whatever way is available today. '
+              'Some tension may remain, and that is fine. Finish by noticing the difference between '
+              'forcing relaxation and simply giving the body permission to use less effort.',
           durationSeconds: 60,
         ),
       ],
@@ -552,29 +612,49 @@ class MeditationCatalog {
         MeditationStep(
           label: 'Notice',
           guidance: 'Notice what feels difficult right now.',
+          spokenGuidance:
+              'Notice what feels difficult right now without turning it into a bigger story. It may be '
+              'a feeling, a mistake, a conversation, or simply a hard day. Name the difficulty quietly '
+              'and notice what happens in the body when you acknowledge it.',
           durationSeconds: 60,
         ),
         MeditationStep(
           label: 'Soften',
           guidance:
               'See if you can speak to yourself without adding criticism to the difficulty.',
+          spokenGuidance:
+              'Notice the tone you are using with yourself. See if you can remove one layer of criticism '
+              'without pretending the situation is easy. The aim is not positive thinking. It is simply '
+              'to stop adding unnecessary hostility to something that is already difficult.',
           durationSeconds: 60,
         ),
         MeditationStep(
           label: 'Kindness',
           guidance:
               'Try one simple phrase you would offer to someone you care about.',
+          spokenGuidance:
+              'Think of one simple sentence you might offer to someone you care about in the same '
+              'situation. Maybe: this is hard, take one thing at a time, or you do not have to solve '
+              'everything right now. Try offering the same sentence to yourself.',
           durationSeconds: 60,
         ),
         MeditationStep(
           label: 'Allow',
           guidance:
               'Let the difficulty and the kinder response exist together for a moment.',
+          spokenGuidance:
+              'Let both things be true for a moment: this may still be difficult, and you can respond '
+              'to yourself with less aggression. You do not need the kinder response to erase the '
+              'feeling. Notice whether it changes the way you are carrying it.',
           durationSeconds: 60,
         ),
         MeditationStep(
           label: 'Return',
           guidance: 'Return attention to the room and to what matters next.',
+          spokenGuidance:
+              'Bring attention back to the room. Notice one sound, one point of support, and the next '
+              'thing that actually needs your attention. Finish without demanding a particular feeling '
+              'from yourself. A kinder next step is enough.',
           durationSeconds: 60,
         ),
       ],
@@ -640,17 +720,29 @@ class MeditationCatalog {
         MeditationStep(
           label: 'Stop',
           guidance: 'For this minute, stop doing the task.',
+          spokenGuidance:
+              'For this minute, stop doing the task. Let your hands move away from the keyboard or '
+              'whatever you have been working on. The work can remain unfinished. This pause is not '
+              'another task to complete; it is simply a short break from task pressure.',
           durationSeconds: 60,
         ),
         MeditationStep(
           label: 'Notice',
           guidance:
               'Notice three things in the room and one sensation in the body.',
+          spokenGuidance:
+              'Look around and notice three ordinary things in the room. Then notice one clear sensation '
+              'in the body: feet on the floor, hands resting, or the support of the chair. Let attention '
+              'move from the work into the environment you are actually sitting in.',
           durationSeconds: 60,
         ),
         MeditationStep(
           label: 'Return',
           guidance: 'Choose the first useful action when you return to work.',
+          spokenGuidance:
+              'Before you return, choose the first useful action. Make it specific and small enough to '
+              'begin immediately. You do not need to organise the whole workload during this break. '
+              'When the session ends, return to that one action first.',
           durationSeconds: 60,
         ),
       ],
@@ -671,36 +763,48 @@ class MeditationCatalog {
           label: 'Arrive',
           guidance:
               'Settle into a stable position and notice where your body is supported.',
+          spokenGuidance:
+              'Settle into a position you can stay with for a while. Notice where the chair, floor, or bed is already supporting you. Let your hands rest. There is no need to prepare perfectly. Give the body a moment to arrive before asking attention to do anything.',
           durationSeconds: 75,
         ),
         MeditationStep(
           label: 'Anchor',
           guidance:
               'Choose one clear sensation and let it be the main place your attention returns to.',
+          spokenGuidance:
+              'Choose one clear sensation as an anchor. It might be breathing, the pressure of your feet, or the contact of your hands. Stay close to the actual sensation rather than the idea of it. You do not need to hold attention there continuously. Let it simply be the place you return to.',
           durationSeconds: 120,
         ),
         MeditationStep(
           label: 'Drift',
           guidance:
               'Notice the moment attention has moved into a thought, sound, or plan.',
+          spokenGuidance:
+              'At some point attention will move. Perhaps into a thought, a sound, a memory, or a plan. See if you can notice that movement without treating it as a mistake. The useful moment is not perfect focus. The useful moment is recognising that attention has gone somewhere else.',
           durationSeconds: 90,
         ),
         MeditationStep(
           label: 'Return',
           guidance:
               'Come back to the anchor without tightening around it or judging the distraction.',
+          spokenGuidance:
+              'Return to the anchor with as little drama as possible. No need to force concentration or make the next moment better than the last. Notice the sensation again. If attention moves, return again. Repetition is the practice here.',
           durationSeconds: 120,
         ),
         MeditationStep(
           label: 'Widen',
           guidance:
               'Keep the anchor present while allowing sounds and other sensations into awareness.',
+          spokenGuidance:
+              'Let awareness become a little wider. Keep some contact with the anchor while also allowing sounds and other body sensations to be present. Nothing has to be pushed out. Practise letting attention stay organised without becoming narrow.',
           durationSeconds: 105,
         ),
         MeditationStep(
           label: 'Close',
           guidance:
               'Let the anchor go and notice the room before choosing what you will do next.',
+          spokenGuidance:
+              'Let the anchor become less important now. Notice the whole body, the room, and the sounds around you. Before you finish, choose where you want your attention to go next. Let that choice be deliberate rather than automatic.',
           durationSeconds: 90,
         ),
       ],
@@ -721,36 +825,48 @@ class MeditationCatalog {
           label: 'Orient',
           guidance:
               'Notice the room, the surface beneath you, and one ordinary sound around you.',
+          spokenGuidance:
+              'Begin with what is certain in this moment. Notice the room, the surface beneath you, and one ordinary sound. Let these simple details remind you that you are here now, before the mind moves ahead into what might happen.',
           durationSeconds: 60,
         ),
         MeditationStep(
           label: 'Name',
           guidance:
               'Notice that uncertainty is here without turning it into a prediction about what will happen.',
+          spokenGuidance:
+              'Notice the simple fact that you do not know exactly what comes next. Try not to turn that uncertainty into a prediction. Not knowing is different from knowing that something bad will happen. For now, just name the uncertainty and let it be unfinished.',
           durationSeconds: 80,
         ),
         MeditationStep(
           label: 'Body',
           guidance:
               'Find where the feeling shows up physically and describe the sensation simply.',
+          spokenGuidance:
+              'Notice where uncertainty shows up in the body. Perhaps pressure, tightness, warmth, restlessness, or something harder to name. Describe the sensation simply, without explaining why it is there. Stay with the physical information rather than the prediction.',
           durationSeconds: 90,
         ),
         MeditationStep(
           label: 'Allow',
           guidance:
               'See if the sensation can be present for this moment without needing to disappear first.',
+          spokenGuidance:
+              'See if the sensation can be here for this moment without becoming a problem you must solve immediately. You are not agreeing with it or asking it to stay. You are only noticing that you can continue to sit here while the feeling changes in its own way.',
           durationSeconds: 90,
         ),
         MeditationStep(
           label: 'Space',
           guidance:
               'Let thoughts come and go while keeping some attention with the body and the room.',
+          spokenGuidance:
+              'Let thoughts come and go without following every branch. Keep some awareness with the body and the room at the same time. The mind may keep offering possibilities. You do not need to answer each one.',
           durationSeconds: 90,
         ),
         MeditationStep(
           label: 'Return',
           guidance:
               'Finish by choosing one useful next action that does not require certainty.',
+          spokenGuidance:
+              'Before you finish, choose one useful next action that does not require certainty. Something small and real that can be done with the information you already have. Let action come from what is available now, rather than waiting to feel completely sure.',
           durationSeconds: 70,
         ),
       ],
@@ -771,42 +887,56 @@ class MeditationCatalog {
           label: 'Settle',
           guidance:
               'Notice the weight of the body and the points that are supported.',
+          spokenGuidance:
+              'Notice the weight of the body and the places already being supported. Let the surface beneath you take the weight it can take. There is nothing to scan yet. Begin with the simple sense of the whole body being here.',
           durationSeconds: 60,
         ),
         MeditationStep(
           label: 'Face & Neck',
           guidance:
               'Move attention through the face, jaw, neck, and the space around the eyes.',
+          spokenGuidance:
+              'Bring attention through the forehead, eyes, cheeks, jaw, and neck. Notice pressure, temperature, movement, or areas with very little sensation. There is no need to make the face soft. Let yourself notice before changing anything.',
           durationSeconds: 90,
         ),
         MeditationStep(
           label: 'Upper Body',
           guidance:
               'Notice shoulders, arms, hands, upper back, and any changing sensations there.',
+          spokenGuidance:
+              'Move through the shoulders, arms, hands, and upper back. Notice heaviness, contact, warmth, tension, or ease. If one area calls for more attention, let it have a few moments without trying to fix what you find.',
           durationSeconds: 100,
         ),
         MeditationStep(
           label: 'Center',
           guidance:
               'Bring attention through the chest, ribs, abdomen, and lower back.',
+          spokenGuidance:
+              'Bring attention through the chest, ribs, abdomen, and lower back. Notice the movement already happening with breathing. Feel pressure from clothing or support beneath you. Let the centre of the body be experienced rather than analysed.',
           durationSeconds: 100,
         ),
         MeditationStep(
           label: 'Lower Body',
           guidance:
               'Notice hips, legs, knees, ankles, and feet without needing them to relax.',
+          spokenGuidance:
+              'Notice the hips, legs, knees, ankles, and feet. Feel their weight and contact with the surface beneath you. There may be restlessness or tension. Let those sensations be part of the scan without needing the lower body to become still.',
           durationSeconds: 100,
         ),
         MeditationStep(
           label: 'Whole Body',
           guidance:
               'Let the whole body be present as one changing field of sensation.',
+          spokenGuidance:
+              'Now let the separate regions come together. Notice the whole body at once, not as a picture but as changing sensation. Some areas may feel clear and others vague. Let all of that belong to one field of experience.',
           durationSeconds: 100,
         ),
         MeditationStep(
           label: 'Close',
           guidance:
               'Widen attention to sounds and the room, then let the practice end.',
+          spokenGuidance:
+              'Let attention widen beyond the body. Notice sounds and the room again. Allow the scan to end without deciding whether anything changed enough. When you are ready, reconnect with what comes next.',
           durationSeconds: 50,
         ),
       ],
@@ -827,36 +957,48 @@ class MeditationCatalog {
           label: 'Anchor',
           guidance:
               'Begin with one simple sensation until attention feels settled enough to widen.',
+          spokenGuidance:
+              'Begin with one simple sensation. Let it give attention a clear starting point. Stay there for a while, not because you need to exclude everything else, but because a stable place to begin makes it easier to notice when awareness widens.',
           durationSeconds: 90,
         ),
         MeditationStep(
           label: 'Sounds',
           guidance:
               'Let sounds arrive and leave without choosing which one should be present.',
+          spokenGuidance:
+              'Allow sounds to become part of awareness. Near or distant, pleasant or ordinary. Do not search for the next sound. Let it arrive, change, and disappear in its own time while you remain here listening.',
           durationSeconds: 100,
         ),
         MeditationStep(
           label: 'Body',
           guidance:
               'Include sensations throughout the body without moving from one region to another.',
+          spokenGuidance:
+              'Include the body now without scanning it part by part. Let pressure, temperature, breathing, and other sensations appear wherever they are noticeable. There is no need to move attention around deliberately.',
           durationSeconds: 100,
         ),
         MeditationStep(
           label: 'Thoughts',
           guidance:
               'Notice thoughts as events appearing in the same field rather than instructions to follow.',
+          spokenGuidance:
+              'Thoughts can be included too. Notice when one appears and when another takes its place. A thought may feel important without needing to be followed right now. Let thinking be one more changing event inside awareness.',
           durationSeconds: 100,
         ),
         MeditationStep(
           label: 'Open',
           guidance:
               'Allow sounds, sensations, thoughts, and silence to share attention without holding one tightly.',
+          spokenGuidance:
+              'Let the field stay open. Sounds, sensations, thoughts, and quiet can all be present together. Nothing needs to become the centre for long. Notice how experience changes when you stop choosing one thing to hold onto.',
           durationSeconds: 140,
         ),
         MeditationStep(
           label: 'Close',
           guidance:
               'Narrow attention back to the body, then reconnect with the room.',
+          spokenGuidance:
+              'Begin to narrow attention again. Feel the body, the surface beneath you, and the room around you. Let the practice close gradually. Take a moment before moving into the next task.',
           durationSeconds: 70,
         ),
       ],
@@ -951,36 +1093,48 @@ class MeditationCatalog {
           label: 'Settle',
           guidance:
               'Feel the weight of your body and the places where you are fully supported.',
+          spokenGuidance:
+              'Let the body become heavier where it is supported. Notice the bed, chair, or floor beneath you. You do not need to make yourself sleepy or relaxed. Simply allow the body to stop holding more weight than it needs to hold.',
           durationSeconds: 80,
         ),
         MeditationStep(
           label: 'Face',
           guidance:
               'Notice the forehead, eyes, jaw, and tongue. Use only as much muscular effort as you need.',
+          spokenGuidance:
+              'Notice the forehead, the muscles around the eyes, the jaw, and the tongue. See whether any of these areas are doing work that is not needed now. If so, let the effort reduce a little. No forcing.',
           durationSeconds: 80,
         ),
         MeditationStep(
           label: 'Shoulders',
           guidance:
               'Move attention through the neck, shoulders, arms, and hands without forcing them to relax.',
+          spokenGuidance:
+              'Move through the neck, shoulders, arms, and hands. Feel their weight and position. Let the arms be carried by the surface beneath them. If tension remains, allow it to remain without turning it into another task.',
           durationSeconds: 80,
         ),
         MeditationStep(
           label: 'Center',
           guidance:
               'Notice the chest, back, abdomen, and the movement that is already happening there.',
+          spokenGuidance:
+              'Notice the chest, back, and abdomen. Feel the movement already happening with breathing without changing its pace. Let the centre of the body move in its own small rhythm while the rest of you becomes quieter.',
           durationSeconds: 80,
         ),
         MeditationStep(
           label: 'Lower Body',
           guidance:
               'Notice the hips, legs, feet, and the contact between your body and the bed or chair.',
+          spokenGuidance:
+              'Bring attention to the hips, legs, and feet. Notice contact, warmth, heaviness, or restlessness. Let the lower body be held where it can be held. You do not need every muscle to become still.',
           durationSeconds: 80,
         ),
         MeditationStep(
           label: 'Whole Body',
           guidance:
               'Let the whole body be present at once and allow the practice to become quieter.',
+          spokenGuidance:
+              'Let the whole body be present at once. Nothing more needs to be scanned. Allow attention to become less deliberate now. The guidance can recede while the body stays supported in its own way.',
           durationSeconds: 80,
         ),
       ],
@@ -1001,36 +1155,48 @@ class MeditationCatalog {
           label: 'Orient',
           guidance:
               'Notice the room, the surface beneath you, and a few ordinary sounds around you.',
+          spokenGuidance:
+              'Begin with the ordinary details of this moment. Notice the room, the surface beneath you, and a few sounds. There is nothing to prepare and nowhere else to get to. Let the night be exactly as it is for now.',
           durationSeconds: 100,
         ),
         MeditationStep(
           label: 'Unhook',
           guidance:
               'When a thought asks for attention, notice that thinking is happening without following the next branch.',
+          spokenGuidance:
+              'When a thought asks for attention, notice that thinking is happening. You do not need to follow the next branch of the story. Let the thought be incomplete. Another thought may come, or there may be a little quiet.',
           durationSeconds: 100,
         ),
         MeditationStep(
           label: 'Return',
           guidance:
               'Return to one simple sensation: contact, warmth, sound, or the natural movement of breathing.',
+          spokenGuidance:
+              'Return to one simple sensation. Contact with the bed or chair. Warmth. A sound. The natural movement of breathing. Let something simple carry attention for a while without asking you to solve anything.',
           durationSeconds: 100,
         ),
         MeditationStep(
           label: 'Widen',
           guidance:
               'Let thoughts and sensations come and go inside a wider field of attention.',
+          spokenGuidance:
+              'Let awareness widen. Thoughts and sensations can come and go without becoming a task. You do not need to monitor them closely. Notice that experience can keep changing while you do less with it.',
           durationSeconds: 100,
         ),
         MeditationStep(
           label: 'Less',
           guidance:
               'There is nothing to perform now. Let attention become less deliberate and less effortful.',
+          spokenGuidance:
+              'There is nothing to perform now. Let attention become less deliberate. If you drift, drift. If you notice a sound, notice it. If thoughts continue, they can continue. The practice does not require you to stay alert in a particular way.',
           durationSeconds: 100,
         ),
         MeditationStep(
           label: 'Close',
           guidance:
               'Let the guidance end and remain with the quiet in your own way.',
+          spokenGuidance:
+              'The guidance can end here. You do not need to do anything with the remaining quiet. Stay with the sounds, the body, or simply let attention loosen. Continue in your own way.',
           durationSeconds: 100,
         ),
       ],

@@ -68,6 +68,35 @@ void main() {
   });
 
 
+  test('Daily insight rotation avoids repeating a category on consecutive days', () {
+    final anchor = DateTime.utc(2026, 1, 1);
+    final cycle = List<DailyInsight>.generate(
+      DailyInsightCatalog.all.length,
+      (index) => DailyInsightCatalog.forDate(
+        anchor.add(Duration(days: index)),
+      ),
+    );
+
+    expect(
+      cycle.map((insight) => insight.id).toSet(),
+      DailyInsightCatalog.all.map((insight) => insight.id).toSet(),
+    );
+
+    for (var index = 1; index < cycle.length; index++) {
+      expect(
+        cycle[index].category,
+        isNot(cycle[index - 1].category),
+        reason: '${cycle[index - 1].id} -> ${cycle[index].id}',
+      );
+    }
+
+    expect(
+      cycle.first.category,
+      isNot(cycle.last.category),
+      reason: 'rotation wrap-around must also change category',
+    );
+  });
+
   testWidgets('Home renders the premium need-first hierarchy', (
     WidgetTester tester,
   ) async {

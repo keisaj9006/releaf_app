@@ -551,10 +551,46 @@ class DailyInsightCatalog {
     ),
   ];
 
+  static const List<String> _rotationIds = [
+    'movement-150-300',
+    'vitamin-d-depression',
+    'movement-some-is-better',
+    'nutrition-fruit-veg-400',
+    'sleep-seven-hours',
+    'walk-11-minutes',
+    'nutrition-free-sugars',
+    'sleep-regularity',
+    'sedentary-time',
+    'nutrition-hydration-guide',
+    'light-body-clock',
+    'mindfulness-nuance',
+    'activity-immediate-benefits',
+    'nutrition-salt-five-grams',
+    'alcohol-sleep',
+    'gratitude-evidence',
+    'movement-strength-two-days',
+    'nutrition-fibre-25',
+    'sleep-caffeine-hours',
+    'social-connection-health',
+    'mind-breathing-evidence',
+    'movement-break-up-sitting',
+    'nutrition-saturated-fat-10',
+    'sleep-screen-30',
+    'connection-loneliness-isolation',
+    'mind-meditation-adverse-effects',
+    'movement-single-session-bp',
+    'nature-120',
+    'nutrition-trans-fat-1',
+    'sleep-naps-afternoon',
+  ];
+
   static DailyInsight forDate(DateTime date) {
     final day = DateTime.utc(date.year, date.month, date.day);
     final anchor = DateTime.utc(2026, 1, 1);
-    final index = day.difference(anchor).inDays % all.length;
-    return all[index < 0 ? index + all.length : index];
+    final rawIndex = day.difference(anchor).inDays % _rotationIds.length;
+    final index = rawIndex < 0 ? rawIndex + _rotationIds.length : rawIndex;
+    final id = _rotationIds[index];
+
+    return all.firstWhere((insight) => insight.id == id);
   }
 }

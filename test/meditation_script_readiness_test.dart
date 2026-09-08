@@ -2,30 +2,37 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:releaf_app/features/meditation/data/meditation_catalog.dart';
 
 void main() {
-  test('Foundations and core Anxiety sessions are narration-script ready', () {
+  test('Every guided meditation has a complete spoken narration script', () {
     const catalog = MeditationCatalog();
-    const ids = [
-      'mindfulness-basics-2',
-      'breath-and-body-4',
-      'working-with-thoughts-5',
-      'open-awareness-6',
-      'anxious-thoughts-5',
-      'before-a-difficult-moment-4',
-    ];
+    final guided = catalog
+        .getAll()
+        .where((session) => !session.unguided)
+        .toList(growable: false);
 
-    for (final id in ids) {
-      final session = catalog.getById(id);
-      expect(session, isNotNull, reason: '$id must exist');
-      expect(session!.unguided, isFalse, reason: '$id must be guided');
-      expect(
-        session.steps.every(
-          (step) =>
-              step.spokenGuidance != null &&
-              step.spokenGuidance!.trim().isNotEmpty,
-        ),
-        isTrue,
-        reason: '$id must have spoken guidance for every step',
-      );
+    expect(guided, hasLength(20));
+
+    for (final session in guided) {
+      expect(session.steps, isNotEmpty, reason: session.id);
+      for (final step in session.steps) {
+        final spoken = step.spokenGuidance?.trim() ?? '';
+        expect(
+          spoken,
+          isNotEmpty,
+          reason: '${session.id} / ${step.label} needs spoken guidance',
+        );
+
+        final wordCount = spoken
+            .split(RegExp(r'\s+'))
+            .where((word) => word.isNotEmpty)
+            .length;
+
+        expect(
+          wordCount,
+          lessThanOrEqualTo(step.durationSeconds),
+          reason:
+              '${session.id} / ${step.label} should leave meaningful silence',
+        );
+      }
     }
   });
 }
