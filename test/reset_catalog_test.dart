@@ -23,6 +23,14 @@ void main() {
     'press-release',
     'make-room',
     'one-small-next-step',
+    'sleep-faster-routine',
+    'morning-reset-ritual',
+    'confidence-posture-reset',
+    'deep-focus-method',
+    'emotional-stability-drill',
+    'night-nervous-system-unwind',
+    'quick-mood-shift',
+    'body-recalibration',
     'before-panic-builds',
     'before-exam',
     'before-interview',
@@ -207,6 +215,30 @@ void main() {
     expect(sleep.program?.breathPattern?.holdAfterExhaleSeconds, 0);
     expect(sleep.methodLabel, contains('4–7–8'));
     expect(sleep.safetyNote, isNotNull);
+  });
+
+  test('Life Upgrade category contains the planned practical micro-routines', () {
+    const ids = <String>{
+      'sleep-faster-routine',
+      'morning-reset-ritual',
+      'confidence-posture-reset',
+      'deep-focus-method',
+      'emotional-stability-drill',
+      'night-nervous-system-unwind',
+      'quick-mood-shift',
+      'body-recalibration',
+    };
+
+    for (final id in ids) {
+      final session = catalog.getById(id)!;
+      expect(session.level, ResetLevel.quick, reason: id);
+      expect(session.quickCategory, QuickResetCategory.lifeUpgrade, reason: id);
+      expect(session.program?.type, ResetProgramType.guidedSteps, reason: id);
+      expect(session.summary, isNotNull, reason: id);
+      expect(session.bestFor, isNotNull, reason: id);
+      expect(session.whyItMayHelp, isNotNull, reason: id);
+      expect(session.durationSeconds, inInclusiveRange(90, 240), reason: id);
+    }
   });
 
   test('remaining Breath Programs expose distinct pacing and education', () {
