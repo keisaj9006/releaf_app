@@ -28,14 +28,16 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Report dependency lock drift
+      - name: Verify dependency lockfile
         run: |
           if git diff --quiet -- pubspec.lock; then
             echo "pubspec.lock is in sync with pubspec.yaml."
-          else
-            echo "::warning::pubspec.lock changed after flutter pub get. Commit the resolved lockfile before release."
-            git diff -- pubspec.lock
+            exit 0
           fi
+
+          echo "::error::pubspec.lock changed after flutter pub get. Commit the resolved lockfile."
+          git diff -- pubspec.lock
+          exit 1
 
       - name: Audit bundled sound assets
         timeout-minutes: 5
