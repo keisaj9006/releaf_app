@@ -223,6 +223,27 @@ void main() {
     expect(sleep.safetyNote, isNotNull);
   });
 
+  test('six core Deep Reset protocols explain use case and rationale', () {
+    const ids = <String>{
+      'wired-steady',
+      'tension-body-scan',
+      'overwhelm-stability',
+      'evening-unwind',
+      'anger-release',
+      'overthinking-let-go',
+    };
+
+    for (final id in ids) {
+      final session = catalog.getById(id)!;
+      expect(session.level, ResetLevel.deep, reason: id);
+      expect(session.durationSeconds, 480, reason: id);
+      expect(session.summary, isNotNull, reason: id);
+      expect(session.methodLabel, isNotNull, reason: id);
+      expect(session.bestFor, isNotNull, reason: id);
+      expect(session.whyItMayHelp, isNotNull, reason: id);
+    }
+  });
+
   test('No-Breath includes safe movement and sensory alternatives', () {
     const ids = <String>{
       'cool-water-reset',
