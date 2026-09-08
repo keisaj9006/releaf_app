@@ -674,13 +674,23 @@ void main() {
 
     expect(find.text('Paused'), findsNothing);
 
+    // Android transitions through inactive before paused. Verify the
+    // earliest background state already freezes the game, then keep it
+    // frozen through paused.
+    tester.binding.handleAppLifecycleStateChanged(
+      AppLifecycleState.inactive,
+    );
+    await tester.pump();
+
+    expect(find.text('Paused'), findsOneWidget);
+    expect(find.text('Resume'), findsOneWidget);
+
     tester.binding.handleAppLifecycleStateChanged(
       AppLifecycleState.paused,
     );
     await tester.pump();
 
     expect(find.text('Paused'), findsOneWidget);
-    expect(find.text('Resume'), findsOneWidget);
 
     tester.binding.handleAppLifecycleStateChanged(
       AppLifecycleState.resumed,
