@@ -28,6 +28,52 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Report dependency lock drift
+        run: |
+          if git diff --quiet -- pubspec.lock; then
+            echo "pubspec.lock is in sync with pubspec.yaml."
+          else
+            echo "::warning::pubspec.lock changed after flutter pub get. Commit the resolved lockfile before release."
+            git diff -- pubspec.lock
+          fi
+
+      - name: Audit bundled sound assets
+        run: |
+          if ! command -v ffprobe >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y ffmpeg
+          fi
+
+          printf "file\tduration_s\tbitrate_bps\tsample_rate_hz\tchannels\tsize_bytes\n"
+          failed=0
+          for file in assets/sounds/*.mp3; do
+            duration="$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "$file" || true)"
+            bitrate="$(ffprobe -v error -show_entries format=bit_rate -of default=noprint_wrappers=1:nokey=1 "$file" || true)"
+            sample_rate="$(ffprobe -v error -select_streams a:0 -show_entries stream=sample_rate -of default=noprint_wrappers=1:nokey=1 "$file" || true)"
+            channels="$(ffprobe -v error -select_streams a:0 -show_entries stream=channels -of default=noprint_wrappers=1:nokey=1 "$file" || true)"
+            size="$(stat -c%s "$file")"
+
+            printf "%s\t%s\t%s\t%s\t%s\t%s\n" \
+              "$file" "$duration" "$bitrate" "$sample_rate" "$channels" "$size"
+
+            if [ -z "$duration" ] || [ -z "$sample_rate" ] || [ -z "$channels" ]; then
+              echo "::error file=$file::Unable to decode bundled sound asset."
+              failed=1
+              continue
+            fi
+
+            if ! awk "BEGIN { exit !($duration >= 60) }"; then
+              echo "::error file=$file::Bundled looping sound must be at least 60 seconds."
+              failed=1
+            fi
+
+            if [ "$sample_rate" != "44100" ]; then
+              echo "::warning file=$file::Expected 44.1 kHz bundled audio; got $sample_rate Hz."
+            fi
+          done
+
+          exit "$failed"
+
       - name: Analyze
         run: flutter analyze
 

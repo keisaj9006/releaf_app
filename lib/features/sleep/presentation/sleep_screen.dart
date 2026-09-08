@@ -29,6 +29,8 @@ class SleepScreen extends ConsumerWidget {
   static const _natureSoundIds = <String>[
     'soft-rain',
     'night-air',
+    'ocean-wash',
+    'forest-canopy',
   ];
 
   static const _sleepAtmosphereIds = <String>[

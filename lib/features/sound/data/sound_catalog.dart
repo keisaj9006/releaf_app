@@ -58,6 +58,24 @@ class SoundCatalog {
       accessTier: SoundAccessTier.free,
     ),
     SoundContent(
+      id: 'ocean-wash',
+      title: 'Ocean Wash',
+      subtitle:
+          'A slow original wave-like soundscape with soft low swells and no sudden events.',
+      assetPath: 'sounds/ocean_wash.mp3',
+      category: SoundCategory.environment,
+      accessTier: SoundAccessTier.premium,
+    ),
+    SoundContent(
+      id: 'forest-canopy',
+      title: 'Forest Canopy',
+      subtitle:
+          'An original wind-through-leaves texture without voices or wildlife calls.',
+      assetPath: 'sounds/forest_canopy.mp3',
+      category: SoundCategory.environment,
+      accessTier: SoundAccessTier.premium,
+    ),
+    SoundContent(
       id: 'white-noise',
       title: 'White Noise',
       subtitle:

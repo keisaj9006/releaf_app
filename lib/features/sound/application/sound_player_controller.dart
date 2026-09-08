@@ -9,6 +9,7 @@ import '../data/sound_catalog.dart';
 import '../domain/sound_content.dart';
 
 const int soundSleepTimerFadeSeconds = 20;
+const double defaultSoundVolume = 0.62;
 
 double soundOutputVolumeForSleepTimer({
   required double baseVolume,
@@ -95,7 +96,7 @@ class SoundPlayerState {
     this.isPlaying = false,
     this.position = Duration.zero,
     this.duration = Duration.zero,
-    this.volume = 0.78,
+    this.volume = defaultSoundVolume,
     this.favoriteIds = const <String>{},
     this.recentIds = const <String>[],
     this.sleepTimerMinutes,
@@ -173,6 +174,9 @@ class SoundPlayerController extends StateNotifier<SoundPlayerState> {
         _now = now ?? DateTime.now,
         super(
           SoundPlayerState(
+            volume: (_prefs.getDouble(_volumeKey) ?? defaultSoundVolume)
+                .clamp(0.0, 1.0)
+                .toDouble(),
             favoriteIds:
                 (_prefs.getStringList(_favoritesKey) ?? const <String>[]).toSet(),
             recentIds:
@@ -197,6 +201,7 @@ class SoundPlayerController extends StateNotifier<SoundPlayerState> {
 
   static const _favoritesKey = 'sound.favorite_ids';
   static const _recentsKey = 'sound.recent_ids';
+  static const _volumeKey = 'sound.volume.v1';
 
   final SoundCatalog _catalog;
   final SharedPreferences _prefs;
@@ -282,6 +287,7 @@ class SoundPlayerController extends StateNotifier<SoundPlayerState> {
   Future<void> setVolume(double volume) async {
     final safe = volume.clamp(0.0, 1.0).toDouble();
     state = state.copyWith(volume: safe);
+    await _prefs.setDouble(_volumeKey, safe);
     await _driver.setVolume(
       soundOutputVolumeForSleepTimer(
         baseVolume: safe,

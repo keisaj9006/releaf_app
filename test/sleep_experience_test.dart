@@ -40,6 +40,8 @@ void main() {
     expect(find.text('LOW-STIMULATION AMBIENCE'), findsOneWidget);
     expect(find.text('Releaf Atmosphere I'), findsOneWidget);
     expect(find.text('Releaf Atmosphere II'), findsOneWidget);
+    expect(find.text('Ocean Wash'), findsOneWidget);
+    expect(find.text('Forest Canopy'), findsOneWidget);
     expect(find.textContaining('sleep-frequency claims'), findsOneWidget);
 
     final premiumSound = find.byKey(const Key('sleep-sound-pink-noise'));

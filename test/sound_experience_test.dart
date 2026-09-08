@@ -79,7 +79,7 @@ void main() {
     const catalog = SoundCatalog();
     final tracks = catalog.getAll();
 
-    expect(tracks, hasLength(8));
+    expect(tracks, hasLength(10));
     expect(
       tracks.map((track) => track.assetPath),
       containsAll([
@@ -94,7 +94,7 @@ void main() {
       ]),
     );
     expect(tracks.every((track) => track.assetPath.endsWith('.mp3')), isTrue);
-    expect(tracks.where((track) => track.isPremium), hasLength(3));
+    expect(tracks.where((track) => track.isPremium), hasLength(5));
     expect(tracks.where((track) => !track.isPremium), hasLength(5));
   });
 
@@ -151,6 +151,30 @@ void main() {
     expect(driver.lastAssetPath, track.assetPath);
     expect(driver.lastTrackId, track.id);
     expect(driver.lastTitle, track.title);
+  });
+
+  test('Sound volume starts gently and persists across controller instances', () async {
+    final preferences = await _preferences();
+    final first = SoundPlayerController(
+      const SoundCatalog(),
+      preferences,
+      driver: _FakeSoundPlaybackDriver(),
+    );
+
+    expect(first.state.volume, closeTo(defaultSoundVolume, 0.0001));
+
+    await first.setVolume(0.41);
+    expect(first.state.volume, closeTo(0.41, 0.0001));
+    await first.dispose();
+
+    final restored = SoundPlayerController(
+      const SoundCatalog(),
+      preferences,
+      driver: _FakeSoundPlaybackDriver(),
+    );
+    addTearDown(restored.dispose);
+
+    expect(restored.state.volume, closeTo(0.41, 0.0001));
   });
 
   test('Sleep timer fade preserves the base volume curve', () {
@@ -262,6 +286,8 @@ void main() {
     expect(find.text('Night Air'), findsOneWidget);
     expect(find.text('White Noise'), findsOneWidget);
     expect(find.text('Pink Noise'), findsOneWidget);
+    expect(find.text('Ocean Wash'), findsOneWidget);
+    expect(find.text('Forest Canopy'), findsOneWidget);
     expect(find.text('Deep Drift'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });

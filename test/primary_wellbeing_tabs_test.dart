@@ -166,10 +166,15 @@ void main() {
     const catalog = SoundCatalog();
     final tracks = catalog.getAll();
 
-    expect(tracks, hasLength(8));
+    expect(tracks, hasLength(10));
     expect(catalog.getById('brown-noise')?.assetPath, 'sounds/brown_noise.mp3');
     expect(catalog.getById('soft-rain')?.assetPath, 'sounds/soft_rain.mp3');
     expect(catalog.getById('night-air')?.assetPath, 'sounds/night_air.mp3');
+    expect(catalog.getById('ocean-wash')?.assetPath, 'sounds/ocean_wash.mp3');
+    expect(
+      catalog.getById('forest-canopy')?.assetPath,
+      'sounds/forest_canopy.mp3',
+    );
     expect(catalog.getById('white-noise')?.assetPath, 'sounds/white_noise.mp3');
     expect(catalog.getById('pink-noise')?.assetPath, 'sounds/pink_noise.mp3');
     expect(catalog.getById('deep-drift')?.assetPath, 'sounds/deep_drift.mp3');
