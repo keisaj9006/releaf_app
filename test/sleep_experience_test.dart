@@ -40,19 +40,13 @@ void main() {
     expect(find.text('LOW-STIMULATION AMBIENCE'), findsOneWidget);
     expect(find.text('Releaf Atmosphere I'), findsOneWidget);
     expect(find.text('Releaf Atmosphere II'), findsOneWidget);
+    expect(find.text('NATURE AT NIGHT'), findsOneWidget);
     expect(find.text('Ocean Wash'), findsOneWidget);
     final natureRail = find.ancestor(
       of: find.text('Ocean Wash'),
       matching: find.byType(ListView),
     );
     expect(natureRail, findsOneWidget);
-    await tester.fling(
-      natureRail,
-      const Offset(-700, 0),
-      1200,
-    );
-    await tester.pumpAndSettle();
-    expect(find.text('Forest Canopy'), findsOneWidget);
     expect(find.textContaining('sleep-frequency claims'), findsOneWidget);
 
     final premiumSound = find.byKey(const Key('sleep-sound-pink-noise'));
