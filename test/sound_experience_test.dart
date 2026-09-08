@@ -16,6 +16,9 @@ class _FakeSoundPlaybackDriver implements SoundPlaybackDriver {
   final List<double> volumeCalls = <double>[];
   int pauseCalls = 0;
   int resumeCalls = 0;
+  String? lastAssetPath;
+  String? lastTrackId;
+  String? lastTitle;
 
   @override
   Stream<Duration> get onDurationChanged => const Stream<Duration>.empty();
@@ -36,7 +39,15 @@ class _FakeSoundPlaybackDriver implements SoundPlaybackDriver {
   }
 
   @override
-  Future<void> playAsset(String assetPath) async {}
+  Future<void> playAsset(
+    String assetPath, {
+    String? trackId,
+    String? title,
+  }) async {
+    lastAssetPath = assetPath;
+    lastTrackId = trackId;
+    lastTitle = title;
+  }
 
   @override
   Future<void> resume() async {
@@ -122,6 +133,24 @@ void main() {
 
     expect(controller.state.currentTrackId, track.id);
     expect(driver.resumeCalls, 1);
+  });
+
+  test('Sound controller forwards media metadata to the playback driver', () async {
+    final preferences = await _preferences();
+    final driver = _FakeSoundPlaybackDriver();
+    final controller = SoundPlayerController(
+      const SoundCatalog(),
+      preferences,
+      driver: driver,
+    );
+    addTearDown(controller.dispose);
+
+    final track = const SoundCatalog().getById('deep-drift')!;
+    await controller.play(track);
+
+    expect(driver.lastAssetPath, track.assetPath);
+    expect(driver.lastTrackId, track.id);
+    expect(driver.lastTitle, track.title);
   });
 
   test('Sleep timer fade preserves the base volume curve', () {

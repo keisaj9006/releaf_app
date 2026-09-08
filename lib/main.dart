@@ -1,6 +1,7 @@
 // FILE: lib/main.dart
 import 'dart:async';
 
+import 'package:audio_service/audio_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -9,6 +10,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'core/providers.dart';
+import 'features/sound/application/releaf_background_sound_driver.dart';
+import 'features/sound/application/sound_player_controller.dart';
 import 'routing/app_router.dart';
 import 'routing/app_routes.dart';
 import 'theme/app_theme.dart';
@@ -25,6 +28,16 @@ const _releafSupabasePublishableKey = String.fromEnvironment(
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  final backgroundSoundDriver =
+      await AudioService.init<ReleafBackgroundSoundDriver>(
+    builder: ReleafBackgroundSoundDriver.new,
+    config: const AudioServiceConfig(
+      androidNotificationChannelId: 'app.releaf.mobile.audio',
+      androidNotificationChannelName: 'Releaf audio',
+      androidNotificationOngoing: true,
+    ),
+  );
 
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
@@ -48,6 +61,7 @@ Future<void> main() async {
   final container = ProviderContainer(
     overrides: [
       sharedPreferencesProvider.overrideWithValue(prefs),
+      soundPlaybackDriverProvider.overrideWithValue(backgroundSoundDriver),
     ],
   );
 

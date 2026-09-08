@@ -33,7 +33,11 @@ abstract class SoundPlaybackDriver {
 
   Future<void> setReleaseMode(audio.ReleaseMode mode);
   Future<void> setVolume(double volume);
-  Future<void> playAsset(String assetPath);
+  Future<void> playAsset(
+    String assetPath, {
+    String? trackId,
+    String? title,
+  });
   Future<void> resume();
   Future<void> pause();
   Future<void> stop();
@@ -62,7 +66,11 @@ class AudioplayersSoundPlaybackDriver implements SoundPlaybackDriver {
   Future<void> setVolume(double volume) => _player.setVolume(volume);
 
   @override
-  Future<void> playAsset(String assetPath) =>
+  Future<void> playAsset(
+    String assetPath, {
+    String? trackId,
+    String? title,
+  }) =>
       _player.play(audio.AssetSource(assetPath));
 
   @override
@@ -142,11 +150,16 @@ class SoundPlayerState {
   }
 }
 
+final soundPlaybackDriverProvider = Provider<SoundPlaybackDriver?>((ref) {
+  return null;
+});
+
 final soundPlayerControllerProvider =
     StateNotifierProvider<SoundPlayerController, SoundPlayerState>((ref) {
   return SoundPlayerController(
     ref.watch(soundCatalogProvider),
     ref.watch(sharedPreferencesProvider),
+    driver: ref.watch(soundPlaybackDriverProvider),
   );
 });
 
@@ -215,7 +228,11 @@ class SoundPlayerController extends StateNotifier<SoundPlayerState> {
         duration: Duration.zero,
         isPlaying: false,
       );
-      await _driver.playAsset(track.assetPath);
+      await _driver.playAsset(
+        track.assetPath,
+        trackId: track.id,
+        title: track.title,
+      );
       await _markRecent(track.id);
     }
   }
