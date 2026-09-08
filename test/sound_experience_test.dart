@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:audioplayers/audioplayers.dart' as audio;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -75,25 +77,31 @@ Future<SharedPreferences> _preferences() async {
 }
 
 void main() {
-  test('Sound catalog only exposes real bundled audio', () {
+  test('Sound catalog only exposes real Flutter-bundled audio', () {
     const catalog = SoundCatalog();
     final tracks = catalog.getAll();
+    final pubspec = File('pubspec.yaml').readAsStringSync();
 
     expect(tracks, hasLength(10));
-    expect(
-      tracks.map((track) => track.assetPath),
-      containsAll([
-        'sounds/relief_01.mp3',
-        'sounds/relief_02.mp3',
-        'sounds/brown_noise.mp3',
-        'sounds/soft_rain.mp3',
-        'sounds/night_air.mp3',
-        'sounds/white_noise.mp3',
-        'sounds/pink_noise.mp3',
-        'sounds/deep_drift.mp3',
-      ]),
-    );
-    expect(tracks.every((track) => track.assetPath.endsWith('.mp3')), isTrue);
+    expect(tracks.map((track) => track.id).toSet(), hasLength(10));
+    expect(tracks.map((track) => track.assetPath).toSet(), hasLength(10));
+
+    for (final track in tracks) {
+      expect(track.assetPath.endsWith('.mp3'), isTrue, reason: track.id);
+
+      final sourceAsset = File('assets/${track.assetPath}');
+      expect(
+        sourceAsset.existsSync(),
+        isTrue,
+        reason: '${sourceAsset.path} must exist',
+      );
+      expect(
+        pubspec,
+        contains('- assets/${track.assetPath}'),
+        reason: '${track.assetPath} must be declared in pubspec.yaml',
+      );
+    }
+
     expect(tracks.where((track) => track.isPremium), hasLength(5));
     expect(tracks.where((track) => !track.isPremium), hasLength(5));
   });
