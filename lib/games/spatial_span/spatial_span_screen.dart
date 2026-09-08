@@ -125,7 +125,8 @@ class _SpatialSpanScreenState extends State<SpatialSpanScreen>
 
     final partialCorrectTaps = _input.length;
     setState(() {
-      _correctTaps = math.max(0, _correctTaps - partialCorrectTaps);
+      _correctTaps =
+          math.max(0, _correctTaps - partialCorrectTaps).toInt();
       _sequence = const [];
       _input.clear();
       _activeCell = null;
