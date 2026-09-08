@@ -6,7 +6,7 @@ import '../domain/models/reset_launch_options.dart';
 
 class ResetAudioPreferences {
   const ResetAudioPreferences({
-    this.voiceEnabled = true,
+    this.voiceEnabled = false,
     this.voiceVolume = 0.78,
     this.ambientEnabled = true,
     this.ambientVolume = 0.16,
@@ -54,7 +54,7 @@ class ResetAudioPreferencesController
   ResetAudioPreferencesController(this._preferences)
       : super(
           ResetAudioPreferences(
-            voiceEnabled: _preferences.getBool(_voiceEnabledKey) ?? true,
+            voiceEnabled: _preferences.getBool(_voiceEnabledKey) ?? false,
             voiceVolume: (_preferences.getDouble(_voiceVolumeKey) ?? 0.78)
                 .clamp(0.0, 1.0)
                 .toDouble(),
