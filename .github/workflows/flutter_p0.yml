@@ -32,7 +32,8 @@ jobs:
         run: flutter analyze
 
       - name: Test
-        run: flutter test
+        timeout-minutes: 5
+        run: flutter test --reporter expanded
 
       - name: Check RevenueCat configuration
         env:
