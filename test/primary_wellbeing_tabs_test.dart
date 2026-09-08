@@ -768,6 +768,31 @@ void main() {
     expect(paused.extra, isA<MeditationResumeState>());
   });
 
+  testWidgets('Direct meditation close falls back to Meditation hub', (
+    WidgetTester tester,
+  ) async {
+    final audioDriver = _FakeMeditationAudioDriver();
+    final voiceDriver = _FakeMeditationVoiceDriver();
+
+    await _pumpRoute(
+      tester,
+      location: AppRoutes.meditationSessionFor('mindfulness-basics-2'),
+      preferences: await _preferences(),
+      meditationAudioDriver: audioDriver,
+      meditationVoiceDriver: voiceDriver,
+    );
+
+    expect(find.byTooltip('Exit meditation'), findsOneWidget);
+    await tester.tap(find.byTooltip('Exit meditation'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(find.byKey(const Key('meditation-back')), findsOneWidget);
+    expect(audioDriver.stopCalls, greaterThanOrEqualTo(1));
+    expect(voiceDriver.stopCalls, greaterThanOrEqualTo(1));
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Paused meditation resumes without auto-playing audio layers', (
     WidgetTester tester,
   ) async {
