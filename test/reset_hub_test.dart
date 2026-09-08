@@ -112,6 +112,25 @@ void main() {
 
     expect(find.text('BREATH'), findsWidgets);
     expect(find.byKey(const Key('reset-clear-category-filter')), findsOneWidget);
+    expect(
+      find.byKey(const Key('reset-breathing-method-guide')),
+      findsOneWidget,
+    );
+    expect(find.text('Choose the pattern, not the promise.'), findsOneWidget);
+    expect(find.text('3–6'), findsOneWidget);
+    expect(
+      find.textContaining('same inhale-to-exhale ratio as 2–4'),
+      findsOneWidget,
+    );
+    expect(
+      find.textContaining('inhale–hold–exhale–hold'),
+      findsOneWidget,
+    );
+    expect(
+      find.textContaining('slow paced breathing has broader support'),
+      findsOneWidget,
+    );
+    expect(find.text('5–5 balanced breathing'), findsOneWidget);
     expect(find.text('5–5 Balanced'), findsOneWidget);
     expect(find.text('60s Grounding'), findsNothing);
 
@@ -225,6 +244,10 @@ void main() {
       findsOneWidget,
     );
     expect(find.byKey(const Key('reset-preview-start')), findsOneWidget);
+    expect(
+      find.text('Let thoughts come and go without judgement.'),
+      findsOneWidget,
+    );
 
     await tester.tap(find.byKey(const Key('reset-preview-close')));
     await tester.pumpAndSettle();
@@ -278,6 +301,32 @@ void main() {
       find.byKey(const Key('reset-active-session-guidance-hidden')),
       findsOneWidget,
     );
+  });
+
+  testWidgets('Breathing method ratio stays visible during the session', (
+    WidgetTester tester,
+  ) async {
+    await _pumpResetHub(tester, preferences: await _preferences());
+
+    await tester.tap(find.byKey(const Key('reset-category-breath')));
+    await tester.pumpAndSettle();
+
+    final sessionCard =
+        find.byKey(const Key('reset-session-equal-rhythm'));
+    await tester.ensureVisible(sessionCard);
+    await tester.tap(sessionCard);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    await tester.tap(find.byKey(const Key('reset-preview-start')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(
+      find.byKey(const Key('reset-active-breath-method')),
+      findsOneWidget,
+    );
+    expect(find.text('5–5 balanced breathing'), findsOneWidget);
   });
 
   testWidgets('Reset audio controls remain available during a session', (

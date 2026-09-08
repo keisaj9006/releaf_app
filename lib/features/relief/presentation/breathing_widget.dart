@@ -719,6 +719,35 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
                         onAudioPressed: _showSessionAudioSettings,
                         audioEnabled: _voiceEnabled || _ambientEnabled,
                       ),
+                      if (isPacedBreathing &&
+                          session.methodLabel?.trim().isNotEmpty == true) ...[
+                        const SizedBox(height: ReleafSpacing.xs),
+                        Align(
+                          alignment: Alignment.center,
+                          child: Container(
+                            key: const Key('reset-active-breath-method'),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 11,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: ReleafColors.surfaceSoft,
+                              borderRadius:
+                                  BorderRadius.circular(ReleafRadii.pill),
+                              border:
+                                  Border.all(color: ReleafColors.borderSoft),
+                            ),
+                            child: Text(
+                              session.methodLabel!,
+                              textAlign: TextAlign.center,
+                              style: ReleafTypography.meta.copyWith(
+                                color: ReleafColors.sage,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                       const SizedBox(height: ReleafSpacing.sm),
                       Expanded(
                         child: Center(

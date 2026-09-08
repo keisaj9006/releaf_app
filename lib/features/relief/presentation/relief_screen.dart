@@ -372,6 +372,13 @@ class _ReliefScreenState extends ConsumerState<ReliefScreen> {
                                   ),
                                 ),
                               ],
+                              if (_selectedCategory ==
+                                  QuickResetCategory.breath) ...[
+                                const SizedBox(height: ReleafSpacing.md),
+                                const _SectionPadding(
+                                  child: _BreathingMethodGuide(),
+                                ),
+                              ],
                               const SizedBox(height: ReleafSpacing.lg),
                               _EditorialRail(
                                 semanticsLabel:
@@ -829,6 +836,227 @@ class _EditorialCategoryCard extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _BreathingMethodGuide extends StatelessWidget {
+  const _BreathingMethodGuide();
+
+  static const _methods = <({
+    String ratio,
+    String title,
+    String detail,
+    String tag,
+  })>[
+    (
+      ratio: '5–5 / 4–4',
+      title: 'Balanced',
+      detail:
+          'No hold. An even inhale and exhale is the simplest place to start when you want a steady paced rhythm.',
+      tag: 'NO HOLD',
+    ),
+    (
+      ratio: '4–6',
+      title: 'Extended exhale',
+      detail:
+          'No hold. The exhale is slightly longer than the inhale, without asking you to empty the lungs forcefully.',
+      tag: 'NO HOLD',
+    ),
+    (
+      ratio: '3–6',
+      title: '1:2 long exhale',
+      detail:
+          'This has the same inhale-to-exhale ratio as 2–4, but a slower overall cycle. The ratio is the same; the pace is not.',
+      tag: '1:2',
+    ),
+    (
+      ratio: '5–7',
+      title: 'Slow continuous',
+      detail:
+          'No hold. A slower 12-second cycle for people who are comfortable with a very unhurried breathing pace.',
+      tag: 'NO HOLD',
+    ),
+    (
+      ratio: '4–4–4–4',
+      title: 'Box breathing',
+      detail:
+          'Uses a hold after the inhale and another after the exhale. Skip it if breath-holding increases panic or air hunger.',
+      tag: 'HOLDS',
+    ),
+    (
+      ratio: '4–7–8',
+      title: 'Hold + long exhale',
+      detail:
+          'A longer hold and exhale used here as a bedtime pacing method, not as a special or magic formula.',
+      tag: 'HOLD',
+    ),
+    (
+      ratio: '3–3',
+      title: 'Active steady',
+      detail:
+          'No hold. A quicker even rhythm that is more active than the slower settling patterns.',
+      tag: 'NO HOLD',
+    ),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      key: const Key('reset-breathing-method-guide'),
+      padding: const EdgeInsets.all(ReleafSpacing.md),
+      decoration: BoxDecoration(
+        color: ReleafColors.surfaceSoft,
+        borderRadius: BorderRadius.circular(ReleafRadii.large),
+        border: Border.all(color: ReleafColors.borderSoft),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'BREATHING METHOD GUIDE',
+            style: ReleafTypography.eyebrow.copyWith(
+              color: ReleafColors.sage,
+            ),
+          ),
+          const SizedBox(height: ReleafSpacing.xs),
+          Text(
+            'Choose the pattern, not the promise.',
+            style: ReleafTypography.sectionTitle,
+          ),
+          const SizedBox(height: ReleafSpacing.xs),
+          Text(
+            'Releaf writes breathing patterns in phase order: inhale–exhale for continuous breathing, or inhale–hold–exhale–hold when holds are used. The numbers describe timing, not a magic formula.',
+            style: ReleafTypography.body.copyWith(
+              color: ReleafColors.textSecondary,
+              height: 1.45,
+            ),
+          ),
+          const SizedBox(height: ReleafSpacing.md),
+          ..._methods.map(
+            (method) => _BreathingMethodGuideRow(
+              ratio: method.ratio,
+              title: method.title,
+              detail: method.detail,
+              tag: method.tag,
+            ),
+          ),
+          const SizedBox(height: ReleafSpacing.xs),
+          Text(
+            'Evidence note: slow paced breathing has broader support than any one exact ratio. Releaf treats patterns such as box breathing and 4–7–8 as pacing options, not superior formulas.',
+            style: ReleafTypography.meta.copyWith(
+              color: ReleafColors.textMuted,
+              height: 1.45,
+            ),
+          ),
+          const SizedBox(height: ReleafSpacing.sm),
+          Container(
+            padding: const EdgeInsets.all(ReleafSpacing.sm),
+            decoration: BoxDecoration(
+              color: ReleafColors.backgroundRaised,
+              borderRadius: BorderRadius.circular(ReleafRadii.medium),
+              border: Border.all(color: ReleafColors.borderSoft),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Icon(
+                  Icons.info_outline_rounded,
+                  size: 17,
+                  color: ReleafColors.textMuted,
+                ),
+                const SizedBox(width: ReleafSpacing.sm),
+                Expanded(
+                  child: Text(
+                    'If you feel light-headed, short of breath or more anxious, stop the count and return to normal breathing. Holds are optional, not a progression you have to complete.',
+                    style: ReleafTypography.meta.copyWith(
+                      color: ReleafColors.textSecondary,
+                      height: 1.45,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BreathingMethodGuideRow extends StatelessWidget {
+  const _BreathingMethodGuideRow({
+    required this.ratio,
+    required this.title,
+    required this.detail,
+    required this.tag,
+  });
+
+  final String ratio;
+  final String title;
+  final String detail;
+  final String tag;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: ReleafSpacing.md),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 92,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  ratio,
+                  style: ReleafTypography.cardTitle.copyWith(fontSize: 15),
+                ),
+                const SizedBox(height: 5),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 7,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: ReleafColors.backgroundRaised,
+                    borderRadius: BorderRadius.circular(ReleafRadii.pill),
+                    border: Border.all(color: ReleafColors.borderSoft),
+                  ),
+                  child: Text(
+                    tag,
+                    style: ReleafTypography.eyebrow.copyWith(
+                      color: ReleafColors.textMuted,
+                      fontSize: 7.5,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: ReleafSpacing.sm),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: ReleafTypography.cardTitle.copyWith(fontSize: 15),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  detail,
+                  style: ReleafTypography.meta.copyWith(
+                    color: ReleafColors.textSecondary,
+                    height: 1.4,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -1342,6 +1570,13 @@ ReleafArtworkVariant _sessionArtwork(ResetContent session) {
 }
 
 String _sessionCardValue(ResetContent session) {
+  final methodLabel = session.methodLabel?.trim();
+  if (session.modality == ResetModality.breathing &&
+      methodLabel != null &&
+      methodLabel.isNotEmpty) {
+    return methodLabel;
+  }
+
   final bestFor = session.bestFor?.trim();
   if (bestFor != null && bestFor.isNotEmpty) {
     return 'Best for: $bestFor';

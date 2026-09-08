@@ -206,8 +206,18 @@ class _ResetSessionPreviewSheetState
                             ),
                             const SizedBox(height: ReleafSpacing.sm),
                             for (final instruction
-                                in session.instructions.take(2)) ...[
+                                in session.instructions.take(4)) ...[
                               _ExpectationRow(text: instruction),
+                              const SizedBox(height: ReleafSpacing.xs),
+                            ],
+                            if (session.instructions.length > 4) ...[
+                              Text(
+                                '+ ${session.instructions.length - 4} more guided step${session.instructions.length - 4 == 1 ? '' : 's'} during the session',
+                                style: ReleafTypography.meta.copyWith(
+                                  color: ReleafColors.textMuted,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
                               const SizedBox(height: ReleafSpacing.xs),
                             ],
                             if (!widget.isLocked) ...[
