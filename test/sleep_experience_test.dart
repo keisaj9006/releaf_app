@@ -46,7 +46,11 @@ void main() {
       matching: find.byType(ListView),
     );
     expect(natureRail, findsOneWidget);
-    await tester.drag(natureRail, const Offset(-300, 0));
+    await tester.dragUntilVisible(
+      find.text('Forest Canopy'),
+      natureRail,
+      const Offset(-220, 0),
+    );
     await tester.pumpAndSettle();
     expect(find.text('Forest Canopy'), findsOneWidget);
     expect(find.textContaining('sleep-frequency claims'), findsOneWidget);
