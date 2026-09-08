@@ -107,7 +107,7 @@ class SessionManager extends StateNotifier<SessionState> {
   void _queuePersistence(Future<void> Function() operation) {
     _persistenceQueue = _persistenceQueue.then(
       (_) => operation(),
-      onError: (Object _, StackTrace __) => operation(),
+      onError: (Object _, StackTrace _) => operation(),
     );
   }
 
