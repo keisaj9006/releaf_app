@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -22,31 +23,7 @@ class RuleShiftScreen extends StatefulWidget {
 }
 
 class _RuleShiftScreenState extends State<RuleShiftScreen> {
-  static const _trials = <_RuleShiftTrial>[
-    _RuleShiftTrial(rule: _Rule.odd, value: 3, expected: true),
-    _RuleShiftTrial(rule: _Rule.high, value: 4, expected: false),
-    _RuleShiftTrial(rule: _Rule.odd, value: 8, expected: false),
-    _RuleShiftTrial(rule: _Rule.high, value: 9, expected: true),
-    _RuleShiftTrial(rule: _Rule.odd, value: 5, expected: true),
-    _RuleShiftTrial(rule: _Rule.high, value: 2, expected: false),
-    _RuleShiftTrial(rule: _Rule.odd, value: 6, expected: false),
-    _RuleShiftTrial(rule: _Rule.high, value: 7, expected: true),
-    _RuleShiftTrial(rule: _Rule.odd, value: 1, expected: true),
-    _RuleShiftTrial(rule: _Rule.high, value: 5, expected: false),
-    _RuleShiftTrial(rule: _Rule.odd, value: 4, expected: false),
-    _RuleShiftTrial(rule: _Rule.high, value: 8, expected: true),
-    _RuleShiftTrial(rule: _Rule.multipleOfThree, value: 6, expected: true),
-    _RuleShiftTrial(rule: _Rule.multipleOfThree, value: 8, expected: false),
-    _RuleShiftTrial(rule: _Rule.inRange, value: 5, expected: true),
-    _RuleShiftTrial(rule: _Rule.inRange, value: 9, expected: false),
-    _RuleShiftTrial(rule: _Rule.multipleOfThree, value: 9, expected: true),
-    _RuleShiftTrial(rule: _Rule.inRange, value: 3, expected: true),
-    _RuleShiftTrial(rule: _Rule.multipleOfThree, value: 4, expected: false),
-    _RuleShiftTrial(rule: _Rule.inRange, value: 7, expected: true),
-    _RuleShiftTrial(rule: _Rule.multipleOfThree, value: 3, expected: true),
-    _RuleShiftTrial(rule: _Rule.inRange, value: 2, expected: false),
-    _RuleShiftTrial(rule: _Rule.multipleOfThree, value: 7, expected: false),
-  ];
+  static const _values = <int>[3, 6, 4, 7, 5, 2, 8, 9, 1, 6, 5, 7];
 
   int _index = 0;
   int _score = 0;
@@ -56,7 +33,45 @@ class _RuleShiftScreenState extends State<RuleShiftScreen> {
   int get _levelIndex => (widget.trainingLevel - 1).clamp(0, 11).toInt();
   int get _trialCount => 12 + _levelIndex;
 
-  _RuleShiftTrial get _trial => _trials[_index];
+  int get _ruleCount {
+    if (widget.trainingLevel >= 7) return 4;
+    if (widget.trainingLevel >= 4) return 3;
+    return 2;
+  }
+
+  int get _switchBlockSize {
+    if (widget.trainingLevel >= 6) return 1;
+    if (widget.trainingLevel >= 3) return 2;
+    return 3;
+  }
+
+  List<_Rule> get _availableRules =>
+      _Rule.values.take(_ruleCount).toList(growable: false);
+
+  bool _matchesRule(_Rule rule, int value) {
+    return switch (rule) {
+      _Rule.odd => value.isOdd,
+      _Rule.high => value > 5,
+      _Rule.multipleOfThree => value % 3 == 0,
+      _Rule.inRange => value >= 3 && value <= 7,
+    };
+  }
+
+  _RuleShiftTrial _trialAt(int index) {
+    final block = index ~/ _switchBlockSize;
+    final rules = _availableRules;
+    final rule = rules[block % rules.length];
+    final value = _values[
+        (index * 5 + _levelIndex * 3 + block * 2) % _values.length];
+
+    return _RuleShiftTrial(
+      rule: rule,
+      value: value,
+      expected: _matchesRule(rule, value),
+    );
+  }
+
+  _RuleShiftTrial get _trial => _trialAt(_index);
 
   Future<void> _answer(bool answer) async {
     if (_locked) return;
@@ -151,7 +166,7 @@ class _RuleShiftScreenState extends State<RuleShiftScreen> {
                                   ),
                                   const SizedBox(height: 3),
                                   Text(
-                                    'Use the current rule. It changes every round.',
+                                    'Use the current rule. Higher levels switch it more often.',
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
                                     style: ReleafTypography.meta.copyWith(
@@ -183,7 +198,7 @@ class _RuleShiftScreenState extends State<RuleShiftScreen> {
                         ),
                         const SizedBox(height: ReleafSpacing.sm),
                         Text(
-                          'LEVEL ${widget.trainingLevel} · ROUND ${_index + 1} OF $_trialCount',
+                          'LEVEL ${widget.trainingLevel} · ROUND ${_index + 1} OF $_trialCount · $_ruleCount RULES',
                           textAlign: TextAlign.right,
                           style: ReleafTypography.meta.copyWith(
                             color: ReleafColors.textMuted,
@@ -313,7 +328,7 @@ class _RuleShiftScreenState extends State<RuleShiftScreen> {
                         ),
                         const SizedBox(height: ReleafSpacing.md),
                         Text(
-                          'Score reflects performance in this exercise only.',
+                          'Higher levels add rules and shorten rule blocks. Score reflects performance in this exercise only.',
                           textAlign: TextAlign.center,
                           style: ReleafTypography.meta.copyWith(
                             color: ReleafColors.textMuted,
@@ -331,6 +346,43 @@ class _RuleShiftScreenState extends State<RuleShiftScreen> {
       ),
     );
   }
+}
+
+@visibleForTesting
+class RuleShiftLevelProfile {
+  const RuleShiftLevelProfile({
+    required this.level,
+    required this.trialCount,
+    required this.ruleCount,
+    required this.switchBlockSize,
+  });
+
+  final int level;
+  final int trialCount;
+  final int ruleCount;
+  final int switchBlockSize;
+}
+
+@visibleForTesting
+RuleShiftLevelProfile ruleShiftLevelProfileForTesting(int rawLevel) {
+  final level = rawLevel.clamp(1, 12).toInt();
+  final ruleCount = level >= 7
+      ? 4
+      : level >= 4
+          ? 3
+          : 2;
+  final switchBlockSize = level >= 6
+      ? 1
+      : level >= 3
+          ? 2
+          : 3;
+
+  return RuleShiftLevelProfile(
+    level: level,
+    trialCount: 12 + (level - 1),
+    ruleCount: ruleCount,
+    switchBlockSize: switchBlockSize,
+  );
 }
 
 enum _Rule {
