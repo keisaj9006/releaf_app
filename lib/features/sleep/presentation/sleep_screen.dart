@@ -31,6 +31,11 @@ class SleepScreen extends ConsumerWidget {
     'night-air',
   ];
 
+  static const _sleepAtmosphereIds = <String>[
+    'releaf-atmosphere-01',
+    'releaf-atmosphere-02',
+  ];
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final catalog = ref.watch(soundCatalogProvider);
@@ -40,6 +45,10 @@ class SleepScreen extends ConsumerWidget {
         .whereType<SoundContent>()
         .toList(growable: false);
     final natureSounds = _natureSoundIds
+        .map(catalog.getById)
+        .whereType<SoundContent>()
+        .toList(growable: false);
+    final sleepAtmospheres = _sleepAtmosphereIds
         .map(catalog.getById)
         .whereType<SoundContent>()
         .toList(growable: false);
@@ -154,6 +163,21 @@ class SleepScreen extends ConsumerWidget {
                                 const SizedBox(height: ReleafSpacing.md),
                                 _SoundRail(
                                   sounds: natureSounds,
+                                  isPremium: isPremium,
+                                  onOpen: open,
+                                ),
+                              ],
+                              if (sleepAtmospheres.isNotEmpty) ...[
+                                const SizedBox(height: ReleafSpacing.section),
+                                const _SectionHeading(
+                                  eyebrow: 'LOW-STIMULATION AMBIENCE',
+                                  title: 'Longer spaces for the night.',
+                                  description:
+                                      'Existing Releaf ambient soundscapes surfaced for sleep: no voice, no sleep-frequency claims and no sudden instructions.',
+                                ),
+                                const SizedBox(height: ReleafSpacing.md),
+                                _SoundRail(
+                                  sounds: sleepAtmospheres,
                                   isPremium: isPremium,
                                   onOpen: open,
                                 ),

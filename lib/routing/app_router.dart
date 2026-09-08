@@ -123,9 +123,17 @@ GoRouter createAppRouter({String initialLocation = AppRoutes.home}) => GoRouter(
       path: AppRoutes.meditationSession,
       pageBuilder: (context, state) {
         final meditationId = state.pathParameters['meditationId'] ?? '';
-        final resumeState = state.extra is MeditationResumeState
-            ? state.extra! as MeditationResumeState
-            : null;
+        final extra = state.extra;
+        final resumeState = extra is MeditationResumeState
+            ? extra
+            : extra is Map &&
+                    extra['type'] == 'meditation' &&
+                    extra['remainingSeconds'] is num
+                ? MeditationResumeState(
+                    remainingSeconds:
+                        (extra['remainingSeconds'] as num).toInt(),
+                  )
+                : null;
         return _fadePage(
           MeditationSessionGate(
             meditationId: meditationId,

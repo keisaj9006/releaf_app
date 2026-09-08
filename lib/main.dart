@@ -29,15 +29,23 @@ const _releafSupabasePublishableKey = String.fromEnvironment(
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  final backgroundSoundDriver =
-      await AudioService.init<ReleafBackgroundSoundDriver>(
-    builder: ReleafBackgroundSoundDriver.new,
-    config: const AudioServiceConfig(
-      androidNotificationChannelId: 'app.releaf.mobile.audio',
-      androidNotificationChannelName: 'Releaf audio',
-      androidNotificationOngoing: true,
-    ),
-  );
+  SoundPlaybackDriver? backgroundSoundDriver;
+  try {
+    backgroundSoundDriver =
+        await AudioService.init<ReleafBackgroundSoundDriver>(
+      builder: ReleafBackgroundSoundDriver.new,
+      config: const AudioServiceConfig(
+        androidNotificationChannelId: 'app.releaf.mobile.audio',
+        androidNotificationChannelName: 'Releaf audio',
+        androidNotificationOngoing: true,
+      ),
+    );
+  } catch (error, stackTrace) {
+    debugPrint(
+      'Background audio service unavailable; using foreground playback. '
+      '$error\n$stackTrace',
+    );
+  }
 
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
@@ -58,11 +66,14 @@ Future<void> main() async {
 
   final prefs = await SharedPreferences.getInstance();
 
-  final container = ProviderContainer(
-    overrides: [
-      sharedPreferencesProvider.overrideWithValue(prefs),
+  final overrides = [
+    sharedPreferencesProvider.overrideWithValue(prefs),
+    if (backgroundSoundDriver != null)
       soundPlaybackDriverProvider.overrideWithValue(backgroundSoundDriver),
-    ],
+  ];
+
+  final container = ProviderContainer(
+    overrides: overrides,
   );
 
   final revenueCatApiKey = _revenueCatApiKeyForCurrentPlatform();

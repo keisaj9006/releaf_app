@@ -239,6 +239,33 @@ void main() {
     );
   });
 
+  testWidgets('Home restores a persisted paused meditation after restart', (
+    WidgetTester tester,
+  ) async {
+    final preferences = await _preferences();
+    await preferences.setBool('releaf.home.intro.dismissed.v1', true);
+    await preferences.setBool('session.active.v1', true);
+    await preferences.setString('session.title.v1', 'Breath & Body');
+    await preferences.setString(
+      'session.subtitle.v1',
+      'Meditation · 3 min remaining',
+    );
+    await preferences.setString(
+      'session.resume_route.v1',
+      AppRoutes.meditationSessionFor('breath-and-body-4'),
+    );
+    await preferences.setString(
+      'session.extra_json.v1',
+      '{"type":"meditation","remainingSeconds":180}',
+    );
+
+    await _pumpHome(tester, preferences: preferences);
+
+    expect(find.text('PAUSED SESSION'), findsOneWidget);
+    expect(find.text('Breath & Body'), findsOneWidget);
+    expect(find.text('Meditation · 3 min remaining'), findsOneWidget);
+  });
+
   testWidgets('Home mindfulness recommendation advances with meditation progress', (
     WidgetTester tester,
   ) async {

@@ -387,9 +387,10 @@ class _MeditationPlayerScreenState
             subtitle:
                 'Meditation · ${_resumeTimeLabel(_remainingSeconds)} remaining',
             resumeRoute: AppRoutes.meditationSessionFor(item.id),
-            extra: MeditationResumeState(
-              remainingSeconds: _remainingSeconds,
-            ),
+            extra: <String, dynamic>{
+              'type': 'meditation',
+              'remainingSeconds': _remainingSeconds,
+            },
           );
     } else if (_remainingSeconds == 0) {
       ref.read(sessionManagerProvider.notifier).clear();
