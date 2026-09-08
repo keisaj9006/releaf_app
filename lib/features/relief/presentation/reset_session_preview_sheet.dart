@@ -241,7 +241,7 @@ class _ResetSessionPreviewSheetState
                                 icon: Icons.record_voice_over_rounded,
                                 title: 'Voice guidance',
                                 subtitle:
-                                    'Slow spoken guidance using the Releaf voice setup.',
+                                    'Optional spoken guidance. Releaf recordings take priority; device speech is fallback only.',
                                 value: _options.voiceGuidanceEnabled,
                                 onChanged: (value) {
                                   setState(() {
