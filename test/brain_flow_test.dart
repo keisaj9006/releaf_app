@@ -538,6 +538,37 @@ void main() {
     await tester.pump();
   });
 
+  testWidgets('Labyrinth stays usable on a 320px phone', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(320, 700);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: LabirynthGameScreen(
+          trainingLevel: 1,
+          onFinish: (_) {},
+          motionStream: const Stream<AccelerometerEvent>.empty(),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.byKey(const Key('labyrinth-board')), findsOneWidget);
+    expect(find.text('ENTRY'), findsOneWidget);
+    expect(find.text('ROUTE'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
+  });
+
   testWidgets('Math Race starts from the persistent Brain level', (
     WidgetTester tester,
   ) async {
