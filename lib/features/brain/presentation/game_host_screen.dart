@@ -133,7 +133,7 @@ class GameHostScreen extends ConsumerWidget {
     );
 
     return PopScope(
-      canPop: context.canPop(),
+      canPop: Navigator.of(context).canPop(),
       onPopInvokedWithResult: (didPop, result) {
         if (didPop || !context.mounted) return;
         context.go(AppRoutes.brain);
