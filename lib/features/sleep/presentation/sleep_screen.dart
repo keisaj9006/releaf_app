@@ -107,8 +107,13 @@ class SleepScreen extends ConsumerWidget {
                                   child: IconButton(
                                     key: const Key('sleep-back'),
                                     tooltip: 'Back',
-                                    onPressed: () =>
-                                        Navigator.of(context).maybePop(),
+                                    onPressed: () {
+                                      if (context.canPop()) {
+                                        context.pop();
+                                      } else {
+                                        context.go(AppRoutes.home);
+                                      }
+                                    },
                                     icon: const Icon(
                                       Icons.arrow_back_rounded,
                                     ),
