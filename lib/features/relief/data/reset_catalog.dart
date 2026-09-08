@@ -1339,6 +1339,153 @@ class ResetCatalog {
       ),
     ),
     ResetContent(
+      id: 'energy-up-breath',
+      title: 'Energy Up Breath',
+      durationSeconds: 90,
+      level: ResetLevel.quick,
+      quickCategory: QuickResetCategory.breath,
+      modality: ResetModality.breathing,
+      accessTier: ResetAccessTier.premium,
+      methodLabel: '3–3 active paced breathing',
+      bestFor:
+          'Low-energy moments when you want a simple rhythm that feels more active than the slower calming protocols.',
+      whyItMayHelp:
+          'The 6-second cycle is quicker than the calming Reset patterns. Releaf uses it mainly as a structured attention cue rather than claiming a proven stimulant effect.',
+      safetyNote:
+          'Keep every breath small and comfortable. This is not forceful breathwork and should not become rapid or deep hyperventilation.',
+      instructions: [
+        'Sit or stand in a comfortable upright position.',
+        'Breathe in gently for 3 seconds.',
+        'Breathe out gently for 3 seconds.',
+        'Keep the rhythm light and stop if you feel dizzy or tingly.',
+      ],
+      program: ResetSessionProgram.breathing(
+        breathPattern: BreathPattern(
+          inhaleSeconds: 3,
+          exhaleSeconds: 3,
+          label: 'Active 3–3',
+        ),
+        steps: [
+          ResetSessionStep(
+            label: 'Settle',
+            guidance:
+                'Come a little more upright. Keep the breath light rather than deep.',
+            durationSeconds: 12,
+          ),
+          ResetSessionStep(
+            label: 'Rhythm',
+            guidance:
+                'Follow an easy 3-count in and 3-count out. Keep it smooth and unforced.',
+            durationSeconds: 66,
+          ),
+          ResetSessionStep(
+            label: 'Release',
+            guidance:
+                'Drop the count and notice whether attention feels a little more awake.',
+            durationSeconds: 12,
+          ),
+        ],
+      ),
+    ),
+    ResetContent(
+      id: 'focus-breath',
+      title: 'Focus Breath',
+      durationSeconds: 120,
+      level: ResetLevel.quick,
+      quickCategory: QuickResetCategory.breath,
+      modality: ResetModality.breathing,
+      accessTier: ResetAccessTier.premium,
+      methodLabel: '4–4 focus breathing',
+      bestFor:
+          'Starting a work block, returning after distraction, or using the count as one clear attentional anchor.',
+      whyItMayHelp:
+          'The main value is the repeating count as a simple focus target. Evidence for paced breathing is stronger for regulation than for directly improving cognitive performance.',
+      safetyNote:
+          'Keep the breath easy and natural in size. If counting becomes distracting, use the visual pacer without words.',
+      instructions: [
+        'Choose one point on the screen or in the room to rest your gaze.',
+        'Breathe in gently for 4 seconds.',
+        'Breathe out gently for 4 seconds.',
+        'Return attention to the count whenever the mind wanders.',
+      ],
+      program: ResetSessionProgram.breathing(
+        breathPattern: BreathPattern(
+          inhaleSeconds: 4,
+          exhaleSeconds: 4,
+          label: 'Focus 4–4',
+        ),
+        steps: [
+          ResetSessionStep(
+            label: 'Anchor',
+            guidance:
+                'Choose one visual point. Let the count become the only task for the next moment.',
+            durationSeconds: 16,
+          ),
+          ResetSessionStep(
+            label: 'Focus',
+            guidance:
+                'Follow four in and four out. When attention drifts, return to the next count.',
+            durationSeconds: 88,
+          ),
+          ResetSessionStep(
+            label: 'Return',
+            guidance:
+                'Release the count and choose the first task you want to return to.',
+            durationSeconds: 16,
+          ),
+        ],
+      ),
+    ),
+    ResetContent(
+      id: 'anxiety-slow-cycle',
+      title: 'Anxiety Slow Cycle',
+      durationSeconds: 150,
+      level: ResetLevel.quick,
+      quickCategory: QuickResetCategory.breath,
+      modality: ResetModality.breathing,
+      accessTier: ResetAccessTier.premium,
+      methodLabel: '5–7 slow-cycle breathing',
+      bestFor:
+          'When you want a slower continuous pattern without adding a breath hold.',
+      whyItMayHelp:
+          'The 12-second cycle equals 5 breaths per minute, within the slow-breathing range studied in autonomic and HRV research.',
+      safetyNote:
+          'Slower is not automatically better. Shorten the counts if the pattern creates air hunger, effort or dizziness.',
+      instructions: [
+        'Let the breath stay quiet and comfortable.',
+        'Breathe in for 5 seconds.',
+        'Breathe out for 7 seconds.',
+        'Use a smaller breath rather than trying to fill or empty the lungs completely.',
+      ],
+      program: ResetSessionProgram.breathing(
+        breathPattern: BreathPattern(
+          inhaleSeconds: 5,
+          exhaleSeconds: 7,
+          label: 'Slow 5–7',
+        ),
+        steps: [
+          ResetSessionStep(
+            label: 'Settle',
+            guidance:
+                'Let the breath stay quiet. A smaller comfortable breath is enough.',
+            durationSeconds: 18,
+          ),
+          ResetSessionStep(
+            label: 'Slow cycle',
+            guidance:
+                'Follow five in and seven out. Keep both phases smooth, with no hold between them.',
+            durationSeconds: 114,
+          ),
+          ResetSessionStep(
+            label: 'Release',
+            guidance:
+                'Let go of the count and allow your breathing to choose its own pace again.',
+            durationSeconds: 18,
+          ),
+        ],
+      ),
+    ),
+    ResetContent(
       id: 'wired-steady',
       title: 'Wired → Steady',
       durationSeconds: 480,
