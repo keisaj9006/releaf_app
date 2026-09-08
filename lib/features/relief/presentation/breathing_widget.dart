@@ -177,14 +177,19 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
 
     final guidance = _currentGuidance(session).trim();
     if (guidance.isEmpty) return;
+    final narrationAsset = _currentNarrationAsset(session);
 
     try {
       await _voiceDriver.configure(volume: _voiceVolume);
       if (!_voiceEnabled || !mounted) return;
-      await _voiceDriver.speak(guidance);
+      if (narrationAsset != null && narrationAsset.trim().isNotEmpty) {
+        await _voiceDriver.playAsset(narrationAsset);
+      } else {
+        await _voiceDriver.speak(guidance);
+      }
     } catch (_) {
-      // Spoken guidance is supportive; a platform TTS failure must never
-      // interrupt a Reset session.
+      // Recorded Releaf Guide audio has priority. Device speech remains a
+      // fallback only and audio failure must never interrupt a Reset session.
     }
   }
 
@@ -1557,6 +1562,18 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
 
     if (session.instructions.isEmpty) return 'Settle in.';
     return session.instructions[_sessionStepIndex(session)];
+  }
+
+  String? _currentNarrationAsset(ResetContent session) {
+    final program = session.program;
+    if (program == null) return null;
+
+    return program
+        .stepAtElapsedSeconds(
+          _elapsedSeconds(session),
+          simplified: _usingSimplifiedProgram,
+        )
+        .narrationAssetPath;
   }
 
   String? _currentAdvanceActionLabel(ResetContent session) {
