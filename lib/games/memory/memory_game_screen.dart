@@ -23,7 +23,8 @@ class MemoryGameScreen extends StatefulWidget {
   State<MemoryGameScreen> createState() => _MemoryGameScreenState();
 }
 
-class _MemoryGameScreenState extends State<MemoryGameScreen> {
+class _MemoryGameScreenState extends State<MemoryGameScreen>
+    with WidgetsBindingObserver {
   final List<String> _emojis = [
     '🍀', '🌸', '🍄', '🌞', '🌻', '🪴', '🍎', '🥕', '🎈', '🚗', '🏀', '🎮',
   ];
@@ -41,6 +42,7 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
 
   int timeLeft = 60;
   Timer? countdownTimer;
+  bool _pausedByLifecycle = false;
 
   int startTime = 0; // startowy czas na poziom
   int mistakes = 0;
@@ -48,6 +50,7 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     if (widget.onFinish != null) {
       currentLevel = widget.trainingLevel.clamp(1, maxLevels).toInt();
       _startLevel();
@@ -58,6 +61,7 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     countdownTimer?.cancel();
     super.dispose();
   }
@@ -119,6 +123,8 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
 
   void _startTimer() {
     countdownTimer?.cancel();
+    if (_gameCompleted || _timeExpired || timeLeft <= 0) return;
+
     countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (!mounted) return;
 
@@ -136,6 +142,28 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
         _showLoseDialog();
       }
     });
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (_gameCompleted || _timeExpired || timeLeft <= 0) return;
+
+    if (state == AppLifecycleState.resumed) {
+      if (_pausedByLifecycle) {
+        _pausedByLifecycle = false;
+        _startTimer();
+      }
+      return;
+    }
+
+    if ((state == AppLifecycleState.inactive ||
+            state == AppLifecycleState.paused ||
+            state == AppLifecycleState.hidden ||
+            state == AppLifecycleState.detached) &&
+        (countdownTimer?.isActive ?? false)) {
+      countdownTimer?.cancel();
+      _pausedByLifecycle = true;
+    }
   }
 
   int _timeSpentSoFar() {
