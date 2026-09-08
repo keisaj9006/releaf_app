@@ -510,6 +510,330 @@ class ResetCatalog {
       ),
     ),
     ResetContent(
+      id: 'cool-water-reset',
+      title: 'Cool Water Reset',
+      durationSeconds: 90,
+      level: ResetLevel.quick,
+      quickCategory: QuickResetCategory.noBreath,
+      modality: ResetModality.guidedPractice,
+      accessTier: ResetAccessTier.free,
+      summary:
+          'A brief sensory reset using comfortably cool water on the hands or face.',
+      methodLabel: 'Temperature anchor',
+      bestFor:
+          'Moments when you feel mentally stuck and a clear physical sensory cue may help you re-orient.',
+      whyItMayHelp:
+          'The useful part is the noticeable change in temperature and attention. Releaf does not present cold exposure as a cure or require extreme temperatures.',
+      safetyNote:
+          'Use comfortably cool—not painfully cold—water. Do not use ice-water immersion or prolonged cold exposure.',
+      visualType: ResetVisualType.sensoryHalo,
+      instructions: [
+        'Use comfortably cool water.',
+        'Notice the temperature rather than chasing intensity.',
+        'Return attention to the room afterwards.',
+      ],
+      program: ResetSessionProgram.guided(
+        steps: [
+          ResetSessionStep(
+            label: 'Prepare',
+            guidance:
+                'Use comfortably cool water on your hands, wrists or face. No ice is needed.',
+            durationSeconds: 20,
+          ),
+          ResetSessionStep(
+            label: 'Notice',
+            guidance:
+                'Notice the temperature, the edges of the sensation and how it changes over a few moments.',
+            durationSeconds: 35,
+          ),
+          ResetSessionStep(
+            label: 'Orient',
+            guidance:
+                'Look around and name three ordinary things in the room.',
+            durationSeconds: 20,
+          ),
+          ResetSessionStep(
+            label: 'Return',
+            guidance:
+                'Dry off, settle your posture and choose what you want to do next.',
+            durationSeconds: 15,
+          ),
+        ],
+      ),
+    ),
+    ResetContent(
+      id: 'pushups-activation',
+      title: '10 Push-Ups Activation',
+      durationSeconds: 90,
+      level: ResetLevel.quick,
+      quickCategory: QuickResetCategory.noBreath,
+      modality: ResetModality.guidedPractice,
+      accessTier: ResetAccessTier.premium,
+      summary:
+          'A short movement reset using up to ten comfortable push-ups, wall push-ups or a seated press.',
+      methodLabel: 'Brief movement activation',
+      bestFor:
+          'Low-momentum moments when a small amount of movement feels more useful than another thinking exercise.',
+      whyItMayHelp:
+          'The goal is simply to interrupt stillness and change physical state through a brief, manageable effort.',
+      safetyNote:
+          'Choose a wall or seated version if needed. Stop for pain, dizziness, chest symptoms or unusual shortness of breath.',
+      visualType: ResetVisualType.bodyRelease,
+      instructions: [
+        'Choose a safe version for your body.',
+        'Do up to ten controlled repetitions.',
+        'Notice the change without pushing to exhaustion.',
+      ],
+      program: ResetSessionProgram.guided(
+        steps: [
+          ResetSessionStep(
+            label: 'Choose',
+            guidance:
+                'Choose floor push-ups, wall push-ups, or a seated press that feels safe today.',
+            durationSeconds: 15,
+          ),
+          ResetSessionStep(
+            label: 'Move',
+            guidance:
+                'Do up to ten controlled repetitions. Stop before form or comfort breaks down.',
+            durationSeconds: 45,
+          ),
+          ResetSessionStep(
+            label: 'Notice',
+            guidance:
+                'Pause and notice warmth, muscle effort and where your attention is now.',
+            durationSeconds: 20,
+          ),
+          ResetSessionStep(
+            label: 'Return',
+            guidance:
+                'Choose the next useful action while the shift in momentum is still fresh.',
+            durationSeconds: 10,
+          ),
+        ],
+      ),
+    ),
+    ResetContent(
+      id: 'shoulder-drop-reset',
+      title: 'Shoulder Drop Reset',
+      durationSeconds: 60,
+      level: ResetLevel.quick,
+      quickCategory: QuickResetCategory.noBreath,
+      modality: ResetModality.guidedPractice,
+      accessTier: ResetAccessTier.free,
+      summary:
+          'A one-minute check for shoulder tension that has crept up unnoticed.',
+      methodLabel: 'Shoulder release',
+      bestFor:
+          'Desk work, scrolling, driving breaks or any moment when the shoulders feel lifted and rigid.',
+      whyItMayHelp:
+          'The exercise makes unnecessary muscular effort easier to notice, then gives the shoulders a chance to settle.',
+      safetyNote:
+          'Use a small range of motion and stop if shoulder or neck movement is painful.',
+      visualType: ResetVisualType.bodyRelease,
+      instructions: [
+        'Notice where the shoulders are now.',
+        'Lift gently, then let go.',
+        'Keep only the muscle effort you need.',
+      ],
+      program: ResetSessionProgram.guided(
+        steps: [
+          ResetSessionStep(
+            label: 'Notice',
+            guidance:
+                'Notice where your shoulders are sitting without changing them yet.',
+            durationSeconds: 15,
+          ),
+          ResetSessionStep(
+            label: 'Lift',
+            guidance:
+                'Gently lift both shoulders a little. Keep the movement comfortable.',
+            durationSeconds: 15,
+          ),
+          ResetSessionStep(
+            label: 'Release',
+            guidance:
+                'Let them drop and notice the contrast.',
+            durationSeconds: 15,
+          ),
+          ResetSessionStep(
+            label: 'Settle',
+            guidance:
+                'Let the shoulders rest where they need to be rather than forcing them down.',
+            durationSeconds: 15,
+          ),
+        ],
+      ),
+    ),
+    ResetContent(
+      id: 'eye-focus-reset',
+      title: 'Eye Focus Reset',
+      durationSeconds: 90,
+      level: ResetLevel.quick,
+      quickCategory: QuickResetCategory.noBreath,
+      modality: ResetModality.grounding,
+      accessTier: ResetAccessTier.premium,
+      summary:
+          'A short visual-attention reset after prolonged close-up screen focus.',
+      methodLabel: 'Near-to-far visual anchor',
+      bestFor:
+          'Long screen sessions or moments when attention feels visually narrow and stuck on one close target.',
+      whyItMayHelp:
+          'The routine deliberately changes visual distance and gives attention a different target. It is not an eye treatment.',
+      safetyNote:
+          'Keep head and eye movement comfortable. Stop if visual shifting causes pain, double vision, marked dizziness or nausea.',
+      visualType: ResetVisualType.objectFocus,
+      instructions: [
+        'Look at a comfortable near object.',
+        'Shift to something farther away.',
+        'Let the eyes rest rather than straining to focus.',
+      ],
+      program: ResetSessionProgram.guided(
+        steps: [
+          ResetSessionStep(
+            label: 'Near',
+            guidance:
+                'Choose one comfortable object nearby and notice one detail.',
+            durationSeconds: 20,
+          ),
+          ResetSessionStep(
+            label: 'Far',
+            guidance:
+                'Shift your gaze to something farther away and let the eyes settle there.',
+            durationSeconds: 25,
+          ),
+          ResetSessionStep(
+            label: 'Wide',
+            guidance:
+                'Without staring hard, notice more of the space around that object.',
+            durationSeconds: 25,
+          ),
+          ResetSessionStep(
+            label: 'Return',
+            guidance:
+                'Blink naturally and return to the room before going back to the screen.',
+            durationSeconds: 20,
+          ),
+        ],
+      ),
+    ),
+    ResetContent(
+      id: 'shake-it-out',
+      title: 'Shake It Out',
+      durationSeconds: 90,
+      level: ResetLevel.quick,
+      quickCategory: QuickResetCategory.noBreath,
+      modality: ResetModality.guidedPractice,
+      accessTier: ResetAccessTier.premium,
+      summary:
+          'A brief loose-movement reset for hands, arms and legs after holding the body still.',
+      methodLabel: 'Loose movement reset',
+      bestFor:
+          'After sitting rigidly, clenching or carrying restless energy in the body.',
+      whyItMayHelp:
+          'The value is straightforward: change the body from rigid holding to loose voluntary movement, then notice the contrast.',
+      safetyNote:
+          'Keep movements small and controlled. Use a seated version if balance is uncertain.',
+      visualType: ResetVisualType.bodyRelease,
+      instructions: [
+        'Loosen the hands first.',
+        'Add only comfortable movement.',
+        'Finish by becoming still again and noticing the difference.',
+      ],
+      program: ResetSessionProgram.guided(
+        steps: [
+          ResetSessionStep(
+            label: 'Hands',
+            guidance:
+                'Loosen the fingers and gently shake out the hands.',
+            durationSeconds: 20,
+          ),
+          ResetSessionStep(
+            label: 'Arms',
+            guidance:
+                'Let the forearms and arms move loosely without forcing the shoulders.',
+            durationSeconds: 20,
+          ),
+          ResetSessionStep(
+            label: 'Legs',
+            guidance:
+                'If safe, add a little movement through the legs or feet. Stay seated if that is better.',
+            durationSeconds: 20,
+          ),
+          ResetSessionStep(
+            label: 'Still',
+            guidance:
+                'Become still again and notice what feels different.',
+            durationSeconds: 20,
+          ),
+          ResetSessionStep(
+            label: 'Return',
+            guidance:
+                'Use the next ten seconds to choose where your attention goes now.',
+            durationSeconds: 10,
+          ),
+        ],
+      ),
+    ),
+    ResetContent(
+      id: 'micro-walk-reset',
+      title: 'Micro Walk Reset',
+      durationSeconds: 120,
+      level: ResetLevel.quick,
+      quickCategory: QuickResetCategory.noBreath,
+      modality: ResetModality.guidedPractice,
+      accessTier: ResetAccessTier.premium,
+      summary:
+          'A two-minute walking reset that uses movement and environmental detail as the anchor.',
+      methodLabel: 'Movement + orientation',
+      bestFor:
+          'When you have been sitting, looping on a problem or need a clean transition between tasks.',
+      whyItMayHelp:
+          'Walking changes posture, location and sensory input at the same time, giving attention several concrete cues outside the thought loop.',
+      safetyNote:
+          'Walk only where it is safe. Do not use the screen while crossing roads, stairs or busy areas.',
+      visualType: ResetVisualType.sensoryHalo,
+      instructions: [
+        'Walk somewhere safe.',
+        'Notice contact with the ground.',
+        'Use the environment instead of the screen as your anchor.',
+      ],
+      program: ResetSessionProgram.guided(
+        steps: [
+          ResetSessionStep(
+            label: 'Start',
+            guidance:
+                'Put the phone down or hold it safely and begin walking somewhere clear.',
+            durationSeconds: 20,
+          ),
+          ResetSessionStep(
+            label: 'Steps',
+            guidance:
+                'Notice the changing pressure through your feet as you walk.',
+            durationSeconds: 30,
+          ),
+          ResetSessionStep(
+            label: 'Look',
+            guidance:
+                'Notice three things that are farther away than the screen.',
+            durationSeconds: 30,
+          ),
+          ResetSessionStep(
+            label: 'Listen',
+            guidance:
+                'Notice one nearby sound and one more distant sound.',
+            durationSeconds: 20,
+          ),
+          ResetSessionStep(
+            label: 'Return',
+            guidance:
+                'Finish the walk and choose the next task before reopening everything else.',
+            durationSeconds: 20,
+          ),
+        ],
+      ),
+    ),
+    ResetContent(
       id: 'one-small-next-step',
       title: 'One Small Next Step',
       durationSeconds: 120,
