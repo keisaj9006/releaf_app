@@ -28,7 +28,8 @@ class LabirynthGameScreen extends StatefulWidget {
   State<LabirynthGameScreen> createState() => _LabirynthGameScreenState();
 }
 
-class _LabirynthGameScreenState extends State<LabirynthGameScreen> {
+class _LabirynthGameScreenState extends State<LabirynthGameScreen>
+    with WidgetsBindingObserver {
   static const int _maxTrainingLevel = 12;
   static const double _ballRadius = 0.18;
   static const double _wallThickness = 0.075;
@@ -50,6 +51,7 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen> {
 
   bool _started = false;
   bool _paused = false;
+  bool _pausedByLifecycle = false;
   bool _finished = false;
   bool _motionAvailable = false;
   int _timeLeft = 0;
@@ -62,6 +64,7 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _level = _MazeLevel.generate(_levelNumber);
     _position = _level.start;
     _timeLeft = _level.timeLimitSeconds;
@@ -71,6 +74,7 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _sensorSubscription?.cancel();
     _physicsTimer?.cancel();
     _countdown?.cancel();
@@ -317,6 +321,38 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen> {
     final score = 100 + timeBonus + precisionBonus + difficultyBonus;
 
     _showSuccess(score);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (_finished) return;
+
+    if (state == AppLifecycleState.resumed) {
+      if (_pausedByLifecycle) {
+        _pausedByLifecycle = false;
+        if (mounted) {
+          setState(() => _paused = false);
+        } else {
+          _paused = false;
+        }
+      }
+      return;
+    }
+
+    if (state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.paused ||
+        state == AppLifecycleState.hidden ||
+        state == AppLifecycleState.detached) {
+      if (!_paused) {
+        _pausedByLifecycle = true;
+        _velocity = Offset.zero;
+        if (mounted) {
+          setState(() => _paused = true);
+        } else {
+          _paused = true;
+        }
+      }
+    }
   }
 
   void _togglePause() {
