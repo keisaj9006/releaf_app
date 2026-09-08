@@ -86,6 +86,10 @@ class _GameResultScreenState extends ConsumerState<GameResultScreen> {
             usesProgressiveBrainLevel(widget.gameId!)
         ? training.trainingLevelFor(widget.gameId!)
         : null;
+    final sessionsUntilNextLevel =
+        widget.gameId != null && trainingLevel != null
+            ? training.sessionsUntilNextTrainingLevelFor(widget.gameId!)
+            : 0;
 
     return Theme(
       data: AppTheme.premiumDark(),
@@ -184,6 +188,50 @@ class _GameResultScreenState extends ConsumerState<GameResultScreen> {
                           _skillLabel(widget.gameId),
                           style: ReleafTypography.eyebrow.copyWith(
                             color: _accentForGame(widget.gameId),
+                          ),
+                        ),
+                        const SizedBox(height: ReleafSpacing.lg),
+                        Container(
+                          key: const Key('brain-training-value'),
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(ReleafSpacing.lg),
+                          decoration: BoxDecoration(
+                            color: const Color(0xB8121822),
+                            borderRadius:
+                                BorderRadius.circular(ReleafRadii.large),
+                            border: Border.all(
+                              color: _accentForGame(widget.gameId)
+                                  .withValues(alpha: 0.18),
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'WHAT YOU TRAINED',
+                                style: ReleafTypography.eyebrow.copyWith(
+                                  color: _accentForGame(widget.gameId),
+                                  fontSize: 9,
+                                ),
+                              ),
+                              const SizedBox(height: ReleafSpacing.xs),
+                              Text(
+                                _trainingBenefit(widget.gameId),
+                                style: ReleafTypography.body.copyWith(
+                                  color: ReleafColors.textPrimary
+                                      .withValues(alpha: 0.88),
+                                  height: 1.45,
+                                ),
+                              ),
+                              const SizedBox(height: ReleafSpacing.xs),
+                              Text(
+                                _progressionNote(widget.gameId),
+                                style: ReleafTypography.meta.copyWith(
+                                  color: ReleafColors.textSecondary,
+                                  height: 1.4,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                         if (widget.score != null) ...[
@@ -288,14 +336,26 @@ class _GameResultScreenState extends ConsumerState<GameResultScreen> {
                             ),
                             child: Text(
                               trainingLevel >= maxBrainTrainingLevel
-                                  ? 'LEVEL $maxBrainTrainingLevel · MASTERY'
-                                  : 'LEVEL $trainingLevel READY',
+                                  ? 'TRAINING LEVEL $maxBrainTrainingLevel · MAX'
+                                  : 'TRAINING LEVEL $trainingLevel',
                               style: ReleafTypography.meta.copyWith(
                                 color: _accentForGame(widget.gameId),
                                 fontWeight: FontWeight.w800,
                               ),
                             ),
                           ),
+                          if (trainingLevel < maxBrainTrainingLevel) ...[
+                            const SizedBox(height: ReleafSpacing.xs),
+                            Text(
+                              sessionsUntilNextLevel == 1
+                                  ? '1 more completed session at this training level before the next step.'
+                                  : '$sessionsUntilNextLevel more completed sessions at this training level before the next step.',
+                              textAlign: TextAlign.center,
+                              style: ReleafTypography.meta.copyWith(
+                                color: ReleafColors.textSecondary,
+                              ),
+                            ),
+                          ],
                         ],
                         const SizedBox(height: 64),
                         if (widget.gameId != null)
@@ -328,7 +388,7 @@ class _GameResultScreenState extends ConsumerState<GameResultScreen> {
                         ),
                         const SizedBox(height: ReleafSpacing.md),
                         Text(
-                          'Scores reflect performance in this game only.',
+                          'Training levels increase task load gradually. Scores reflect performance in this game only and are not an IQ or clinical measure.',
                           textAlign: TextAlign.center,
                           style: ReleafTypography.meta.copyWith(
                             color: ReleafColors.textMuted,
@@ -375,6 +435,63 @@ Color _accentForGame(String? gameId) {
     'pattern_logic' => const Color(0xFFA9A0E8),
     'signal_scan' => const Color(0xFF69C1B8),
     _ => const Color(0xFF91A4EF),
+  };
+}
+
+String _trainingBenefit(String? gameId) {
+  return switch (gameId) {
+    'memory' => 'Recall locations and recognise visual pairs while keeping recent information active.',
+    'labyrinth' => 'Plan a route, monitor position and update a spatial goal as you move.',
+    'math_race' => 'Practise mental arithmetic and response selection under limited time.',
+    'broken_mirror' => 'Reconstruct spatial relationships from separate visual fragments.',
+    'rule_shift' => 'Switch between simple rules without automatically carrying the previous rule forward.',
+    'sequence_echo' => 'Hold a short visual sequence in working memory and reproduce it in order.',
+    'n_back' => 'Continuously update working memory as each new item changes what must be compared.',
+    'spatial_span' => 'Hold and reproduce a sequence of locations in visuospatial working memory.',
+    'mental_rotation' => 'Compare shapes across orientation changes and distinguish rotation from reflection.',
+    'trail_switch' => 'Scan visually while maintaining an ordered rule and switching between target types.',
+    'tower_plan' => 'Plan several legal moves ahead while respecting constraints.',
+    'symbol_code' => 'Use a temporary mapping key accurately across repeated decisions.',
+    'color_conflict' => 'Inhibit a competing word response and select the relevant colour information.',
+    'pattern_logic' => 'Detect rules across sequences and reject plausible but incorrect alternatives.',
+    'signal_scan' => 'Select a target among increasingly similar visual distractors.',
+    _ => 'Practise a focused cognitive task with repeatable feedback.',
+  };
+}
+
+String _progressionNote(String? gameId) {
+  return switch (gameId) {
+    'labyrinth' =>
+      'Later levels increase route length, turns and maze complexity rather than simply making the ball faster.',
+    'broken_mirror' =>
+      'Later levels add more fragments and gradually increase placement precision.',
+    'rule_shift' =>
+      'Later levels add more rules and shorten the time you stay with one rule before switching.',
+    'sequence_echo' =>
+      'Later levels lengthen sequences and reduce presentation time.',
+    'n_back' =>
+      'Later levels increase how far back you must compare and extend the sequence.',
+    'spatial_span' =>
+      'Later levels increase span length, grid size and presentation pressure.',
+    'mental_rotation' =>
+      'Later levels increase shape complexity and the number of comparisons.',
+    'trail_switch' =>
+      'Later levels lengthen the ordered trail and add stronger distractors.',
+    'tower_plan' =>
+      'Later levels add planning depth through larger constrained move sequences.',
+    'symbol_code' =>
+      'Later levels expand the mapping load, trials and competing options.',
+    'color_conflict' =>
+      'Later levels add colour choices and reduce the available response window.',
+    'pattern_logic' =>
+      'Later levels use more interacting rules, stronger distractors and fewer hints.',
+    'signal_scan' =>
+      'Later levels expand the grid and make distractors more similar to the target.',
+    'memory' =>
+      'Later levels increase the number of pairs and the amount of information to keep track of.',
+    'math_race' =>
+      'Later levels begin with more demanding arithmetic and continue escalating from there.',
+    _ => 'Later levels gradually increase the task load.',
   };
 }
 
