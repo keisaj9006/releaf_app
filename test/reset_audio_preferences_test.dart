@@ -4,6 +4,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:releaf_app/features/relief/application/reset_audio_preferences.dart';
 
 void main() {
+  test('Reset device voice is opt-in by default', () async {
+    SharedPreferences.setMockInitialValues(<String, Object>{});
+    final preferences = await SharedPreferences.getInstance();
+    final controller = ResetAudioPreferencesController(preferences);
+
+    expect(controller.state.voiceEnabled, isFalse);
+  });
+
   test('Reset audio preferences persist across controller instances', () async {
     SharedPreferences.setMockInitialValues({});
     final preferences = await SharedPreferences.getInstance();
