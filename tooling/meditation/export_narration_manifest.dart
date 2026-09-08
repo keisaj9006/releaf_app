@@ -110,33 +110,11 @@ Map<String, Object?> buildNarrationManifest() {
   };
 }
 
-Future<void> main(List<String> args) async {
-  String? outputPath;
-
-  for (var index = 0; index < args.length; index++) {
-    if (args[index] == '--output' && index + 1 < args.length) {
-      outputPath = args[index + 1];
-      index += 1;
-    }
-  }
-
+Future<File> writeNarrationManifest(String outputPath) async {
   final manifest = buildNarrationManifest();
   final json = const JsonEncoder.withIndent('  ').convert(manifest);
-
-  if (outputPath == null) {
-    stdout.writeln(json);
-    return;
-  }
-
   final file = File(outputPath);
   await file.parent.create(recursive: true);
   await file.writeAsString('$json\n');
-
-  stdout.writeln(
-    'Narration manifest: ${manifest['guidedSessionCount']} guided sessions, '
-    '${manifest['totalStepCount']} steps, '
-    '${manifest['recordedStepCount']} recorded, '
-    '${manifest['stepsStillToRender']} still to render.',
-  );
-  stdout.writeln('Wrote ${file.path}');
+  return file;
 }
