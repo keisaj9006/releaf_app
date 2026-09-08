@@ -334,7 +334,15 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              _AccountHeader(onBack: () => context.pop()),
+                              _AccountHeader(
+                                onBack: () {
+                                  if (context.canPop()) {
+                                    context.pop();
+                                  } else {
+                                    context.go(AppRoutes.home);
+                                  }
+                                },
+                              ),
                               const SizedBox(height: ReleafSpacing.xl),
                               _PremiumAccountCard(
                                 isPremium: subscription.isPremium,
