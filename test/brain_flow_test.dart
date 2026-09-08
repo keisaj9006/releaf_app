@@ -67,6 +67,114 @@ void main() {
     expect(resolvedTypes['signal_scan'], SignalScanScreen);
   });
 
+  testWidgets('Broken Mirror timer pauses while the app is backgrounded', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: BrokenMirrorGameScreen(
+          enableTimer: true,
+          seconds: 5,
+          onFinish: () {},
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('5s'), findsOneWidget);
+
+    await tester.binding.handleAppLifecycleStateChanged(
+      AppLifecycleState.paused,
+    );
+    await tester.pump(const Duration(seconds: 3));
+    expect(find.text('5s'), findsOneWidget);
+
+    await tester.binding.handleAppLifecycleStateChanged(
+      AppLifecycleState.resumed,
+    );
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('4s'), findsOneWidget);
+  });
+
+  testWidgets('Color Conflict timer pauses while the app is backgrounded', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ColorConflictScreen(onFinish: (_) {}),
+      ),
+    );
+    await tester.pump();
+
+    await tester.ensureVisible(find.byKey(const Key('color-conflict-start')));
+    await tester.tap(find.byKey(const Key('color-conflict-start')));
+    await tester.pump();
+    expect(find.text('30s'), findsOneWidget);
+
+    await tester.binding.handleAppLifecycleStateChanged(
+      AppLifecycleState.paused,
+    );
+    await tester.pump(const Duration(seconds: 3));
+    expect(find.text('30s'), findsOneWidget);
+
+    await tester.binding.handleAppLifecycleStateChanged(
+      AppLifecycleState.resumed,
+    );
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('29s'), findsOneWidget);
+  });
+
+  testWidgets('Math Race timer pauses while the app is backgrounded', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MathRaceScreen(onFinish: (_) {}),
+      ),
+    );
+    await tester.pump();
+    expect(find.text('60s'), findsOneWidget);
+
+    await tester.binding.handleAppLifecycleStateChanged(
+      AppLifecycleState.paused,
+    );
+    await tester.pump(const Duration(seconds: 3));
+    expect(find.text('60s'), findsOneWidget);
+
+    await tester.binding.handleAppLifecycleStateChanged(
+      AppLifecycleState.resumed,
+    );
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('59s'), findsOneWidget);
+  });
+
+  testWidgets('Memory timer pauses while the app is backgrounded', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MemoryGameScreen(
+          onFinish: (_) {},
+          trainingLevel: 1,
+        ),
+      ),
+    );
+    await tester.pump();
+    expect(find.text('58s'), findsOneWidget);
+
+    await tester.binding.handleAppLifecycleStateChanged(
+      AppLifecycleState.paused,
+    );
+    await tester.pump(const Duration(seconds: 3));
+    expect(find.text('58s'), findsOneWidget);
+
+    await tester.binding.handleAppLifecycleStateChanged(
+      AppLifecycleState.resumed,
+    );
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('57s'), findsOneWidget);
+  });
+
   test('Every active Brain game participates in L1-L12 progression', () {
     final activeIds = brainGames
         .where((game) => game.enabled)
