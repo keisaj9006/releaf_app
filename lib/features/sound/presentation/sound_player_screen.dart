@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../routing/app_routes.dart';
 import '../../../theme/app_theme.dart';
 import '../../../theme/releaf_design_tokens.dart';
 import '../../../theme/widgets/releaf_sound_artwork.dart';
@@ -100,7 +101,13 @@ class _SoundPlayerScreenState extends ConsumerState<SoundPlayerScreen> {
                                   icon: Icons.keyboard_arrow_down_rounded,
                                   tooltip: 'Close player',
                                   accentColor: ReleafFeatureAccents.sound,
-                                  onPressed: context.pop,
+                                  onPressed: () {
+                                    if (context.canPop()) {
+                                      context.pop();
+                                    } else {
+                                      context.go(AppRoutes.sound);
+                                    }
+                                  },
                                 ),
                                 const Spacer(),
                                 Text(
