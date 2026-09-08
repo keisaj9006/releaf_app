@@ -41,7 +41,12 @@ void main() {
     expect(find.text('Releaf Atmosphere I'), findsOneWidget);
     expect(find.text('Releaf Atmosphere II'), findsOneWidget);
     expect(find.text('Ocean Wash'), findsOneWidget);
-    await tester.drag(find.text('Ocean Wash'), const Offset(-280, 0));
+    final natureRail = find.ancestor(
+      of: find.text('Ocean Wash'),
+      matching: find.byType(ListView),
+    );
+    expect(natureRail, findsOneWidget);
+    await tester.drag(natureRail, const Offset(-300, 0));
     await tester.pumpAndSettle();
     expect(find.text('Forest Canopy'), findsOneWidget);
     expect(find.textContaining('sleep-frequency claims'), findsOneWidget);
