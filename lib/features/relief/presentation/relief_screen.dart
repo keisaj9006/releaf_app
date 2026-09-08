@@ -853,7 +853,7 @@ class _QuickSessionCard extends StatelessWidget {
       button: true,
       enabled: true,
       onTap: onPressed,
-      label: '${session.title}. ${_sessionPurpose(session)} '
+      label: '${session.title}. ${_sessionCardValue(session)} '
           '${_durationLabel(session.durationSeconds)}. '
           '${_sessionTypeLabel(session)}. '
           '${session.isPremium ? 'Premium, opens session preview.' : 'Free, opens session preview.'}',
@@ -911,7 +911,7 @@ class _QuickSessionCard extends StatelessWidget {
                   ),
                   const SizedBox(height: ReleafSpacing.xxs),
                   Text(
-                    _sessionPurpose(session),
+                    _sessionCardValue(session),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: ReleafTypography.meta.copyWith(
@@ -1048,6 +1048,18 @@ class _DeepResetCard extends StatelessWidget {
                                 color: ReleafColors.textSecondary,
                               ),
                             ),
+                            if (!session.isLegacyCompatible) ...[
+                              const SizedBox(height: ReleafSpacing.xxs),
+                              Text(
+                                _sessionCardValue(session),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: ReleafTypography.meta.copyWith(
+                                  color: ReleafColors.textSecondary,
+                                  height: 1.3,
+                                ),
+                              ),
+                            ],
                           ],
                         ),
                       ),
@@ -1327,6 +1339,14 @@ ReleafArtworkVariant _sessionArtwork(ResetContent session) {
     '5min-focus' => ReleafArtworkVariant.focus,
     _ => ReleafArtworkVariant.ambient,
   };
+}
+
+String _sessionCardValue(ResetContent session) {
+  final bestFor = session.bestFor?.trim();
+  if (bestFor != null && bestFor.isNotEmpty) {
+    return 'Best for: $bestFor';
+  }
+  return _sessionPurpose(session);
 }
 
 String _sessionPurpose(ResetContent session) {
