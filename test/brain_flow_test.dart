@@ -516,7 +516,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
 
     expect(find.byType(BrainScreen), findsOneWidget);
-    expect(find.byType(SequenceEchoScreen), findsNothing);
+    expect(router.routeInformationProvider.value.uri.path, AppRoutes.brain);
   });
 
   testWidgets('Rule Shift is a real playable Brain exercise', (
