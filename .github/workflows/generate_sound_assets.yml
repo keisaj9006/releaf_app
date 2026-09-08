@@ -1,0 +1,76 @@
+name: Generate owned sleep audio
+
+on:
+  push:
+    branches:
+      - releaf-development
+    paths:
+      - tooling/audio/generate_sleep_assets.py
+      - .github/workflows/generate_sound_assets.yml
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install generator dependency
+        run: python -m pip install --disable-pip-version-check numpy
+
+      - name: Ensure ffmpeg is available
+        run: |
+          if ! command -v ffmpeg >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y ffmpeg
+          fi
+
+      - name: Generate deterministic sound assets
+        run: python tooling/audio/generate_sleep_assets.py --output-dir assets/sounds
+
+      - name: Probe generated assets
+        run: |
+          for file in \
+            assets/sounds/brown_noise.mp3 \
+            assets/sounds/pink_noise.mp3 \
+            assets/sounds/white_noise.mp3 \
+            assets/sounds/soft_rain.mp3 \
+            assets/sounds/night_air.mp3 \
+            assets/sounds/deep_drift.mp3 \
+            assets/sounds/ocean_wash.mp3 \
+            assets/sounds/forest_canopy.mp3; do
+            echo "=== $file"
+            ffprobe -v error \
+              -show_entries format=duration,bit_rate \
+              -show_entries stream=sample_rate,channels \
+              -of default=noprint_wrappers=1 "$file"
+          done
+
+      - name: Commit generated audio
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            assets/sounds/brown_noise.mp3 \
+            assets/sounds/pink_noise.mp3 \
+            assets/sounds/white_noise.mp3 \
+            assets/sounds/soft_rain.mp3 \
+            assets/sounds/night_air.mp3 \
+            assets/sounds/deep_drift.mp3 \
+            assets/sounds/ocean_wash.mp3 \
+            assets/sounds/forest_canopy.mp3
+          if git diff --cached --quiet; then
+            echo "Generated assets already match the committed versions."
+            exit 0
+          fi
+          git commit -m "audio: regenerate long-form owned sleep soundscapes"
+          git push origin HEAD:releaf-development
