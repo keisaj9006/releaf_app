@@ -507,6 +507,36 @@ void main() {
     expect(find.text('What do you need right now?'), findsOneWidget);
   });
 
+  testWidgets('Direct Reset session back falls back to Reset hub', (
+    WidgetTester tester,
+  ) async {
+    final preferences = await _preferences();
+    final router = createAppRouter(
+      initialLocation: AppRoutes.reliefSessionFor(freeSession.id),
+    );
+    addTearDown(router.dispose);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(preferences),
+        ],
+        child: MaterialApp.router(routerConfig: router),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.text('01:00'), findsOneWidget);
+
+    await tester.binding.handlePopRoute();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.text('What do you need right now?'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('60s Grounding advances through visible grounding steps', (
     WidgetTester tester,
   ) async {
