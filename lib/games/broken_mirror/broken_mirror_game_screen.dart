@@ -30,7 +30,7 @@ class BrokenMirrorGameScreen extends ConsumerStatefulWidget {
 }
 
 class _BrokenMirrorGameScreenState extends ConsumerState<BrokenMirrorGameScreen>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin, WidgetsBindingObserver {
   final GlobalKey _boardKey = GlobalKey();
 
   late List<_Shard> _shards;
@@ -38,6 +38,7 @@ class _BrokenMirrorGameScreenState extends ConsumerState<BrokenMirrorGameScreen>
   bool _won = false;
   int _timeLeft = 0;
   Timer? _timer;
+  bool _pausedByLifecycle = false;
   late AnimationController _pulse;
 
   int get _levelIndex => (widget.level - 1).clamp(0, 11).toInt();
@@ -48,6 +49,7 @@ class _BrokenMirrorGameScreenState extends ConsumerState<BrokenMirrorGameScreen>
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _timeLeft = widget.seconds;
     _pulse = AnimationController(
       vsync: this,
@@ -60,6 +62,7 @@ class _BrokenMirrorGameScreenState extends ConsumerState<BrokenMirrorGameScreen>
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _timer?.cancel();
     _pulse.dispose();
     super.dispose();
@@ -140,9 +143,11 @@ class _BrokenMirrorGameScreenState extends ConsumerState<BrokenMirrorGameScreen>
         .toList();
   }
 
-  void _startTimer() {
+  void _startTimer({bool reset = true}) {
     _timer?.cancel();
-    _timeLeft = widget.seconds;
+    if (reset) _timeLeft = widget.seconds;
+    if (_timeLeft <= 0 || _won) return;
+
     _timer = Timer.periodic(const Duration(seconds: 1), (t) {
       if (!mounted) return;
       setState(() => _timeLeft--);
@@ -151,6 +156,28 @@ class _BrokenMirrorGameScreenState extends ConsumerState<BrokenMirrorGameScreen>
         _onFail();
       }
     });
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (!widget.enableTimer || _won || _timeLeft <= 0) return;
+
+    if (state == AppLifecycleState.resumed) {
+      if (_pausedByLifecycle) {
+        _pausedByLifecycle = false;
+        _startTimer(reset: false);
+      }
+      return;
+    }
+
+    if ((state == AppLifecycleState.inactive ||
+            state == AppLifecycleState.paused ||
+            state == AppLifecycleState.hidden ||
+            state == AppLifecycleState.detached) &&
+        (_timer?.isActive ?? false)) {
+      _timer?.cancel();
+      _pausedByLifecycle = true;
+    }
   }
 
   void _checkWin() {
