@@ -83,13 +83,13 @@ void main() {
 
     expect(find.text('5s'), findsOneWidget);
 
-    await tester.binding.handleAppLifecycleStateChanged(
+    tester.binding.handleAppLifecycleStateChanged(
       AppLifecycleState.paused,
     );
     await tester.pump(const Duration(seconds: 3));
     expect(find.text('5s'), findsOneWidget);
 
-    await tester.binding.handleAppLifecycleStateChanged(
+    tester.binding.handleAppLifecycleStateChanged(
       AppLifecycleState.resumed,
     );
     await tester.pump(const Duration(seconds: 1));
@@ -111,13 +111,13 @@ void main() {
     await tester.pump();
     expect(find.text('30s'), findsOneWidget);
 
-    await tester.binding.handleAppLifecycleStateChanged(
+    tester.binding.handleAppLifecycleStateChanged(
       AppLifecycleState.paused,
     );
     await tester.pump(const Duration(seconds: 3));
     expect(find.text('30s'), findsOneWidget);
 
-    await tester.binding.handleAppLifecycleStateChanged(
+    tester.binding.handleAppLifecycleStateChanged(
       AppLifecycleState.resumed,
     );
     await tester.pump(const Duration(seconds: 1));
@@ -135,13 +135,13 @@ void main() {
     await tester.pump();
     expect(find.text('60s'), findsOneWidget);
 
-    await tester.binding.handleAppLifecycleStateChanged(
+    tester.binding.handleAppLifecycleStateChanged(
       AppLifecycleState.paused,
     );
     await tester.pump(const Duration(seconds: 3));
     expect(find.text('60s'), findsOneWidget);
 
-    await tester.binding.handleAppLifecycleStateChanged(
+    tester.binding.handleAppLifecycleStateChanged(
       AppLifecycleState.resumed,
     );
     await tester.pump(const Duration(seconds: 1));
@@ -162,13 +162,13 @@ void main() {
     await tester.pump();
     expect(find.text('58s'), findsOneWidget);
 
-    await tester.binding.handleAppLifecycleStateChanged(
+    tester.binding.handleAppLifecycleStateChanged(
       AppLifecycleState.paused,
     );
     await tester.pump(const Duration(seconds: 3));
     expect(find.text('58s'), findsOneWidget);
 
-    await tester.binding.handleAppLifecycleStateChanged(
+    tester.binding.handleAppLifecycleStateChanged(
       AppLifecycleState.resumed,
     );
     await tester.pump(const Duration(seconds: 1));
