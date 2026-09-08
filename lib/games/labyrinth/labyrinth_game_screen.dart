@@ -121,7 +121,13 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen>
             next = Offset.zero;
           }
 
-          _tilt = next;
+          _tilt = Offset(
+            (_tilt.dx * 0.68) + (next.dx * 0.32),
+            (_tilt.dy * 0.68) + (next.dy * 0.32),
+          );
+          if (_tilt.distance < 0.025) {
+            _tilt = Offset.zero;
+          }
         },
         onError: (_) {
           if (mounted && _motionAvailable) {
@@ -132,6 +138,14 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen>
     } catch (_) {
       _motionAvailable = false;
     }
+  }
+
+  void _resetMotionCalibration() {
+    _motionCalibrationSum = Offset.zero;
+    _motionBaseline = Offset.zero;
+    _motionCalibrationSamples = 0;
+    _tilt = Offset.zero;
+    _motionAvailable = false;
   }
 
   void _startTimerIfNeeded() {
@@ -164,11 +178,10 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen>
 
     _startTimerIfNeeded();
 
-    final acceleration = 0.010 + (_levelNumber * 0.00045);
-    _velocity = (_velocity * 0.90) + (_tilt * acceleration);
+    const acceleration = 0.0115;
+    _velocity = (_velocity * 0.91) + (_tilt * acceleration);
 
-    final maxSpeed =
-        (0.050 + (_levelNumber * 0.0018)).clamp(0.05, 0.072).toDouble();
+    const maxSpeed = 0.058;
     if (_velocity.distance > maxSpeed) {
       _velocity = _velocity / _velocity.distance * maxSpeed;
     }
@@ -330,6 +343,7 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen>
     if (state == AppLifecycleState.resumed) {
       if (_pausedByLifecycle) {
         _pausedByLifecycle = false;
+        _resetMotionCalibration();
         if (mounted) {
           setState(() => _paused = false);
         } else {
@@ -392,6 +406,7 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen>
           ('Wall touches', '$_wallHits'),
           ('Maze', '${_level.columns}×${_level.rows}'),
           ('Shortest route', '${_level.shortestPathMoves} moves'),
+          ('Route turns', '${_level.shortestPathTurns}'),
           ('Score', '$score'),
         ],
         primaryLabel: 'Finish',
@@ -433,6 +448,7 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen>
           ('Wall touches', '$_wallHits'),
           ('Maze', '${_level.columns}×${_level.rows}'),
           ('Shortest route', '${_level.shortestPathMoves} moves'),
+          ('Route turns', '${_level.shortestPathTurns}'),
         ],
         primaryLabel: 'Retry',
         onPrimary: _restart,
@@ -569,6 +585,63 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen>
   }
 }
 
+@visibleForTesting
+class LabyrinthLevelProfile {
+  const LabyrinthLevelProfile({
+    required this.level,
+    required this.columns,
+    required this.rows,
+    required this.shortestPathMoves,
+    required this.shortestPathTurns,
+    required this.deadEnds,
+    required this.timeLimitSeconds,
+  });
+
+  final int level;
+  final int columns;
+  final int rows;
+  final int shortestPathMoves;
+  final int shortestPathTurns;
+  final int deadEnds;
+  final int timeLimitSeconds;
+}
+
+@visibleForTesting
+LabyrinthLevelProfile labyrinthLevelProfileForTesting(int level) {
+  final maze = _MazeLevel.generate(level);
+  return LabyrinthLevelProfile(
+    level: maze.level,
+    columns: maze.columns,
+    rows: maze.rows,
+    shortestPathMoves: maze.shortestPathMoves,
+    shortestPathTurns: maze.shortestPathTurns,
+    deadEnds: maze.deadEnds,
+    timeLimitSeconds: maze.timeLimitSeconds,
+  );
+}
+
+class _MazeCandidate {
+  const _MazeCandidate({
+    required this.cells,
+    required this.metrics,
+  });
+
+  final List<List<_MazeCell>> cells;
+  final _MazeMetrics metrics;
+}
+
+class _MazeMetrics {
+  const _MazeMetrics({
+    required this.moves,
+    required this.turns,
+    required this.deadEnds,
+  });
+
+  final int moves;
+  final int turns;
+  final int deadEnds;
+}
+
 class _MazeLevel {
   const _MazeLevel({
     required this.level,
@@ -580,6 +653,8 @@ class _MazeLevel {
     required this.timeLimitSeconds,
     required this.entrySide,
     required this.shortestPathMoves,
+    required this.shortestPathTurns,
+    required this.deadEnds,
   });
 
   final int level;
@@ -591,6 +666,8 @@ class _MazeLevel {
   final int timeLimitSeconds;
   final _MazeEntrySide entrySide;
   final int shortestPathMoves;
+  final int shortestPathTurns;
+  final int deadEnds;
 
   String get entryLabel => switch (entrySide) {
         _MazeEntrySide.bottom => 'Bottom',
@@ -603,7 +680,93 @@ class _MazeLevel {
     final level = rawLevel.clamp(1, 12).toInt();
     final columns = (5 + ((level - 1) ~/ 2)).clamp(5, 10).toInt();
     final rows = (7 + ((level - 1) ~/ 2)).clamp(7, 12).toInt();
+    final entrySide = _MazeEntrySide.values[(level - 1) % 4];
+    final (startColumn, startRow) = switch (entrySide) {
+      _MazeEntrySide.bottom => (columns ~/ 2, rows - 1),
+      _MazeEntrySide.left => (0, rows ~/ 2),
+      _MazeEntrySide.top => (columns ~/ 2, 0),
+      _MazeEntrySide.right => (columns - 1, rows ~/ 2),
+    };
+    final goalColumn = columns ~/ 2;
+    final goalRow = rows ~/ 2;
 
+    // Difficulty is selected from actual route complexity rather than from a
+    // single random DFS result. Higher levels target a progressively larger
+    // fraction of the board, while keeping physics calm and predictable.
+    final cellCount = columns * rows;
+    final targetRatio = 0.22 + (((level - 1) / 11.0) * 0.26);
+    final targetPathMoves =
+        (cellCount * targetRatio).round().clamp(6, cellCount - 1).toInt();
+    final targetTurns = (2 + (level * 0.65)).round();
+
+    _MazeCandidate? best;
+    var bestScore = double.infinity;
+
+    for (var candidateIndex = 0; candidateIndex < 72; candidateIndex++) {
+      final candidate = _generateCandidate(
+        columns: columns,
+        rows: rows,
+        startColumn: startColumn,
+        startRow: startRow,
+        goalColumn: goalColumn,
+        goalRow: goalRow,
+        seed: 4813 +
+            (level * 7919) +
+            (columns * 1009) +
+            (rows * 9176) +
+            (candidateIndex * 104729),
+      );
+
+      final pathGap = (candidate.metrics.moves - targetPathMoves).abs();
+      final shortfall = math.max(
+        0,
+        ((targetPathMoves * 0.88).round() - candidate.metrics.moves),
+      );
+      final turnGap = (candidate.metrics.turns - targetTurns).abs();
+
+      final score = (pathGap * 12.0) +
+          (shortfall * 42.0) +
+          (turnGap * 1.4) -
+          (math.min(candidate.metrics.deadEnds, 18) * 0.12);
+
+      if (score < bestScore) {
+        best = candidate;
+        bestScore = score;
+      }
+    }
+
+    final selected = best!;
+    final secondsPerMove = 2.9 - ((level - 1) * 0.035);
+    final timeLimitSeconds =
+        (28 + (selected.metrics.moves * secondsPerMove))
+            .round()
+            .clamp(50, 150)
+            .toInt();
+
+    return _MazeLevel(
+      level: level,
+      columns: columns,
+      rows: rows,
+      cells: selected.cells,
+      start: Offset(startColumn + 0.5, startRow + 0.5),
+      goal: Offset(goalColumn + 0.5, goalRow + 0.5),
+      timeLimitSeconds: timeLimitSeconds,
+      entrySide: entrySide,
+      shortestPathMoves: selected.metrics.moves,
+      shortestPathTurns: selected.metrics.turns,
+      deadEnds: selected.metrics.deadEnds,
+    );
+  }
+
+  static _MazeCandidate _generateCandidate({
+    required int columns,
+    required int rows,
+    required int startColumn,
+    required int startRow,
+    required int goalColumn,
+    required int goalRow,
+    required int seed,
+  }) {
     final cells = List<List<_MazeCell>>.generate(
       rows,
       (_) => List<_MazeCell>.generate(
@@ -612,14 +775,7 @@ class _MazeLevel {
       ),
     );
 
-    final random = math.Random(4813 + (level * 7919));
-    final entrySide = _MazeEntrySide.values[(level - 1) % 4];
-    final (startColumn, startRow) = switch (entrySide) {
-      _MazeEntrySide.bottom => (columns ~/ 2, rows - 1),
-      _MazeEntrySide.left => (0, rows ~/ 2),
-      _MazeEntrySide.top => (columns ~/ 2, 0),
-      _MazeEntrySide.right => (columns - 1, rows ~/ 2),
-    };
+    final random = math.Random(seed);
     final visited = List<List<bool>>.generate(
       rows,
       (_) => List<bool>.filled(columns, false),
@@ -673,53 +829,21 @@ class _MazeLevel {
       stack.add((nextColumn, nextRow));
     }
 
-    // Extra loops appear gradually, reducing rote memorisation while keeping
-    // every generated layout solvable.
-    final extraConnections = (level - 1) ~/ 3;
-    for (var index = 0; index < extraConnections; index++) {
-      final column = random.nextInt(columns);
-      final row = random.nextInt(rows);
-
-      if (random.nextBool() && column < columns - 1) {
-        cells[row][column].right = false;
-        cells[row][column + 1].left = false;
-      } else if (row < rows - 1) {
-        cells[row][column].bottom = false;
-        cells[row + 1][column].top = false;
-      }
-    }
-
-    final goalColumn = columns ~/ 2;
-    final goalRow = rows ~/ 2;
-    final shortestPathMoves = _shortestPathMoves(
+    return _MazeCandidate(
       cells: cells,
-      columns: columns,
-      rows: rows,
-      startColumn: startColumn,
-      startRow: startRow,
-      goalColumn: goalColumn,
-      goalRow: goalRow,
-    );
-    final timeLimitSeconds =
-        (26 + (shortestPathMoves * 3.0) - (level * 0.3))
-            .round()
-            .clamp(42, 86)
-            .toInt();
-
-    return _MazeLevel(
-      level: level,
-      columns: columns,
-      rows: rows,
-      cells: cells,
-      start: Offset(startColumn + 0.5, startRow + 0.5),
-      goal: Offset(goalColumn + 0.5, goalRow + 0.5),
-      timeLimitSeconds: timeLimitSeconds,
-      entrySide: entrySide,
-      shortestPathMoves: shortestPathMoves,
+      metrics: _pathMetrics(
+        cells: cells,
+        columns: columns,
+        rows: rows,
+        startColumn: startColumn,
+        startRow: startRow,
+        goalColumn: goalColumn,
+        goalRow: goalRow,
+      ),
     );
   }
 
-  static int _shortestPathMoves({
+  static _MazeMetrics _pathMetrics({
     required List<List<_MazeCell>> cells,
     required int columns,
     required int rows,
@@ -732,20 +856,22 @@ class _MazeLevel {
       rows,
       (_) => List<int>.filled(columns, -1),
     );
+    final parentDirection = List<List<int>>.generate(
+      rows,
+      (_) => List<int>.filled(columns, -1),
+    );
     final queue = <(int, int)>[(startColumn, startRow)];
     distances[startRow][startColumn] = 0;
     var head = 0;
 
     while (head < queue.length) {
       final (column, row) = queue[head++];
-      if (column == goalColumn && row == goalRow) {
-        return distances[row][column];
-      }
+      if (column == goalColumn && row == goalRow) break;
 
       final cell = cells[row][column];
       final nextDistance = distances[row][column] + 1;
 
-      void enqueue(int nextColumn, int nextRow) {
+      void enqueue(int nextColumn, int nextRow, int direction) {
         if (nextColumn < 0 ||
             nextColumn >= columns ||
             nextRow < 0 ||
@@ -753,17 +879,72 @@ class _MazeLevel {
             distances[nextRow][nextColumn] != -1) {
           return;
         }
+
         distances[nextRow][nextColumn] = nextDistance;
+        parentDirection[nextRow][nextColumn] = direction;
         queue.add((nextColumn, nextRow));
       }
 
-      if (!cell.top) enqueue(column, row - 1);
-      if (!cell.right) enqueue(column + 1, row);
-      if (!cell.bottom) enqueue(column, row + 1);
-      if (!cell.left) enqueue(column - 1, row);
+      if (!cell.top) enqueue(column, row - 1, 0);
+      if (!cell.right) enqueue(column + 1, row, 1);
+      if (!cell.bottom) enqueue(column, row + 1, 2);
+      if (!cell.left) enqueue(column - 1, row, 3);
     }
 
-    return math.max(columns, rows).toInt();
+    final directions = <int>[];
+    var column = goalColumn;
+    var row = goalRow;
+
+    while (column != startColumn || row != startRow) {
+      final direction = parentDirection[row][column];
+      if (direction < 0) break;
+      directions.add(direction);
+
+      switch (direction) {
+        case 0:
+          row += 1;
+        case 1:
+          column -= 1;
+        case 2:
+          row -= 1;
+        case 3:
+          column += 1;
+      }
+    }
+
+    directions.reverse();
+    var turns = 0;
+    for (var index = 1; index < directions.length; index++) {
+      if (directions[index] != directions[index - 1]) turns++;
+    }
+
+    var deadEnds = 0;
+    for (var r = 0; r < rows; r++) {
+      for (var c = 0; c < columns; c++) {
+        if ((c == startColumn && r == startRow) ||
+            (c == goalColumn && r == goalRow)) {
+          continue;
+        }
+
+        final cell = cells[r][c];
+        var openings = 0;
+        if (!cell.top) openings++;
+        if (!cell.right) openings++;
+        if (!cell.bottom) openings++;
+        if (!cell.left) openings++;
+        if (openings == 1) deadEnds++;
+      }
+    }
+
+    final moves = distances[goalRow][goalColumn] >= 0
+        ? distances[goalRow][goalColumn]
+        : math.max(columns, rows).toInt();
+
+    return _MazeMetrics(
+      moves: moves,
+      turns: turns,
+      deadEnds: deadEnds,
+    );
   }
 
   bool hasVerticalWall(int xLine, int row) {
