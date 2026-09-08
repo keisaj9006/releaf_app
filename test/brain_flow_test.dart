@@ -910,7 +910,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 240));
 
     // Start a fresh replay and background the app while the pattern is visible.
-    await tester.binding.handlePopRoute();
+    await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump();
     await tester.pumpWidget(
       MaterialApp(
