@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:audioplayers/audioplayers.dart' as audio;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -13,12 +14,61 @@ import 'package:releaf_app/features/progress/data/leaves_repository.dart';
 import 'package:releaf_app/features/relief/data/audio_catalog.dart' as legacy;
 import 'package:releaf_app/features/relief/data/reset_catalog.dart';
 import 'package:releaf_app/features/relief/presentation/relief_session_gate.dart';
+import 'package:releaf_app/features/sound/application/sound_player_controller.dart';
+import 'package:releaf_app/features/sound/data/sound_catalog.dart';
 import 'package:releaf_app/routing/app_router.dart';
 import 'package:releaf_app/routing/app_routes.dart';
 
 Future<SharedPreferences> _preferences() async {
   SharedPreferences.setMockInitialValues({});
   return SharedPreferences.getInstance();
+}
+
+class _TrackingSoundPlaybackDriver implements SoundPlaybackDriver {
+  final _playerStates = StreamController<audio.PlayerState>.broadcast();
+  int pauseCalls = 0;
+
+  @override
+  Stream<Duration> get onDurationChanged => const Stream<Duration>.empty();
+
+  @override
+  Stream<Duration> get onPositionChanged => const Stream<Duration>.empty();
+
+  @override
+  Stream<audio.PlayerState> get onPlayerStateChanged => _playerStates.stream;
+
+  @override
+  Future<void> setReleaseMode(audio.ReleaseMode mode) async {}
+
+  @override
+  Future<void> setVolume(double volume) async {}
+
+  @override
+  Future<void> playAsset(String assetPath) async {
+    _playerStates.add(audio.PlayerState.playing);
+  }
+
+  @override
+  Future<void> resume() async {
+    _playerStates.add(audio.PlayerState.playing);
+  }
+
+  @override
+  Future<void> pause() async {
+    pauseCalls += 1;
+    _playerStates.add(audio.PlayerState.paused);
+  }
+
+  @override
+  Future<void> stop() async {
+    _playerStates.add(audio.PlayerState.stopped);
+  }
+
+  @override
+  Future<void> seek(Duration position) async {}
+
+  @override
+  Future<void> dispose() => _playerStates.close();
 }
 
 class _FixedSubscriptionController extends SubscriptionController {
@@ -83,6 +133,41 @@ void main() {
 
     expect(find.text('01:00'), findsOneWidget);
     expect(find.text('Unlock Premium'), findsNothing);
+  });
+
+  testWidgets('Reset pauses an already playing Sound Space', (
+    WidgetTester tester,
+  ) async {
+    final preferences = await _preferences();
+    final driver = _TrackingSoundPlaybackDriver();
+    final soundController = SoundPlayerController(
+      const SoundCatalog(),
+      preferences,
+      driver: driver,
+    );
+    await soundController.play(const SoundCatalog().getById('soft-rain')!);
+    await Future<void>.delayed(Duration.zero);
+    expect(soundController.state.isPlaying, isTrue);
+
+    final router = createAppRouter(
+      initialLocation: AppRoutes.reliefSessionFor(freeSession.id),
+    );
+    addTearDown(router.dispose);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(preferences),
+          soundPlayerControllerProvider.overrideWith((ref) => soundController),
+        ],
+        child: MaterialApp.router(routerConfig: router),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(driver.pauseCalls, 1);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('Simple equal breathing stays visually minimal', (
