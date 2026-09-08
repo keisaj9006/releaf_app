@@ -39,6 +39,10 @@ class ResetContent {
   final List<String> instructions;
   final String? audioAsset;
   final String? summary;
+  final String? methodLabel;
+  final String? bestFor;
+  final String? whyItMayHelp;
+  final String? safetyNote;
   final ResetTaxonomyStatus taxonomyStatus;
   final ResetSessionProgram? program;
   final ResetVisualType visualType;
@@ -54,6 +58,10 @@ class ResetContent {
     this.quickCategory,
     this.audioAsset,
     this.summary,
+    this.methodLabel,
+    this.bestFor,
+    this.whyItMayHelp,
+    this.safetyNote,
     this.taxonomyStatus = ResetTaxonomyStatus.canonical,
     this.program,
     this.visualType = ResetVisualType.livingForm,
