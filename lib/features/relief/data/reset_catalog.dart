@@ -2276,6 +2276,15 @@ class ResetCatalog {
       level: ResetLevel.deep,
       modality: ResetModality.breathing,
       accessTier: ResetAccessTier.premium,
+      summary:
+          'An eight-minute paced-breathing reset for high activation and restless energy.',
+      methodLabel: '4–5 steady breathing',
+      bestFor:
+          'Feeling wired, restless or overstimulated when you want a longer continuous breathing practice without holds.',
+      whyItMayHelp:
+          'The session keeps the breath gentle and slightly lengthens the exhale while giving enough time for the rhythm to settle.',
+      safetyNote:
+          'Keep the breath small and comfortable. Shorten the count if the pace creates air hunger or dizziness.',
       instructions: [
         'Let the breath stay gentle and comfortable.',
         'Follow a four-count in and five-count out.',
@@ -2318,6 +2327,15 @@ class ResetCatalog {
       level: ResetLevel.deep,
       modality: ResetModality.guidedPractice,
       accessTier: ResetAccessTier.premium,
+      summary:
+          'A slow eight-minute scan through common tension points without forcing the body to relax.',
+      methodLabel: 'Full-body attention scan',
+      bestFor:
+          'Held muscular tension, long desk days, or moments when the body feels tight but you do not want a breathing exercise.',
+      whyItMayHelp:
+          'The scan moves attention systematically through the body so unnecessary effort is easier to notice and soften.',
+      safetyNote:
+          'Nothing needs to be released. If a body area is painful or emotionally difficult, skip it and return to a neutral point of support.',
       visualType: ResetVisualType.bodyRelease,
       instructions: [
         'Notice the face and jaw.',
@@ -2385,6 +2403,13 @@ class ResetCatalog {
       level: ResetLevel.deep,
       modality: ResetModality.guidedPractice,
       accessTier: ResetAccessTier.premium,
+      summary:
+          'An eight-minute overload reset that turns too many active demands into one realistic next action.',
+      methodLabel: 'Overload → one next action',
+      bestFor:
+          'Cognitive overload, too many open tasks, or the feeling that everything needs attention at once.',
+      whyItMayHelp:
+          'The protocol separates now from later, restores physical orientation, then reduces the problem to one visible action.',
       visualType: ResetVisualType.nextStep,
       instructions: [
         'Stop trying to organise everything at once.',
@@ -2443,6 +2468,15 @@ class ResetCatalog {
       level: ResetLevel.deep,
       modality: ResetModality.guidedPractice,
       accessTier: ResetAccessTier.premium,
+      summary:
+          'An eight-minute evening downshift for unfinished thoughts, residual tension and difficulty ending the day.',
+      methodLabel: 'Evening psychological off-load',
+      bestFor:
+          'The transition from an active day into a quieter evening when your mind is still carrying unfinished work.',
+      whyItMayHelp:
+          'The routine deliberately stops problem-solving, reconnects with physical support and gives unfinished tasks permission to wait.',
+      safetyNote:
+          'This is a wind-down practice, not a treatment for persistent insomnia.',
       visualType: ResetVisualType.acceptanceSpace,
       instructions: [
         'Notice what your mind is still carrying from the day.',
@@ -2499,6 +2533,15 @@ class ResetCatalog {
       level: ResetLevel.deep,
       modality: ResetModality.guidedPractice,
       accessTier: ResetAccessTier.premium,
+      summary:
+          'An eight-minute pause for strong activation before you choose what to say or do next.',
+      methodLabel: 'Activation → release → choice',
+      bestFor:
+          'After conflict or during strong anger when acting immediately is likely to make the situation worse.',
+      whyItMayHelp:
+          'The practice gives physical activation time to change and separates the feeling from the next decision.',
+      safetyNote:
+          'Use gentle pressure only. If you feel unsafe or at risk of harming yourself or someone else, leave the situation and seek immediate support.',
       visualType: ResetVisualType.bodyRelease,
       instructions: [
         'Notice where anger is showing up in your body.',
@@ -2553,6 +2596,15 @@ class ResetCatalog {
       level: ResetLevel.deep,
       modality: ResetModality.guidedPractice,
       accessTier: ResetAccessTier.premium,
+      summary:
+          'An eight-minute thought-unhooking practice for loops that keep reopening without producing a useful next step.',
+      methodLabel: 'Thought defusion + return',
+      bestFor:
+          'Repetitive thinking, rumination or mental replay when more analysis is no longer helping.',
+      whyItMayHelp:
+          'The practice changes the relationship to the thought rather than trying to prove it wrong, then returns attention to something concrete.',
+      safetyNote:
+          'If a thought concerns immediate danger, safety or a real urgent problem, address the practical issue rather than using the exercise to dismiss it.',
       visualType: ResetVisualType.thoughtUnhook,
       instructions: [
         'Notice the thought or problem your mind keeps reopening.',
