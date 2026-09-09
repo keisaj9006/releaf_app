@@ -30,7 +30,7 @@ class ProgressSyncEvent {
   final DateTime occurredAt;
   final Map<String, Object?> payload;
 
-  Map<String, Object?> toJson() => {
+  Map<String, Object?> toJson() => <String, Object?>{
         'id': id,
         'kind': kind.name,
         'entityId': entityId,
@@ -60,9 +60,13 @@ class ProgressSyncEvent {
       }
 
       final occurredAt = DateTime.tryParse(occurredAtRaw);
-      final kind = ProgressSyncEventKind.values
-          .where((value) => value.name == kindName)
-          .firstOrNull;
+      ProgressSyncEventKind? kind;
+      for (final value in ProgressSyncEventKind.values) {
+        if (value.name == kindName) {
+          kind = value;
+          break;
+        }
+      }
       if (occurredAt == null || kind == null) return null;
 
       final payloadRaw = decoded['payload'];
@@ -123,7 +127,7 @@ class ProgressSyncEventStore
     Map<String, Object?> payload = const <String, Object?>{},
   }) {
     final when = (occurredAt ?? _now()).toUtc();
-    final id = [
+    final id = <Object>[
       'v1',
       _clientInstanceId,
       when.microsecondsSinceEpoch,
@@ -203,30 +207,7 @@ class ProgressSyncEventStore
   ) {
     final existing = preferences.getString(_clientInstanceKey)?.trim();
     if (existing != null &&
-        RegExp(r'^[a-f0-9]{32}
-    final raw = preferences.getStringList(_storageKey) ?? const <String>[];
-    final seen = <String>{};
-    final events = <ProgressSyncEvent>[];
-
-    for (final item in raw) {
-      final decoded = ProgressSyncEvent.decode(item);
-      if (decoded == null || !seen.add(decoded.id)) continue;
-      events.add(decoded);
-      if (events.length >= _maxEvents) break;
-    }
-
-    return List<ProgressSyncEvent>.unmodifiable(events);
-  }
-}
-
-extension _IterableFirstOrNull<T> on Iterable<T> {
-  T? get firstOrNull {
-    final iterator = this.iterator;
-    if (!iterator.moveNext()) return null;
-    return iterator.current;
-  }
-}
-).hasMatch(existing)) {
+        RegExp(r'^[a-f0-9]{32}$').hasMatch(existing)) {
       return existing;
     }
 
@@ -252,13 +233,5 @@ extension _IterableFirstOrNull<T> on Iterable<T> {
     }
 
     return List<ProgressSyncEvent>.unmodifiable(events);
-  }
-}
-
-extension _IterableFirstOrNull<T> on Iterable<T> {
-  T? get firstOrNull {
-    final iterator = this.iterator;
-    if (!iterator.moveNext()) return null;
-    return iterator.current;
   }
 }
