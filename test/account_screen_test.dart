@@ -126,7 +126,10 @@ void main() {
     expect(find.byKey(const Key('account-email-field')), findsOneWidget);
     expect(find.byKey(const Key('account-password-field')), findsOneWidget);
 
-    await tester.tap(find.text('Register'));
+    final register = find.text('Register');
+    await tester.ensureVisible(register);
+    await tester.pumpAndSettle();
+    await tester.tap(register);
     await tester.pump();
 
     expect(find.byKey(const Key('account-name-field')), findsOneWidget);
@@ -202,11 +205,17 @@ void main() {
     final emailService = _FakeAccountEmailService();
     await _pumpAccount(tester, emailService: emailService);
 
-    await tester.tap(find.text('Register'));
+    final register = find.text('Register');
+    await tester.ensureVisible(register);
+    await tester.pumpAndSettle();
+    await tester.tap(register);
     await tester.pump();
 
+    final nameField = find.byKey(const Key('account-name-field'));
+    await tester.ensureVisible(nameField);
+    await tester.pumpAndSettle();
     await tester.enterText(
-      find.byKey(const Key('account-name-field')),
+      nameField,
       'Jo',
     );
     await tester.enterText(
@@ -233,9 +242,10 @@ void main() {
       findsOneWidget,
     );
 
-    await tester.tap(
-      find.byKey(const Key('account-resend-confirmation')),
-    );
+    final resend = find.byKey(const Key('account-resend-confirmation'));
+    await tester.ensureVisible(resend);
+    await tester.pumpAndSettle();
+    await tester.tap(resend);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
