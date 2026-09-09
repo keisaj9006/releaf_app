@@ -8,7 +8,7 @@ const _guideProfile = <String, Object?>{
   'provider': 'ElevenCreative',
   'voice': 'selected female British-English meditation narrator',
   'delivery': 'natural, warm, calm, intimate, premium; no whisper or ASMR',
-  'speedReference': 0.75,
+  'speedReference': 0.82,
   'exactProviderVoiceId': null,
   'renderBlockedUntilVoiceIdIsRecovered': true,
 };
