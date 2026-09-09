@@ -22,6 +22,7 @@ import '../../../theme/widgets/releaf_sensory_halo.dart';
 import '../../../theme/widgets/releaf_thought_unhook_visual.dart';
 import '../../../theme/widgets/releaf_wave2_visuals.dart';
 import '../application/reset_audio_preferences.dart';
+import '../application/reset_completion_store.dart';
 import '../data/reset_catalog.dart';
 import '../domain/models/breath_pattern.dart';
 import '../domain/models/reset_content.dart';
@@ -52,6 +53,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
   DateTime? _deadline;
   SessionPhase _phase = SessionPhase.running;
   bool _awarded = false;
+  bool _completionRecorded = false;
   bool _usingSimplifiedProgram = false;
   final Map<int, int> _sensoryCompletedByStep = <int, int>{};
 
@@ -477,10 +479,29 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
     unawaited(_stopSessionAudio());
     setState(() => _phase = SessionPhase.feedback);
 
-    if (_awarded || _session?.isEmergency == true) return;
+    final session = _session;
+    if (session == null ||
+        !shouldJournalResetCompletion(isEmergency: session.isEmergency)) {
+      return;
+    }
+
+    if (!_completionRecorded) {
+      _completionRecorded = true;
+      try {
+        await ref.read(resetCompletionStoreProvider.notifier).recordCompletion(
+              sessionId: session.id,
+              durationSeconds: _activeDurationSeconds,
+            );
+      } catch (_) {
+        // Completion history must never block feedback or rewards.
+      }
+    }
+
+    if (_awarded) return;
     _awarded = true;
 
-    final result = await ref.read(leavesNotifierProvider.notifier).markReliefDone();
+    final result =
+        await ref.read(leavesNotifierProvider.notifier).markReliefDone();
 
     if (!mounted || result == null) return;
 

@@ -93,6 +93,7 @@ void main() {
     final store = ProgressSyncEventStore(
       preferences,
       now: () => now,
+      clientInstanceId: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
     );
     addTearDown(store.dispose);
 
@@ -106,5 +107,51 @@ void main() {
     );
 
     expect(first.id, isNot(second.id));
+  });
+
+  test('Different device instances cannot collide at the same instant', () async {
+    final firstPreferences = await _preferences(<String, Object>{});
+    final secondPreferences = await _preferences(<String, Object>{});
+    final now = DateTime.utc(2026, 9, 9, 7, 30);
+
+    final firstStore = ProgressSyncEventStore(
+      firstPreferences,
+      now: () => now,
+      clientInstanceId: '11111111111111111111111111111111',
+    );
+    final secondStore = ProgressSyncEventStore(
+      secondPreferences,
+      now: () => now,
+      clientInstanceId: '22222222222222222222222222222222',
+    );
+    addTearDown(firstStore.dispose);
+    addTearDown(secondStore.dispose);
+
+    final first = firstStore.createEvent(
+      kind: ProgressSyncEventKind.brainSessionCompleted,
+      entityId: 'n_back',
+    );
+    final second = secondStore.createEvent(
+      kind: ProgressSyncEventKind.brainSessionCompleted,
+      entityId: 'n_back',
+    );
+
+    expect(first.id, isNot(second.id));
+    expect(first.id, contains(firstStore.clientInstanceId));
+    expect(second.id, contains(secondStore.clientInstanceId));
+  });
+
+  test('Generated client instance id is persisted and reused', () async {
+    final preferences = await _preferences(<String, Object>{});
+
+    final firstStore = ProgressSyncEventStore(preferences);
+    final firstId = firstStore.clientInstanceId;
+    firstStore.dispose();
+
+    final secondStore = ProgressSyncEventStore(preferences);
+    addTearDown(secondStore.dispose);
+
+    expect(firstId, hasLength(32));
+    expect(secondStore.clientInstanceId, firstId);
   });
 }

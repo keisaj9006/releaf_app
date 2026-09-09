@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -10,6 +12,7 @@ enum ProgressSyncEventKind {
   meditationCompleted,
   meditationFavoriteChanged,
   meditationOpened,
+  resetSessionCompleted,
 }
 
 class ProgressSyncEvent {
@@ -95,16 +98,23 @@ class ProgressSyncEventStore
   ProgressSyncEventStore(
     this._preferences, {
     DateTime Function()? now,
+    String? clientInstanceId,
   })  : _now = now ?? DateTime.now,
+        _clientInstanceId =
+            clientInstanceId ?? _readOrCreateClientInstanceId(_preferences),
         super(_read(_preferences));
 
   static const _storageKey = 'progress.sync.events.v1';
+  static const _clientInstanceKey = 'progress.sync.client_instance.v1';
   static const _maxEvents = 1000;
 
   final SharedPreferences _preferences;
   final DateTime Function() _now;
+  final String _clientInstanceId;
   Future<void> _queue = Future<void>.value();
   int _sequence = 0;
+
+  String get clientInstanceId => _clientInstanceId;
 
   ProgressSyncEvent createEvent({
     required ProgressSyncEventKind kind,
@@ -115,6 +125,7 @@ class ProgressSyncEventStore
     final when = (occurredAt ?? _now()).toUtc();
     final id = [
       'v1',
+      _clientInstanceId,
       when.microsecondsSinceEpoch,
       kind.name,
       Uri.encodeComponent(entityId),
@@ -185,6 +196,47 @@ class ProgressSyncEventStore
       onError: (Object _, StackTrace _) {},
     );
     return result;
+  }
+
+  static String _readOrCreateClientInstanceId(
+    SharedPreferences preferences,
+  ) {
+    final existing = preferences.getString(_clientInstanceKey)?.trim();
+    if (existing != null &&
+        RegExp(r'^[a-f0-9]{32}
+    final raw = preferences.getStringList(_storageKey) ?? const <String>[];
+    final seen = <String>{};
+    final events = <ProgressSyncEvent>[];
+
+    for (final item in raw) {
+      final decoded = ProgressSyncEvent.decode(item);
+      if (decoded == null || !seen.add(decoded.id)) continue;
+      events.add(decoded);
+      if (events.length >= _maxEvents) break;
+    }
+
+    return List<ProgressSyncEvent>.unmodifiable(events);
+  }
+}
+
+extension _IterableFirstOrNull<T> on Iterable<T> {
+  T? get firstOrNull {
+    final iterator = this.iterator;
+    if (!iterator.moveNext()) return null;
+    return iterator.current;
+  }
+}
+).hasMatch(existing)) {
+      return existing;
+    }
+
+    final random = Random.secure();
+    final id = List<int>.generate(16, (_) => random.nextInt(256))
+        .map((byte) => byte.toRadixString(16).padLeft(2, '0'))
+        .join();
+
+    unawaited(preferences.setString(_clientInstanceKey, id));
+    return id;
   }
 
   static List<ProgressSyncEvent> _read(SharedPreferences preferences) {

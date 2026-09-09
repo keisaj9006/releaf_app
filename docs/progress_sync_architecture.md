@@ -38,6 +38,7 @@ Initial event kinds:
 - `meditationCompleted`
 - `meditationFavoriteChanged`
 - `meditationOpened`
+- `resetSessionCompleted`
 
 Each event contains:
 
@@ -95,6 +96,33 @@ number of recent sessions.
 Legacy recents without timestamps should not be invented as precise historical
 events.
 
+## Reset completions
+
+Normal Reset sessions use an append-only local completion history with:
+
+- completion event id;
+- Reset session id;
+- UTC completion time;
+- actual active duration.
+
+The same completion id is also used as the sync event id so future cloud
+inserts are idempotent.
+
+Reset completion history is intentionally separate from the daily Relief leaf
+reward. A user can complete multiple Reset sessions in one day while the
+pillar reward is still granted at most once.
+
+Emergency sessions are deliberately excluded from Reset completion history and
+sync journaling. The fact that a user opened or completed Emergency support is
+more sensitive than ordinary wellbeing progress and should not be uploaded by
+the standard progress pipeline.
+
+### Reset merge rule
+
+Merge Reset completions by event id using set union, the same way as Brain
+session history. Do not collapse multiple completions of the same Reset into a
+single boolean.
+
 ## Leaves
 
 Leaves are intentionally excluded from the first sync schema.
@@ -149,6 +177,16 @@ An item absent from the legacy favorite set should not generate a synthetic
 Do not backfill legacy recents with invented timestamps.
 
 New opens after event journaling begins will naturally populate synced recents.
+
+### Reset
+
+Reset did not previously maintain per-session completion history. Do not invent
+historical Reset completions from the daily `reliefDone` reward flag.
+
+Only genuine completions recorded after the Reset completion journal ships
+should enter the standard event history.
+
+Emergency usage remains excluded.
 
 ### Leaves
 

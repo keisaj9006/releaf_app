@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:releaf_app/core/sync/progress_sync_event_store.dart';
 import 'package:releaf_app/features/brain/application/brain_training_controller.dart';
 import 'package:releaf_app/features/meditation/application/meditation_library_controller.dart';
+import 'package:releaf_app/features/relief/application/reset_completion_store.dart';
 
 Future<SharedPreferences> _preferences() async {
   SharedPreferences.setMockInitialValues(<String, Object>{});
@@ -76,6 +77,37 @@ void main() {
     expect(favoriteEvents, hasLength(2));
     expect(favoriteEvents.first.payload['favorite'], isFalse);
     expect(favoriteEvents.last.payload['favorite'], isTrue);
+  });
+
+  test('Reset completion persists locally and journals a merge-safe sync event', () async {
+    final preferences = await _preferences();
+    final events = ProgressSyncEventStore(
+      preferences,
+      clientInstanceId: '33333333333333333333333333333333',
+    );
+    final reset = ResetCompletionStore(
+      preferences,
+      syncEvents: events,
+      now: () => DateTime.utc(2026, 9, 9, 7, 30),
+    );
+    addTearDown(reset.dispose);
+    addTearDown(events.dispose);
+
+    final completion = await reset.recordCompletion(
+      sessionId: 'equal-rhythm',
+      durationSeconds: 120,
+    );
+
+    expect(reset.state, hasLength(1));
+    expect(reset.state.single.id, completion.id);
+    expect(events.state, hasLength(1));
+    expect(events.state.single.id, completion.id);
+    expect(
+      events.state.single.kind,
+      ProgressSyncEventKind.resetSessionCompleted,
+    );
+    expect(events.state.single.entityId, 'equal-rhythm');
+    expect(events.state.single.payload['durationSeconds'], 120);
   });
 
   test('Leaves are intentionally absent from the sync event schema', () {
