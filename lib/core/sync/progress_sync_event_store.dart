@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
@@ -102,23 +101,19 @@ class ProgressSyncEventStore
   ProgressSyncEventStore(
     this._preferences, {
     DateTime Function()? now,
-    String? clientInstanceId,
+    String Function()? eventNonce,
   })  : _now = now ?? DateTime.now,
-        _clientInstanceId =
-            clientInstanceId ?? _readOrCreateClientInstanceId(_preferences),
+        _eventNonce = eventNonce ?? _secureNonce,
         super(_read(_preferences));
 
   static const _storageKey = 'progress.sync.events.v1';
-  static const _clientInstanceKey = 'progress.sync.client_instance.v1';
   static const _maxEvents = 1000;
+  static final Random _secureRandom = Random.secure();
 
   final SharedPreferences _preferences;
   final DateTime Function() _now;
-  final String _clientInstanceId;
+  final String Function() _eventNonce;
   Future<void> _queue = Future<void>.value();
-  int _sequence = 0;
-
-  String get clientInstanceId => _clientInstanceId;
 
   ProgressSyncEvent createEvent({
     required ProgressSyncEventKind kind,
@@ -127,13 +122,9 @@ class ProgressSyncEventStore
     Map<String, Object?> payload = const <String, Object?>{},
   }) {
     final when = (occurredAt ?? _now()).toUtc();
-    final id = <Object>[
+    final id = <String>[
       'v1',
-      _clientInstanceId,
-      when.microsecondsSinceEpoch,
-      kind.name,
-      Uri.encodeComponent(entityId),
-      _sequence++,
+      _eventNonce(),
     ].join(':');
 
     return ProgressSyncEvent(
@@ -202,22 +193,10 @@ class ProgressSyncEventStore
     return result;
   }
 
-  static String _readOrCreateClientInstanceId(
-    SharedPreferences preferences,
-  ) {
-    final existing = preferences.getString(_clientInstanceKey)?.trim();
-    if (existing != null &&
-        RegExp(r'^[a-f0-9]{32}$').hasMatch(existing)) {
-      return existing;
-    }
-
-    final random = Random.secure();
-    final id = List<int>.generate(16, (_) => random.nextInt(256))
+  static String _secureNonce() {
+    return List<int>.generate(16, (_) => _secureRandom.nextInt(256))
         .map((byte) => byte.toRadixString(16).padLeft(2, '0'))
         .join();
-
-    unawaited(preferences.setString(_clientInstanceKey, id));
-    return id;
   }
 
   static List<ProgressSyncEvent> _read(SharedPreferences preferences) {

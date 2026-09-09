@@ -83,7 +83,7 @@ void main() {
     final preferences = await _preferences();
     final events = ProgressSyncEventStore(
       preferences,
-      clientInstanceId: '33333333333333333333333333333333',
+      eventNonce: () => '33333333333333333333333333333333',
     );
     final reset = ResetCompletionStore(
       preferences,

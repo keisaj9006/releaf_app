@@ -90,10 +90,14 @@ void main() {
   test('Event ids remain unique for multiple events at the same instant', () async {
     final preferences = await _preferences(<String, Object>{});
     final now = DateTime.utc(2026, 9, 8, 20, 45);
+    var sequence = 0;
     final store = ProgressSyncEventStore(
       preferences,
       now: () => now,
-      clientInstanceId: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+      eventNonce: () {
+        sequence += 1;
+        return sequence.toRadixString(16).padLeft(32, '0');
+      },
     );
     addTearDown(store.dispose);
 
@@ -109,7 +113,7 @@ void main() {
     expect(first.id, isNot(second.id));
   });
 
-  test('Different device instances cannot collide at the same instant', () async {
+  test('Independent clients cannot collide at the same instant', () async {
     final firstPreferences = await _preferences(<String, Object>{});
     final secondPreferences = await _preferences(<String, Object>{});
     final now = DateTime.utc(2026, 9, 9, 7, 30);
@@ -117,12 +121,12 @@ void main() {
     final firstStore = ProgressSyncEventStore(
       firstPreferences,
       now: () => now,
-      clientInstanceId: '11111111111111111111111111111111',
+      eventNonce: () => '11111111111111111111111111111111',
     );
     final secondStore = ProgressSyncEventStore(
       secondPreferences,
       now: () => now,
-      clientInstanceId: '22222222222222222222222222222222',
+      eventNonce: () => '22222222222222222222222222222222',
     );
     addTearDown(firstStore.dispose);
     addTearDown(secondStore.dispose);
@@ -136,22 +140,27 @@ void main() {
       entityId: 'n_back',
     );
 
+    expect(first.id, 'v1:11111111111111111111111111111111');
+    expect(second.id, 'v1:22222222222222222222222222222222');
     expect(first.id, isNot(second.id));
-    expect(first.id, contains(firstStore.clientInstanceId));
-    expect(second.id, contains(secondStore.clientInstanceId));
   });
 
-  test('Generated client instance id is persisted and reused', () async {
+  test('Generated event ids are opaque and do not persist a device identifier', () async {
     final preferences = await _preferences(<String, Object>{});
+    final store = ProgressSyncEventStore(preferences);
+    addTearDown(store.dispose);
 
-    final firstStore = ProgressSyncEventStore(preferences);
-    final firstId = firstStore.clientInstanceId;
-    firstStore.dispose();
+    final event = store.createEvent(
+      kind: ProgressSyncEventKind.meditationOpened,
+      entityId: 'open-awareness-6',
+    );
 
-    final secondStore = ProgressSyncEventStore(preferences);
-    addTearDown(secondStore.dispose);
-
-    expect(firstId, hasLength(32));
-    expect(secondStore.clientInstanceId, firstId);
+    expect(event.id, matches(RegExp(r'^v1:[a-f0-9]{32}
+}
+)));
+    expect(
+      preferences.getString('progress.sync.client_instance.v1'),
+      isNull,
+    );
   });
 }
