@@ -187,13 +187,11 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen>
           }
         },
         onError: (_) {
-          if (mounted && _motionAvailable) {
-            setState(() => _motionAvailable = false);
-          }
+          _handleMotionFailure();
         },
       );
     } catch (_) {
-      _motionAvailable = false;
+      _handleMotionFailure();
     }
   }
 
@@ -203,6 +201,17 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen>
     _motionCalibrationSamples = 0;
     _tilt = Offset.zero;
     _motionAvailable = false;
+  }
+
+  void _handleMotionFailure() {
+    // Never keep applying a stale accelerometer vector after the sensor
+    // stream fails. Touch control remains available and, if the stream later
+    // recovers, fresh samples will calibrate a new neutral baseline.
+    _velocity = Offset.zero;
+    _resetMotionCalibration();
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   void _startTimerIfNeeded() {
