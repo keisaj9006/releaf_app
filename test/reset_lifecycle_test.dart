@@ -43,7 +43,7 @@ void main() {
       final beforeBackground = _timerText(tester);
       expect(beforeBackground, isNot('02:00'));
 
-      await tester.binding.handleAppLifecycleStateChanged(
+      tester.binding.handleAppLifecycleStateChanged(
         AppLifecycleState.paused,
       );
       await tester.pump();
@@ -51,7 +51,7 @@ void main() {
       await tester.pump(const Duration(seconds: 8));
       expect(_timerText(tester), beforeBackground);
 
-      await tester.binding.handleAppLifecycleStateChanged(
+      tester.binding.handleAppLifecycleStateChanged(
         AppLifecycleState.resumed,
       );
       await tester.pump();
