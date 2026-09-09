@@ -214,3 +214,37 @@ jobs:
           path: build/qa-apks/releaf-debug-premium-preview.apk
           if-no-files-found: error
           retention-days: 7
+
+      - name: Build Android release AAB smoke artifact
+        env:
+          REVENUECAT_ANDROID_API_KEY: ${{ secrets.REVENUECAT_ANDROID_API_KEY }}
+        run: |
+          keytool -genkeypair -v \
+            -keystore android/ci-upload-keystore.jks \
+            -storepass changeit \
+            -keypass changeit \
+            -alias upload \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 10000 \
+            -dname "CN=Releaf CI, OU=QA, O=Releaf, L=Edinburgh, ST=Scotland, C=GB"
+
+          cat > android/key.properties <<'EOF'
+          storePassword=changeit
+          keyPassword=changeit
+          keyAlias=upload
+          storeFile=ci-upload-keystore.jks
+          EOF
+
+          flutter build appbundle --release \
+            --dart-define=REVENUECAT_ANDROID_API_KEY="$REVENUECAT_ANDROID_API_KEY"
+
+          rm -f android/key.properties android/ci-upload-keystore.jks
+
+      - name: Upload Android release AAB smoke artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: releaf-android-release-aab-smoke
+          path: build/app/outputs/bundle/release/app-release.aab
+          if-no-files-found: error
+          retention-days: 7
