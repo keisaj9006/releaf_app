@@ -10,6 +10,63 @@ import '../../features/brain/presentation/game_result_screen.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/releaf_design_tokens.dart';
 
+const double _labyrinthTiltMovementThreshold = 0.055;
+const double _labyrinthAcceleration = 0.0115;
+const double _labyrinthMovingDamping = 0.91;
+const double _labyrinthIdleDamping = 0.88;
+const double _labyrinthMaxSpeed = 0.058;
+const double _labyrinthStopSpeed = 0.0012;
+
+Offset _nextLabyrinthVelocity({
+  required Offset velocity,
+  required Offset tilt,
+}) {
+  var next = tilt.distance < _labyrinthTiltMovementThreshold
+      ? velocity * _labyrinthIdleDamping
+      : (velocity * _labyrinthMovingDamping) +
+          (tilt * _labyrinthAcceleration);
+
+  if (next.distance > _labyrinthMaxSpeed) {
+    next = next / next.distance * _labyrinthMaxSpeed;
+  }
+
+  if (next.distance < _labyrinthStopSpeed) {
+    return Offset.zero;
+  }
+
+  return next;
+}
+
+Offset _velocityAfterLabyrinthWallCollision(
+  Offset velocity, {
+  bool blockHorizontal = false,
+  bool blockVertical = false,
+}) {
+  return Offset(
+    blockHorizontal ? 0 : velocity.dx,
+    blockVertical ? 0 : velocity.dy,
+  );
+}
+
+@visibleForTesting
+Offset labyrinthVelocityStepForTesting({
+  required Offset velocity,
+  required Offset tilt,
+}) =>
+    _nextLabyrinthVelocity(velocity: velocity, tilt: tilt);
+
+@visibleForTesting
+Offset labyrinthVelocityAfterWallCollisionForTesting(
+  Offset velocity, {
+  bool blockHorizontal = false,
+  bool blockVertical = false,
+}) =>
+    _velocityAfterLabyrinthWallCollision(
+      velocity,
+      blockHorizontal: blockHorizontal,
+      blockVertical: blockVertical,
+    );
+
 class LabirynthGameScreen extends StatefulWidget {
   const LabirynthGameScreen({
     super.key,
@@ -171,20 +228,16 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen>
   void _tickPhysics() {
     if (!mounted || _paused || _finished) return;
 
-    if (_tilt.distance < 0.055) {
-      _velocity *= 0.88;
-      return;
+    final hasIntent = _tilt.distance >= _labyrinthTiltMovementThreshold;
+    if (hasIntent) {
+      _startTimerIfNeeded();
     }
 
-    _startTimerIfNeeded();
-
-    const acceleration = 0.0115;
-    _velocity = (_velocity * 0.91) + (_tilt * acceleration);
-
-    const maxSpeed = 0.058;
-    if (_velocity.distance > maxSpeed) {
-      _velocity = _velocity / _velocity.distance * maxSpeed;
-    }
+    _velocity = _nextLabyrinthVelocity(
+      velocity: _velocity,
+      tilt: _tilt,
+    );
+    if (_velocity == Offset.zero) return;
 
     final moved = _attemptMove(_velocity);
     if (moved) {
@@ -207,7 +260,10 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen>
         moved = true;
       } else if (step.dx.abs() > 0.0001) {
         _registerWallHit();
-        _velocity = Offset(_velocity.dx * -0.12, _velocity.dy);
+        _velocity = _velocityAfterLabyrinthWallCollision(
+          _velocity,
+          blockHorizontal: true,
+        );
       }
 
       final vertical = Offset(_position.dx, _position.dy + step.dy);
@@ -216,7 +272,10 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen>
         moved = true;
       } else if (step.dy.abs() > 0.0001) {
         _registerWallHit();
-        _velocity = Offset(_velocity.dx, _velocity.dy * -0.12);
+        _velocity = _velocityAfterLabyrinthWallCollision(
+          _velocity,
+          blockVertical: true,
+        );
       }
     }
 

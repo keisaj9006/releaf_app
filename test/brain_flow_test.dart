@@ -663,6 +663,47 @@ void main() {
     await tester.pump();
   });
 
+  test('Labyrinth motion coasts smoothly instead of freezing off tilt', () {
+    const moving = Offset(0.04, -0.02);
+    final coasted = labyrinthVelocityStepForTesting(
+      velocity: moving,
+      tilt: Offset.zero,
+    );
+
+    expect(coasted, isNot(Offset.zero));
+    expect(coasted.distance, lessThan(moving.distance));
+
+    final stopped = labyrinthVelocityStepForTesting(
+      velocity: const Offset(0.0005, 0),
+      tilt: Offset.zero,
+    );
+    expect(stopped, Offset.zero);
+  });
+
+  test('Labyrinth motion clamps speed and slides along blocked walls', () {
+    final accelerated = labyrinthVelocityStepForTesting(
+      velocity: const Offset(0.05, 0.04),
+      tilt: const Offset(1, 1),
+    );
+    expect(accelerated.distance, lessThanOrEqualTo(0.0580001));
+
+    const incoming = Offset(0.04, -0.03);
+    expect(
+      labyrinthVelocityAfterWallCollisionForTesting(
+        incoming,
+        blockHorizontal: true,
+      ),
+      const Offset(0, -0.03),
+    );
+    expect(
+      labyrinthVelocityAfterWallCollisionForTesting(
+        incoming,
+        blockVertical: true,
+      ),
+      const Offset(0.04, 0),
+    );
+  });
+
   test('Labyrinth progression grows through maze complexity, not ball speed', () {
     final profiles = List<LabyrinthLevelProfile>.generate(
       12,
