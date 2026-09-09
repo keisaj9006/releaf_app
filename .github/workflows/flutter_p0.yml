@@ -112,6 +112,14 @@ jobs:
           test/meditation_narration_manifest_export_test.dart
           --reporter expanded
 
+      - name: Upload Releaf Guide production manifest
+        uses: actions/upload-artifact@v4
+        with:
+          name: releaf-guide-production-manifest
+          path: build/qa-manifests/releaf-guide-manifest.json
+          if-no-files-found: error
+          retention-days: 14
+
       - name: Check RevenueCat configuration
         env:
           REVENUECAT_ANDROID_API_KEY: ${{ secrets.REVENUECAT_ANDROID_API_KEY }}
@@ -141,14 +149,6 @@ jobs:
             --dart-define=RELEAF_PREMIUM_PREVIEW=true
           cp build/app/outputs/flutter-apk/app-debug.apk \
             build/qa-apks/releaf-debug-premium-preview.apk
-
-      - name: Upload Releaf Guide production manifest
-        uses: actions/upload-artifact@v4
-        with:
-          name: releaf-guide-production-manifest
-          path: build/qa-manifests/releaf-guide-manifest.json
-          if-no-files-found: error
-          retention-days: 14
 
       - name: Upload Android standard debug APK
         uses: actions/upload-artifact@v4
