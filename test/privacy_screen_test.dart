@@ -38,6 +38,12 @@ void main() {
       const MaterialApp(home: PrivacyScreen()),
     );
 
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('privacy-development-legal-warning')),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+
     expect(
       find.byKey(const Key('privacy-development-legal-warning')),
       findsOneWidget,
