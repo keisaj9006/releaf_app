@@ -1621,18 +1621,6 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
     return session.instructions[_sessionStepIndex(session)];
   }
 
-  String? _currentNarrationAsset(ResetContent session) {
-    final program = session.program;
-    if (program == null) return null;
-
-    return program
-        .stepAtElapsedSeconds(
-          _elapsedSeconds(session),
-          simplified: _usingSimplifiedProgram,
-        )
-        .narrationAssetPath;
-  }
-
   String? _currentAdvanceActionLabel(ResetContent session) {
     final program = session.program;
     if (program == null || program.type != ResetProgramType.guidedSteps) {
