@@ -31,7 +31,7 @@ String _targetPath(
 
 int _wordCount(String value) => value
     .trim()
-    .split(RegExp(r'\\s+'))
+    .split(RegExp(r'\s+'))
     .where((word) => word.isNotEmpty)
     .length;
 
@@ -188,6 +188,6 @@ Future<File> writeResetNarrationManifest(String outputPath) async {
   final json = const JsonEncoder.withIndent('  ').convert(manifest);
   final file = File(outputPath);
   await file.parent.create(recursive: true);
-  await file.writeAsString('$json\\n');
+  await file.writeAsString('$json\n');
   return file;
 }
