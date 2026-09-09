@@ -12,13 +12,10 @@ try {
         throw "Production signing is not configured. Copy android/key.properties.example to android/key.properties and point it at the private upload keystore."
     }
 
-    $revenueCatKey = $env:REVENUECAT_ANDROID_API_KEY
-    if ([string]::IsNullOrWhiteSpace($revenueCatKey)) {
-        throw "REVENUECAT_ANDROID_API_KEY is required for a Play release build."
-    }
-
-    if ($revenueCatKey.StartsWith("REVENUECAT_") -or $revenueCatKey -match "CHANGE_ME|smoke|dummy|example") {
-        throw "REVENUECAT_ANDROID_API_KEY looks like a placeholder. Refusing to build a production bundle."
+    $revenueCatKey = ([string]$env:REVENUECAT_ANDROID_API_KEY).Trim()
+    dart run tool/release/revenuecat_key_policy.dart "$revenueCatKey"
+    if ($LASTEXITCODE -ne 0) {
+        throw "REVENUECAT_ANDROID_API_KEY is not a valid production Google Play RevenueCat SDK key."
     }
 
     $dataController = $env:RELEAF_DATA_CONTROLLER_NAME
