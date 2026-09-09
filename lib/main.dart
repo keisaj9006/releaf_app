@@ -78,15 +78,12 @@ Future<void> main() async {
 
   final revenueCatApiKey = _revenueCatApiKeyForCurrentPlatform();
   final revenueCat = container.read(revenueCatServiceProvider);
+  final restoredUser = Supabase.instance.client.auth.currentUser;
   await revenueCat.init(
     apiKey: revenueCatApiKey,
     debug: kDebugMode,
+    appUserId: restoredUser?.id,
   );
-
-  final restoredUser = Supabase.instance.client.auth.currentUser;
-  if (restoredUser != null) {
-    await revenueCat.identifyUser(restoredUser.id);
-  }
 
   runApp(
     UncontrolledProviderScope(

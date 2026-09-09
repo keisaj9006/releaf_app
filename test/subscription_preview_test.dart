@@ -5,6 +5,21 @@ import 'package:releaf_app/core/subscription/revenuecat_service.dart';
 import 'package:releaf_app/core/subscription/subscription_controller.dart';
 
 void main() {
+  test('RevenueCat configuration reuses restored user identity at launch', () {
+    final identified = RevenueCatService.buildConfiguration(
+      apiKey: ' public-key ',
+      appUserId: ' user-123 ',
+    );
+    final anonymous = RevenueCatService.buildConfiguration(
+      apiKey: 'public-key',
+      appUserId: '   ',
+    );
+
+    expect(identified.apiKey, 'public-key');
+    expect(identified.appUserID, 'user-123');
+    expect(anonymous.appUserID, isNull);
+  });
+
   test('subscription controller attaches and detaches RevenueCat updates', () async {
     final service = _ListenerTrackingRevenueCatService();
     final controller = SubscriptionController(service);

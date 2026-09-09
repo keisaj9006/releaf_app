@@ -7,7 +7,11 @@ class RevenueCatService {
   bool _initialized = false;
   bool get isInitialized => _initialized;
 
-  Future<void> init({required String apiKey, required bool debug}) async {
+  Future<void> init({
+    required String apiKey,
+    required bool debug,
+    String? appUserId,
+  }) async {
     if (_initialized) return;
 
     final trimmedKey = apiKey.trim();
@@ -17,11 +21,28 @@ class RevenueCatService {
 
     try {
       await Purchases.setLogLevel(debug ? LogLevel.debug : LogLevel.info);
-      await Purchases.configure(PurchasesConfiguration(trimmedKey));
+      await Purchases.configure(
+        buildConfiguration(
+          apiKey: trimmedKey,
+          appUserId: appUserId,
+        ),
+      );
       _initialized = true;
     } catch (_) {
       _initialized = false;
     }
+  }
+
+  static PurchasesConfiguration buildConfiguration({
+    required String apiKey,
+    String? appUserId,
+  }) {
+    final configuration = PurchasesConfiguration(apiKey.trim());
+    final safeAppUserId = appUserId?.trim();
+    if (safeAppUserId != null && safeAppUserId.isNotEmpty) {
+      configuration.appUserID = safeAppUserId;
+    }
+    return configuration;
   }
 
   Future<CustomerInfo?> identifyUser(String appUserId) async {
