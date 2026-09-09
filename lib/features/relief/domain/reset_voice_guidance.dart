@@ -1,6 +1,8 @@
 import 'models/breath_pattern.dart';
 import 'models/reset_session_program.dart';
 
+const int resetBreathRhythmLeadInSeconds = 8;
+
 class ResetVoiceGuidanceCue {
   const ResetVoiceGuidanceCue({
     required this.key,
@@ -48,10 +50,44 @@ ResetVoiceGuidanceCue resetVoiceGuidanceCue({
   required int elapsedSeconds,
   required bool simplified,
 }) {
+  final steps = program.stepsFor(simplified: simplified);
+  final index = program.stepIndexAtElapsedSeconds(
+    elapsedSeconds,
+    simplified: simplified,
+  );
+  final step = steps[index];
+  final track = simplified ? 'simplified' : 'main';
+
   if (program.type == ResetProgramType.pacedBreathing) {
     final pattern = program.breathPattern;
     if (pattern == null) {
       throw StateError('Paced-breathing Reset has no BreathPattern.');
+    }
+
+    // Breathing sessions use three semantic stages in the catalog:
+    // settle -> active rhythm -> release. Speak the full scripted guidance
+    // during settle/release. At the start of the active stage, give the user a
+    // short lead-in window to hear the method-specific instruction before
+    // switching to reusable phase cues.
+    if (index == 0 || index == steps.length - 1) {
+      return ResetVoiceGuidanceCue(
+        key: 'step:$track:$index',
+        spokenText: step.guidance,
+        narrationAssetPath: step.narrationAssetPath,
+      );
+    }
+
+    var stepStartSeconds = 0;
+    for (var stepIndex = 0; stepIndex < index; stepIndex++) {
+      stepStartSeconds += steps[stepIndex].durationSeconds;
+    }
+    final elapsedInStep = elapsedSeconds - stepStartSeconds;
+    if (elapsedInStep < resetBreathRhythmLeadInSeconds) {
+      return ResetVoiceGuidanceCue(
+        key: 'step:$track:$index',
+        spokenText: step.guidance,
+        narrationAssetPath: step.narrationAssetPath,
+      );
     }
 
     final phase = pattern.frameAtElapsedSeconds(elapsedSeconds).phase;
@@ -60,13 +96,6 @@ ResetVoiceGuidanceCue resetVoiceGuidanceCue({
       spokenText: resetBreathPhaseSpokenText(phase),
     );
   }
-
-  final index = program.stepIndexAtElapsedSeconds(
-    elapsedSeconds,
-    simplified: simplified,
-  );
-  final step = program.stepsFor(simplified: simplified)[index];
-  final track = simplified ? 'simplified' : 'main';
 
   return ResetVoiceGuidanceCue(
     key: 'step:$track:$index',

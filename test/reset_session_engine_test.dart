@@ -74,7 +74,7 @@ void main() {
   });
 
   group('Reset voice guidance', () {
-    test('paced breathing speaks one canonical cue per phase transition', () {
+    test('paced breathing preserves full guidance around phase cues', () {
       const program = ResetSessionProgram.breathing(
         breathPattern: BreathPattern(
           inhaleSeconds: 4,
@@ -84,51 +84,79 @@ void main() {
         ),
         steps: [
           ResetSessionStep(
+            label: 'Settle',
+            guidance: 'Settle and keep the breath comfortable.',
+            durationSeconds: 14,
+          ),
+          ResetSessionStep(
             label: 'Rhythm',
-            guidance: 'Follow the rhythm.',
-            durationSeconds: 120,
+            guidance: 'Follow the four-part rhythm without forcing it.',
+            durationSeconds: 92,
+          ),
+          ResetSessionStep(
+            label: 'Release',
+            guidance: 'Release the count and breathe naturally.',
+            durationSeconds: 14,
           ),
         ],
       );
 
-      final inhale = resetVoiceGuidanceCue(
+      final settle = resetVoiceGuidanceCue(
         program: program,
         elapsedSeconds: 0,
         simplified: false,
       );
-      final sameInhale = resetVoiceGuidanceCue(
-        program: program,
-        elapsedSeconds: 3,
-        simplified: false,
-      );
-      final hold = resetVoiceGuidanceCue(
-        program: program,
-        elapsedSeconds: 4,
-        simplified: false,
-      );
-      final exhale = resetVoiceGuidanceCue(
-        program: program,
-        elapsedSeconds: 6,
-        simplified: false,
-      );
-      final rest = resetVoiceGuidanceCue(
-        program: program,
-        elapsedSeconds: 12,
-        simplified: false,
-      );
-      final nextInhale = resetVoiceGuidanceCue(
+      final rhythmLeadIn = resetVoiceGuidanceCue(
         program: program,
         elapsedSeconds: 14,
         simplified: false,
       );
+      final sameLeadIn = resetVoiceGuidanceCue(
+        program: program,
+        elapsedSeconds: 21,
+        simplified: false,
+      );
+      final inhale = resetVoiceGuidanceCue(
+        program: program,
+        elapsedSeconds: 28,
+        simplified: false,
+      );
+      final hold = resetVoiceGuidanceCue(
+        program: program,
+        elapsedSeconds: 32,
+        simplified: false,
+      );
+      final exhale = resetVoiceGuidanceCue(
+        program: program,
+        elapsedSeconds: 34,
+        simplified: false,
+      );
+      final rest = resetVoiceGuidanceCue(
+        program: program,
+        elapsedSeconds: 40,
+        simplified: false,
+      );
+      final release = resetVoiceGuidanceCue(
+        program: program,
+        elapsedSeconds: 106,
+        simplified: false,
+      );
 
+      expect(settle.key, 'step:main:0');
+      expect(settle.spokenText, 'Settle and keep the breath comfortable.');
+      expect(rhythmLeadIn.key, 'step:main:1');
+      expect(
+        rhythmLeadIn.spokenText,
+        'Follow the four-part rhythm without forcing it.',
+      );
+      expect(sameLeadIn.key, rhythmLeadIn.key);
       expect(inhale.key, 'breath:inhale');
       expect(inhale.spokenText, 'Breathe in.');
-      expect(sameInhale.key, inhale.key);
       expect(hold.spokenText, 'Hold gently.');
       expect(exhale.spokenText, 'Breathe out.');
       expect(rest.spokenText, 'Rest.');
-      expect(nextInhale.key, inhale.key);
+      expect(release.key, 'step:main:2');
+      expect(release.spokenText, 'Release the count and breathe naturally.');
       expect(inhale.narrationAssetPath, isNull);
     });
 

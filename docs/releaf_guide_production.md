@@ -64,10 +64,12 @@ This guarantees one source of truth for:
 - session narration timing.
 
 Guided Reset sessions speak their scripted step guidance. Paced-breathing
-sessions use four deliberately short shared cues: **Breathe in**, **Hold
-gently**, **Breathe out**, and **Rest**. The cue changes only when the canonical
-`BreathPattern` changes phase, so a slow narrator cannot drift independently
-from the visual rhythm.
+sessions preserve the complete method-specific **settle**, **rhythm lead-in**
+and **release** guidance. After an 8-second spoken lead-in to the active rhythm,
+the player switches to four deliberately short shared cues: **Breathe in**,
+**Hold gently**, **Breathe out**, and **Rest**. The cue changes only when the
+canonical `BreathPattern` changes phase, so a slow narrator cannot drift
+independently from the visual rhythm or interrupt the entry/exit instructions.
 
 ## Audio layering
 
