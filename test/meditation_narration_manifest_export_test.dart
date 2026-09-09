@@ -15,7 +15,7 @@ void main() {
     final guide = manifest['guideProfile']! as Map<String, Object?>;
     expect(guide['name'], 'Releaf Guide');
     expect(guide['provider'], 'ElevenCreative');
-    expect(guide['speedReference'], 0.75);
+    expect(guide['speedReference'], 0.82);
     expect(guide['exactProviderVoiceId'], isNull);
     expect(guide['renderBlockedUntilVoiceIdIsRecovered'], isTrue);
 
