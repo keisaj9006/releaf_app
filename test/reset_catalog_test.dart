@@ -255,6 +255,36 @@ void main() {
     }
   });
 
+  test('movement demo requirement stays selective and explicit', () {
+    const expectedDemoIds = <String>{
+      'pushups-activation',
+      'shake-it-out',
+    };
+
+    final demoIds = catalog
+        .getAll()
+        .where((session) => session.requiresMovementDemo)
+        .map((session) => session.id)
+        .toSet();
+
+    expect(demoIds, expectedDemoIds);
+    for (final id in expectedDemoIds) {
+      expect(
+        catalog.getById(id)?.demoRequirement,
+        ResetDemoRequirement.movementTechnique,
+        reason: id,
+      );
+    }
+    expect(
+      catalog.getById('shoulder-drop-reset')?.demoRequirement,
+      ResetDemoRequirement.none,
+    );
+    expect(
+      catalog.getById('micro-walk-reset')?.demoRequirement,
+      ResetDemoRequirement.none,
+    );
+  });
+
   test('No-Breath includes safe movement and sensory alternatives', () {
     const ids = <String>{
       'cool-water-reset',
