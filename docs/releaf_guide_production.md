@@ -163,3 +163,13 @@ Before an asset is declared recorded:
 - Recorded Reset sessions: **0**
 - Remaining studio rendering is blocked only by the missing exact provider voice
   identity; runtime fallback remains available for development and testing.
+
+
+## Reset app lifecycle
+
+An active Reset is session-paused when the app becomes inactive, hidden, paused,
+or detached. The countdown deadline is cleared, narration is stopped, and the
+ambient layer is paused. On resume, the same remaining duration becomes the new
+deadline, ambient audio is restored when enabled, and Releaf Guide guidance is
+re-synchronised to the current Reset step/breath phase. This prevents users
+from missing breathing cues while the app is backgrounded.

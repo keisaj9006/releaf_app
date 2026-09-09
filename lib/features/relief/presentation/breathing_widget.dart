@@ -47,7 +47,8 @@ class BreathingWidget extends ConsumerStatefulWidget {
   ConsumerState<BreathingWidget> createState() => _BreathingWidgetState();
 }
 
-class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
+class _BreathingWidgetState extends ConsumerState<BreathingWidget>
+    with WidgetsBindingObserver {
   ResetContent? _session;
   int _remainingSeconds = 0;
   int _activeDurationSeconds = 0;
@@ -57,6 +58,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
   bool _awarded = false;
   bool _completionRecorded = false;
   bool _usingSimplifiedProgram = false;
+  bool _pausedByLifecycle = false;
   final Map<int, int> _sensoryCompletedByStep = <int, int>{};
 
   final audio.AudioPlayer _ambientPlayer = audio.AudioPlayer();
@@ -73,6 +75,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
 
     final audioPreferences = ref.read(resetAudioPreferencesProvider);
     _voiceEnabled = audioPreferences.voiceEnabled;
@@ -106,7 +109,10 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
 
   void _startTimer() {
     _timer?.cancel();
-    if (_remainingSeconds <= 0 || _phase != SessionPhase.running) {
+    _timer = null;
+    if (_remainingSeconds <= 0 ||
+        _phase != SessionPhase.running ||
+        _pausedByLifecycle) {
       _deadline = null;
       return;
     }
@@ -144,6 +150,8 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
   }
 
   Future<void> _startSessionAudio() async {
+    if (_pausedByLifecycle || _phase != SessionPhase.running) return;
+
     final soundState = ref.read(soundPlayerControllerProvider);
     if (soundState.isPlaying) {
       try {
@@ -172,7 +180,10 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
 
   Future<void> _syncSpokenGuidance({bool force = false}) async {
     final session = _session;
-    if (session == null || !_voiceEnabled || _phase != SessionPhase.running) {
+    if (session == null ||
+        !_voiceEnabled ||
+        _phase != SessionPhase.running ||
+        _pausedByLifecycle) {
       return;
     }
 
@@ -621,8 +632,84 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
     }
   }
 
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      if (_pausedByLifecycle) {
+        _pausedByLifecycle = false;
+        unawaited(_resumeAfterLifecyclePause());
+      }
+      return;
+    }
+
+    if (state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.paused ||
+        state == AppLifecycleState.hidden ||
+        state == AppLifecycleState.detached) {
+      if (!_pausedByLifecycle && _phase == SessionPhase.running) {
+        _pausedByLifecycle = true;
+        _timer?.cancel();
+        _timer = null;
+        _deadline = null;
+        unawaited(_pauseAudioForLifecycle());
+      }
+    }
+  }
+
+  Future<void> _pauseAudioForLifecycle() async {
+    try {
+      await _voiceDriver.stop();
+    } catch (_) {}
+
+    if (!_ambientStarted) return;
+    try {
+      await _ambientPlayer.pause();
+    } catch (_) {}
+  }
+
+  Future<void> _resumeAfterLifecyclePause() async {
+    if (!mounted || _phase != SessionPhase.running) return;
+
+    if (_remainingSeconds > 0) {
+      _startTimer();
+    }
+
+    final soundState = ref.read(soundPlayerControllerProvider);
+    if (soundState.isPlaying) {
+      try {
+        await ref.read(soundPlayerControllerProvider.notifier).pause();
+      } catch (_) {
+        // Reset remains usable if the previous Sound Space cannot release
+        // audio focus cleanly.
+      }
+    }
+
+    if (_ambientEnabled) {
+      try {
+        await _ambientPlayer.setVolume(_ambientVolume);
+        if (_ambientStarted) {
+          await _ambientPlayer.resume();
+        } else {
+          await _ambientPlayer.setReleaseMode(audio.ReleaseMode.loop);
+          await _ambientPlayer.play(
+            audio.AssetSource('sounds/deep_drift.mp3'),
+          );
+          _ambientStarted = true;
+        }
+      } catch (_) {
+        // Visual/timing layers remain authoritative when audio is unavailable.
+      }
+    }
+
+    if (_voiceEnabled) {
+      await _syncSpokenGuidance(force: true);
+    }
+  }
+
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _timer?.cancel();
     _deadline = null;
     unawaited(_voiceDriver.dispose());
