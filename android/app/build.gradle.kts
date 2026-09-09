@@ -10,7 +10,9 @@ plugins {
 val keystoreProperties = Properties()
 val keystorePropertiesFile = rootProject.file("key.properties")
 if (keystorePropertiesFile.exists()) {
-    keystorePropertiesFile.inputStream().use { stream ->\n        keystoreProperties.load(stream)\n    }
+    keystorePropertiesFile.inputStream().use { stream ->
+        keystoreProperties.load(stream)
+    }
 }
 
 fun requiredSigningProperty(name: String): String {
