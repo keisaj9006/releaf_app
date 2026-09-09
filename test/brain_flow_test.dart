@@ -68,6 +68,24 @@ void main() {
     expect(resolvedTypes['signal_scan'], SignalScanScreen);
   });
 
+  test('Labyrinth exposes 50 persisted maze stages without changing Brain levels', () {
+    expect(labyrinthMazeStageForCompletionCount(0), 1);
+    expect(labyrinthMazeStageForCompletionCount(1), 2);
+    expect(labyrinthMazeStageForCompletionCount(23), 24);
+    expect(labyrinthMazeStageForCompletionCount(49), 50);
+    expect(labyrinthMazeStageForCompletionCount(999), 50);
+
+    final game = buildBrainGame(
+      gameId: 'labyrinth',
+      onFinish: (_) {},
+      trainingLevel: 6,
+      labyrinthMazeStage: 23,
+    ) as LabirynthGameScreen;
+
+    expect(game.trainingLevel, 6);
+    expect(game.mazeStage, 23);
+  });
+
   testWidgets('Broken Mirror timer pauses while the app is backgrounded', (
     WidgetTester tester,
   ) async {
@@ -709,10 +727,24 @@ void main() {
     );
   });
 
+  test('Labyrinth stages create deterministic map variants', () {
+    final stage1 = labyrinthLevelProfileForTesting(6, mazeStage: 1);
+    final stage2 = labyrinthLevelProfileForTesting(6, mazeStage: 2);
+    final stage50 = labyrinthLevelProfileForTesting(12, mazeStage: 50);
+
+    expect(stage1.mazeStage, 1);
+    expect(stage2.mazeStage, 2);
+    expect(stage50.mazeStage, 50);
+    expect(stage1.level, stage2.level);
+  });
+
   test('Labyrinth progression grows through maze complexity, not ball speed', () {
     final profiles = List<LabyrinthLevelProfile>.generate(
       12,
-      (index) => labyrinthLevelProfileForTesting(index + 1),
+      (index) => labyrinthLevelProfileForTesting(
+        index + 1,
+        mazeStage: index + 1,
+      ),
     );
 
     for (var index = 1; index < profiles.length; index++) {
@@ -760,6 +792,7 @@ void main() {
       MaterialApp(
         home: LabirynthGameScreen(
           trainingLevel: 6,
+          mazeStage: 23,
           onFinish: (_) {},
           motionStream: const Stream<AccelerometerEvent>.empty(),
         ),
@@ -767,6 +800,7 @@ void main() {
     );
     await tester.pump();
 
+    expect(find.text('23/50'), findsOneWidget);
     expect(find.text('L6'), findsOneWidget);
     expect(find.text('Ready'), findsOneWidget);
     expect(find.byKey(const Key('labyrinth-board')), findsOneWidget);

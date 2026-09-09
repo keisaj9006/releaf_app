@@ -47,6 +47,7 @@ Widget buildBrainGame({
   required String gameId,
   required ValueChanged<int?> onFinish,
   int trainingLevel = 1,
+  int labyrinthMazeStage = 1,
 }) {
   return switch (gameId) {
     'memory' => MemoryGameScreen(
@@ -56,6 +57,7 @@ Widget buildBrainGame({
     'labyrinth' => LabirynthGameScreen(
         onFinish: onFinish,
         trainingLevel: trainingLevel,
+        mazeStage: labyrinthMazeStage,
       ),
     'math_race' => MathRaceScreen(
         onFinish: onFinish,
@@ -126,10 +128,20 @@ class GameHostScreen extends ConsumerWidget {
         (state) => state.trainingLevelFor(gameId),
       ),
     );
+    final labyrinthMazeStage = ref.watch(
+      brainTrainingControllerProvider.select(
+        (state) => gameId == 'labyrinth'
+            ? labyrinthMazeStageForCompletionCount(
+                state.completionCountFor(gameId),
+              )
+            : 1,
+      ),
+    );
     final child = buildBrainGame(
       gameId: gameId,
       onFinish: (score) => _finish(context, score),
       trainingLevel: trainingLevel,
+      labyrinthMazeStage: labyrinthMazeStage,
     );
 
     return PopScope(

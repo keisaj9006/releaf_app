@@ -17,6 +17,12 @@ const double _labyrinthIdleDamping = 0.88;
 const double _labyrinthMaxSpeed = 0.058;
 const double _labyrinthStopSpeed = 0.0012;
 const double _labyrinthGoalRadius = 0.23;
+const int maxLabyrinthMazeStages = 50;
+
+@visibleForTesting
+int labyrinthMazeStageForCompletionCount(int completedSessions) {
+  return (completedSessions + 1).clamp(1, maxLabyrinthMazeStages).toInt();
+}
 
 @visibleForTesting
 double labyrinthGoalCaptureRadiusForTesting() => _labyrinthGoalRadius;
@@ -83,11 +89,13 @@ class LabirynthGameScreen extends StatefulWidget {
     super.key,
     this.onFinish,
     this.trainingLevel = 1,
+    this.mazeStage = 1,
     this.motionStream,
   });
 
   final ValueChanged<int>? onFinish;
   final int trainingLevel;
+  final int mazeStage;
 
   /// Injectable for tests and future accessibility modes.
   final Stream<AccelerometerEvent>? motionStream;
@@ -128,11 +136,17 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen>
   int get _levelNumber =>
       widget.trainingLevel.clamp(1, _maxTrainingLevel).toInt();
 
+  int get _mazeStage =>
+      widget.mazeStage.clamp(1, maxLabyrinthMazeStages).toInt();
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _level = _MazeLevel.generate(_levelNumber);
+    _level = _MazeLevel.generate(
+      _levelNumber,
+      mazeStage: _mazeStage,
+    );
     _position = _level.start;
     _timeLeft = _level.timeLimitSeconds;
     _listenToMotion();
@@ -483,14 +497,15 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen>
       context: context,
       barrierDismissible: false,
       builder: (_) => _MazeResultDialog(
-        title: 'Level $_levelNumber complete',
-        subtitle: _levelNumber >= _maxTrainingLevel
-            ? 'You completed the current Labyrinth progression.'
-            : 'The next training level will generate a harder maze.',
+        title: 'Maze $_mazeStage/$maxLabyrinthMazeStages complete',
+        subtitle: _mazeStage >= maxLabyrinthMazeStages
+            ? 'You completed all 50 Labyrinth mazes.'
+            : 'Your next Labyrinth session will open a new maze.',
         stats: [
+          ('Brain level', 'L$_levelNumber'),
           ('Time left', '${_timeLeft}s'),
           ('Wall touches', '$_wallHits'),
-          ('Maze', '${_level.columns}×${_level.rows}'),
+          ('Grid', '${_level.columns}×${_level.rows}'),
           ('Shortest route', '${_level.shortestPathMoves} moves'),
           ('Route turns', '${_level.shortestPathTurns}'),
           ('Score', '$score'),
@@ -577,6 +592,7 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen>
                     children: [
                       _MazeHeader(
                         level: _levelNumber,
+                        mazeStage: _mazeStage,
                         timeLeft: _timeLeft,
                         wallHits: _wallHits,
                         entryLabel: _level.entryLabel,
@@ -675,6 +691,7 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen>
 class LabyrinthLevelProfile {
   const LabyrinthLevelProfile({
     required this.level,
+    required this.mazeStage,
     required this.columns,
     required this.rows,
     required this.shortestPathMoves,
@@ -685,6 +702,7 @@ class LabyrinthLevelProfile {
   });
 
   final int level;
+  final int mazeStage;
   final int columns;
   final int rows;
   final int shortestPathMoves;
@@ -695,10 +713,14 @@ class LabyrinthLevelProfile {
 }
 
 @visibleForTesting
-LabyrinthLevelProfile labyrinthLevelProfileForTesting(int level) {
-  final maze = _MazeLevel.generate(level);
+LabyrinthLevelProfile labyrinthLevelProfileForTesting(
+  int level, {
+  int mazeStage = 1,
+}) {
+  final maze = _MazeLevel.generate(level, mazeStage: mazeStage);
   return LabyrinthLevelProfile(
     level: maze.level,
+    mazeStage: maze.mazeStage,
     columns: maze.columns,
     rows: maze.rows,
     shortestPathMoves: maze.shortestPathMoves,
@@ -734,6 +756,7 @@ class _MazeMetrics {
 class _MazeLevel {
   const _MazeLevel({
     required this.level,
+    required this.mazeStage,
     required this.columns,
     required this.rows,
     required this.cells,
@@ -747,6 +770,7 @@ class _MazeLevel {
   });
 
   final int level;
+  final int mazeStage;
   final int columns;
   final int rows;
   final List<List<_MazeCell>> cells;
@@ -765,11 +789,15 @@ class _MazeLevel {
         _MazeEntrySide.right => 'Right',
       };
 
-  factory _MazeLevel.generate(int rawLevel) {
+  factory _MazeLevel.generate(
+    int rawLevel, {
+    int mazeStage = 1,
+  }) {
     final level = rawLevel.clamp(1, 12).toInt();
+    final stage = mazeStage.clamp(1, maxLabyrinthMazeStages).toInt();
     final columns = (5 + ((level - 1) ~/ 2)).clamp(5, 10).toInt();
     final rows = (7 + ((level - 1) ~/ 2)).clamp(7, 12).toInt();
-    final entrySide = _MazeEntrySide.values[(level - 1) % 4];
+    final entrySide = _MazeEntrySide.values[(stage - 1) % 4];
     final (startColumn, startRow) = switch (entrySide) {
       _MazeEntrySide.bottom => (columns ~/ 2, rows - 1),
       _MazeEntrySide.left => (0, rows ~/ 2),
@@ -801,6 +829,7 @@ class _MazeLevel {
         goalRow: goalRow,
         seed: 4813 +
             (level * 7919) +
+            (stage * 15485863) +
             (columns * 1009) +
             (rows * 9176) +
             (candidateIndex * 104729),
@@ -834,6 +863,7 @@ class _MazeLevel {
 
     return _MazeLevel(
       level: level,
+      mazeStage: stage,
       columns: columns,
       rows: rows,
       cells: selected.cells,
@@ -1275,12 +1305,14 @@ class _MazeBoardPainter extends CustomPainter {
       oldDelegate.position != position ||
       oldDelegate.paused != paused ||
       oldDelegate.started != started ||
-      oldDelegate.level.level != level.level;
+      oldDelegate.level.level != level.level ||
+      oldDelegate.level.mazeStage != level.mazeStage;
 }
 
 class _MazeHeader extends StatelessWidget {
   const _MazeHeader({
     required this.level,
+    required this.mazeStage,
     required this.timeLeft,
     required this.wallHits,
     required this.entryLabel,
@@ -1293,6 +1325,7 @@ class _MazeHeader extends StatelessWidget {
   });
 
   final int level;
+  final int mazeStage;
   final int timeLeft;
   final int wallHits;
   final String entryLabel;
@@ -1356,6 +1389,10 @@ class _MazeHeader extends StatelessWidget {
             spacing: 7,
             runSpacing: 7,
             children: [
+              _MazeStat(
+                label: 'MAZE',
+                value: '$mazeStage/$maxLabyrinthMazeStages',
+              ),
               _MazeStat(label: 'LEVEL', value: 'L$level'),
               _MazeStat(
                 label: 'TIME',
