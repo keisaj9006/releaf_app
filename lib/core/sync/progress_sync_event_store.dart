@@ -14,6 +14,19 @@ enum ProgressSyncEventKind {
   resetSessionCompleted,
 }
 
+const _emergencyResetEntityId = 'emergency-grounding';
+
+bool isProgressSyncEventAllowed({
+  required ProgressSyncEventKind kind,
+  required String entityId,
+}) {
+  final safeEntityId = entityId.trim();
+  if (safeEntityId.isEmpty) return false;
+
+  return kind != ProgressSyncEventKind.resetSessionCompleted ||
+      safeEntityId.toLowerCase() != _emergencyResetEntityId;
+}
+
 class ProgressSyncEvent {
   const ProgressSyncEvent({
     required this.id,
@@ -68,6 +81,11 @@ class ProgressSyncEvent {
       }
       if (occurredAt == null || kind == null) return null;
 
+      final safeEntityId = entityId.trim();
+      if (!isProgressSyncEventAllowed(kind: kind, entityId: safeEntityId)) {
+        return null;
+      }
+
       final payloadRaw = decoded['payload'];
       final payload = <String, Object?>{};
       if (payloadRaw is Map) {
@@ -79,7 +97,7 @@ class ProgressSyncEvent {
       return ProgressSyncEvent(
         id: id,
         kind: kind,
-        entityId: entityId,
+        entityId: safeEntityId,
         occurredAt: occurredAt.toUtc(),
         payload: payload,
       );
@@ -121,6 +139,15 @@ class ProgressSyncEventStore
     DateTime? occurredAt,
     Map<String, Object?> payload = const <String, Object?>{},
   }) {
+    final safeEntityId = entityId.trim();
+    if (!isProgressSyncEventAllowed(kind: kind, entityId: safeEntityId)) {
+      throw ArgumentError.value(
+        entityId,
+        'entityId',
+        'is excluded from the standard progress sync journal',
+      );
+    }
+
     final when = (occurredAt ?? _now()).toUtc();
     final id = <String>[
       'v1',
@@ -130,13 +157,26 @@ class ProgressSyncEventStore
     return ProgressSyncEvent(
       id: id,
       kind: kind,
-      entityId: entityId,
+      entityId: safeEntityId,
       occurredAt: when,
       payload: payload,
     );
   }
 
   Future<void> append(ProgressSyncEvent event) {
+    if (!isProgressSyncEventAllowed(
+      kind: event.kind,
+      entityId: event.entityId,
+    )) {
+      return Future<void>.error(
+        ArgumentError.value(
+          event.entityId,
+          'event.entityId',
+          'is excluded from the standard progress sync journal',
+        ),
+      );
+    }
+
     return _runExclusive(() async {
       if (state.any((existing) => existing.id == event.id)) return;
 

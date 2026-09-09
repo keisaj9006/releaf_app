@@ -1,7 +1,7 @@
 # Releaf Progress Sync Architecture
 
-Status: design + local event foundation only  
-Last reviewed: 2026-09-08
+Status: local event foundation + inactive transport + server schema; runtime reconciliation remains disabled  
+Last reviewed: 2026-09-09
 
 ## Current product truth
 
@@ -124,6 +124,11 @@ Emergency sessions are deliberately excluded from Reset completion history and
 sync journaling. The fact that a user opened or completed Emergency support is
 more sensitive than ordinary wellbeing progress and should not be uploaded by
 the standard progress pipeline.
+
+This exclusion is defence-in-depth rather than a UI convention: the canonical
+Reset flow skips journaling, the local completion/sync stores reject the
+Emergency entity id, and the Supabase table rejects a generic
+`resetSessionCompleted` row whose entity is `emergency-grounding`.
 
 ### Reset merge rule
 

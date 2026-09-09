@@ -49,11 +49,19 @@ void main() {
       entityId: 'mindfulness-basics-2',
       occurredAt: DateTime.utc(2026, 9, 8, 20),
     ).encode();
+    final forbiddenEmergency = ProgressSyncEvent(
+      id: 'event-emergency',
+      kind: ProgressSyncEventKind.resetSessionCompleted,
+      entityId: 'emergency-grounding',
+      occurredAt: DateTime.utc(2026, 9, 8, 20),
+      payload: const <String, Object?>{'durationSeconds': 120},
+    ).encode();
 
     final preferences = await _preferences(<String, Object>{
       'progress.sync.events.v1': <String>[
         valid,
         '{broken json',
+        forbiddenEmergency,
         valid,
       ],
     });
@@ -156,6 +164,37 @@ void main() {
     expect(first.id, 'v1:11111111111111111111111111111111');
     expect(second.id, 'v1:22222222222222222222222222222222');
     expect(first.id, isNot(second.id));
+  });
+
+  test('Emergency Reset events are rejected at every local sync entry point',
+      () async {
+    final preferences = await _preferences(<String, Object>{});
+    final store = ProgressSyncEventStore(preferences);
+    addTearDown(store.dispose);
+
+    expect(
+      () => store.createEvent(
+        kind: ProgressSyncEventKind.resetSessionCompleted,
+        entityId: ' Emergency-Grounding ',
+        payload: const <String, Object?>{'durationSeconds': 120},
+      ),
+      throwsArgumentError,
+    );
+
+    final forged = ProgressSyncEvent(
+      id: 'v1:ffffffffffffffffffffffffffffffff',
+      kind: ProgressSyncEventKind.resetSessionCompleted,
+      entityId: 'emergency-grounding',
+      occurredAt: DateTime.utc(2026, 9, 9, 8),
+      payload: const <String, Object?>{'durationSeconds': 120},
+    );
+
+    await expectLater(store.append(forged), throwsArgumentError);
+    expect(store.state, isEmpty);
+    expect(
+      preferences.getStringList('progress.sync.events.v1'),
+      isNull,
+    );
   });
 
   test('Generated event ids are opaque and persist no device identifier',

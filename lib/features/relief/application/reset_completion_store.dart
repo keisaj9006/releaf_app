@@ -48,11 +48,19 @@ class ResetCompletionRecord {
       }
 
       final completedAt = DateTime.tryParse(completedAtRaw);
-      if (completedAt == null || durationSeconds <= 0) return null;
+      final safeSessionId = sessionId.trim();
+      if (completedAt == null ||
+          durationSeconds <= 0 ||
+          !isProgressSyncEventAllowed(
+            kind: ProgressSyncEventKind.resetSessionCompleted,
+            entityId: safeSessionId,
+          )) {
+        return null;
+      }
 
       return ResetCompletionRecord(
         id: id,
-        sessionId: sessionId,
+        sessionId: safeSessionId,
         completedAt: completedAt.toUtc(),
         durationSeconds: durationSeconds.toInt(),
       );
@@ -119,6 +127,16 @@ class ResetCompletionStore
     final safeSessionId = sessionId.trim();
     if (safeSessionId.isEmpty) {
       throw ArgumentError.value(sessionId, 'sessionId', 'must not be empty');
+    }
+    if (!isProgressSyncEventAllowed(
+      kind: ProgressSyncEventKind.resetSessionCompleted,
+      entityId: safeSessionId,
+    )) {
+      throw ArgumentError.value(
+        sessionId,
+        'sessionId',
+        'is excluded from Reset completion history and cloud sync',
+      );
     }
     if (durationSeconds <= 0) {
       throw ArgumentError.value(

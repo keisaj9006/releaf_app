@@ -97,10 +97,18 @@ void main() {
       durationSeconds: 120,
     );
 
+    final forbiddenEmergency = ResetCompletionRecord(
+      id: 'reset-local-v1:2:emergency:0',
+      sessionId: 'Emergency-Grounding',
+      completedAt: DateTime.utc(2026, 9, 9, 7, 30),
+      durationSeconds: 120,
+    );
+
     SharedPreferences.setMockInitialValues(<String, Object>{
       'reset.completions.v1': <String>[
         valid.encode(),
         valid.encode(),
+        forbiddenEmergency.encode(),
         '{not-json',
         '{"id":"","sessionId":"bad","completedAt":"x","durationSeconds":0}',
       ],
@@ -132,6 +140,31 @@ void main() {
       ),
       throwsArgumentError,
     );
+  });
+
+  test('Emergency cannot be written even if a caller bypasses the UI guard',
+      () async {
+    final preferences = await _preferences();
+    final sync = ProgressSyncEventStore(preferences);
+    final store = ResetCompletionStore(
+      preferences,
+      syncEvents: sync,
+    );
+    addTearDown(store.dispose);
+    addTearDown(sync.dispose);
+
+    expect(
+      () => store.recordCompletion(
+        sessionId: ' Emergency-Grounding ',
+        durationSeconds: 120,
+      ),
+      throwsArgumentError,
+    );
+
+    expect(store.state, isEmpty);
+    expect(sync.state, isEmpty);
+    expect(preferences.getStringList('reset.completions.v1'), isNull);
+    expect(preferences.getStringList('progress.sync.events.v1'), isNull);
   });
 
   test('Emergency sessions are excluded from Reset progress journaling', () {
