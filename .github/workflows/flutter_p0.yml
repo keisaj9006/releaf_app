@@ -92,6 +92,8 @@ jobs:
           test/reset_audio_preferences_test.dart
           test/reset_catalog_test.dart
           test/reset_session_engine_test.dart
+          test/reset_voice_playback_test.dart
+          test/reset_lifecycle_test.dart
           --reporter expanded
 
       - name: Test Reset hub
