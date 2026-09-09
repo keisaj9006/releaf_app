@@ -12,6 +12,8 @@ import '../../../theme/releaf_design_tokens.dart';
 import '../../../theme/widgets/releaf_artwork.dart';
 import '../../../theme/widgets/releaf_components.dart';
 import '../application/relief_paywall_hooks.dart';
+import '../application/reset_completion_store.dart';
+import '../application/reset_progress_summary.dart';
 import '../data/reset_catalog.dart';
 import '../domain/models/reset_content.dart';
 import '../domain/models/reset_launch_options.dart';
@@ -238,6 +240,8 @@ class _ReliefScreenState extends ConsumerState<ReliefScreen> {
         .toList();
     final accessPolicy = ref.watch(resetAccessPolicyProvider);
     final isPremiumUser = ref.watch(subscriptionControllerProvider).isPremium;
+    final resetCompletions = ref.watch(resetCompletionStoreProvider);
+    final progressSummary = ResetProgressSummary.fromRecords(resetCompletions);
 
     return Theme(
       data: AppTheme.premiumDark(),
@@ -459,6 +463,14 @@ class _ReliefScreenState extends ConsumerState<ReliefScreen> {
                                       context.push(AppRoutes.sound),
                                 ),
                               ),
+                              if (progressSummary.totalCompletions > 0) ...[
+                                const SizedBox(height: ReleafSpacing.section),
+                                _SectionPadding(
+                                  child: _ResetProgressCard(
+                                    summary: progressSummary,
+                                  ),
+                                ),
+                              ],
                               const SizedBox(height: ReleafSpacing.section),
                             ],
                           ),
@@ -1401,6 +1413,130 @@ class _SoundGatewayCard extends StatelessWidget {
               ),
             );
           },
+        ),
+      ),
+    );
+  }
+}
+
+class _ResetProgressCard extends StatelessWidget {
+  const _ResetProgressCard({required this.summary});
+
+  final ResetProgressSummary summary;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      container: true,
+      label: 'Reset progress. '
+          '${summary.sessionsLast7Days} sessions in the last 7 days, '
+          '${summary.activeDaysLast7Days} active days, '
+          '${summary.totalCompletions} sessions all time.',
+      child: DecoratedBox(
+        key: const Key('reset-progress-card'),
+        decoration: BoxDecoration(
+          color: ReleafColors.surfaceSoft,
+          borderRadius: BorderRadius.circular(ReleafRadii.large),
+          border: Border.all(color: ReleafColors.borderSoft),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(ReleafSpacing.lg),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'YOUR RESET PRACTICE',
+                style: ReleafTypography.eyebrow,
+              ),
+              const SizedBox(height: ReleafSpacing.xs),
+              Text(
+                'A simple view of what you have actually completed.',
+                style: ReleafTypography.meta.copyWith(
+                  color: ReleafColors.textSecondary,
+                  height: 1.4,
+                ),
+              ),
+              const SizedBox(height: ReleafSpacing.lg),
+              Row(
+                children: [
+                  Expanded(
+                    child: _ResetProgressMetric(
+                      key: const Key('reset-progress-week'),
+                      value: summary.sessionsLast7Days,
+                      label: 'This week',
+                    ),
+                  ),
+                  const SizedBox(width: ReleafSpacing.sm),
+                  Expanded(
+                    child: _ResetProgressMetric(
+                      key: const Key('reset-progress-days'),
+                      value: summary.activeDaysLast7Days,
+                      label: 'Active days',
+                    ),
+                  ),
+                  const SizedBox(width: ReleafSpacing.sm),
+                  Expanded(
+                    child: _ResetProgressMetric(
+                      key: const Key('reset-progress-total'),
+                      value: summary.totalCompletions,
+                      label: 'All time',
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ResetProgressMetric extends StatelessWidget {
+  const _ResetProgressMetric({
+    super.key,
+    required this.value,
+    required this.label,
+  });
+
+  final int value;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: ReleafColors.backgroundRaised,
+        borderRadius: BorderRadius.circular(ReleafRadii.medium),
+        border: Border.all(
+          color: ReleafColors.borderSoft.withValues(alpha: 0.85),
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: ReleafSpacing.sm,
+          vertical: ReleafSpacing.md,
+        ),
+        child: Column(
+          children: [
+            Text(
+              '$value',
+              style: ReleafTypography.sectionTitle.copyWith(
+                fontSize: 22,
+              ),
+            ),
+            const SizedBox(height: ReleafSpacing.xxs),
+            Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: ReleafTypography.meta.copyWith(
+                color: ReleafColors.textSecondary,
+                fontSize: 11,
+              ),
+            ),
+          ],
         ),
       ),
     );
