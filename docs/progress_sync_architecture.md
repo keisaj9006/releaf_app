@@ -231,6 +231,26 @@ RLS:
 
 Server-side validation should constrain allowed event kinds and payload shape.
 
+## Deterministic projection foundation
+
+Before runtime cloud sync is enabled, Releaf uses a pure projection reducer to
+turn an unordered union of immutable progress events into deterministic product
+state.
+
+The projection:
+
+- deduplicates exact events by event id;
+- fails closed when the same immutable id carries conflicting content;
+- orders Brain and Reset histories by occurrence time and event-id tie-break;
+- derives monotonic Meditation completion;
+- resolves Meditation favorites by latest timestamp, then event id;
+- derives newest unique Meditation recents with the product limit;
+- excludes forbidden Emergency Reset events before they can affect state.
+
+The reducer performs no network access and writes no local state. Runtime sync
+must not be enabled until cloud download, local materialization and cursor
+advancement are built around this deterministic layer.
+
 ## Upload behaviour
 
 1. Local action completes and persists first.
