@@ -35,6 +35,8 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSMotionUsageDescription</key>
+	<string>Releaf uses motion data so you can guide the ball in Labyrinth by tilting your device.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>audio</string>
