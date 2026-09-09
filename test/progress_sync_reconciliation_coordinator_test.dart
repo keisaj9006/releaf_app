@@ -2,7 +2,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:releaf_app/core/sync/progress_sync_cursor_store.dart';
-import 'package:releaf_app/core/sync/progress_sync_event_store.dart';
 import 'package:releaf_app/core/sync/progress_sync_reconciliation_coordinator.dart';
 import 'package:releaf_app/core/sync/supabase_progress_sync_download_transport.dart';
 
