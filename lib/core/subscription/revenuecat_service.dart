@@ -65,6 +65,16 @@ class RevenueCatService {
     return customerInfo.entitlements.active.containsKey(_premiumEntitlementId);
   }
 
+  void addCustomerInfoUpdateListener(CustomerInfoUpdateListener listener) {
+    if (!_initialized) return;
+    Purchases.addCustomerInfoUpdateListener(listener);
+  }
+
+  void removeCustomerInfoUpdateListener(CustomerInfoUpdateListener listener) {
+    if (!_initialized) return;
+    Purchases.removeCustomerInfoUpdateListener(listener);
+  }
+
   Future<CustomerInfo> purchasePackage(Package package) async {
     if (!_initialized) {
       throw StateError('RevenueCat is not configured.');

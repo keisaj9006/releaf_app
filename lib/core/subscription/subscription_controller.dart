@@ -14,12 +14,15 @@ const bool premiumPreviewFromBuild = bool.fromEnvironment(
 class SubscriptionController extends StateNotifier<SubscriptionState> {
   final RevenueCatService _service;
   final bool _premiumPreview;
+  late final CustomerInfoUpdateListener _customerInfoListener;
 
   SubscriptionController(
     this._service, {
     bool premiumPreview = premiumPreviewFromBuild,
   })  : _premiumPreview = premiumPreview,
         super(SubscriptionState(isPremium: premiumPreview)) {
+    _customerInfoListener = _handleCustomerInfoUpdate;
+    _service.addCustomerInfoUpdateListener(_customerInfoListener);
     initAndRefresh();
   }
 
@@ -30,6 +33,14 @@ class SubscriptionController extends StateNotifier<SubscriptionState> {
   Future<void> refresh() async {
     if (_premiumPreview) {
       state = const SubscriptionState(isPremium: true);
+      return;
+    }
+
+    if (!_service.isInitialized) {
+      state = state.copyWith(
+        isLoading: false,
+        error: 'Premium store is not configured in this build.',
+      );
       return;
     }
 
@@ -52,6 +63,21 @@ class SubscriptionController extends StateNotifier<SubscriptionState> {
         error: 'Failed to sync subscriptions.',
       );
     }
+  }
+
+  void _handleCustomerInfoUpdate(CustomerInfo customerInfo) {
+    if (_premiumPreview || !mounted) return;
+    state = state.copyWith(
+      customerInfo: customerInfo,
+      isPremium: _service.hasPremium(customerInfo),
+      clearError: true,
+    );
+  }
+
+  @override
+  void dispose() {
+    _service.removeCustomerInfoUpdateListener(_customerInfoListener);
+    super.dispose();
   }
 
   Future<bool> purchase(Package package) async {

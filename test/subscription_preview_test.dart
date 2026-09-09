@@ -1,9 +1,37 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:purchases_flutter/purchases_flutter.dart';
 
 import 'package:releaf_app/core/subscription/revenuecat_service.dart';
 import 'package:releaf_app/core/subscription/subscription_controller.dart';
 
 void main() {
+  test('subscription controller attaches and detaches RevenueCat updates', () {
+    final service = _ListenerTrackingRevenueCatService();
+    final controller = SubscriptionController(service);
+
+    expect(service.addCalls, 1);
+    expect(service.listener, isNotNull);
+
+    controller.dispose();
+
+    expect(service.removeCalls, 1);
+    expect(service.listener, isNull);
+  });
+
+  test('standard build exposes missing RevenueCat configuration', () async {
+    final controller = SubscriptionController(RevenueCatService());
+    addTearDown(controller.dispose);
+
+    await controller.refresh();
+
+    expect(controller.state.isPremium, isFalse);
+    expect(
+      controller.state.error,
+      'Premium store is not configured in this build.',
+    );
+  });
+
+
   test('owner Premium preview keeps entitlement active without RevenueCat', () async {
     final controller = SubscriptionController(
       RevenueCatService(),
@@ -19,4 +47,34 @@ void main() {
     expect(controller.state.isLoading, isFalse);
     expect(controller.state.error, isNull);
   });
+}
+
+
+class _ListenerTrackingRevenueCatService extends RevenueCatService {
+  CustomerInfoUpdateListener? listener;
+  int addCalls = 0;
+  int removeCalls = 0;
+
+  @override
+  bool get isInitialized => true;
+
+  @override
+  void addCustomerInfoUpdateListener(CustomerInfoUpdateListener value) {
+    addCalls++;
+    listener = value;
+  }
+
+  @override
+  void removeCustomerInfoUpdateListener(CustomerInfoUpdateListener value) {
+    removeCalls++;
+    if (identical(listener, value)) {
+      listener = null;
+    }
+  }
+
+  @override
+  Future<CustomerInfo?> getCustomerInfoSafe() async => null;
+
+  @override
+  Future<Offerings?> getOfferingsSafe() async => null;
 }
