@@ -28,6 +28,7 @@ import '../domain/models/breath_pattern.dart';
 import '../domain/models/reset_content.dart';
 import '../domain/models/reset_launch_options.dart';
 import '../domain/models/reset_session_program.dart';
+import '../domain/reset_voice_guidance.dart';
 
 enum SessionPhase { running, feedback }
 
@@ -172,14 +173,20 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
       return;
     }
 
-    final key =
-        '${_sessionStepIndex(session)}:$_usingSimplifiedProgram';
-    if (!force && key == _lastNarrationKey) return;
-    _lastNarrationKey = key;
+    final program = session.program;
+    if (program == null) return;
 
-    final guidance = _currentGuidance(session).trim();
+    final cue = resetVoiceGuidanceCue(
+      program: program,
+      elapsedSeconds: _elapsedSeconds(session),
+      simplified: _usingSimplifiedProgram,
+    );
+    if (!force && cue.key == _lastNarrationKey) return;
+    _lastNarrationKey = cue.key;
+
+    final guidance = cue.spokenText.trim();
     if (guidance.isEmpty) return;
-    final narrationAsset = _currentNarrationAsset(session);
+    final narrationAsset = cue.narrationAssetPath;
 
     try {
       await _voiceDriver.configure(volume: _voiceVolume);

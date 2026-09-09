@@ -6,6 +6,7 @@ import 'package:releaf_app/features/relief/data/reset_catalog.dart';
 import 'package:releaf_app/features/relief/domain/models/breath_pattern.dart';
 import 'package:releaf_app/features/relief/domain/models/reset_content.dart';
 import 'package:releaf_app/features/relief/domain/models/reset_session_program.dart';
+import 'package:releaf_app/features/relief/domain/reset_voice_guidance.dart';
 
 const double resetGuideDefaultVoiceVolume = 0.72;
 
@@ -166,6 +167,16 @@ Map<String, Object?> buildResetNarrationManifest() {
     );
   }
 
+  final breathCues = BreathPhase.values.map((phase) {
+    return <String, Object?>{
+      'phase': phase.name,
+      'spokenGuidance': resetBreathPhaseSpokenText(phase),
+      'targetAssetPath': resetBreathPhaseTargetAssetPath(phase),
+      'recordedAssetPath': null,
+      'renderRequired': true,
+    };
+  }).toList(growable: false);
+
   return <String, Object?>{
     'schemaVersion': 1,
     'guideProfile': releafGuideProductionProfile,
@@ -176,6 +187,9 @@ Map<String, Object?> buildResetNarrationManifest() {
         'not a substitute for the approved studio Releaf Guide',
     'resetSessionCount': sessions.length,
     'breathingSessionCount': breathingSessionCount,
+    'breathCueCount': breathCues.length,
+    'breathCuesStillToRender': breathCues.length,
+    'breathCues': breathCues,
     'totalStepCount': totalStepCount,
     'recordedStepCount': recordedStepCount,
     'stepsStillToRender': totalStepCount - recordedStepCount,

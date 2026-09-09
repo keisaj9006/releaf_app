@@ -60,12 +60,14 @@ This guarantees one source of truth for:
 - exhale duration;
 - optional hold after exhale;
 - visual breath phase;
-- future recorded phase cues and haptics;
+- recorded phase cues and haptics;
 - session narration timing.
 
-Every active Reset session has a scripted program. The same step guidance shown
-on screen is currently the spoken Reset script, so the audible and visual
-instruction cannot silently diverge.
+Guided Reset sessions speak their scripted step guidance. Paced-breathing
+sessions use four deliberately short shared cues: **Breathe in**, **Hold
+gently**, **Breathe out**, and **Rest**. The cue changes only when the canonical
+`BreathPattern` changes phase, so a slow narrator cannot drift independently
+from the visual rhythm.
 
 ## Audio layering
 
@@ -90,9 +92,13 @@ Meditation:
 
 `assets/narration/releaf-guide/<session-id>/<NN>-<step-label>.mp3`
 
-Reset:
+Reset guided steps:
 
 `assets/narration/releaf-guide/reset/<session-id>/<main|simplified>/<NN>-<step-label>.mp3`
+
+Shared Reset breathing cues:
+
+`assets/narration/releaf-guide/reset/breath-cues/<cue>.mp3`
 
 The app stores paths without the leading `assets/` prefix.
 
@@ -105,7 +111,9 @@ Every P0 build exports two narration manifests:
 
 The Reset manifest covers all **50** active Reset sessions, including Emergency,
 and verifies that all **10** breathing methods use the canonical paced-breathing
-engine.
+engine. It also exports the four shared breathing cue targets so they can later
+be rendered once with the exact approved Releaf Guide voice and reused across
+all breathing methods.
 
 The manifests contain the canonical script, timing, target asset path, recorded
 asset path and render status. Do not maintain a second manual spreadsheet with

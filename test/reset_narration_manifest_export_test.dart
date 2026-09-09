@@ -10,6 +10,8 @@ void main() {
 
     expect(manifest['resetSessionCount'], 50);
     expect(manifest['breathingSessionCount'], 10);
+    expect(manifest['breathCueCount'], 4);
+    expect(manifest['breathCuesStillToRender'], 4);
     expect(manifest['voiceGuidanceDefaultEnabled'], isTrue);
     expect(manifest['defaultVoiceVolume'], 0.72);
     expect(manifest['totalStepCount'], greaterThan(50));
@@ -23,6 +25,21 @@ void main() {
     );
     expect(guide['exactProviderVoiceId'], isNull);
     expect(guide['renderBlockedUntilVoiceIdIsRecovered'], isTrue);
+
+    final breathCues = (manifest['breathCues']! as List<Object?>)
+        .cast<Map<String, Object?>>();
+    expect(breathCues, hasLength(4));
+    expect(
+      breathCues.singleWhere((cue) => cue['phase'] == 'inhale'),
+      containsPair(
+        'targetAssetPath',
+        'narration/releaf-guide/reset/breath-cues/breathe-in.mp3',
+      ),
+    );
+    expect(
+      breathCues.singleWhere((cue) => cue['phase'] == 'exhale'),
+      containsPair('spokenGuidance', 'Breathe out.'),
+    );
 
     final sessions = (manifest['sessions']! as List<Object?>)
         .cast<Map<String, Object?>>();

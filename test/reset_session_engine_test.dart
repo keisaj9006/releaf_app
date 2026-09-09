@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:releaf_app/features/relief/domain/models/breath_pattern.dart';
 import 'package:releaf_app/features/relief/domain/models/reset_session_program.dart';
+import 'package:releaf_app/features/relief/domain/reset_voice_guidance.dart';
 
 void main() {
   group('BreathPattern', () {
@@ -69,6 +70,120 @@ void main() {
       expect(pattern.frameAtElapsedSeconds(3).phase, BreathPhase.exhale);
       expect(pattern.frameAtElapsedSeconds(6).phase, BreathPhase.exhale);
       expect(pattern.frameAtElapsedSeconds(7).phase, BreathPhase.inhale);
+    });
+  });
+
+  group('Reset voice guidance', () {
+    test('paced breathing speaks one canonical cue per phase transition', () {
+      const program = ResetSessionProgram.breathing(
+        breathPattern: BreathPattern(
+          inhaleSeconds: 4,
+          holdAfterInhaleSeconds: 2,
+          exhaleSeconds: 6,
+          holdAfterExhaleSeconds: 2,
+        ),
+        steps: [
+          ResetSessionStep(
+            label: 'Rhythm',
+            guidance: 'Follow the rhythm.',
+            durationSeconds: 120,
+          ),
+        ],
+      );
+
+      final inhale = resetVoiceGuidanceCue(
+        program: program,
+        elapsedSeconds: 0,
+        simplified: false,
+      );
+      final sameInhale = resetVoiceGuidanceCue(
+        program: program,
+        elapsedSeconds: 3,
+        simplified: false,
+      );
+      final hold = resetVoiceGuidanceCue(
+        program: program,
+        elapsedSeconds: 4,
+        simplified: false,
+      );
+      final exhale = resetVoiceGuidanceCue(
+        program: program,
+        elapsedSeconds: 6,
+        simplified: false,
+      );
+      final rest = resetVoiceGuidanceCue(
+        program: program,
+        elapsedSeconds: 12,
+        simplified: false,
+      );
+      final nextInhale = resetVoiceGuidanceCue(
+        program: program,
+        elapsedSeconds: 14,
+        simplified: false,
+      );
+
+      expect(inhale.key, 'breath:inhale');
+      expect(inhale.spokenText, 'Breathe in.');
+      expect(sameInhale.key, inhale.key);
+      expect(hold.spokenText, 'Hold gently.');
+      expect(exhale.spokenText, 'Breathe out.');
+      expect(rest.spokenText, 'Rest.');
+      expect(nextInhale.key, inhale.key);
+      expect(inhale.narrationAssetPath, isNull);
+    });
+
+    test('guided Reset keeps scripted step narration and recorded asset', () {
+      const program = ResetSessionProgram.guided(
+        steps: [
+          ResetSessionStep(
+            label: 'Arrive',
+            guidance: 'Settle in.',
+            durationSeconds: 10,
+            narrationAssetPath: 'narration/reset/arrive.mp3',
+          ),
+          ResetSessionStep(
+            label: 'Notice',
+            guidance: 'Notice the room.',
+            durationSeconds: 10,
+          ),
+        ],
+      );
+
+      final first = resetVoiceGuidanceCue(
+        program: program,
+        elapsedSeconds: 0,
+        simplified: false,
+      );
+      final second = resetVoiceGuidanceCue(
+        program: program,
+        elapsedSeconds: 10,
+        simplified: false,
+      );
+
+      expect(first.key, 'step:main:0');
+      expect(first.spokenText, 'Settle in.');
+      expect(first.narrationAssetPath, 'narration/reset/arrive.mp3');
+      expect(second.key, 'step:main:1');
+      expect(second.spokenText, 'Notice the room.');
+    });
+
+    test('production breath cue paths are shared across Reset methods', () {
+      expect(
+        resetBreathPhaseTargetAssetPath(BreathPhase.inhale),
+        'narration/releaf-guide/reset/breath-cues/breathe-in.mp3',
+      );
+      expect(
+        resetBreathPhaseTargetAssetPath(BreathPhase.holdAfterInhale),
+        'narration/releaf-guide/reset/breath-cues/hold-gently.mp3',
+      );
+      expect(
+        resetBreathPhaseTargetAssetPath(BreathPhase.exhale),
+        'narration/releaf-guide/reset/breath-cues/breathe-out.mp3',
+      );
+      expect(
+        resetBreathPhaseTargetAssetPath(BreathPhase.holdAfterExhale),
+        'narration/releaf-guide/reset/breath-cues/rest.mp3',
+      );
     });
   });
 
