@@ -1,6 +1,6 @@
 # Releaf Progress Sync Architecture
 
-Status: local event foundation + inactive transport + server schema; runtime reconciliation remains disabled  
+Status: local event foundation + inactive upload/download transports + server schema; runtime reconciliation remains disabled  
 Last reviewed: 2026-09-09
 
 ## Current product truth
@@ -263,14 +263,38 @@ advancement are built around this deterministic layer.
 
 No foreground action waits on network success.
 
+## Download transport and cursor
+
+The inactive read-side transport pages server events using the server-assigned
+lexicographic cursor:
+
+`(created_at, event_id)`
+
+`created_at` is deliberately used instead of client `occurred_at`. A phone
+with an incorrect clock therefore cannot cause a later-created server row to be
+skipped. `event_id` is the tie-break for rows sharing the same server
+timestamp.
+
+The reader:
+
+- requires an authenticated user id;
+- reads only that user's RLS-protected rows;
+- orders ascending by `created_at`, then `event_id`;
+- decodes only schema-v1 known events;
+- keeps the Emergency Reset exclusion on the read path;
+- advances the returned cursor past well-addressed unknown/forbidden rows so a
+  future sync loop cannot get stuck on one bad record;
+- performs no local writes and is not registered in runtime providers.
+
 ## Download / reconciliation behaviour
 
 A future sync session will:
 
 1. fetch cloud events after the user's sync cursor;
 2. merge them with local known events;
-3. derive Brain and Meditation state from merge rules;
-4. update local materialized state;
+3. derive Brain, Reset and Meditation state from merge rules;
+4. persist all affected local materialized state atomically enough that partial
+   failure cannot advance the cursor;
 5. advance the cursor only after successful local persistence.
 
 ## Account deletion
