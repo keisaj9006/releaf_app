@@ -19,7 +19,6 @@ const double _labyrinthStopSpeed = 0.0012;
 const double _labyrinthGoalRadius = 0.23;
 const int maxLabyrinthMazeStages = 50;
 
-@visibleForTesting
 int labyrinthMazeStageForCompletionCount(int completedSessions) {
   return (completedSessions + 1).clamp(1, maxLabyrinthMazeStages).toInt();
 }
