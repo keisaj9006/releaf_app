@@ -16,6 +16,10 @@ const double _labyrinthMovingDamping = 0.91;
 const double _labyrinthIdleDamping = 0.88;
 const double _labyrinthMaxSpeed = 0.058;
 const double _labyrinthStopSpeed = 0.0012;
+const double _labyrinthGoalRadius = 0.23;
+
+@visibleForTesting
+double labyrinthGoalCaptureRadiusForTesting() => _labyrinthGoalRadius;
 
 @visibleForTesting
 double labyrinthBallRadiusForLevel(int rawLevel) {
@@ -395,7 +399,7 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen>
 
   void _checkGoal() {
     if (_finished) return;
-    if ((_position - _level.goal).distance > 0.36) return;
+    if ((_position - _level.goal).distance > _labyrinthGoalRadius) return;
 
     _finished = true;
     _countdown?.cancel();
@@ -1159,7 +1163,7 @@ class _MazeBoardPainter extends CustomPainter {
       level.goal.dy / level.rows * size.height,
     );
     final goalRadius =
-        math.min(cellWidth, cellHeight).toDouble() * 0.23;
+        math.min(cellWidth, cellHeight).toDouble() * _labyrinthGoalRadius;
 
     canvas.drawCircle(
       goal,

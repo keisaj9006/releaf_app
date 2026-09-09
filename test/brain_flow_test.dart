@@ -664,6 +664,10 @@ void main() {
     await tester.pump();
   });
 
+  test('Labyrinth goal capture uses the visible target radius', () {
+    expect(labyrinthGoalCaptureRadiusForTesting(), closeTo(0.23, 0.0001));
+  });
+
   test('Labyrinth motion coasts smoothly instead of freezing off tilt', () {
     const moving = Offset(0.04, -0.02);
     final coasted = labyrinthVelocityStepForTesting(
