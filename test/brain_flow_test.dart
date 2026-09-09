@@ -880,11 +880,11 @@ void main() {
     expect(find.text('Ready'), findsOneWidget);
     expect(find.byKey(const Key('labyrinth-board')), findsOneWidget);
     expect(find.text('ENTRY'), findsOneWidget);
-    expect(find.text('Left'), findsOneWidget);
+    expect(find.text('Top'), findsOneWidget);
     expect(find.text('MAZE'), findsOneWidget);
     expect(find.text('23/50'), findsOneWidget);
     expect(
-      find.textContaining('Start at the left edge and reach the centre.'),
+      find.textContaining('Start at the top edge and reach the centre.'),
       findsOneWidget,
     );
     expect(find.textContaining('Drag anywhere'), findsOneWidget);
