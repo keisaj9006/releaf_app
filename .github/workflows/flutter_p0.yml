@@ -88,6 +88,10 @@ jobs:
             echo "::error::Android targetSdk must be API 36 for Google Play submissions."
             exit 1
           }
+          grep -q 'ndkVersion = "28.2.13676358"' android/app/build.gradle.kts || {
+            echo "::error::Android release baseline must use NDK r28+ for default 16 KB ELF alignment."
+            exit 1
+          }
           if grep -q 'signingConfig = signingConfigs.getByName("debug")' android/app/build.gradle.kts; then
             echo "::error::Release artifacts must never use the debug signing key."
             exit 1
@@ -240,6 +244,65 @@ jobs:
             --dart-define=REVENUECAT_ANDROID_API_KEY="$REVENUECAT_ANDROID_API_KEY"
 
           rm -f android/key.properties android/ci-upload-keystore.jks
+
+      - name: Verify Android release 16 KB compatibility
+        run: |
+          # Re-create a short-lived CI signing key because the AAB smoke step
+          # removes its credentials after use.
+          keytool -genkeypair -v \
+            -keystore android/ci-upload-keystore.jks \
+            -storepass changeit \
+            -keypass changeit \
+            -alias upload \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 10000 \
+            -dname "CN=Releaf CI, OU=QA, O=Releaf, L=Edinburgh, ST=Scotland, C=GB"
+
+          cat > android/key.properties <<'EOF'
+          storePassword=changeit
+          keyPassword=changeit
+          keyAlias=upload
+          storeFile=ci-upload-keystore.jks
+          EOF
+
+          flutter build apk --release \
+            --dart-define=REVENUECAT_ANDROID_API_KEY="$REVENUECAT_ANDROID_API_KEY"
+
+          APK="build/app/outputs/flutter-apk/app-release.apk"
+          ZIPALIGN="$(find "$ANDROID_HOME/build-tools" -type f -name zipalign | sort -V | tail -n 1)"
+          test -n "$ZIPALIGN" || {
+            echo "::error::zipalign was not found in Android SDK build-tools."
+            exit 1
+          }
+          "$ZIPALIGN" -c -P 16 -v 4 "$APK"
+
+          rm -rf build/qa-16kb-apk
+          mkdir -p build/qa-16kb-apk
+          unzip -q "$APK" 'lib/*/*.so' -d build/qa-16kb-apk
+
+          OBJDUMP="$ANDROID_HOME/ndk/28.2.13676358/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-objdump"
+          test -x "$OBJDUMP" || {
+            echo "::error::NDK r28 llvm-objdump was not found."
+            exit 1
+          }
+
+          failed=0
+          while IFS= read -r so; do
+            echo "Checking ELF LOAD alignment: $so"
+            while IFS= read -r exponent; do
+              if [ "$exponent" -lt 14 ]; then
+                echo "::error file=$so::ELF LOAD segment alignment 2**$exponent is below the required 2**14 (16 KB)."
+                failed=1
+              fi
+            done < <(
+              "$OBJDUMP" -p "$so" |
+                sed -n 's/.*LOAD.*align 2\*\*\([0-9][0-9]*\).*/\1/p'
+            )
+          done < <(find build/qa-16kb-apk -type f -name '*.so' | sort)
+
+          rm -f android/key.properties android/ci-upload-keystore.jks
+          exit "$failed"
 
       - name: Upload Android release AAB smoke artifact
         uses: actions/upload-artifact@v4
