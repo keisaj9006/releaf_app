@@ -88,6 +88,14 @@ jobs:
             echo "::error::Android targetSdk must be API 36 for Google Play submissions."
             exit 1
           }
+          grep -q 'android:name="com.android.vending.BILLING"' android/app/src/main/AndroidManifest.xml || {
+            echo "::error::Google Play Billing permission is required for RevenueCat purchases."
+            exit 1
+          }
+          grep -q 'android:launchMode="singleTop"' android/app/src/main/AndroidManifest.xml || {
+            echo "::error::Purchase Activity must use standard or singleTop launch mode; Releaf baseline is singleTop."
+            exit 1
+          }
           grep -q 'ndkVersion = "28.2.13676358"' android/app/build.gradle.kts || {
             echo "::error::Android release baseline must use NDK r28+ for default 16 KB ELF alignment."
             exit 1
