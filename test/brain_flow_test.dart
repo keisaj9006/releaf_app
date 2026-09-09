@@ -1651,6 +1651,8 @@ void main() {
           matching: find.byType(FilledButton),
         )
         .first;
+    await tester.ensureVisible(firstAnswer);
+    await tester.pumpAndSettle();
     await tester.tap(firstAnswer);
     await tester.pump();
 
