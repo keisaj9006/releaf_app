@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -776,6 +777,48 @@ void main() {
     await tester.pump(const Duration(milliseconds: 50));
 
     expect(find.text('Ready'), findsNothing);
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
+  });
+
+  testWidgets('Labyrinth falls back to touch when motion sensor fails', (
+    WidgetTester tester,
+  ) async {
+    final motion = StreamController<AccelerometerEvent>.broadcast(sync: true);
+    addTearDown(motion.close);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: LabirynthGameScreen(
+          trainingLevel: 3,
+          onFinish: (_) {},
+          motionStream: motion.stream,
+        ),
+      ),
+    );
+    await tester.pump();
+
+    final timestamp = DateTime(2026, 9, 9, 12);
+    for (var sample = 0; sample < 12; sample++) {
+      motion.add(
+        AccelerometerEvent(
+          0,
+          9.8,
+          0,
+          timestamp.add(Duration(milliseconds: sample * 16)),
+        ),
+      );
+    }
+    await tester.pump();
+
+    expect(find.text('Tilt + touch'), findsOneWidget);
+
+    motion.addError(StateError('sensor unavailable'));
+    await tester.pump();
+
+    expect(find.text('Touch'), findsOneWidget);
     expect(tester.takeException(), isNull);
 
     await tester.pumpWidget(const SizedBox.shrink());
