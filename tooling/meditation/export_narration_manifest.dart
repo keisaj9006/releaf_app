@@ -9,6 +9,7 @@ const _guideProfile = <String, Object?>{
   'voice': 'selected female British-English meditation narrator',
   'delivery': 'natural, warm, calm, intimate, premium; no whisper or ASMR',
   'speedReference': 0.82,
+  'referenceGenerationId': 'd730719be8654c93bddd639a96da7417',
   'exactProviderVoiceId': null,
   'renderBlockedUntilVoiceIdIsRecovered': true,
 };

@@ -16,6 +16,10 @@ void main() {
     expect(guide['name'], 'Releaf Guide');
     expect(guide['provider'], 'ElevenCreative');
     expect(guide['speedReference'], 0.82);
+    expect(
+      guide['referenceGenerationId'],
+      'd730719be8654c93bddd639a96da7417',
+    );
     expect(guide['exactProviderVoiceId'], isNull);
     expect(guide['renderBlockedUntilVoiceIdIsRecovered'], isTrue);
 

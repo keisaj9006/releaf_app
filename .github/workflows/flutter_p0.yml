@@ -120,6 +120,20 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
+      - name: Export Reset demo production manifest
+        run: >-
+          flutter test
+          test/reset_demo_manifest_export_test.dart
+          --reporter expanded
+
+      - name: Upload Reset demo production manifest
+        uses: actions/upload-artifact@v4
+        with:
+          name: releaf-reset-demo-production-manifest
+          path: build/qa-manifests/reset-demo-manifest.json
+          if-no-files-found: error
+          retention-days: 14
+
       - name: Check RevenueCat configuration
         env:
           REVENUECAT_ANDROID_API_KEY: ${{ secrets.REVENUECAT_ANDROID_API_KEY }}
