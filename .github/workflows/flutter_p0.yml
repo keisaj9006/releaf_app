@@ -78,6 +78,25 @@ jobs:
 
           exit "$failed"
 
+      - name: Audit Android release configuration
+        run: |
+          grep -q 'compileSdk = 36' android/app/build.gradle.kts || {
+            echo "::error::Android compileSdk must be API 36 for the 2026 release baseline."
+            exit 1
+          }
+          grep -q 'targetSdk = 36' android/app/build.gradle.kts || {
+            echo "::error::Android targetSdk must be API 36 for Google Play submissions."
+            exit 1
+          }
+          if grep -q 'signingConfig = signingConfigs.getByName("debug")' android/app/build.gradle.kts; then
+            echo "::error::Release artifacts must never use the debug signing key."
+            exit 1
+          fi
+          git check-ignore -q android/key.properties || {
+            echo "::error::android/key.properties must stay ignored."
+            exit 1
+          }
+
       - name: Analyze
         run: flutter analyze
 
