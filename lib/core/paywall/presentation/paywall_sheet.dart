@@ -6,6 +6,54 @@ import '../../../core/providers.dart';
 import '../../../theme/app_theme.dart';
 import '../../../theme/releaf_design_tokens.dart';
 
+String premiumBillingPeriodLabel(
+  PackageType packageType,
+  String? subscriptionPeriod,
+) {
+  switch (packageType) {
+    case PackageType.weekly:
+      return '/ week';
+    case PackageType.monthly:
+      return '/ month';
+    case PackageType.twoMonth:
+      return '/ 2 months';
+    case PackageType.threeMonth:
+      return '/ 3 months';
+    case PackageType.sixMonth:
+      return '/ 6 months';
+    case PackageType.annual:
+      return '/ year';
+    case PackageType.lifetime:
+      return 'one-time';
+    case PackageType.unknown:
+    case PackageType.custom:
+      return _isoBillingPeriodLabel(subscriptionPeriod);
+  }
+}
+
+String _isoBillingPeriodLabel(String? raw) {
+  final value = raw?.trim().toUpperCase();
+  if (value == null || value.length < 3 || !value.startsWith('P')) {
+    return 'billing period shown by store';
+  }
+
+  final unitCode = value.substring(value.length - 1);
+  final count = int.tryParse(value.substring(1, value.length - 1));
+  if (count == null || count <= 0) {
+    return 'billing period shown by store';
+  }
+
+  final unit = switch (unitCode) {
+    'D' => count == 1 ? 'day' : 'days',
+    'W' => count == 1 ? 'week' : 'weeks',
+    'M' => count == 1 ? 'month' : 'months',
+    'Y' => count == 1 ? 'year' : 'years',
+    _ => null,
+  };
+  if (unit == null) return 'billing period shown by store';
+  return count == 1 ? '/ $unit' : '/ $count $unit';
+}
+
 class PaywallSheet extends ConsumerWidget {
   final bool softOffer;
 
@@ -179,7 +227,6 @@ class PaywallSheet extends ConsumerWidget {
                           index++) ...[
                         _PackageButton(
                           package: packages[index],
-                          recommended: index == 0 && packages.length > 1,
                           onPressed: () async {
                             final ok = await controller.purchase(packages[index]);
                             if (ok && context.mounted) {
@@ -204,12 +251,22 @@ class PaywallSheet extends ConsumerWidget {
                         child: const Text('Restore purchases'),
                       ),
                     const SizedBox(height: ReleafSpacing.xs),
-                    Text(
-                      'Purchases and restoration are handled through the app store linked to this device.',
-                      textAlign: TextAlign.center,
-                      style: ReleafTypography.meta.copyWith(
-                        color: ReleafColors.textMuted,
-                        fontSize: 10,
+                    Container(
+                      key: const Key('premium-subscription-terms'),
+                      padding: const EdgeInsets.all(ReleafSpacing.md),
+                      decoration: BoxDecoration(
+                        color: ReleafColors.surfaceSoft,
+                        borderRadius: BorderRadius.circular(ReleafRadii.medium),
+                        border: Border.all(color: ReleafColors.borderSoft),
+                      ),
+                      child: Text(
+                        'Auto-renewing Premium plans renew at the displayed price and billing period until cancelled. Releaf remains usable without Premium; Premium unlocks additional content. You can manage or cancel a subscription from Account or Google Play. Purchases and restoration are handled by the app store linked to this device.',
+                        textAlign: TextAlign.center,
+                        style: ReleafTypography.meta.copyWith(
+                          color: ReleafColors.textMuted,
+                          fontSize: 10,
+                          height: 1.45,
+                        ),
                       ),
                     ),
                   ],
@@ -400,17 +457,21 @@ class _PackageButton extends StatelessWidget {
   const _PackageButton({
     required this.package,
     required this.onPressed,
-    required this.recommended,
   });
 
   final Package package;
   final VoidCallback onPressed;
-  final bool recommended;
 
   @override
   Widget build(BuildContext context) {
-    final price = package.storeProduct.priceString;
-    final title = package.storeProduct.title;
+    final product = package.storeProduct;
+    final price = product.priceString;
+    final title = product.title;
+    final billingPeriod = premiumBillingPeriodLabel(
+      package.packageType,
+      product.subscriptionPeriod,
+    );
+    final isOneTime = package.packageType == PackageType.lifetime;
 
     return Material(
       color: Colors.transparent,
@@ -422,15 +483,9 @@ class _PackageButton extends StatelessWidget {
         child: Ink(
           padding: const EdgeInsets.all(ReleafSpacing.lg),
           decoration: BoxDecoration(
-            color: recommended
-                ? ReleafColors.premium.withValues(alpha: 0.10)
-                : ReleafColors.surface,
+            color: ReleafColors.surface,
             borderRadius: BorderRadius.circular(ReleafRadii.large),
-            border: Border.all(
-              color: recommended
-                  ? ReleafColors.premium.withValues(alpha: 0.38)
-                  : ReleafColors.borderSoft,
-            ),
+            border: Border.all(color: ReleafColors.borderSoft),
           ),
           child: Row(
             children: [
@@ -438,31 +493,42 @@ class _PackageButton extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (recommended) ...[
-                      Text(
-                        'RECOMMENDED',
-                        style: ReleafTypography.eyebrow.copyWith(
-                          color: ReleafColors.premium,
-                          fontSize: 9,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                    ],
                     Text(
                       title,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: ReleafTypography.cardTitle,
                     ),
+                    const SizedBox(height: 4),
+                    Text(
+                      isOneTime
+                          ? 'One-time purchase — does not renew'
+                          : 'Auto-renews $billingPeriod until cancelled',
+                      style: ReleafTypography.meta.copyWith(
+                        color: ReleafColors.textSecondary,
+                      ),
+                    ),
                   ],
                 ),
               ),
               const SizedBox(width: ReleafSpacing.md),
-              Text(
-                price,
-                style: ReleafTypography.cardTitle.copyWith(
-                  color: ReleafColors.premium,
-                ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    price,
+                    style: ReleafTypography.cardTitle.copyWith(
+                      color: ReleafColors.premium,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    billingPeriod,
+                    style: ReleafTypography.meta.copyWith(
+                      color: ReleafColors.textMuted,
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(width: ReleafSpacing.xs),
               const Icon(

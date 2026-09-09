@@ -120,6 +120,8 @@ void main() {
     expect(find.byKey(const Key('account-premium-card')), findsOneWidget);
     expect(find.byKey(const Key('account-premium-explore')), findsOneWidget);
     expect(find.text('Explore Premium'), findsOneWidget);
+    expect(find.byKey(const Key('account-premium-manage')), findsOneWidget);
+    expect(find.text('Manage subscription'), findsOneWidget);
     expect(find.byKey(const Key('account-auth-card')), findsOneWidget);
     expect(find.byKey(const Key('account-email-field')), findsOneWidget);
     expect(find.byKey(const Key('account-password-field')), findsOneWidget);

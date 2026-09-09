@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/paywall/presentation/paywall_sheet.dart';
 import '../../../core/providers.dart';
@@ -288,6 +289,38 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
     );
   }
 
+  Future<void> _manageSubscription() async {
+    final managementUrl = ref
+        .read(subscriptionControllerProvider)
+        .customerInfo
+        ?.managementURL
+        ?.trim();
+
+    final revenueCatUri =
+        managementUrl == null || managementUrl.isEmpty
+            ? null
+            : Uri.tryParse(managementUrl);
+    final isWebManagementUrl = revenueCatUri != null &&
+        (revenueCatUri.scheme == 'https' || revenueCatUri.scheme == 'http');
+    final target = isWebManagementUrl
+        ? revenueCatUri
+        : Uri.parse('https://play.google.com/store/account/subscriptions');
+
+    final opened = await launchUrl(
+      target,
+      mode: LaunchMode.externalApplication,
+    );
+    if (!opened && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Unable to open subscription management right now.',
+          ),
+        ),
+      );
+    }
+  }
+
   void _openPremium() {
     showModalBottomSheet<void>(
       context: context,
@@ -350,6 +383,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                                 isLoading: subscription.isLoading,
                                 onExplore: _openPremium,
                                 onRestore: _restorePurchases,
+                                onManage: _manageSubscription,
                               ),
                               const SizedBox(height: ReleafSpacing.lg),
                               userAsync.when(
@@ -481,6 +515,7 @@ class _PremiumAccountCard extends StatelessWidget {
     required this.isLoading,
     required this.onExplore,
     required this.onRestore,
+    required this.onManage,
   });
 
   final bool isPremium;
@@ -488,6 +523,7 @@ class _PremiumAccountCard extends StatelessWidget {
   final bool isLoading;
   final VoidCallback onExplore;
   final VoidCallback onRestore;
+  final VoidCallback onManage;
 
   @override
   Widget build(BuildContext context) {
@@ -580,6 +616,13 @@ class _PremiumAccountCard extends StatelessWidget {
                 onPressed: isLoading ? null : onRestore,
                 child: const Text('Restore purchase'),
               ),
+              if (!isPreviewBuild)
+                TextButton.icon(
+                  key: const Key('account-premium-manage'),
+                  onPressed: onManage,
+                  icon: const Icon(Icons.open_in_new_rounded, size: 18),
+                  label: const Text('Manage subscription'),
+                ),
             ],
           ),
         ],

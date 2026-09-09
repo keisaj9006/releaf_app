@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:purchases_flutter/purchases_flutter.dart';
 
 import 'package:releaf_app/core/providers.dart';
 import 'package:releaf_app/core/paywall/presentation/paywall_sheet.dart';
@@ -45,6 +46,17 @@ Future<void> _pumpPaywall(
 }
 
 void main() {
+  test('Premium billing labels keep the actual billing cadence visible', () {
+    expect(premiumBillingPeriodLabel(PackageType.monthly, null), '/ month');
+    expect(premiumBillingPeriodLabel(PackageType.annual, null), '/ year');
+    expect(premiumBillingPeriodLabel(PackageType.custom, 'P3M'), '/ 3 months');
+    expect(
+      premiumBillingPeriodLabel(PackageType.custom, 'unexpected'),
+      'billing period shown by store',
+    );
+    expect(premiumBillingPeriodLabel(PackageType.lifetime, null), 'one-time');
+  });
+
   testWidgets('Premium paywall uses the Releaf product hierarchy', (
     WidgetTester tester,
   ) async {
@@ -59,6 +71,19 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('Restore purchases'), findsOneWidget);
+
+    await tester.ensureVisible(
+      find.byKey(const Key('premium-subscription-terms')),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const Key('premium-subscription-terms')),
+      findsOneWidget,
+    );
+    expect(find.textContaining('renew at the displayed price'), findsOneWidget);
+    expect(find.textContaining('remains usable without Premium'), findsOneWidget);
+    expect(find.text('RECOMMENDED'), findsNothing);
   });
 
   testWidgets('Premium paywall stays usable at 320px', (
