@@ -369,8 +369,8 @@ void main() {
     controller.dispose();
   });
 
-  test('Releaf narration fallback keeps the approved 0.75x pacing', () {
-    expect(releafNarrationSpeedMultiplier, 0.75);
+  test('Releaf narration fallback keeps the approved 0.82x pacing', () {
+    expect(releafNarrationSpeedMultiplier, 0.82);
     expect(releafFlutterTtsNeutralRate, 0.50);
     expect(releafFlutterTtsSpeechRate, closeTo(0.375, 0.0001));
   });
