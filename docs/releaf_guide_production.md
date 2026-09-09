@@ -102,6 +102,12 @@ Shared Reset breathing cues:
 
 `assets/narration/releaf-guide/reset/breath-cues/<cue>.mp3`
 
+The runtime already targets these production paths. Recorded assets are
+preferred automatically; until the exact approved Releaf Guide recordings are
+bundled, a missing/corrupt asset falls back to device TTS. Missing paths are
+cached for the current Reset session so the app does not retry the same failed
+asset on every breathing cycle.
+
 The app stores paths without the leading `assets/` prefix.
 
 ## Production manifests

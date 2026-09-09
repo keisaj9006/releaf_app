@@ -157,7 +157,10 @@ void main() {
       expect(rest.spokenText, 'Rest.');
       expect(release.key, 'step:main:2');
       expect(release.spokenText, 'Release the count and breathe naturally.');
-      expect(inhale.narrationAssetPath, isNull);
+      expect(
+        inhale.narrationAssetPath,
+        'narration/releaf-guide/reset/breath-cues/breathe-in.mp3',
+      );
     });
 
     test('guided Reset keeps scripted step narration and recorded asset', () {

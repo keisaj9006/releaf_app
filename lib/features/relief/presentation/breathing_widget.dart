@@ -22,6 +22,7 @@ import '../../../theme/widgets/releaf_sensory_halo.dart';
 import '../../../theme/widgets/releaf_thought_unhook_visual.dart';
 import '../../../theme/widgets/releaf_wave2_visuals.dart';
 import '../application/reset_audio_preferences.dart';
+import '../application/reset_voice_playback.dart';
 import '../application/reset_completion_store.dart';
 import '../data/reset_catalog.dart';
 import '../domain/models/breath_pattern.dart';
@@ -60,6 +61,8 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
 
   final audio.AudioPlayer _ambientPlayer = audio.AudioPlayer();
   final MeditationVoiceDriver _voiceDriver = FlutterMeditationVoiceDriver();
+  late final ResetVoicePlayback _voicePlayback =
+      ResetVoicePlayback(_voiceDriver);
   bool _ambientStarted = false;
   late bool _voiceEnabled;
   late double _voiceVolume;
@@ -186,16 +189,10 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
 
     final guidance = cue.spokenText.trim();
     if (guidance.isEmpty) return;
-    final narrationAsset = cue.narrationAssetPath;
-
     try {
       await _voiceDriver.configure(volume: _voiceVolume);
       if (!_voiceEnabled || !mounted) return;
-      if (narrationAsset != null && narrationAsset.trim().isNotEmpty) {
-        await _voiceDriver.playAsset(narrationAsset);
-      } else {
-        await _voiceDriver.speak(guidance);
-      }
+      await _voicePlayback.playCue(cue);
     } catch (_) {
       // Recorded Releaf Guide audio has priority. Device speech remains a
       // fallback only and audio failure must never interrupt a Reset session.

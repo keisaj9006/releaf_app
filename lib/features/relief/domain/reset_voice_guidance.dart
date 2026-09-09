@@ -94,6 +94,7 @@ ResetVoiceGuidanceCue resetVoiceGuidanceCue({
     return ResetVoiceGuidanceCue(
       key: 'breath:${phase.name}',
       spokenText: resetBreathPhaseSpokenText(phase),
+      narrationAssetPath: resetBreathPhaseTargetAssetPath(phase),
     );
   }
 
