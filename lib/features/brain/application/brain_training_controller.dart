@@ -60,11 +60,22 @@ class BrainSessionRecord {
 class BrainTrainingState {
   const BrainTrainingState({
     this.records = const <BrainSessionRecord>[],
+    this.completionCounts = const <String, int>{},
   });
 
   final List<BrainSessionRecord> records;
+  final Map<String, int> completionCounts;
 
-  int get totalSessions => records.length;
+  int get totalSessions {
+    final gameIds = <String>{
+      ...completionCounts.keys,
+      ...records.map((record) => record.gameId),
+    };
+    return gameIds.fold<int>(
+      0,
+      (total, gameId) => total + completionCountFor(gameId),
+    );
+  }
 
   int get sessionsLast7Days =>
       activityLast7Days.fold<int>(0, (total, value) => total + value);
@@ -107,8 +118,12 @@ class BrainTrainingState {
     );
   }
 
-  int completionCountFor(String gameId) =>
-      records.where((record) => record.gameId == gameId).length;
+  int completionCountFor(String gameId) {
+    final recentCount =
+        records.where((record) => record.gameId == gameId).length;
+    final cumulativeCount = completionCounts[gameId] ?? 0;
+    return cumulativeCount > recentCount ? cumulativeCount : recentCount;
+  }
 
   int trainingLevelFor(String gameId) {
     if (!usesProgressiveBrainLevel(gameId)) return 1;
@@ -145,8 +160,7 @@ class BrainTrainingState {
     return best;
   }
 
-  bool hasCompleted(String gameId) =>
-      records.any((record) => record.gameId == gameId);
+  bool hasCompleted(String gameId) => completionCountFor(gameId) > 0;
 
   DateTime? lastPlayedFor(String gameId) {
     DateTime? latest;
@@ -197,10 +211,12 @@ class BrainTrainingController extends StateNotifier<BrainTrainingState> {
         super(
           BrainTrainingState(
             records: _readRecords(_prefs),
+            completionCounts: _readCompletionCounts(_prefs),
           ),
         );
 
   static const _historyKey = 'brain.training.history.v1';
+  static const _completionCountsKey = 'brain.training.completion_counts.v1';
   static const _maxHistoryItems = 120;
 
   final SharedPreferences _prefs;
@@ -219,11 +235,22 @@ class BrainTrainingController extends StateNotifier<BrainTrainingState> {
       ),
       ...state.records,
     ].take(_maxHistoryItems).toList(growable: false);
+    final nextCounts = <String, int>{
+      ...state.completionCounts,
+      gameId: state.completionCountFor(gameId) + 1,
+    };
 
-    state = BrainTrainingState(records: next);
+    state = BrainTrainingState(
+      records: next,
+      completionCounts: nextCounts,
+    );
     await _prefs.setStringList(
       _historyKey,
       next.map((record) => record.encode()).toList(growable: false),
+    );
+    await _prefs.setStringList(
+      _completionCountsKey,
+      _encodeCompletionCounts(nextCounts),
     );
 
     await _recordSyncEvent(
@@ -262,6 +289,49 @@ class BrainTrainingController extends StateNotifier<BrainTrainingState> {
     return raw
         .map(BrainSessionRecord.decode)
         .whereType<BrainSessionRecord>()
+        .toList(growable: false);
+  }
+
+  static Map<String, int> _readCompletionCounts(SharedPreferences prefs) {
+    final result = <String, int>{};
+    final raw =
+        prefs.getStringList(_completionCountsKey) ?? const <String>[];
+
+    for (final item in raw) {
+      final separator = item.lastIndexOf('|');
+      if (separator <= 0 || separator >= item.length - 1) continue;
+
+      final gameId = item.substring(0, separator).trim();
+      final count = int.tryParse(item.substring(separator + 1));
+      if (gameId.isEmpty || count == null || count < 0) continue;
+
+      final current = result[gameId] ?? 0;
+      if (count > current) result[gameId] = count;
+    }
+
+    // Migration path for installs created before cumulative counters existed.
+    // Never let a persisted counter be lower than the recent history we can
+    // still observe.
+    final recentCounts = <String, int>{};
+    for (final record in _readRecords(prefs)) {
+      recentCounts[record.gameId] = (recentCounts[record.gameId] ?? 0) + 1;
+    }
+    for (final entry in recentCounts.entries) {
+      final persisted = result[entry.key] ?? 0;
+      if (entry.value > persisted) result[entry.key] = entry.value;
+    }
+
+    return result;
+  }
+
+  static List<String> _encodeCompletionCounts(Map<String, int> counts) {
+    final entries = counts.entries
+        .where((entry) => entry.key.trim().isNotEmpty && entry.value >= 0)
+        .toList(growable: false)
+      ..sort((a, b) => a.key.compareTo(b.key));
+
+    return entries
+        .map((entry) => '${entry.key}|${entry.value}')
         .toList(growable: false);
   }
 }

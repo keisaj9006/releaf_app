@@ -612,6 +612,50 @@ void main() {
     expect(state.trainingLevelFor('memory'), 1);
   });
 
+  test('Brain completion counters do not regress when recent history is pruned', () async {
+    final now = DateTime.now();
+    final recent = List<String>.generate(
+      120,
+      (index) => BrainSessionRecord(
+        gameId: 'memory',
+        completedAt: now.subtract(Duration(minutes: index)),
+        score: 100 + index,
+      ).encode(),
+    );
+
+    SharedPreferences.setMockInitialValues(<String, Object>{
+      'brain.training.history.v1': recent,
+      'brain.training.completion_counts.v1': <String>[
+        'labyrinth|49',
+        'memory|120',
+      ],
+    });
+    final preferences = await SharedPreferences.getInstance();
+
+    final controller = BrainTrainingController(preferences);
+    expect(controller.state.records, hasLength(120));
+    expect(controller.state.completionCountFor('labyrinth'), 49);
+    expect(
+      labyrinthMazeStageForCompletionCount(
+        controller.state.completionCountFor('labyrinth'),
+      ),
+      50,
+    );
+
+    await controller.recordCompletion(gameId: 'labyrinth', score: 500);
+    expect(controller.state.records, hasLength(120));
+    expect(controller.state.completionCountFor('labyrinth'), 50);
+    expect(controller.state.totalSessions, 170);
+    controller.dispose();
+
+    final restored = BrainTrainingController(preferences);
+    addTearDown(restored.dispose);
+    expect(restored.state.records, hasLength(120));
+    expect(restored.state.completionCountFor('labyrinth'), 50);
+    expect(restored.state.trainingLevelFor('labyrinth'), maxBrainTrainingLevel);
+    expect(restored.state.totalSessions, 170);
+  });
+
   testWidgets('Game host injects the saved persistent training level', (
     WidgetTester tester,
   ) async {
