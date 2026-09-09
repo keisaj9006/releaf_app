@@ -17,7 +17,9 @@ void main() {
     final store = ProgressSyncEventStore(
       preferences,
       now: () => now,
+      eventNonce: () => 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
     );
+    addTearDown(store.dispose);
 
     final event = store.createEvent(
       kind: ProgressSyncEventKind.brainSessionCompleted,
@@ -27,7 +29,6 @@ void main() {
     await store.append(event);
 
     final restored = ProgressSyncEventStore(preferences);
-    addTearDown(store.dispose);
     addTearDown(restored.dispose);
 
     expect(restored.state, hasLength(1));
@@ -64,9 +65,17 @@ void main() {
     expect(store.state.single.id, 'event-1');
   });
 
-  test('Uploaded event ids can be removed without touching pending events', () async {
+  test('Uploaded event ids can be removed without touching pending events',
+      () async {
     final preferences = await _preferences(<String, Object>{});
-    final store = ProgressSyncEventStore(preferences);
+    var nonce = 0;
+    final store = ProgressSyncEventStore(
+      preferences,
+      eventNonce: () {
+        nonce += 1;
+        return nonce.toRadixString(16).padLeft(32, '0');
+      },
+    );
     addTearDown(store.dispose);
 
     final first = store.createEvent(
@@ -87,7 +96,8 @@ void main() {
     expect(store.state.single.id, second.id);
   });
 
-  test('Event ids remain unique for multiple events at the same instant', () async {
+  test('Event ids remain unique for multiple events at the same instant',
+      () async {
     final preferences = await _preferences(<String, Object>{});
     final now = DateTime.utc(2026, 9, 8, 20, 45);
     var sequence = 0;
@@ -110,6 +120,9 @@ void main() {
       entityId: 'open-awareness-6',
     );
 
+    expect(first.occurredAt, second.occurredAt);
+    expect(first.id, 'v1:00000000000000000000000000000001');
+    expect(second.id, 'v1:00000000000000000000000000000002');
     expect(first.id, isNot(second.id));
   });
 
@@ -145,19 +158,24 @@ void main() {
     expect(first.id, isNot(second.id));
   });
 
-  test('Generated event ids are opaque and do not persist a device identifier', () async {
+  test('Generated event ids are opaque and persist no device identifier',
+      () async {
     final preferences = await _preferences(<String, Object>{});
     final store = ProgressSyncEventStore(preferences);
     addTearDown(store.dispose);
 
-    final event = store.createEvent(
+    final first = store.createEvent(
+      kind: ProgressSyncEventKind.meditationOpened,
+      entityId: 'open-awareness-6',
+    );
+    final second = store.createEvent(
       kind: ProgressSyncEventKind.meditationOpened,
       entityId: 'open-awareness-6',
     );
 
-    expect(event.id, matches(RegExp(r'^v1:[a-f0-9]{32}
-}
-)));
+    expect(first.id, matches(RegExp(r'^v1:[a-f0-9]{32}$')));
+    expect(second.id, matches(RegExp(r'^v1:[a-f0-9]{32}$')));
+    expect(first.id, isNot(second.id));
     expect(
       preferences.getString('progress.sync.client_instance.v1'),
       isNull,
