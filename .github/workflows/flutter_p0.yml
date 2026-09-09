@@ -246,6 +246,8 @@ jobs:
           rm -f android/key.properties android/ci-upload-keystore.jks
 
       - name: Verify Android release 16 KB compatibility
+        env:
+          REVENUECAT_ANDROID_API_KEY: ${{ secrets.REVENUECAT_ANDROID_API_KEY }}
         run: |
           # Re-create a short-lived CI signing key because the AAB smoke step
           # removes its credentials after use.
@@ -288,18 +290,33 @@ jobs:
           }
 
           failed=0
+          native_count=0
           while IFS= read -r so; do
+            native_count=$((native_count + 1))
             echo "Checking ELF LOAD alignment: $so"
+            exponents="$(
+              "$OBJDUMP" -p "$so" |
+                sed -n 's/.*LOAD.*align 2\*\*\([0-9][0-9]*\).*/\1/p'
+            )"
+
+            if [ -z "$exponents" ]; then
+              echo "::error file=$so::Unable to read ELF LOAD segment alignment."
+              failed=1
+              continue
+            fi
+
             while IFS= read -r exponent; do
               if [ "$exponent" -lt 14 ]; then
                 echo "::error file=$so::ELF LOAD segment alignment 2**$exponent is below the required 2**14 (16 KB)."
                 failed=1
               fi
-            done < <(
-              "$OBJDUMP" -p "$so" |
-                sed -n 's/.*LOAD.*align 2\*\*\([0-9][0-9]*\).*/\1/p'
-            )
+            done <<< "$exponents"
           done < <(find build/qa-16kb-apk -type f -name '*.so' | sort)
+
+          if [ "$native_count" -eq 0 ]; then
+            echo "::error::Release APK contains no native libraries to verify; 16 KB check would be meaningless."
+            failed=1
+          fi
 
           rm -f android/key.properties android/ci-upload-keystore.jks
           exit "$failed"
