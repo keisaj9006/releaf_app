@@ -278,7 +278,7 @@ void main() {
     );
     expect(
       find.byKey(const Key('reset-preview-voice-volume')),
-      findsNothing,
+      findsOneWidget,
     );
     final previewVoiceTile =
         find.byKey(const Key('reset-preview-voice-toggle'));
@@ -289,7 +289,7 @@ void main() {
     await tester.pump();
     expect(
       find.byKey(const Key('reset-preview-voice-volume')),
-      findsOneWidget,
+      findsNothing,
     );
     expect(
       find.byKey(const Key('reset-preview-ambient-toggle')),
@@ -428,7 +428,7 @@ void main() {
     );
     expect(
       find.byKey(const Key('reset-active-voice-volume')),
-      findsNothing,
+      findsOneWidget,
     );
     final activeVoiceTile =
         find.byKey(const Key('reset-active-voice-toggle'));
@@ -439,7 +439,7 @@ void main() {
     await tester.pump();
     expect(
       find.byKey(const Key('reset-active-voice-volume')),
-      findsOneWidget,
+      findsNothing,
     );
     expect(
       find.byKey(const Key('reset-active-ambient-toggle')),
