@@ -641,6 +641,7 @@ class ResetCatalog {
       quickCategory: QuickResetCategory.noBreath,
       modality: ResetModality.guidedPractice,
       accessTier: ResetAccessTier.premium,
+      demoRequirement: ResetDemoRequirement.movementTechnique,
       summary:
           'A short movement reset using up to ten comfortable push-ups, wall push-ups or a seated press.',
       methodLabel: 'Brief movement activation',
@@ -797,6 +798,7 @@ class ResetCatalog {
       quickCategory: QuickResetCategory.noBreath,
       modality: ResetModality.guidedPractice,
       accessTier: ResetAccessTier.premium,
+      demoRequirement: ResetDemoRequirement.movementTechnique,
       summary:
           'A brief loose-movement reset for hands, arms and legs after holding the body still.',
       methodLabel: 'Loose movement reset',
