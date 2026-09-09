@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -50,7 +51,9 @@ class _SymbolCodeScreenState extends State<SymbolCodeScreen>
   int _mistakes = 0;
   bool _locked = false;
   late final Stopwatch _stopwatch;
+  bool _pausedByLifecycle = false;
   bool _resumeStopwatchAfterLifecyclePause = false;
+  Completer<void>? _lifecycleResumeCompleter;
   String _feedback = 'Use the key to decode each symbol. Accuracy comes first.';
 
   int get _trainingLevel => widget.trainingLevel.clamp(1, 12).toInt();
@@ -111,6 +114,13 @@ class _SymbolCodeScreenState extends State<SymbolCodeScreen>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
+      _pausedByLifecycle = false;
+      final resumeCompleter = _lifecycleResumeCompleter;
+      _lifecycleResumeCompleter = null;
+      if (resumeCompleter != null && !resumeCompleter.isCompleted) {
+        resumeCompleter.complete();
+      }
+
       if (_resumeStopwatchAfterLifecyclePause && !_stopwatch.isRunning) {
         _resumeStopwatchAfterLifecyclePause = false;
         _stopwatch.start();
@@ -122,6 +132,7 @@ class _SymbolCodeScreenState extends State<SymbolCodeScreen>
         state == AppLifecycleState.paused ||
         state == AppLifecycleState.hidden ||
         state == AppLifecycleState.detached) {
+      _pausedByLifecycle = true;
       if (_stopwatch.isRunning) {
         _resumeStopwatchAfterLifecyclePause = true;
         _stopwatch.stop();
@@ -132,9 +143,25 @@ class _SymbolCodeScreenState extends State<SymbolCodeScreen>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _pausedByLifecycle = false;
     _resumeStopwatchAfterLifecyclePause = false;
+    final resumeCompleter = _lifecycleResumeCompleter;
+    _lifecycleResumeCompleter = null;
+    if (resumeCompleter != null && !resumeCompleter.isCompleted) {
+      resumeCompleter.complete();
+    }
     _stopwatch.stop();
     super.dispose();
+  }
+
+  Future<void> _waitForActiveDelay(Duration duration) async {
+    await Future<void>.delayed(duration);
+    if (!mounted) return;
+
+    while (_pausedByLifecycle && mounted) {
+      final completer = _lifecycleResumeCompleter ??= Completer<void>();
+      await completer.future;
+    }
   }
 
   void _changeDifficulty(BrainDifficulty difficulty) {
@@ -174,6 +201,7 @@ class _SymbolCodeScreenState extends State<SymbolCodeScreen>
     _correct = 0;
     _mistakes = 0;
     _locked = false;
+    _pausedByLifecycle = false;
     _resumeStopwatchAfterLifecyclePause = false;
     _stopwatch
       ..stop()
@@ -221,12 +249,12 @@ class _SymbolCodeScreenState extends State<SymbolCodeScreen>
 
     if (_trial >= _targets.length - 1) {
       _stopwatch.stop();
-      await Future<void>.delayed(const Duration(milliseconds: 320));
+      await _waitForActiveDelay(const Duration(milliseconds: 320));
       if (mounted) _completeSession();
       return;
     }
 
-    await Future<void>.delayed(const Duration(milliseconds: 260));
+    await _waitForActiveDelay(const Duration(milliseconds: 260));
     if (!mounted) return;
 
     setState(() {

@@ -1664,12 +1664,23 @@ void main() {
     await tester.pump();
     expect(stopwatch.isRunning, isFalse);
 
+    final feedbackBeforeBackground = tester
+        .widget<Text>(find.byKey(const Key('symbol-code-feedback')))
+        .data;
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(stopwatch.isRunning, isFalse);
+    expect(
+      tester.widget<Text>(find.byKey(const Key('symbol-code-feedback'))).data,
+      feedbackBeforeBackground,
+    );
+
     tester.binding.handleAppLifecycleStateChanged(
       AppLifecycleState.resumed,
     );
     await tester.pump();
     expect(stopwatch.isRunning, isTrue);
 
+    await tester.pump(const Duration(milliseconds: 10));
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump();
     expect(stopwatch.isRunning, isFalse);
