@@ -372,7 +372,7 @@ void main() {
   test('Releaf narration fallback keeps the approved 0.82x pacing', () {
     expect(releafNarrationSpeedMultiplier, 0.82);
     expect(releafFlutterTtsNeutralRate, 0.50);
-    expect(releafFlutterTtsSpeechRate, closeTo(0.375, 0.0001));
+    expect(releafFlutterTtsSpeechRate, closeTo(0.41, 0.0001));
   });
 
   test('Meditation voice preferences persist independently', () async {
