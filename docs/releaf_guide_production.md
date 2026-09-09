@@ -1,11 +1,12 @@
 # Releaf Guide — Narration Production Standard
 
-Last reviewed: 2026-09-08
+Last reviewed: 2026-09-09
 
 ## Scope
 
-This standard applies to guided Meditation narration and later guided
-Reset/Emergency content that intentionally uses the same Releaf Guide.
+This standard applies to **all guided Meditation and Reset content**, including
+Emergency Calm. Reset and Meditation use one Releaf Guide contract and one
+runtime voice driver.
 
 It does **not** apply to Sleep. Sleep remains audio-only: music, noise and
 nature soundscapes without narration.
@@ -21,11 +22,50 @@ Use one narrator consistently across the guided library.
 - premium meditation delivery
 - no ASMR treatment
 - no obvious synthetic cadence
-- reference pace: **0.75×**
+- reference pace: **0.82×**
 
-The selected narration provider is **ElevenCreative**. The exact provider voice ID was not preserved in the project record. Do not
+The selected narration provider is **ElevenCreative**. The approved reference
+generation is `d730719be8654c93bddd639a96da7417`.
+
+The exact provider voice ID was not preserved in the project record. Do not
 batch-render the remaining library until that exact voice is recovered or one
 replacement voice is explicitly locked as the new canonical Releaf Guide.
+Never present a newly selected voice as if it were the approved original.
+
+## Runtime behaviour
+
+Meditation and Reset share the same `FlutterMeditationVoiceDriver`.
+
+- recorded Releaf Guide assets always take priority;
+- where recorded studio audio is unavailable, the development/runtime fallback
+  prefers a calm female English voice and British English where available;
+- fallback pacing is derived from the same **0.82×** contract;
+- Reset voice guidance is enabled by default for new installs;
+- Reset starts voice at a deliberately quieter default volume of **0.72**;
+- a user's explicit voice-off preference is preserved.
+
+The device fallback is not the recorded Releaf Guide and must never be labelled
+as such.
+
+## Reset breathing standard
+
+All active breathing methods must use the single
+`ResetSessionProgram.breathing` + `BreathPattern` engine. The catalog
+currently contains **10** breathing sessions.
+
+This guarantees one source of truth for:
+
+- inhale duration;
+- optional hold after inhale;
+- exhale duration;
+- optional hold after exhale;
+- visual breath phase;
+- future recorded phase cues and haptics;
+- session narration timing.
+
+Every active Reset session has a scripted program. The same step guidance shown
+on screen is currently the spoken Reset script, so the audible and visual
+instruction cannot silently diverge.
 
 ## Audio layering
 
@@ -34,7 +74,6 @@ Narration and ambience are separate production layers.
 Do:
 
 - render dry narration to its own MP3 asset;
-- use the Meditation session's `backgroundSoundId` for ambience;
 - keep ambience controlled by the app so volume can be mixed independently;
 - let the player prefer recorded Releaf Guide audio over device voice fallback.
 
@@ -47,42 +86,34 @@ Do not:
 
 ## Canonical asset naming
 
-Each recorded step uses:
+Meditation:
 
 `assets/narration/releaf-guide/<session-id>/<NN>-<step-label>.mp3`
 
-Examples:
+Reset:
 
-- `assets/narration/releaf-guide/mindfulness-basics-2/01-arrive.mp3`
-- `assets/narration/releaf-guide/mindfulness-basics-2/02-notice.mp3`
+`assets/narration/releaf-guide/reset/<session-id>/<main|simplified>/<NN>-<step-label>.mp3`
 
-The app stores the path without the leading `assets/` prefix.
+The app stores paths without the leading `assets/` prefix.
 
-## Production manifest
+## Production manifests
 
-Every P0 build exports:
+Every P0 build exports two narration manifests:
 
-`releaf-guide-manifest.json`
+- `releaf-guide-manifest.json` from `MeditationCatalog`;
+- `reset-releaf-guide-manifest.json` from `ResetCatalog`.
 
-The manifest is generated directly from `MeditationCatalog` and contains:
+The Reset manifest covers all **50** active Reset sessions, including Emergency,
+and verifies that all **10** breathing methods use the canonical paced-breathing
+engine.
 
-- all guided sessions;
-- every spoken narration script;
-- step duration;
-- word count for production reference;
-- canonical target MP3 path;
-- currently recorded asset path;
-- whether a step still needs rendering.
-
-The manifest is the source package for narration production. Do not maintain a
-second manual spreadsheet containing competing scripts.
+The manifests contain the canonical script, timing, target asset path, recorded
+asset path and render status. Do not maintain a second manual spreadsheet with
+competing narration copy.
 
 ## Script and timing QA
 
-The written `spokenGuidance` is narration copy. The shorter `guidance`
-field remains on-screen caption copy.
-
-Recorded timing should be checked against the actual rendered MP3, not inferred
+Recorded timing must be checked against the actual rendered MP3, not inferred
 from word count alone. Delivery is intentionally slow and uses pauses.
 
 For each step:
@@ -105,14 +136,14 @@ Before an asset is declared recorded:
 - no excessive leading silence;
 - pronunciation and British-English delivery are consistent;
 - captions and spoken meaning remain aligned;
-- voice source label in the app accurately reflects recorded vs fallback audio.
-
-CI already verifies that any declared `narrationAssetPath` exists and contains
-non-trivial audio.
+- voice source label accurately distinguishes recorded audio from fallback.
 
 ## Current production state
 
-- Guided meditation scripts: **20 / 20 complete**
-- Fully recorded sessions: **Mindfulness Basics**
-- Remaining sessions: script-ready, awaiting the canonical Releaf Guide voice
-  identity before batch rendering
+- Guided Meditation scripts: **20 / 20 complete**
+- Active Reset scripted sessions: **50 / 50 complete**
+- Canonical Reset breathing sessions: **10 / 10**
+- Fully recorded Meditation sessions: **Mindfulness Basics**
+- Recorded Reset sessions: **0**
+- Remaining studio rendering is blocked only by the missing exact provider voice
+  identity; runtime fallback remains available for development and testing.

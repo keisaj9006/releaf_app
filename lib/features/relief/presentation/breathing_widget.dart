@@ -378,7 +378,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget> {
                         contentPadding: EdgeInsets.zero,
                         title: const Text('Voice guidance'),
                         subtitle: const Text(
-                          'Device English voice fallback. Turn it off for a silent visual session.',
+                          'Releaf Guide pacing. Recorded guide audio takes priority; a calm female en-GB device voice is used only where studio audio is not yet available.',
                         ),
                         value: _voiceEnabled,
                         onChanged: (value) {

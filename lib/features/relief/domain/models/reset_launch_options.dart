@@ -6,8 +6,8 @@ class ResetLaunchOptions {
   const ResetLaunchOptions({
     this.showGuidanceText = true,
     this.showSessionTimer = true,
-    this.voiceGuidanceEnabled = false,
-    this.voiceVolume = 0.78,
+    this.voiceGuidanceEnabled = true,
+    this.voiceVolume = 0.72,
     this.ambientSoundEnabled = true,
     this.ambientVolume = 0.16,
   });
@@ -15,9 +15,9 @@ class ResetLaunchOptions {
   final bool showGuidanceText;
   final bool showSessionTimer;
 
-  /// Spoken guidance. Recorded Releaf Guide assets can be supplied later;
-  /// the player currently shares the same calm en-GB voice fallback used by
-  /// Meditation when a recorded segment is unavailable.
+  /// Spoken guidance uses the same Releaf Guide contract as Meditation.
+  /// Recorded guide assets take priority; until the exact studio voice is
+  /// available, both features share the same calm female en-GB fallback.
   final bool voiceGuidanceEnabled;
   final double voiceVolume;
 

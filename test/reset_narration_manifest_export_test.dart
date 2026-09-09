@@ -1,0 +1,56 @@
+import 'dart:convert';
+
+import 'package:flutter_test/flutter_test.dart';
+
+import '../tooling/reset/export_narration_manifest.dart';
+
+void main() {
+  test('Reset Releaf Guide manifest covers every active Reset session', () async {
+    final manifest = buildResetNarrationManifest();
+
+    expect(manifest['resetSessionCount'], 50);
+    expect(manifest['breathingSessionCount'], 10);
+    expect(manifest['voiceGuidanceDefaultEnabled'], isTrue);
+    expect(manifest['defaultVoiceVolume'], 0.72);
+    expect(manifest['totalStepCount'], greaterThan(50));
+
+    final guide = manifest['guideProfile']! as Map<String, Object?>;
+    expect(guide['name'], 'Releaf Guide');
+    expect(guide['speedReference'], 0.82);
+    expect(
+      guide['referenceGenerationId'],
+      'd730719be8654c93bddd639a96da7417',
+    );
+    expect(guide['exactProviderVoiceId'], isNull);
+    expect(guide['renderBlockedUntilVoiceIdIsRecovered'], isTrue);
+
+    final sessions = (manifest['sessions']! as List<Object?>)
+        .cast<Map<String, Object?>>();
+    expect(sessions, hasLength(50));
+    expect(sessions.where((session) => session['isEmergency'] == true), hasLength(1));
+
+    final equalRhythm = sessions.singleWhere(
+      (session) => session['id'] == 'equal-rhythm',
+    );
+    expect(equalRhythm['programType'], 'pacedBreathing');
+    final pattern = equalRhythm['breathPattern']! as Map<String, Object?>;
+    expect(pattern['inhaleSeconds'], 5);
+    expect(pattern['exhaleSeconds'], 5);
+
+    final steps =
+        (equalRhythm['steps']! as List<Object?>).cast<Map<String, Object?>>();
+    expect(
+      steps.first['targetAssetPath'],
+      'narration/releaf-guide/reset/equal-rhythm/main/01-settle.mp3',
+    );
+    expect(steps.first['spokenGuidance'], steps.first['screenGuidance']);
+
+    final file = await writeResetNarrationManifest(
+      'build/qa-manifests/reset-releaf-guide-manifest.json',
+    );
+    expect(file.existsSync(), isTrue);
+    final decoded = jsonDecode(await file.readAsString());
+    expect(decoded, isA<Map>());
+    expect((decoded as Map)['resetSessionCount'], 50);
+  });
+}

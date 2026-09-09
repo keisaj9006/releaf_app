@@ -6,9 +6,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../core/audio/releaf_guide_contract.dart';
 import '../../../core/providers.dart';
 
-const double releafNarrationSpeedMultiplier = 0.75;
+const double releafNarrationSpeedMultiplier =
+    releafGuideNarrationSpeedMultiplier;
 const double releafFlutterTtsNeutralRate = 0.50;
 const double releafFlutterTtsSpeechRate =
     releafFlutterTtsNeutralRate * releafNarrationSpeedMultiplier;
@@ -68,7 +70,7 @@ class FlutterMeditationVoiceDriver implements MeditationVoiceDriver {
       await _tts.setLanguage('en-GB');
       await _preferCalmFemaleVoice();
 
-      // Releaf narration runs at 0.75x of the plugin's neutral 0.50
+      // Releaf narration runs at 0.82x of the plugin's neutral 0.50
       // baseline. Recorded narration should be authored to the same pacing.
       await _tts.setSpeechRate(releafFlutterTtsSpeechRate);
       await _tts.setPitch(0.93);

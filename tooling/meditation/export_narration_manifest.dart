@@ -1,18 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:releaf_app/core/audio/releaf_guide_contract.dart';
 import 'package:releaf_app/features/meditation/data/meditation_catalog.dart';
 
-const _guideProfile = <String, Object?>{
-  'name': 'Releaf Guide',
-  'provider': 'ElevenCreative',
-  'voice': 'selected female British-English meditation narrator',
-  'delivery': 'natural, warm, calm, intimate, premium; no whisper or ASMR',
-  'speedReference': 0.82,
-  'referenceGenerationId': 'd730719be8654c93bddd639a96da7417',
-  'exactProviderVoiceId': null,
-  'renderBlockedUntilVoiceIdIsRecovered': true,
-};
 
 String _slug(String value) {
   final lower = value.toLowerCase().trim();
@@ -103,7 +94,7 @@ Map<String, Object?> buildNarrationManifest() {
 
   return {
     'schemaVersion': 1,
-    'guideProfile': _guideProfile,
+    'guideProfile': releafGuideProductionProfile,
     'guidedSessionCount': sessions.length,
     'totalStepCount': totalSteps,
     'recordedStepCount': recordedSteps,

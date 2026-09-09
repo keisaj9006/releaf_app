@@ -1,21 +1,27 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:releaf_app/features/meditation/application/meditation_voice_controller.dart';
 import 'package:releaf_app/features/relief/application/reset_audio_preferences.dart';
 import 'package:releaf_app/features/relief/domain/models/reset_launch_options.dart';
 
 void main() {
-  test('Reset device voice is opt-in by default', () async {
+  test('Meditation and Reset share the locked 0.82x Releaf Guide pacing', () {
+    expect(releafNarrationSpeedMultiplier, 0.82);
+    expect(releafFlutterTtsSpeechRate, closeTo(0.41, 0.0001));
+  });
+
+  test('Reset Releaf Guide voice is on by default', () async {
     SharedPreferences.setMockInitialValues(<String, Object>{});
     final preferences = await SharedPreferences.getInstance();
     final controller = ResetAudioPreferencesController(preferences);
 
-    expect(controller.state.voiceEnabled, isFalse);
+    expect(controller.state.voiceEnabled, isTrue);
   });
 
-  test('Reset launch options also keep device voice off by default', () {
+  test('Reset launch options also keep voice guidance on by default', () {
     const options = ResetLaunchOptions();
-    expect(options.voiceGuidanceEnabled, isFalse);
+    expect(options.voiceGuidanceEnabled, isTrue);
     expect(options.ambientSoundEnabled, isTrue);
   });
 
