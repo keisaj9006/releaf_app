@@ -595,7 +595,6 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen>
                         timeLeft: _timeLeft,
                         wallHits: _wallHits,
                         entryLabel: _level.entryLabel,
-                        routeMoves: _level.shortestPathMoves,
                         started: _started,
                         paused: _paused,
                         motionAvailable: _motionAvailable,
@@ -664,7 +663,11 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen>
                               subtitle:
                                   'Your current route and timer will reset.',
                               stats: [
-                                ('Level', 'L$_levelNumber'),
+                                (
+                                  'Maze',
+                                  '$_mazeStage/$maxLabyrinthMazeStages',
+                                ),
+                                ('Brain level', 'L$_levelNumber'),
                                 ('Time left', '${_timeLeft}s'),
                               ],
                               primaryLabel: 'Restart',
@@ -1315,7 +1318,6 @@ class _MazeHeader extends StatelessWidget {
     required this.timeLeft,
     required this.wallHits,
     required this.entryLabel,
-    required this.routeMoves,
     required this.started,
     required this.paused,
     required this.motionAvailable,
@@ -1328,7 +1330,6 @@ class _MazeHeader extends StatelessWidget {
   final int timeLeft;
   final int wallHits;
   final String entryLabel;
-  final int routeMoves;
   final bool started;
   final bool paused;
   final bool motionAvailable;
@@ -1399,7 +1400,6 @@ class _MazeHeader extends StatelessWidget {
               ),
               _MazeStat(label: 'WALLS', value: '$wallHits'),
               _MazeStat(label: 'ENTRY', value: entryLabel),
-              _MazeStat(label: 'ROUTE', value: '$routeMoves'),
               _MazeStat(
                 label: 'CONTROL',
                 value: motionAvailable ? 'Tilt + touch' : 'Touch',
