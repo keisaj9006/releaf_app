@@ -5,13 +5,14 @@ import 'package:releaf_app/core/subscription/revenuecat_service.dart';
 import 'package:releaf_app/core/subscription/subscription_controller.dart';
 
 void main() {
-  test('subscription controller attaches and detaches RevenueCat updates', () {
+  test('subscription controller attaches and detaches RevenueCat updates', () async {
     final service = _ListenerTrackingRevenueCatService();
     final controller = SubscriptionController(service);
 
     expect(service.addCalls, 1);
     expect(service.listener, isNotNull);
 
+    await controller.refresh();
     controller.dispose();
 
     expect(service.removeCalls, 1);
@@ -31,7 +32,6 @@ void main() {
     );
   });
 
-
   test('owner Premium preview keeps entitlement active without RevenueCat', () async {
     final controller = SubscriptionController(
       RevenueCatService(),
@@ -48,7 +48,6 @@ void main() {
     expect(controller.state.error, isNull);
   });
 }
-
 
 class _ListenerTrackingRevenueCatService extends RevenueCatService {
   CustomerInfoUpdateListener? listener;
