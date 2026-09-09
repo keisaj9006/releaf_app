@@ -656,6 +656,37 @@ void main() {
     expect(restored.state.totalSessions, 170);
   });
 
+  testWidgets('Game host opens the persisted Labyrinth maze stage', (
+    WidgetTester tester,
+  ) async {
+    SharedPreferences.setMockInitialValues(<String, Object>{
+      'brain.training.completion_counts.v1': <String>['labyrinth|22'],
+    });
+    final preferences = await SharedPreferences.getInstance();
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(preferences),
+        ],
+        child: const MaterialApp(
+          home: GameHostScreen(gameId: 'labyrinth'),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    final game = tester.widget<LabirynthGameScreen>(
+      find.byType(LabirynthGameScreen),
+    );
+    expect(game.mazeStage, 23);
+    expect(game.trainingLevel, maxBrainTrainingLevel);
+    expect(find.text('23/50'), findsOneWidget);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
+  });
+
   testWidgets('Game host injects the saved persistent training level', (
     WidgetTester tester,
   ) async {
