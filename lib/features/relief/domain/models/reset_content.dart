@@ -8,6 +8,8 @@ enum ResetModality { breathing, grounding, guidedPractice }
 
 enum ResetAccessTier { free, premium }
 
+enum ResetDemoRequirement { none, movementTechnique }
+
 enum ResetVisualType {
   livingForm,
   sensoryHalo,
@@ -36,6 +38,7 @@ class ResetContent {
   final QuickResetCategory? quickCategory;
   final ResetModality modality;
   final ResetAccessTier accessTier;
+  final ResetDemoRequirement demoRequirement;
   final List<String> instructions;
   final String? audioAsset;
   final String? summary;
@@ -55,6 +58,7 @@ class ResetContent {
     required this.modality,
     required this.accessTier,
     required this.instructions,
+    this.demoRequirement = ResetDemoRequirement.none,
     this.quickCategory,
     this.audioAsset,
     this.summary,
@@ -80,6 +84,8 @@ class ResetContent {
        );
 
   bool get isEmergency => level == ResetLevel.emergency;
+  bool get requiresMovementDemo =>
+      demoRequirement == ResetDemoRequirement.movementTechnique;
   bool get isPremium => accessTier == ResetAccessTier.premium;
   bool get isLegacyCompatible =>
       taxonomyStatus == ResetTaxonomyStatus.legacyCompatible;
