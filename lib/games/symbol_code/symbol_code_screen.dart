@@ -12,16 +12,21 @@ class SymbolCodeScreen extends StatefulWidget {
     super.key,
     required this.onFinish,
     this.trainingLevel = 1,
+    this.stopwatch,
   });
 
   final ValueChanged<int?> onFinish;
   final int trainingLevel;
 
+  /// Injectable so lifecycle timing can be verified deterministically.
+  final Stopwatch? stopwatch;
+
   @override
   State<SymbolCodeScreen> createState() => _SymbolCodeScreenState();
 }
 
-class _SymbolCodeScreenState extends State<SymbolCodeScreen> {
+class _SymbolCodeScreenState extends State<SymbolCodeScreen>
+    with WidgetsBindingObserver {
   static const _accent = Color(0xFF8CC8FF);
   static const _symbols = <String>[
     '●',
@@ -44,7 +49,8 @@ class _SymbolCodeScreenState extends State<SymbolCodeScreen> {
   int _correct = 0;
   int _mistakes = 0;
   bool _locked = false;
-  final Stopwatch _stopwatch = Stopwatch();
+  late final Stopwatch _stopwatch;
+  bool _resumeStopwatchAfterLifecyclePause = false;
   String _feedback = 'Use the key to decode each symbol. Accuracy comes first.';
 
   int get _trainingLevel => widget.trainingLevel.clamp(1, 12).toInt();
@@ -97,11 +103,36 @@ class _SymbolCodeScreenState extends State<SymbolCodeScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _stopwatch = widget.stopwatch ?? Stopwatch();
     _buildSession();
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      if (_resumeStopwatchAfterLifecyclePause && !_stopwatch.isRunning) {
+        _resumeStopwatchAfterLifecyclePause = false;
+        _stopwatch.start();
+      }
+      return;
+    }
+
+    if (state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.paused ||
+        state == AppLifecycleState.hidden ||
+        state == AppLifecycleState.detached) {
+      if (_stopwatch.isRunning) {
+        _resumeStopwatchAfterLifecyclePause = true;
+        _stopwatch.stop();
+      }
+    }
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _resumeStopwatchAfterLifecyclePause = false;
     _stopwatch.stop();
     super.dispose();
   }
@@ -143,6 +174,7 @@ class _SymbolCodeScreenState extends State<SymbolCodeScreen> {
     _correct = 0;
     _mistakes = 0;
     _locked = false;
+    _resumeStopwatchAfterLifecyclePause = false;
     _stopwatch
       ..stop()
       ..reset();

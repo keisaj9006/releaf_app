@@ -1630,6 +1630,49 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('Symbol Code excludes background time from its stopwatch', (
+    WidgetTester tester,
+  ) async {
+    final stopwatch = Stopwatch();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SymbolCodeScreen(
+          onFinish: (_) {},
+          stopwatch: stopwatch,
+        ),
+      ),
+    );
+    await tester.pump();
+
+    final firstAnswer = find
+        .descendant(
+          of: find.byKey(const Key('symbol-code-options')),
+          matching: find.byType(FilledButton),
+        )
+        .first;
+    await tester.tap(firstAnswer);
+    await tester.pump();
+
+    expect(stopwatch.isRunning, isTrue);
+
+    tester.binding.handleAppLifecycleStateChanged(
+      AppLifecycleState.paused,
+    );
+    await tester.pump();
+    expect(stopwatch.isRunning, isFalse);
+
+    tester.binding.handleAppLifecycleStateChanged(
+      AppLifecycleState.resumed,
+    );
+    await tester.pump();
+    expect(stopwatch.isRunning, isTrue);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
+    expect(stopwatch.isRunning, isFalse);
+  });
+
   testWidgets('Symbol Code scales mapping and answer set by difficulty', (
     WidgetTester tester,
   ) async {
