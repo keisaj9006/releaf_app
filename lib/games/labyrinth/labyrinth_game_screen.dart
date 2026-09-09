@@ -17,6 +17,13 @@ const double _labyrinthIdleDamping = 0.88;
 const double _labyrinthMaxSpeed = 0.058;
 const double _labyrinthStopSpeed = 0.0012;
 
+@visibleForTesting
+double labyrinthBallRadiusForLevel(int rawLevel) {
+  final level = rawLevel.clamp(1, 12).toInt();
+  final progress = (level - 1) / 11.0;
+  return 0.19 - (0.05 * progress);
+}
+
 Offset _nextLabyrinthVelocity({
   required Offset velocity,
   required Offset tilt,
@@ -88,7 +95,6 @@ class LabirynthGameScreen extends StatefulWidget {
 class _LabirynthGameScreenState extends State<LabirynthGameScreen>
     with WidgetsBindingObserver {
   static const int _maxTrainingLevel = 12;
-  static const double _ballRadius = 0.18;
   static const double _wallThickness = 0.075;
   static const Duration _physicsStep = Duration(milliseconds: 16);
   static const int _motionCalibrationSampleTarget = 12;
@@ -321,7 +327,8 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen>
   }
 
   bool _canOccupy(Offset point) {
-    final r = _ballRadius + (_wallThickness / 2);
+    final r = labyrinthBallRadiusForLevel(_levelNumber) +
+        (_wallThickness / 2);
 
     if (point.dx - r <= 0 ||
         point.dy - r <= 0 ||
@@ -670,6 +677,7 @@ class LabyrinthLevelProfile {
     required this.shortestPathTurns,
     required this.deadEnds,
     required this.timeLimitSeconds,
+    required this.ballRadius,
   });
 
   final int level;
@@ -679,6 +687,7 @@ class LabyrinthLevelProfile {
   final int shortestPathTurns;
   final int deadEnds;
   final int timeLimitSeconds;
+  final double ballRadius;
 }
 
 @visibleForTesting
@@ -692,6 +701,7 @@ LabyrinthLevelProfile labyrinthLevelProfileForTesting(int level) {
     shortestPathTurns: maze.shortestPathTurns,
     deadEnds: maze.deadEnds,
     timeLimitSeconds: maze.timeLimitSeconds,
+    ballRadius: labyrinthBallRadiusForLevel(maze.level),
   );
 }
 
@@ -1209,7 +1219,8 @@ class _MazeBoardPainter extends CustomPainter {
       position.dy / level.rows * size.height,
     );
     final ballRadius =
-        math.min(cellWidth, cellHeight).toDouble() * 0.18;
+        math.min(cellWidth, cellHeight).toDouble() *
+            labyrinthBallRadiusForLevel(level.level);
 
     canvas.drawCircle(
       ball,

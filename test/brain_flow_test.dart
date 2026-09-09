@@ -732,6 +732,9 @@ void main() {
     );
     expect(profiles.first.timeLimitSeconds, greaterThanOrEqualTo(50));
     expect(profiles.last.timeLimitSeconds, lessThanOrEqualTo(150));
+    expect(profiles.last.ballRadius, lessThan(profiles.first.ballRadius));
+    expect(profiles.first.ballRadius, closeTo(0.19, 0.0001));
+    expect(profiles.last.ballRadius, closeTo(0.14, 0.0001));
 
     for (final profile in profiles) {
       expect(profile.shortestPathMoves, greaterThan(0), reason: 'L${profile.level}');
