@@ -39,12 +39,6 @@ void main() {
     final file = await writeNarrationManifest(
       'build/qa-manifests/releaf-guide-manifest.json',
     );
-    addTearDown(() {
-      if (file.existsSync()) {
-        file.deleteSync();
-      }
-    });
-
     expect(file.existsSync(), isTrue);
     final decoded = jsonDecode(await file.readAsString());
     expect(decoded, isA<Map>());
