@@ -40,6 +40,14 @@ Initial event kinds:
 - `meditationOpened`
 - `resetSessionCompleted`
 
+The event id includes a persistent random 128-bit `clientInstanceId`
+generated locally per app installation. This prevents two devices from producing
+the same event id even if they record the same entity at the same timestamp.
+
+The client instance id is a deduplication primitive only. It is not a user id,
+advertising id or analytics identity and should not be used for behavioural
+tracking.
+
 Each event contains:
 
 - globally unique client event id;

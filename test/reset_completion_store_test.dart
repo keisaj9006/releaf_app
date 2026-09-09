@@ -33,6 +33,7 @@ void main() {
     expect(store.state.single.completedAt, now);
 
     expect(sync.state, hasLength(1));
+    expect(record.id, contains(sync.clientInstanceId));
     expect(sync.state.single.id, record.id);
     expect(
       sync.state.single.kind,

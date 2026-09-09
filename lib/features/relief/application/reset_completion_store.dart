@@ -129,13 +129,23 @@ class ResetCompletionStore
     }
 
     final when = (completedAt ?? _now()).toUtc();
+    final syncEvent = _syncEvents?.createEvent(
+      kind: ProgressSyncEventKind.resetSessionCompleted,
+      entityId: safeSessionId,
+      occurredAt: when,
+      payload: <String, Object?>{
+        'durationSeconds': durationSeconds,
+      },
+    );
+
     final record = ResetCompletionRecord(
-      id: [
-        'reset-v1',
-        when.microsecondsSinceEpoch,
-        Uri.encodeComponent(safeSessionId),
-        _sequence++,
-      ].join(':'),
+      id: syncEvent?.id ??
+          [
+            'reset-local-v1',
+            when.microsecondsSinceEpoch,
+            Uri.encodeComponent(safeSessionId),
+            _sequence++,
+          ].join(':'),
       sessionId: safeSessionId,
       completedAt: when,
       durationSeconds: durationSeconds,
@@ -154,19 +164,9 @@ class ResetCompletionStore
       state = List<ResetCompletionRecord>.unmodifiable(next);
 
       final syncEvents = _syncEvents;
-      if (syncEvents != null) {
+      if (syncEvents != null && syncEvent != null) {
         try {
-          await syncEvents.append(
-            ProgressSyncEvent(
-              id: record.id,
-              kind: ProgressSyncEventKind.resetSessionCompleted,
-              entityId: safeSessionId,
-              occurredAt: when,
-              payload: <String, Object?>{
-                'durationSeconds': durationSeconds,
-              },
-            ),
-          );
+          await syncEvents.append(syncEvent);
         } catch (_) {
           // Local completion is the source of truth. Sync journaling must never
           // turn a completed Reset into a failed user action.
