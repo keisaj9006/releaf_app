@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:releaf_app/core/providers.dart';
+import 'package:releaf_app/features/relief/application/reset_completion_store.dart';
 import 'package:releaf_app/features/relief/data/reset_catalog.dart';
 import 'package:releaf_app/features/relief/domain/models/reset_content.dart';
 import 'package:releaf_app/routing/app_router.dart';
@@ -12,6 +13,36 @@ import 'package:releaf_app/routing/app_routes.dart';
 
 Future<SharedPreferences> _preferences() async {
   SharedPreferences.setMockInitialValues({});
+  return SharedPreferences.getInstance();
+}
+
+Future<SharedPreferences> _preferencesWithResetHistory() async {
+  final now = DateTime.now().toUtc();
+  final records = <ResetCompletionRecord>[
+    ResetCompletionRecord(
+      id: 'reset-test-1',
+      sessionId: 'equal-rhythm',
+      completedAt: now,
+      durationSeconds: 120,
+    ),
+    ResetCompletionRecord(
+      id: 'reset-test-2',
+      sessionId: 'back-to-room',
+      completedAt: now.subtract(const Duration(days: 2)),
+      durationSeconds: 180,
+    ),
+    ResetCompletionRecord(
+      id: 'reset-test-3',
+      sessionId: 'equal-rhythm',
+      completedAt: now.subtract(const Duration(days: 2, hours: 1)),
+      durationSeconds: 120,
+    ),
+  ];
+
+  SharedPreferences.setMockInitialValues(<String, Object>{
+    'reset.completions.v1':
+        records.map((record) => record.encode()).toList(growable: false),
+  });
   return SharedPreferences.getInstance();
 }
 
@@ -73,6 +104,31 @@ void main() {
     expect(find.byKey(const Key('reset-deep-rail')), findsOneWidget);
     expect(find.byKey(const Key('reset-sound-gateway')), findsOneWidget);
     expect(find.byKey(const Key('reset-emergency-action')), findsOneWidget);
+    expect(find.byKey(const Key('reset-progress-card')), findsNothing);
+  });
+
+  testWidgets('Reset progress appears only after real completion history exists', (
+    WidgetTester tester,
+  ) async {
+    await _pumpResetHub(
+      tester,
+      preferences: await _preferencesWithResetHistory(),
+    );
+
+    final progressCard = find.byKey(const Key('reset-progress-card'));
+    await tester.ensureVisible(progressCard);
+    await tester.pumpAndSettle();
+
+    expect(progressCard, findsOneWidget);
+    expect(find.text('YOUR RESET PRACTICE'), findsOneWidget);
+    expect(find.byKey(const Key('reset-progress-week')), findsOneWidget);
+    expect(find.byKey(const Key('reset-progress-days')), findsOneWidget);
+    expect(find.byKey(const Key('reset-progress-total')), findsOneWidget);
+    expect(find.text('This week'), findsOneWidget);
+    expect(find.text('Active days'), findsOneWidget);
+    expect(find.text('All time'), findsOneWidget);
+    expect(find.text('3'), findsNWidgets(2));
+    expect(find.text('2'), findsOneWidget);
   });
 
   testWidgets('Quick Reset categories are populated and actionable', (
