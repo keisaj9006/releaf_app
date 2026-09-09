@@ -10,6 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'core/providers.dart';
+import 'core/subscription/revenuecat_auth_identity_coordinator.dart';
 import 'features/sound/application/releaf_background_sound_driver.dart';
 import 'features/sound/application/sound_player_controller.dart';
 import 'routing/app_router.dart';
@@ -106,14 +107,14 @@ String _revenueCatApiKeyForCurrentPlatform() {
   }
 }
 
-class ReleafApp extends StatefulWidget {
+class ReleafApp extends ConsumerStatefulWidget {
   const ReleafApp({super.key});
 
   @override
-  State<ReleafApp> createState() => _ReleafAppState();
+  ConsumerState<ReleafApp> createState() => _ReleafAppState();
 }
 
-class _ReleafAppState extends State<ReleafApp> {
+class _ReleafAppState extends ConsumerState<ReleafApp> {
   StreamSubscription<AuthState>? _authSubscription;
 
   @override
@@ -121,11 +122,23 @@ class _ReleafAppState extends State<ReleafApp> {
     super.initState();
 
     try {
-      _authSubscription =
-          Supabase.instance.client.auth.onAuthStateChange.listen((state) {
+      final auth = Supabase.instance.client.auth;
+      final premiumIdentity =
+          RevenueCatAuthIdentityCoordinator.forService(
+        service: ref.read(revenueCatServiceProvider),
+        refreshSubscriptions: () =>
+            ref.read(subscriptionControllerProvider.notifier).refresh(),
+        initialUserId: auth.currentUser?.id,
+      );
+
+      _authSubscription = auth.onAuthStateChange.listen((state) {
         if (state.event == AuthChangeEvent.passwordRecovery) {
           appRouter.go(AppRoutes.passwordReset);
         }
+
+        unawaited(
+          premiumIdentity.syncUser(state.session?.user.id),
+        );
       });
     } catch (_) {
       // Widget tests may intentionally build the app without Supabase.initialize.

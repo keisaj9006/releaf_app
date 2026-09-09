@@ -81,7 +81,6 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
             );
 
       if (result.user != null) {
-        await _syncPremiumIdentity(result.user!.id);
         if (mounted) {
           setState(() {
             _pendingConfirmationEmail = null;
@@ -161,11 +160,6 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
     }
   }
 
-  Future<void> _syncPremiumIdentity(String userId) async {
-    await ref.read(revenueCatServiceProvider).identifyUser(userId);
-    await ref.read(subscriptionControllerProvider.notifier).refresh();
-  }
-
   Future<void> _signOut() async {
     setState(() {
       _working = true;
@@ -174,8 +168,6 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
     });
     try {
       await ref.read(accountAuthServiceProvider).signOut();
-      await ref.read(revenueCatServiceProvider).clearUserIdentity();
-      await ref.read(subscriptionControllerProvider.notifier).refresh();
     } catch (error) {
       if (mounted) setState(() => _errorMessage = _friendlyError(error));
     } finally {
@@ -220,8 +212,6 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
 
     try {
       await ref.read(accountAuthServiceProvider).deleteAccount();
-      await ref.read(revenueCatServiceProvider).clearUserIdentity();
-      await ref.read(subscriptionControllerProvider.notifier).refresh();
       if (!mounted) return;
       setState(() {
         _statusMessage =
