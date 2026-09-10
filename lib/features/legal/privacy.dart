@@ -88,7 +88,21 @@ class PrivacyScreen extends StatelessWidget {
                     icon: Icons.workspace_premium_outlined,
                     title: 'Premium access',
                     body:
-                        'RevenueCat and the app-store provider are used to determine subscription and entitlement status. Payment-card details are handled by the store provider rather than by Releaf.',
+                        'RevenueCat and Google Play are used to provide Premium. RevenueCat processes purchase history and a Releaf account identifier when you are signed in so Releaf can determine subscription and entitlement status. Payment-card details are handled by Google Play rather than by Releaf.',
+                  ),
+                  const SizedBox(height: ReleafSpacing.md),
+                  const _PrivacySection(
+                    icon: Icons.screen_rotation_alt_rounded,
+                    title: 'Device motion',
+                    body:
+                        'Labyrinth can read your device accelerometer to control the ball. Those motion samples are used on-device for gameplay and are not sent to the Releaf backend or RevenueCat.',
+                  ),
+                  const SizedBox(height: ReleafSpacing.md),
+                  const _PrivacySection(
+                    icon: Icons.lock_outline_rounded,
+                    title: 'Secure transfer',
+                    body:
+                        'Network requests Releaf makes to Supabase and RevenueCat use encrypted HTTPS connections. Payment communication is handled by Google Play.',
                   ),
                   const SizedBox(height: ReleafSpacing.md),
                   const _PrivacySection(
@@ -102,7 +116,7 @@ class PrivacyScreen extends StatelessWidget {
                     icon: Icons.delete_outline_rounded,
                     title: 'Deleting your account',
                     body:
-                        'A signed-in user can permanently delete their Releaf account from the Account screen. Remote account data associated through Releaf is deleted through the account service. Local progress on this device remains unless app data is cleared or the app is uninstalled.',
+                        'A signed-in user can permanently delete their Releaf account from the Account screen. The account service first requests deletion of the matching RevenueCat customer and then deletes the Supabase account and associated account records. Local progress on this device remains unless app data is cleared or the app is uninstalled.',
                   ),
                   const SizedBox(height: ReleafSpacing.md),
                   const _PrivacySection(
