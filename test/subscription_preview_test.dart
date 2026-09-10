@@ -1,6 +1,8 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 
+import 'package:releaf_app/core/subscription/revenuecat_lifecycle_policy.dart';
 import 'package:releaf_app/core/subscription/revenuecat_service.dart';
 import 'package:releaf_app/core/subscription/subscription_controller.dart';
 
@@ -94,6 +96,37 @@ void main() {
         fetchedIsPremium: true,
       ),
       isTrue,
+    );
+  });
+
+  test('Premium refreshes on resume only when RevenueCat is ready', () {
+    expect(
+      shouldRefreshRevenueCatOnLifecycle(
+        state: AppLifecycleState.resumed,
+        isRevenueCatInitialized: true,
+      ),
+      isTrue,
+    );
+    expect(
+      shouldRefreshRevenueCatOnLifecycle(
+        state: AppLifecycleState.resumed,
+        isRevenueCatInitialized: false,
+      ),
+      isFalse,
+    );
+    expect(
+      shouldRefreshRevenueCatOnLifecycle(
+        state: AppLifecycleState.paused,
+        isRevenueCatInitialized: true,
+      ),
+      isFalse,
+    );
+    expect(
+      shouldRefreshRevenueCatOnLifecycle(
+        state: AppLifecycleState.inactive,
+        isRevenueCatInitialized: true,
+      ),
+      isFalse,
     );
   });
 }

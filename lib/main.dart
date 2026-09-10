@@ -11,6 +11,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'core/providers.dart';
 import 'core/subscription/revenuecat_auth_identity_coordinator.dart';
+import 'core/subscription/revenuecat_lifecycle_policy.dart';
 import 'features/sound/application/releaf_background_sound_driver.dart';
 import 'features/sound/application/sound_player_controller.dart';
 import 'routing/app_router.dart';
@@ -114,12 +115,14 @@ class ReleafApp extends ConsumerStatefulWidget {
   ConsumerState<ReleafApp> createState() => _ReleafAppState();
 }
 
-class _ReleafAppState extends ConsumerState<ReleafApp> {
+class _ReleafAppState extends ConsumerState<ReleafApp>
+    with WidgetsBindingObserver {
   StreamSubscription<AuthState>? _authSubscription;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
 
     try {
       final auth = Supabase.instance.client.auth;
@@ -146,7 +149,23 @@ class _ReleafAppState extends ConsumerState<ReleafApp> {
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    final revenueCat = ref.read(revenueCatServiceProvider);
+    if (!shouldRefreshRevenueCatOnLifecycle(
+      state: state,
+      isRevenueCatInitialized: revenueCat.isInitialized,
+    )) {
+      return;
+    }
+
+    unawaited(
+      ref.read(subscriptionControllerProvider.notifier).refresh(),
+    );
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _authSubscription?.cancel();
     super.dispose();
   }
