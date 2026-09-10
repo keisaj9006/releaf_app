@@ -22,6 +22,16 @@ bool resolvePremiumAfterRefresh({
   return fetchedIsPremium ?? currentIsPremium;
 }
 
+/// Releaf 1.0 intentionally sells only the explicitly supported annual and
+/// monthly packages. If RevenueCat is misconfigured, fail closed instead of
+/// silently exposing an arbitrary custom/legacy package to customers.
+List<T> orderedPremiumPackages<T>({T? annual, T? monthly}) {
+  final result = <T>[];
+  if (annual != null) result.add(annual);
+  if (monthly != null) result.add(monthly);
+  return List<T>.unmodifiable(result);
+}
+
 class SubscriptionController extends StateNotifier<SubscriptionState> {
   final RevenueCatService _service;
   final bool _premiumPreview;
@@ -163,15 +173,11 @@ class SubscriptionController extends StateNotifier<SubscriptionState> {
 
   List<Package> getOrderedPackages() {
     final current = state.offerings?.current;
-    if (current == null) return [];
+    if (current == null) return const <Package>[];
 
-    final list = <Package>[];
-    if (current.annual != null) list.add(current.annual!);
-    if (current.monthly != null) list.add(current.monthly!);
-
-    if (list.isEmpty && current.availablePackages.isNotEmpty) {
-      list.add(current.availablePackages.first);
-    }
-    return list;
+    return orderedPremiumPackages<Package>(
+      annual: current.annual,
+      monthly: current.monthly,
+    );
   }
 }

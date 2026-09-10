@@ -177,6 +177,24 @@ void main() {
       'Premium store setup is unavailable in this build.',
     );
   });
+
+  test('Premium offer exposes only annual then monthly packages', () {
+    expect(
+      orderedPremiumPackages<String>(
+        annual: 'annual',
+        monthly: 'monthly',
+      ),
+      <String>['annual', 'monthly'],
+    );
+    expect(
+      orderedPremiumPackages<String>(monthly: 'monthly'),
+      <String>['monthly'],
+    );
+  });
+
+  test('Premium offer fails closed when supported packages are missing', () {
+    expect(orderedPremiumPackages<String>(), isEmpty);
+  });
 }
 
 class _ListenerTrackingRevenueCatService extends RevenueCatService {
