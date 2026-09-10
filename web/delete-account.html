@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="index,follow">
+  <meta name="description" content="Request permanent deletion of your Releaf account and associated server-side account data.">
+  <title>Delete your Releaf account</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #111915;
+      color: #f4f4ec;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 15% 5%, rgba(124, 155, 126, .22), transparent 34rem),
+        linear-gradient(180deg, #111915 0%, #0b100e 100%);
+    }
+    main {
+      width: min(720px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 56px 0 72px;
+    }
+    .brand {
+      margin: 0 0 18px;
+      color: #a9c6a9;
+      font-size: .82rem;
+      font-weight: 800;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+    .card {
+      padding: clamp(24px, 5vw, 44px);
+      border: 1px solid rgba(255, 255, 255, .10);
+      border-radius: 28px;
+      background: rgba(24, 35, 29, .92);
+      box-shadow: 0 24px 80px rgba(0, 0, 0, .28);
+    }
+    h1 {
+      margin: 0;
+      max-width: 14ch;
+      font-size: clamp(2rem, 7vw, 3.65rem);
+      line-height: 1.02;
+      letter-spacing: -.045em;
+    }
+    .lead {
+      margin: 22px 0 0;
+      color: #d8ddd8;
+      font-size: 1.06rem;
+      line-height: 1.7;
+    }
+    .notice {
+      margin: 28px 0;
+      padding: 18px 20px;
+      border-radius: 18px;
+      background: rgba(169, 198, 169, .09);
+      color: #e7ece7;
+      line-height: 1.6;
+    }
+    ol {
+      margin: 26px 0 30px;
+      padding-left: 1.35rem;
+      color: #d8ddd8;
+      line-height: 1.75;
+    }
+    li + li { margin-top: 8px; }
+    .cta {
+      display: inline-flex;
+      min-height: 52px;
+      align-items: center;
+      justify-content: center;
+      padding: 0 22px;
+      border-radius: 16px;
+      background: #b9d3b8;
+      color: #102016;
+      font-weight: 800;
+      text-decoration: none;
+      transition: transform .15s ease, filter .15s ease;
+    }
+    .cta:hover { transform: translateY(-1px); filter: brightness(1.04); }
+    .cta:focus-visible { outline: 3px solid #f4f4ec; outline-offset: 4px; }
+    .small {
+      margin: 22px 0 0;
+      color: #aeb9b1;
+      font-size: .92rem;
+      line-height: 1.65;
+    }
+    strong { color: #ffffff; }
+  </style>
+</head>
+<body>
+  <main>
+    <p class="brand">Releaf account control</p>
+    <section class="card" aria-labelledby="page-title">
+      <h1 id="page-title">Delete your Releaf account</h1>
+      <p class="lead">
+        You can permanently delete your Releaf account through our secure browser flow.
+        <strong>You do not need the Android app installed.</strong>
+      </p>
+
+      <div class="notice">
+        For security, Releaf asks you to sign in before an account can be permanently deleted.
+        The deletion action is performed for the authenticated account only.
+      </div>
+
+      <ol>
+        <li>Open the secure Releaf account page using the button below.</li>
+        <li>Sign in with the email address and password for the account you want to delete.</li>
+        <li>Select <strong>Delete account</strong>.</li>
+        <li>Confirm <strong>Delete permanently</strong>.</li>
+      </ol>
+
+      <a class="cta" href="/#/account">Continue to secure account deletion</a>
+
+      <p class="small">
+        If you cannot sign in, use <strong>Forgot password?</strong> on the secure account page first.
+        After successful deletion, the Releaf account and account-associated server data handled by
+        the account service are deleted. Data that exists only on a user's device is not remotely
+        accessible to Releaf and must be managed through that device's app/storage controls.
+      </p>
+    </section>
+  </main>
+</body>
+</html>
