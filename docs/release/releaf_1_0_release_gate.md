@@ -28,10 +28,10 @@ When that state is reached, explicitly report:
 | Emergency privacy/access | DONE | No Premium gate; excluded from standard progress sync and DB-enforced exclusion is present. |
 | Progress sync | DEFERRED / HARDENED | Local progress remains the user-facing truth for 1.0. Upload/download/reconciliation primitives remain inactive until materialization + multi-device conflict tests are complete. Do not claim cloud backup. |
 | Supabase security | DONE / MONITOR | RLS is enabled on product tables and current Supabase security advisor reports no lints. |
-| Android API level | PREPARED | Release baseline explicitly targets Android 16 / API 36. Must pass signed release-AAB CI smoke test before CLOSED. |
+| Android API level | DONE | Release baseline explicitly targets Android 16 / API 36 and has passed signed release-AAB CI smoke validation. |
 | Android release signing | PREPARED / SECRET REQUIRED | Debug signing is forbidden for release. Production upload keystore must remain private and be configured before store upload. |
-| Release AAB | PREPARED | CI release-bundle smoke build is being added with an ephemeral CI-only key. Production bundle still requires the private upload key. |
-| RevenueCat / Google Play Billing | BLOCKED | `REVENUECAT_ANDROID_API_KEY` is currently absent from CI. Real Play products, entitlement, purchase and restore must be verified on a Play-distributed build. |
+| Release AAB | CI DONE / PROD SIGNING REQUIRED | CI builds and validates a signed release AAB, including 16 KB compatibility. Final Play artifact still requires the private production upload key. |
+| RevenueCat / Google Play Billing | CODE READY / EXTERNAL CONFIG REQUIRED | Runtime billing hardening covers entitlement refresh, account-switch isolation, normalized store failures, annual/monthly package gating, restore and subscription management. Release tooling rejects missing, Test Store, secret, Apple, wrong-prefix, whitespace and implausibly short RevenueCat keys. Final closure requires the real `goog_` SDK key, active Play products/current RevenueCat Offering and purchase + restore verification from a Play-distributed test build. |
 | Privacy policy | BLOCKED | In-app screen is still explicitly development copy. Final controller/contact details, retention and public HTTPS privacy-policy URL are required. |
 | Web account-deletion URL | BLOCKED | Google Play account-deletion disclosure needs a public HTTPS deletion/request page in addition to in-app deletion. |
 | Google Play health declaration | OPEN | Complete declaration and keep store claims wellness/recovery-support appropriate; avoid unsupported medical/clinical claims. |
