@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -51,5 +53,21 @@ void main() {
     expect(find.byKey(const Key('privacy-open-policy')), findsNothing);
     expect(find.byKey(const Key('privacy-open-deletion')), findsNothing);
     expect(tester.takeException(), isNull);
+  });
+
+  test('privacy disclosure stays aligned with the Data Safety release mapping', () {
+    final privacySource = File(
+      'lib/features/legal/privacy.dart',
+    ).readAsStringSync();
+
+    expect(privacySource, contains('purchase history'));
+    expect(privacySource, contains('Releaf account identifier'));
+    expect(privacySource, contains('device accelerometer'));
+    expect(
+      privacySource,
+      contains('not sent to the Releaf backend or RevenueCat'),
+    );
+    expect(privacySource, contains('encrypted HTTPS connections'));
+    expect(privacySource, contains('matching RevenueCat customer'));
   });
 }
