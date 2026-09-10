@@ -92,6 +92,13 @@ class PrivacyScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: ReleafSpacing.md),
                   const _PrivacySection(
+                    icon: Icons.info_outline_rounded,
+                    title: 'Health & safety',
+                    body:
+                        'Releaf is a wellness app, not a medical device. It does not diagnose, treat, cure, or prevent any medical condition. For medical advice, diagnosis, or treatment, consult a qualified healthcare professional.',
+                  ),
+                  const SizedBox(height: ReleafSpacing.md),
+                  const _PrivacySection(
                     icon: Icons.delete_outline_rounded,
                     title: 'Deleting your account',
                     body:

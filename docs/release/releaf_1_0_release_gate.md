@@ -32,10 +32,10 @@ When that state is reached, explicitly report:
 | Android release signing | PREPARED / SECRET REQUIRED | Debug signing is forbidden for release. Production upload keystore must remain private and be configured before store upload. |
 | Release AAB | CI DONE / PROD SIGNING REQUIRED | CI builds and validates a signed release AAB, including 16 KB compatibility. Final Play artifact still requires the private production upload key. |
 | RevenueCat / Google Play Billing | CODE READY / EXTERNAL CONFIG REQUIRED | Runtime billing hardening covers entitlement refresh, account-switch isolation, normalized store failures, annual/monthly package gating, restore and subscription management. Release tooling rejects missing, Test Store, secret, Apple, wrong-prefix, whitespace and implausibly short RevenueCat keys. Final closure requires the real `goog_` SDK key, active Play products/current RevenueCat Offering and purchase + restore verification from a Play-distributed test build. |
-| Privacy policy | BLOCKED | In-app screen is still explicitly development copy. Final controller/contact details, retention and public HTTPS privacy-policy URL are required. |
+| Privacy policy | BLOCKED | In-app data disclosures and the health-safety notice are present. Final controller/contact details, retention, final legal review and a public HTTPS privacy-policy URL are still required. |
 | Web account-deletion URL | CODE READY / PUBLIC DEPLOY REQUIRED | `web/delete-account.html` provides a Releaf-branded external deletion resource and routes users into the secure browser account flow, which uses the existing authenticated deletion path. CI protects the resource contract. Final closure requires deployment at a stable public HTTPS URL, live end-to-end verification and entry of that URL in the Play Console Data safety form. |
-| Google Play health declaration | OPEN | Complete declaration and keep store claims wellness/recovery-support appropriate; avoid unsupported medical/clinical claims. |
-| Store listing | OPEN | Final title/short/full description, screenshots, feature graphic, category, contact details and content declarations. |
+| Google Play health declaration | CONTENT READY / PLAY CONSOLE SUBMISSION REQUIRED | Release mapping is documented in `docs/release/google_play_health_declaration.md`: Sleep Management; Stress Management, Relaxation, Mental Acuity; and Mental and Behavioral Health. In-app health-safety copy is protected by tests. Closure still requires completing and submitting the declaration in Play Console and keeping the final Store Listing aligned. |
+| Store listing | OPEN | Final title/short/full description, screenshots, feature graphic, category, contact details and content declarations. The description must include the release health-safety disclaimer. |
 | Versioning | OPEN | Keep pre-release version during development; set final `1.0.0+<build>` only for release candidate. |
 | Device release QA | OPEN | Test production-equivalent build on supported Android devices, including background/foreground, audio, auth/deep links, purchases, offline behaviour and destructive flows. |
 | Play closed testing | OPEN | Complete any tester-duration requirement applicable to the developer account before Production access. |
@@ -60,4 +60,6 @@ These must not delay public release unless a new defect makes them P0:
 6. Do not put narration in Sleep.
 7. Do not replace the approved Releaf Guide voice with a guessed substitute.
 8. Emergency remains available without Premium and outside normal sync/history.
-9. A P0 regression reopens the corresponding gate even if it was previously DONE.
+9. Keep health/store claims aligned with the declared release surface and do not
+   make unsupported diagnosis, treatment, cure or prevention claims.
+10. A P0 regression reopens the corresponding gate even if it was previously DONE.
