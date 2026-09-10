@@ -1,0 +1,58 @@
+name: Releaf Web Release Smoke
+
+on:
+  push:
+    branches:
+      - releaf-development
+  pull_request:
+    branches:
+      - releaf-development
+  workflow_dispatch:
+
+concurrency:
+  group: releaf-web-release-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  web-release-smoke:
+    name: Build Releaf web + deletion resource
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.2'
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build Flutter web release
+        run: flutter build web --release
+
+      - name: Verify account deletion resource
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s build/web/index.html
+          test -s build/web/main.dart.js
+          test -s build/web/delete-account.html
+          grep -Fq 'href="/#/account"' build/web/delete-account.html
+          grep -Fq 'You do not need the Android app installed.' build/web/delete-account.html
+          if grep -Fq 'SUPABASE_SERVICE_ROLE_KEY' build/web/delete-account.html; then
+            echo "ERROR: service-role identifier leaked into public deletion resource." >&2
+            exit 1
+          fi
+
+      - name: Upload web release smoke artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: releaf-web-release-smoke
+          path: build/web
+          retention-days: 7
