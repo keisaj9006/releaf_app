@@ -51,6 +51,16 @@ class SubscriptionController extends StateNotifier<SubscriptionState> {
     await refresh();
   }
 
+  /// Clears account-bound billing state before RevenueCat changes App User ID.
+  ///
+  /// This is deliberately fail-closed: a Premium entitlement cached for user A
+  /// must never remain visible while the SDK is switching to user B. The next
+  /// CustomerInfo update or [refresh] restores the authoritative state.
+  void beginIdentityChange() {
+    if (_premiumPreview || !mounted) return;
+    state = const SubscriptionState(isLoading: true);
+  }
+
   Future<void> refresh() async {
     if (_premiumPreview) {
       state = const SubscriptionState(isPremium: true);

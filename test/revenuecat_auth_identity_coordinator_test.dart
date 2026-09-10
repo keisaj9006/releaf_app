@@ -59,9 +59,39 @@ void main() {
     expect(refreshes, 2);
   });
 
-  test('failed identity mutation is retryable and does not advance state', () async {
+  test('identity boundary runs before RevenueCat account mutation', () async {
+    var premiumVisible = true;
+    final calls = <String>[];
+
+    final coordinator = RevenueCatAuthIdentityCoordinator(
+      identifyUser: (userId) async {
+        calls.add('identify:$userId:${premiumVisible ? 'premium' : 'closed'}');
+        return true;
+      },
+      clearUser: () async => true,
+      beginIdentityChange: () {
+        calls.add('boundary');
+        premiumVisible = false;
+      },
+      refreshSubscriptions: () async {
+        calls.add('refresh');
+      },
+      initialUserId: 'user-a',
+    );
+
+    expect(await coordinator.syncUser('user-b'), isTrue);
+    expect(
+      calls,
+      <String>['boundary', 'identify:user-b:closed', 'refresh'],
+    );
+    expect(premiumVisible, isFalse);
+    expect(coordinator.activeUserId, 'user-b');
+  });
+
+  test('failed identity mutation is retryable and restores authoritative state', () async {
     var attempts = 0;
     var refreshes = 0;
+    var boundaries = 0;
 
     final coordinator = RevenueCatAuthIdentityCoordinator(
       identifyUser: (userId) async {
@@ -69,6 +99,9 @@ void main() {
         return attempts > 1;
       },
       clearUser: () async => true,
+      beginIdentityChange: () {
+        boundaries++;
+      },
       refreshSubscriptions: () async {
         refreshes++;
       },
@@ -76,12 +109,14 @@ void main() {
 
     expect(await coordinator.syncUser('user-3'), isFalse);
     expect(coordinator.activeUserId, isNull);
-    expect(refreshes, 0);
+    expect(boundaries, 1);
+    expect(refreshes, 1);
 
     expect(await coordinator.syncUser('user-3'), isTrue);
     expect(coordinator.activeUserId, 'user-3');
     expect(attempts, 2);
-    expect(refreshes, 1);
+    expect(boundaries, 2);
+    expect(refreshes, 2);
   });
 
   test('rapid auth changes are serialized in arrival order', () async {

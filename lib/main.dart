@@ -129,6 +129,8 @@ class _ReleafAppState extends ConsumerState<ReleafApp>
       final premiumIdentity =
           RevenueCatAuthIdentityCoordinator.forService(
         service: ref.read(revenueCatServiceProvider),
+        beginIdentityChange: () =>
+            ref.read(subscriptionControllerProvider.notifier).beginIdentityChange(),
         refreshSubscriptions: () =>
             ref.read(subscriptionControllerProvider.notifier).refresh(),
         initialUserId: auth.currentUser?.id,
