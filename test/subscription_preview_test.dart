@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 
+import 'package:releaf_app/core/subscription/revenuecat_error_message.dart';
 import 'package:releaf_app/core/subscription/revenuecat_lifecycle_policy.dart';
 import 'package:releaf_app/core/subscription/revenuecat_service.dart';
 import 'package:releaf_app/core/subscription/subscription_controller.dart';
@@ -127,6 +128,53 @@ void main() {
         isRevenueCatInitialized: true,
       ),
       isFalse,
+    );
+  });
+
+  test('billing copy treats cancellation as a normal user action', () {
+    expect(
+      revenueCatBillingMessage(
+        PurchasesErrorCode.purchaseCancelledError,
+        action: RevenueCatBillingAction.purchase,
+      ),
+      isNull,
+    );
+  });
+
+  test('billing copy explains pending Google Play payment without failure wording', () {
+    expect(
+      revenueCatBillingMessage(
+        PurchasesErrorCode.paymentPendingError,
+        action: RevenueCatBillingAction.purchase,
+      ),
+      'Your payment is pending in Google Play. Premium will unlock automatically after the payment is confirmed.',
+    );
+  });
+
+  test('billing copy maps connectivity and ownership errors to useful recovery', () {
+    expect(
+      revenueCatBillingMessage(
+        PurchasesErrorCode.networkError,
+        action: RevenueCatBillingAction.purchase,
+      ),
+      contains('Check your connection'),
+    );
+    expect(
+      revenueCatBillingMessage(
+        PurchasesErrorCode.productAlreadyPurchasedError,
+        action: RevenueCatBillingAction.purchase,
+      ),
+      contains('Restore purchases'),
+    );
+  });
+
+  test('billing copy never exposes raw configuration errors', () {
+    expect(
+      revenueCatBillingMessage(
+        PurchasesErrorCode.configurationError,
+        action: RevenueCatBillingAction.restore,
+      ),
+      'Premium store setup is unavailable in this build.',
     );
   });
 }

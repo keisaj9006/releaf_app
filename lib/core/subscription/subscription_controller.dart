@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 
+import 'revenuecat_error_message.dart';
 import 'revenuecat_service.dart';
 import 'subscription_state.dart';
 
@@ -106,18 +107,22 @@ class SubscriptionController extends StateNotifier<SubscriptionState> {
         isPremium: isPremium,
       );
       return isPremium;
-    } on PlatformException catch (e) {
-      final errorCode = PurchasesErrorHelper.getErrorCode(e);
-      if (errorCode != PurchasesErrorCode.purchaseCancelledError) {
-        state = state.copyWith(isLoading: false, error: e.message);
-      } else {
-        state = state.copyWith(isLoading: false);
-      }
+    } on PlatformException catch (error) {
+      final code = PurchasesErrorHelper.getErrorCode(error);
+      final message = revenueCatBillingMessage(
+        code,
+        action: RevenueCatBillingAction.purchase,
+      );
+      state = state.copyWith(
+        isLoading: false,
+        error: message,
+        clearError: message == null,
+      );
       return false;
     } catch (_) {
       state = state.copyWith(
         isLoading: false,
-        error: 'Purchases are unavailable right now.',
+        error: 'Unable to complete the purchase right now. Please try again.',
       );
       return false;
     }
@@ -135,13 +140,22 @@ class SubscriptionController extends StateNotifier<SubscriptionState> {
         error: isPremium ? null : 'No active subscriptions found.',
       );
       return isPremium;
-    } on PlatformException catch (e) {
-      state = state.copyWith(isLoading: false, error: e.message);
+    } on PlatformException catch (error) {
+      final code = PurchasesErrorHelper.getErrorCode(error);
+      final message = revenueCatBillingMessage(
+        code,
+        action: RevenueCatBillingAction.restore,
+      );
+      state = state.copyWith(
+        isLoading: false,
+        error: message,
+        clearError: message == null,
+      );
       return false;
     } catch (_) {
       state = state.copyWith(
         isLoading: false,
-        error: 'Restore purchases is unavailable right now.',
+        error: 'Unable to restore purchases right now. Please try again.',
       );
       return false;
     }
