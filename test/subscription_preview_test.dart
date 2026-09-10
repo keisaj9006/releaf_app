@@ -62,6 +62,40 @@ void main() {
     expect(controller.state.isLoading, isFalse);
     expect(controller.state.error, isNull);
   });
+
+  test('transient subscription read failure preserves last known state', () {
+    expect(
+      resolvePremiumAfterRefresh(
+        currentIsPremium: true,
+        fetchedIsPremium: null,
+      ),
+      isTrue,
+    );
+    expect(
+      resolvePremiumAfterRefresh(
+        currentIsPremium: false,
+        fetchedIsPremium: null,
+      ),
+      isFalse,
+    );
+  });
+
+  test('successful subscription refresh is authoritative', () {
+    expect(
+      resolvePremiumAfterRefresh(
+        currentIsPremium: true,
+        fetchedIsPremium: false,
+      ),
+      isFalse,
+    );
+    expect(
+      resolvePremiumAfterRefresh(
+        currentIsPremium: false,
+        fetchedIsPremium: true,
+      ),
+      isTrue,
+    );
+  });
 }
 
 class _ListenerTrackingRevenueCatService extends RevenueCatService {

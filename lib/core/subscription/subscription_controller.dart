@@ -11,6 +11,16 @@ const bool premiumPreviewFromBuild = bool.fromEnvironment(
   defaultValue: false,
 );
 
+/// A transient RevenueCat read failure must never be interpreted as a
+/// subscription cancellation. Keep the last known entitlement until a later
+/// successful CustomerInfo refresh gives us an authoritative answer.
+bool resolvePremiumAfterRefresh({
+  required bool currentIsPremium,
+  required bool? fetchedIsPremium,
+}) {
+  return fetchedIsPremium ?? currentIsPremium;
+}
+
 class SubscriptionController extends StateNotifier<SubscriptionState> {
   final RevenueCatService _service;
   final bool _premiumPreview;
@@ -48,8 +58,13 @@ class SubscriptionController extends StateNotifier<SubscriptionState> {
     try {
       final customerInfo = await _service.getCustomerInfoSafe();
       final offerings = await _service.getOfferingsSafe();
-      final isPremium =
-          customerInfo != null ? _service.hasPremium(customerInfo) : false;
+      final fetchedIsPremium = customerInfo == null
+          ? null
+          : _service.hasPremium(customerInfo);
+      final isPremium = resolvePremiumAfterRefresh(
+        currentIsPremium: state.isPremium,
+        fetchedIsPremium: fetchedIsPremium,
+      );
 
       state = state.copyWith(
         isLoading: false,
