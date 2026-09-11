@@ -320,11 +320,20 @@ class _MeditationPlayerScreenState
 
     HapticFeedback.selectionClick();
 
+    // Restart the cadence after a manual seek. Otherwise the existing
+    // periodic timer can fire immediately after the tap and make a 10-second
+    // action appear to jump by 11 seconds on the player clock.
+    final wasRunning = _running;
+    if (wasRunning) {
+      _timer?.cancel();
+      _deadline = null;
+    }
+
     setState(() {
       _remainingSeconds = nextRemaining;
     });
-    if (_running) {
-      _deadline = SessionDeadlineClock.deadlineFor(_remainingSeconds);
+    if (wasRunning) {
+      _startTimer();
     }
 
     _lastSpokenStepIndex = -1;
