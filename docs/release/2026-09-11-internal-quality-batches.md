@@ -213,3 +213,55 @@ passed**. Android debug APK built successfully. `git diff --check` passed.
 
 Affected gate: Sleep player/timer reliability. Next: final existing release
 tooling verification and completion-plan/context handoff; external gates remain.
+
+## Batch 9 — final engineering verification and handoff
+
+Verified implementation: `3ddffee`. The audit batch `efbcf58` and all eight
+implementation/content batches were committed and pushed only to
+`releaf-development`. No branch was created, switched to main, merged or force-pushed.
+
+Final dependency resolution succeeded; `pubspec.lock` is unchanged. Full suite:
+**375 passed**; analyzer: **No issues found**. A fresh focused release run passed
+**15 tests** across device QA, Store listing, Data safety, health copy, public
+deletion resource, provider erasure and production RevenueCat-key policy.
+Final web release build succeeded; nonempty index/JavaScript/deletion artifacts,
+the authenticated account link, public-resource copy and absence of service-role
+identifier all passed the existing workflow contract. Existing dependency Wasm
+dry-run warnings did not prevent the build.
+
+The existing CI-style temporary-key smoke built release AAB (**93,375,235 bytes**)
+and APK (**95,618,598 bytes**). ZIP 16 KB alignment and all **9 native libraries'**
+ELF alignment passed. `android/key.properties` and `android/ci-upload-keystore.jks`
+were confirmed absent afterward. These artifacts use a temporary test key and
+are **not for Play upload**; production-signing and billing gates remain open.
+No dependency lockfile change occurred. `git diff --check` passed.
+
+Context files: CURRENT_STATE, ROADMAP, completion plan, new research-scope triage,
+canonical gate link and this evidence. The triage completes the plan's proposal
+step while retaining all locked product decisions. There is no identified
+unblocked coding item left in this pass's completion plan or reported quality
+issues. New defects found during RC testing must reopen the relevant gate.
+
+Remaining required work is external/approval/RC-dependent:
+
+- Configure the real server-only RevenueCat erasure secret, deploy the reviewed
+  account-deletion function, then verify erasure across both providers with a
+  disposable identified account. The deployed version 1 gap remains open.
+- Recover the approved Releaf Guide voice identity; approve natural breathing
+  cues and final sound selection. Only Mindfulness Basics has approved narration.
+  Fal balance currently blocks breathing candidate generation; no substitute was
+  generated. The Atmosphere II candidate remains outside runtime assets.
+- Supply production upload signing and real Play/RevenueCat configuration;
+  complete Play-distributed purchase/restore and account-specific closed testing.
+- Finalize owner/legal contact/retention details, publish stable privacy/deletion
+  URLs, and complete store assets/declarations in Play Console.
+- Set final version only for the production-equivalent RC; run the existing
+  Samsung physical-device matrix, including audio, media controls, sensors,
+  haptics, back navigation, accessibility and performance. No such run is claimed.
+
+Next owner action for account deletion: in Supabase project
+`mgajdbdzflspypxhgmaw`, open Edge Functions → Secrets and configure
+`REVENUECAT_SECRET_API_KEY` with the real server-only RevenueCat erasure credential.
+Do not paste its value into chat or commit it. After configuration is confirmed,
+deploy `supabase/functions/delete-account/index.ts` and execute the existing
+disposable-account verification plan. Do not deploy before the secret exists.

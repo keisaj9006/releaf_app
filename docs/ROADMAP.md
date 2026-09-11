@@ -16,7 +16,9 @@ The canonical release gate remains:
    - `flutter analyze`
    - `flutter test`
    - existing non-secret CI/release contract checks.
-4. Current HEAD is one commit ahead of the previously reported green baseline (`1fd44b7`), so verify the latest Reset movement change before carrying forward a green claim.
+4. Baseline audit is completed and preserved as `efbcf58`. Subsequent internal
+   batches through `3ddffee` passed 375 tests and clean analysis; use
+   `docs/release/2026-09-11-internal-quality-batches.md` instead of repeating a general audit.
 5. Do not require repetitive manual phone testing yet.
 
 Exit condition:
@@ -104,6 +106,10 @@ Exit condition:
 Every canonical P0 gate is CLOSED.
 
 ## Phase 4 — Research-informed differentiation
+
+Task 8's scoped proposal is recorded in
+`docs/plans/2026-09-11-research-scope-triage.md`. Optional expansions remain deferred
+under the existing locked decisions; they are not unclosed 1.0 coding tasks.
 
 Do this before release only when low-risk and explicitly accepted as part of scope; otherwise target 1.1+.
 

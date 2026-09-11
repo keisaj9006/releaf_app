@@ -43,6 +43,11 @@ When that state is reached, explicitly report:
 
 Latest audit evidence: [11 September 2026 repository audit](2026-09-11-repository-audit.md).
 Subsequent implementation: [internal quality batches](2026-09-11-internal-quality-batches.md).
+The internal continuation through `3ddffee` passed 375 tests and clean analysis.
+It closes the identified player/collection/difficulty defects, not the remaining
+content approvals, credentials, production signing, public resources, store
+actions or production-equivalent physical-device gates. See the batch evidence
+for the exact next secure account-deletion prerequisite.
 The live `delete-account` version 1 was confirmed to lack the repository's
 RevenueCat erasure step; its existing secret/deployment gate remains open.
 The same read-only audit returned zero Supabase security-advisor lints.

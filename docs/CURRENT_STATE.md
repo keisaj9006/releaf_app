@@ -3,11 +3,14 @@
 Snapshot: **2026-09-11**  
 Repo: `keisaj9006/releaf_app`  
 Branch: **`releaf-development`**  
-Verified batch base: **`efbcf58`** (`chore: preserve verified Releaf release audit batch`)
+Verified implementation HEAD: **`3ddffee`** (`fix: preserve latest Sleep timer and playback intent`)
 
 Subsequent internal quality work is tracked in
 [batch evidence](release/2026-09-11-internal-quality-batches.md), including
-recorded-audio cancellation during configuration and source loading.
+recorded-audio cancellation during configuration and source loading, Sleep timer
+boundaries/ordering, all 30 browsable Daily Insights, large-text Home layouts and
+consistent difficulty controls across all 15 Brain games. Latest full suite:
+**375 tests passed**; analyzer clean. No production/device verification is implied.
 
 This file is a working snapshot. The code and canonical release gate remain authoritative if the branch moves.
 
@@ -108,7 +111,7 @@ Current Brain infrastructure also contains:
 - personal best/history data,
 - sync-event preparation,
 - Brain UI,
-- difficulty support for many games.
+- shared Easy/Medium/Hard controls across all 15 canonical game flows.
 
 Current controller uses progressive levels up to 12 for registered progressive games.
 
@@ -281,6 +284,13 @@ Use and update them rather than starting a second release process.
 ## Current biggest blockers to actual public release
 
 These are more important than adding optional features:
+
+Approved content also remains open: the existing breathing tones were rejected,
+natural-breath generation is blocked by Fal account balance, only
+`mindfulness-basics-2` has approved recorded narration, and the exact Releaf Guide
+provider identity is still missing. The separate Atmosphere II headroom candidate
+is available under `audio-candidates/2026-09-11` for later listening approval;
+the active source has not been replaced.
 
 1. Deploy/verify account-deletion Edge function with required server secret.
 2. Complete real RevenueCat + Google Play product/offering configuration and Play-distributed purchase/restore verification.
