@@ -42,6 +42,7 @@ When that state is reached, explicitly report:
 | Play closed testing | PLAN READY / ACCOUNT CHECK + PLAY RUN REQUIRED | Account-specific requirements and the test/feedback/Production-access process are defined in `docs/release/google_play_closed_testing.md`. Verify the Play Console account type/creation date and Dashboard requirement; if the current Google rule applies, satisfy its continuous tester/duration criterion before applying for Production access. The final run must use a production-equivalent candidate and feed the Device Release QA evidence. |
 
 Latest audit evidence: [11 September 2026 repository audit](2026-09-11-repository-audit.md).
+Subsequent implementation: [internal quality batches](2026-09-11-internal-quality-batches.md).
 The live `delete-account` version 1 was confirmed to lack the repository's
 RevenueCat erasure step; its existing secret/deployment gate remains open.
 The same read-only audit returned zero Supabase security-advisor lints.

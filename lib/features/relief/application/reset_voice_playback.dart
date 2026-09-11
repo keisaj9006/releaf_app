@@ -13,11 +13,24 @@ class ResetVoicePlayback {
 
   final MeditationVoiceDriver _driver;
   final Set<String> _unavailableRecordedAssets = <String>{};
+  int _request = 0;
 
   Set<String> get unavailableRecordedAssets =>
       Set<String>.unmodifiable(_unavailableRecordedAssets);
 
-  Future<void> playCue(ResetVoiceGuidanceCue cue) async {
+  void cancelPending() {
+    _request++;
+  }
+
+  Future<void> playCue(ResetVoiceGuidanceCue cue, {double? volume}) async {
+    final request = ++_request;
+    // Invalidate the driver before configuration can queue behind an older load.
+    try {
+      await _driver.stop();
+    } catch (_) {
+      // A failed stop must not prevent future approved cues from playing.
+    }
+    if (request != _request) return;
     final assetPath = cue.narrationAssetPath?.trim();
     if (assetPath == null ||
         assetPath.isEmpty ||
@@ -25,6 +38,8 @@ class ResetVoicePlayback {
       return;
     }
 
+    if (volume != null) await _driver.configure(volume: volume);
+    if (request != _request) return;
     try {
       await _driver.playAsset(assetPath);
     } catch (_) {

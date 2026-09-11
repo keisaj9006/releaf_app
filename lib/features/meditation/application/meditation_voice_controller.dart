@@ -47,70 +47,99 @@ abstract class MeditationVoiceDriver {
 }
 
 class FlutterMeditationVoiceDriver implements MeditationVoiceDriver {
-  final audio.AudioPlayer _recordedVoice = audio.AudioPlayer();
+  FlutterMeditationVoiceDriver({audio.AudioPlayer? player})
+    : _recordedVoice = player ?? audio.AudioPlayer();
+
+  final audio.AudioPlayer _recordedVoice;
+  Future<void> _pending = Future<void>.value();
+  int _playRequest = 0;
+  bool _disposed = false;
+
+  Future<void> _enqueue(Future<void> Function() action) {
+    final result = _pending.then((_) => action());
+    // A failed asset must not poison later stop/dispose or playback requests.
+    _pending = result.then<void>((_) {}, onError: (Object _, StackTrace _) {});
+    return result;
+  }
 
   @override
   Future<void> configure({required double volume}) async {
-    final safeVolume = volume.clamp(0.0, 1.0).toDouble();
-    await _recordedVoice.setVolume(safeVolume);
+    await setVolume(volume);
   }
 
   @override
   Future<void> playAsset(String assetPath) async {
-    if (assetPath.trim().isEmpty) return;
-
-    await _recordedVoice.stop();
-    await _recordedVoice.setReleaseMode(audio.ReleaseMode.stop);
-    await _recordedVoice.play(audio.AssetSource(assetPath));
+    if (_disposed || assetPath.trim().isEmpty) return;
+    final request = ++_playRequest;
+    bool current() => !_disposed && request == _playRequest;
+    await _enqueue(() async {
+      if (!current()) return;
+      await _recordedVoice.stop();
+      if (!current()) return;
+      await _recordedVoice.setReleaseMode(audio.ReleaseMode.stop);
+      if (!current()) return;
+      await _recordedVoice.setSource(audio.AssetSource(assetPath));
+      if (!current()) return;
+      await _recordedVoice.resume();
+    });
   }
 
   @override
   Future<void> setVolume(double volume) async {
+    if (_disposed) return;
     final safeVolume = volume.clamp(0.0, 1.0).toDouble();
-    await _recordedVoice.setVolume(safeVolume);
+    await _enqueue(() async {
+      if (!_disposed) await _recordedVoice.setVolume(safeVolume);
+    });
   }
 
   @override
   Future<void> stop() async {
-    await _recordedVoice.stop();
+    _playRequest++;
+    if (_disposed) return;
+    await _enqueue(_recordedVoice.stop);
   }
 
   @override
   Future<void> dispose() async {
-    await _recordedVoice.dispose();
+    if (_disposed) return _pending;
+    _disposed = true;
+    _playRequest++;
+    await _enqueue(_recordedVoice.dispose);
   }
 }
 
 final meditationVoiceDriverProvider =
     Provider.autoDispose<MeditationVoiceDriver>((ref) {
-  final driver = FlutterMeditationVoiceDriver();
-  ref.onDispose(() {
-    unawaited(driver.dispose());
-  });
-  return driver;
-});
+      final driver = FlutterMeditationVoiceDriver();
+      ref.onDispose(() {
+        unawaited(driver.dispose());
+      });
+      return driver;
+    });
 
-final meditationVoiceControllerProvider = StateNotifierProvider.autoDispose<
-    MeditationVoiceController, MeditationVoiceState>((ref) {
-  return MeditationVoiceController(
-    ref.watch(sharedPreferencesProvider),
-    ref.watch(meditationVoiceDriverProvider),
-  );
-});
+final meditationVoiceControllerProvider =
+    StateNotifierProvider.autoDispose<
+      MeditationVoiceController,
+      MeditationVoiceState
+    >((ref) {
+      return MeditationVoiceController(
+        ref.watch(sharedPreferencesProvider),
+        ref.watch(meditationVoiceDriverProvider),
+      );
+    });
 
 class MeditationVoiceController extends StateNotifier<MeditationVoiceState> {
-  MeditationVoiceController(
-    this._preferences,
-    this._driver,
-  ) : super(
-          MeditationVoiceState(
-            enabled: _preferences.getBool(_enabledKey) ?? true,
-            showCaptions: _preferences.getBool(_captionsKey) ?? false,
-            volume: (_preferences.getDouble(_volumeKey) ?? 0.92)
-                .clamp(0.0, 1.0)
-                .toDouble(),
-          ),
-        );
+  MeditationVoiceController(this._preferences, this._driver)
+    : super(
+        MeditationVoiceState(
+          enabled: _preferences.getBool(_enabledKey) ?? true,
+          showCaptions: _preferences.getBool(_captionsKey) ?? false,
+          volume: (_preferences.getDouble(_volumeKey) ?? 0.92)
+              .clamp(0.0, 1.0)
+              .toDouble(),
+        ),
+      );
 
   static const _enabledKey = 'meditation.voice.enabled';
   static const _captionsKey = 'meditation.voice.captions';
@@ -120,11 +149,13 @@ class MeditationVoiceController extends StateNotifier<MeditationVoiceState> {
   final MeditationVoiceDriver _driver;
 
   bool _configured = false;
+  int _guidanceRequest = 0;
 
   Future<void> speakGuidance(
     String guidance, {
     String? narrationAssetPath,
   }) async {
+    final request = ++_guidanceRequest;
     if (!state.enabled || guidance.trim().isEmpty) return;
 
     final assetPath = narrationAssetPath?.trim();
@@ -138,9 +169,11 @@ class MeditationVoiceController extends StateNotifier<MeditationVoiceState> {
     try {
       if (!_configured) {
         await _driver.configure(volume: state.volume);
+        if (!mounted) return;
         _configured = true;
       }
 
+      if (!mounted || request != _guidanceRequest || !state.enabled) return;
       await _driver.playAsset(assetPath);
     } catch (_) {
       // Voice guidance is additive. Audio failure must never break
@@ -149,11 +182,18 @@ class MeditationVoiceController extends StateNotifier<MeditationVoiceState> {
   }
 
   Future<void> stop() async {
+    _guidanceRequest++;
     try {
       await _driver.stop();
     } catch (_) {
       // Keep the meditation usable if recorded audio cannot be stopped.
     }
+  }
+
+  @override
+  void dispose() {
+    _guidanceRequest++;
+    super.dispose();
   }
 
   Future<void> toggleEnabled() async {

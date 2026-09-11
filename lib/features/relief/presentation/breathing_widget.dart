@@ -199,12 +199,8 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
     if (!force && cue.key == _lastNarrationKey) return;
     _lastNarrationKey = cue.key;
 
-    final assetPath = cue.narrationAssetPath?.trim();
-    if (assetPath == null || assetPath.isEmpty) return;
     try {
-      await _voiceDriver.configure(volume: _voiceVolume);
-      if (!_voiceEnabled || !mounted) return;
-      await _voicePlayback.playCue(cue);
+      await _voicePlayback.playCue(cue, volume: _voiceVolume);
     } catch (_) {
       // Missing recorded audio stays silent. Audio failure must never
       // interrupt a Reset session or substitute an unapproved voice.
@@ -214,6 +210,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
   Future<void> _setVoiceEnabled(bool enabled) async {
     if (!mounted) return;
     setState(() => _voiceEnabled = enabled);
+    if (!enabled) _voicePlayback.cancelPending();
     await ref
         .read(resetAudioPreferencesProvider.notifier)
         .setVoiceEnabled(enabled);
@@ -291,6 +288,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
   }
 
   Future<void> _stopSessionAudio() async {
+    _voicePlayback.cancelPending();
     try {
       await _voiceDriver.stop();
     } catch (_) {}
@@ -668,6 +666,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
   }
 
   Future<void> _pauseAudioForLifecycle() async {
+    _voicePlayback.cancelPending();
     try {
       await _voiceDriver.stop();
     } catch (_) {}
@@ -717,6 +716,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
 
   @override
   void dispose() {
+    _voicePlayback.cancelPending();
     WidgetsBinding.instance.removeObserver(this);
     _timer?.cancel();
     _deadline = null;

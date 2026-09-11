@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:releaf_app/features/meditation/application/meditation_voice_controller.dart';
@@ -7,10 +9,14 @@ import 'package:releaf_app/features/relief/domain/reset_voice_guidance.dart';
 class _FakeVoiceDriver implements MeditationVoiceDriver {
   final List<String> calls = <String>[];
   final Set<String> failingAssets = <String>{};
+  Completer<void>? configureGate;
+  final configureStarted = Completer<void>();
 
   @override
   Future<void> configure({required double volume}) async {
     calls.add('configure:$volume');
+    if (!configureStarted.isCompleted) configureStarted.complete();
+    if (configureGate != null) await configureGate!.future;
   }
 
   @override
@@ -39,24 +45,44 @@ class _FakeVoiceDriver implements MeditationVoiceDriver {
 
 void main() {
   group('ResetVoicePlayback', () {
-    test('prefers a recorded Releaf Guide asset when it can be played', () async {
-      final driver = _FakeVoiceDriver();
+    test('cancelled configuration cannot start a Reset cue', () async {
+      final driver = _FakeVoiceDriver()..configureGate = Completer<void>();
       final playback = ResetVoicePlayback(driver);
-
-      await playback.playCue(
+      final playing = playback.playCue(
         const ResetVoiceGuidanceCue(
-          key: 'step:main:0',
-          spokenText: 'Settle in.',
-          narrationAssetPath: 'narration/reset/settle.mp3',
+          key: 'inhale',
+          spokenText: '',
+          narrationAssetPath: 'approved/inhale.mp3',
         ),
+        volume: 0.72,
       );
-
-      expect(
-        driver.calls,
-        <String>['asset:narration/reset/settle.mp3'],
-      );
-      expect(playback.unavailableRecordedAssets, isEmpty);
+      await driver.configureStarted.future;
+      playback.cancelPending();
+      driver.configureGate!.complete();
+      await playing;
+      expect(driver.calls, ['stop', 'configure:0.72']);
     });
+    test(
+      'prefers a recorded Releaf Guide asset when it can be played',
+      () async {
+        final driver = _FakeVoiceDriver();
+        final playback = ResetVoicePlayback(driver);
+
+        await playback.playCue(
+          const ResetVoiceGuidanceCue(
+            key: 'step:main:0',
+            spokenText: 'Settle in.',
+            narrationAssetPath: 'narration/reset/settle.mp3',
+          ),
+        );
+
+        expect(driver.calls, <String>[
+          'stop',
+          'asset:narration/reset/settle.mp3',
+        ]);
+        expect(playback.unavailableRecordedAssets, isEmpty);
+      },
+    );
 
     test('stays silent when a recorded asset is unavailable', () async {
       final driver = _FakeVoiceDriver()
@@ -71,37 +97,39 @@ void main() {
         ),
       );
 
-      expect(
-        driver.calls,
-        <String>['asset:narration/reset/missing.mp3'],
-      );
+      expect(driver.calls, <String>[
+        'stop',
+        'asset:narration/reset/missing.mp3',
+      ]);
       expect(
         playback.unavailableRecordedAssets,
         contains('narration/reset/missing.mp3'),
       );
     });
 
-    test('does not retry the same missing asset every breathing cycle', () async {
-      final driver = _FakeVoiceDriver()
-        ..failingAssets.add(
-          'sounds/reset/breath-cues/inhale.mp3',
+    test(
+      'does not retry the same missing asset every breathing cycle',
+      () async {
+        final driver = _FakeVoiceDriver()
+          ..failingAssets.add('sounds/reset/breath-cues/inhale.mp3');
+        final playback = ResetVoicePlayback(driver);
+
+        const cue = ResetVoiceGuidanceCue(
+          key: 'breath:inhale',
+          spokenText: '',
+          narrationAssetPath: 'sounds/reset/breath-cues/inhale.mp3',
         );
-      final playback = ResetVoicePlayback(driver);
 
-      const cue = ResetVoiceGuidanceCue(
-        key: 'breath:inhale',
-        spokenText: '',
-        narrationAssetPath: 'sounds/reset/breath-cues/inhale.mp3',
-      );
+        await playback.playCue(cue);
+        await playback.playCue(cue);
 
-      await playback.playCue(cue);
-      await playback.playCue(cue);
-
-      expect(
-        driver.calls,
-        <String>['asset:sounds/reset/breath-cues/inhale.mp3'],
-      );
-    });
+        expect(driver.calls, <String>[
+          'stop',
+          'asset:sounds/reset/breath-cues/inhale.mp3',
+          'stop',
+        ]);
+      },
+    );
 
     test('stays silent when a cue has no approved asset target', () async {
       final driver = _FakeVoiceDriver();
@@ -114,7 +142,7 @@ void main() {
         ),
       );
 
-      expect(driver.calls, isEmpty);
+      expect(driver.calls, ['stop']);
     });
   });
 }

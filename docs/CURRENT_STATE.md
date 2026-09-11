@@ -3,8 +3,11 @@
 Snapshot: **2026-09-11**  
 Repo: `keisaj9006/releaf_app`  
 Branch: **`releaf-development`**  
-Snapshot HEAD: **`b949ab3fff6bcc460c376b682430d499e3c3682a`**
-HEAD message: `docs: add canonical Codex context for Releaf 1.0`
+Verified batch base: **`efbcf58`** (`chore: preserve verified Releaf release audit batch`)
+
+Subsequent internal quality work is tracked in
+[batch evidence](release/2026-09-11-internal-quality-batches.md), including
+recorded-audio cancellation during configuration and source loading.
 
 This file is a working snapshot. The code and canonical release gate remain authoritative if the branch moves.
 
