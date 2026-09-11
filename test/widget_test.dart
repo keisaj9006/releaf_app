@@ -8,14 +8,29 @@ import 'package:releaf_app/core/subscription/revenuecat_service.dart';
 import 'package:releaf_app/main.dart';
 
 void main() {
-  test('RevenueCat accepts missing configuration without initialization', () async {
-    final service = RevenueCatService();
+  test(
+    'RevenueCat accepts missing configuration without initialization',
+    () async {
+      final service = RevenueCatService();
 
-    await service.init(apiKey: '', debug: false);
+      await service.init(apiKey: '', debug: false);
 
-    expect(service.isInitialized, isFalse);
-    expect(await service.getCustomerInfoSafe(), isNull);
-    expect(await service.getOfferingsSafe(), isNull);
+      expect(service.isInitialized, isFalse);
+      expect(await service.getCustomerInfoSafe(), isNull);
+      expect(await service.getOfferingsSafe(), isNull);
+    },
+  );
+
+  test('RevenueCat recognizes a supplied public Test Store SDK key', () {
+    expect(RevenueCatService.hasConfiguredApiKey(''), isFalse);
+    expect(
+      RevenueCatService.hasConfiguredApiKey('REVENUECAT_ANDROID_API_KEY'),
+      isFalse,
+    );
+    expect(
+      RevenueCatService.hasConfiguredApiKey(' test_abcdefghijklmnop '),
+      isTrue,
+    );
   });
 
   testWidgets('App boots with required provider overrides', (
@@ -26,9 +41,7 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          sharedPreferencesProvider.overrideWithValue(prefs),
-        ],
+        overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
         child: const ReleafApp(),
       ),
     );

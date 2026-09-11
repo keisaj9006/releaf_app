@@ -1,35 +1,56 @@
 // FILE: lib/core/subscription/revenuecat_service.dart
+import 'package:flutter/foundation.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 
 class RevenueCatService {
   static const String _premiumEntitlementId = 'premium';
 
   bool _initialized = false;
+  bool _debugLogging = false;
   bool get isInitialized => _initialized;
+
+  /// Build-time SDK keys must be supplied outside source control. This accepts
+  /// public SDK keys only by shape; release tooling separately enforces the
+  /// production Google key policy.
+  static bool hasConfiguredApiKey(String apiKey) {
+    final trimmedKey = apiKey.trim();
+    return trimmedKey.isNotEmpty && !trimmedKey.startsWith('REVENUECAT_');
+  }
 
   Future<void> init({
     required String apiKey,
     required bool debug,
     String? appUserId,
   }) async {
-    if (_initialized) return;
+    _debugLogging = debug;
+    if (_initialized) {
+      _debugLog('Initialization skipped; Purchases is already configured.');
+      return;
+    }
 
     final trimmedKey = apiKey.trim();
-    if (trimmedKey.isEmpty || trimmedKey.startsWith('REVENUECAT_')) {
+    _debugLog(
+      'Initialization requested; public SDK key present='
+      '${hasConfiguredApiKey(trimmedKey)}.',
+    );
+    if (!hasConfiguredApiKey(trimmedKey)) {
+      _debugLog(
+        'Initialization skipped; no usable public SDK key was supplied.',
+      );
       return;
     }
 
     try {
       await Purchases.setLogLevel(debug ? LogLevel.debug : LogLevel.info);
       await Purchases.configure(
-        buildConfiguration(
-          apiKey: trimmedKey,
-          appUserId: appUserId,
-        ),
+        buildConfiguration(apiKey: trimmedKey, appUserId: appUserId),
       );
       _initialized = true;
-    } catch (_) {
+      _debugLog('Purchases.configure completed.');
+      await _logCurrentAppUserId('after Purchases.configure');
+    } on Object catch (error) {
       _initialized = false;
+      _debugLog('Purchases.configure failed (${error.runtimeType}).');
     }
   }
 
@@ -46,11 +67,19 @@ class RevenueCatService {
   }
 
   Future<CustomerInfo?> identifyUser(String appUserId) async {
-    if (!_initialized || appUserId.trim().isEmpty) return null;
+    if (!_initialized || appUserId.trim().isEmpty) {
+      _debugLog(
+        'Purchases.logIn skipped; Purchases is not configured or user ID is empty.',
+      );
+      return null;
+    }
     try {
       final result = await Purchases.logIn(appUserId.trim());
+      _debugLog('Purchases.logIn completed.');
+      await _logCurrentAppUserId('after Purchases.logIn');
       return result.customerInfo;
-    } catch (_) {
+    } on Object catch (error) {
+      _debugLog('Purchases.logIn failed (${error.runtimeType}).');
       return null;
     }
   }
@@ -76,10 +105,30 @@ class RevenueCatService {
   Future<Offerings?> getOfferingsSafe() async {
     if (!_initialized) return null;
     try {
-      return await Purchases.getOfferings();
-    } catch (_) {
+      final offerings = await Purchases.getOfferings();
+      _debugLog(
+        'Purchases.getOfferings completed; current offering present='
+        '${offerings.current != null}.',
+      );
+      return offerings;
+    } on Object catch (error) {
+      _debugLog('Purchases.getOfferings failed (${error.runtimeType}).');
       return null;
     }
+  }
+
+  Future<void> _logCurrentAppUserId(String context) async {
+    if (!_debugLogging) return;
+    try {
+      final appUserId = await Purchases.appUserID;
+      _debugLog('$context; current appUserID=$appUserId.');
+    } on Object catch (error) {
+      _debugLog('$context; unable to read appUserID (${error.runtimeType}).');
+    }
+  }
+
+  void _debugLog(String message) {
+    if (_debugLogging) debugPrint('[RevenueCat] $message');
   }
 
   bool hasPremium(CustomerInfo customerInfo) {

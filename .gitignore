@@ -48,3 +48,6 @@ app.*.map.json
 /android/key.properties
 /android/*.jks
 /android/*.keystore
+
+# Local development credentials and build-time Dart defines. Never commit them.
+/tool/local/
