@@ -103,3 +103,42 @@ remain. `git diff --check` passed.
 Affected gate: Sleep player/timer reliability. Samsung screen-off/background
 verification remains deferred to the production-equivalent RC. Next priority:
 Meditation ambience cancellation during delayed startup.
+
+## Batch 5 — Meditation ambience cancellation
+
+Base: `54132e3`. Delayed ambience startup could fade in after pause, stop or mute;
+old fades could continue after a newer action. Playback and fade generations now
+guard asynchronous completions. Native player operations are serialized; source
+preparation is separate from resume, and only a current prepared source is
+resumable. Muting starts cancellation before preference persistence. Platform
+cleanup errors remain nonfatal.
+
+Files: Meditation audio controller; new ambience cancellation tests; shared
+driver cancellation tests; this evidence. No narrator, track, catalog volume,
+mix preference, route or audio-layer contract was changed.
+
+TDD: three controller delayed-start cases, four native-driver cancellation cases,
+two resume/preparation cases and the initial-stop-failure case failed before
+their fixes. Disposal and fade supersession also have regression coverage.
+Independent review found the resumable-source edge case; it was fixed and
+re-reviewed with no remaining material findings. Focused verification: **49
+tests passed**. Analyzer: **No issues found** after fixing six brace-style lints.
+Full suite: **360 tests passed**. Android debug build succeeded and produced
+`build/app/outputs/flutter-apk/app-debug.apk`. `git diff --check` passed.
+
+Gate affected: Meditation player reliability. Device interruption and background
+audio QA remain open. Next internal task: browsing the existing Daily Insight
+collection without changing daily rotation, evidence copy or navigation.
+
+### Targeted user-reported checks
+
+- Meditation already has its own audio-first ambient visual and optional captions,
+  protected by `primary_wellbeing_tabs_test.dart`; no Reset-style rewrite needed.
+- Approved Mindfulness Basics uses Deep Drift at 0.18 multiplied by the saved
+  ambience mix (default 0.72), independent of voice volume (default 0.92).
+  Audit means are -30.4 dB for Deep Drift and -24.9 to -25.3 dB for the four
+  narration clips. Applying default linear gains predicts approximately -48.1 dB
+  ambience versus -25.6 to -26.0 dB narration. This static estimate does not
+  reproduce narration being masked at defaults; preserve user controls and verify
+  perceived balance on Samsung at RC rather than arbitrarily remastering approved
+  voice assets. Decode measurements are not listening approval.

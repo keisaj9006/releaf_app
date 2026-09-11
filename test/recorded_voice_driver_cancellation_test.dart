@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:releaf_app/features/meditation/application/meditation_voice_controller.dart';
+import 'package:releaf_app/features/meditation/application/meditation_audio_controller.dart';
 import 'package:releaf_app/features/relief/application/reset_voice_playback.dart';
 import 'package:releaf_app/features/relief/domain/reset_voice_guidance.dart';
 
@@ -25,6 +26,8 @@ class _DelayedPlayer implements AudioPlayer {
 
   @override
   Future<void> stop() async {}
+  @override
+  Future<void> pause() async {}
   @override
   Future<void> setVolume(double volume) async {}
   @override
@@ -62,6 +65,50 @@ class _DelayedPlayer implements AudioPlayer {
 }
 
 void main() {
+  test('ambience resume cannot revive a cancelled source load', () async {
+    final player = _DelayedPlayer(delaySource: true);
+    player.prepared.complete();
+    final driver = AudioplayersMeditationAudioDriver(player: player);
+    final first = driver.playAsset('ambience/cancelled.mp3', volume: 0);
+    await player.sourceLoading.future;
+    final stopped = driver.stop();
+    final resumed = driver.resume();
+    player.sourceReady.complete();
+    await Future.wait([first, stopped, resumed]);
+    expect(player.played, isEmpty);
+  });
+
+  test('ambience resume does not cancel pending preparation', () async {
+    final player = _DelayedPlayer();
+    final driver = AudioplayersMeditationAudioDriver(player: player);
+    final first = driver.playAsset('ambience/current.mp3', volume: 0);
+    await player.preparing.future;
+    final resumed = driver.resume();
+    player.prepared.complete();
+    await Future.wait([first, resumed]);
+    expect(player.played, ['ambience/current.mp3']);
+  });
+  for (final action in ['pause', 'stop', 'dispose', 'replace']) {
+    test('Ambience $action cancels source loading', () async {
+      final player = _DelayedPlayer(delaySource: true);
+      player.prepared.complete();
+      final driver = AudioplayersMeditationAudioDriver(player: player);
+      final first = driver.playAsset('ambience/first.mp3', volume: 0);
+      await player.sourceLoading.future;
+      final next = switch (action) {
+        'pause' => driver.pause(),
+        'stop' => driver.stop(),
+        'dispose' => driver.dispose(),
+        _ => driver.playAsset('ambience/latest.mp3', volume: 0),
+      };
+      player.sourceReady.complete();
+      await Future.wait([first, next]);
+      expect(
+        player.played,
+        action == 'replace' ? ['ambience/latest.mp3'] : isEmpty,
+      );
+    });
+  }
   for (final silent in [false, true]) {
     test(
       'Reset supersedes source loading with ${silent ? 'silence' : 'new cue'}',
