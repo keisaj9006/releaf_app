@@ -24,7 +24,7 @@ When that state is reached, explicitly report:
 | Sleep player/timer | DONE / CONTENT | Player/timer behaviour is tested. Final Sleep sound selection is owner-provided; engineering remains responsible for asset QA, looping, metadata and integration. Sleep must not contain narration. |
 | Meditation player | DONE / CONTENT | Player and scripted content exist. Final approved Releaf Guide recordings remain a content dependency; do not silently substitute a new narrator identity. |
 | Account auth | DONE / QA | Sign-up, sign-in, confirmation resend, password recovery, profile update and sign-out are implemented. |
-| Account deletion | CODE READY / EDGE DEPLOY + SECRET REQUIRED | In-app deletion calls authenticated Supabase `delete-account`. The hardened function first requests erasure of the matching RevenueCat customer, then deletes the Supabase auth user so dependent `profiles` / `progress_events` records cascade. RevenueCat erasure uses a server-only `REVENUECAT_SECRET_API_KEY`; no secret belongs in the app or repo. Closure requires configuring that Edge secret, deploying the updated function and verifying deletion end-to-end, including an identified RevenueCat customer. |
+| Account deletion | DEPLOYED / DISPOSABLE E2E REQUIRED | Hardened `delete-account` version 4 is ACTIVE with JWT verification. Server secret name presence was verified without accessing its value. Deployed source matches the repository and requests RevenueCat erasure before Supabase deletion. Three missing/invalid-auth smoke requests returned 401. Closure still requires authenticated deletion end-to-end with a disposable identified RevenueCat customer, including eventual provider erasure and dependent Supabase data cleanup. See [deployment evidence](2026-09-11-delete-account-deployment.md). |
 | Emergency privacy/access | DONE | No Premium gate; excluded from standard progress sync and DB-enforced exclusion is present. |
 | Progress sync | DEFERRED / HARDENED | Local progress remains the user-facing truth for 1.0. Upload/download/reconciliation primitives remain inactive until materialization + multi-device conflict tests are complete. Do not claim cloud backup. |
 | Supabase security | DONE / MONITOR | RLS is enabled on product tables and current Supabase security advisor reports no lints. |
@@ -47,9 +47,9 @@ The internal continuation through `3ddffee` passed 375 tests and clean analysis.
 It closes the identified player/collection/difficulty defects, not the remaining
 content approvals, credentials, production signing, public resources, store
 actions or production-equivalent physical-device gates. See the batch evidence
-for the exact next secure account-deletion prerequisite.
-The live `delete-account` version 1 was confirmed to lack the repository's
-RevenueCat erasure step; its existing secret/deployment gate remains open.
+for the internal completion record. Subsequent account-deletion deployment
+replaced the outdated live version 3 with reviewed version 4; secret presence
+and unauthorized-request rejection are verified. Disposable-account E2E remains open.
 The same read-only audit returned zero Supabase security-advisor lints.
 Automated results do not close production-signing, content, external or device gates.
 

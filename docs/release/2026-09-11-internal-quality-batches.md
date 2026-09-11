@@ -244,9 +244,9 @@ issues. New defects found during RC testing must reopen the relevant gate.
 
 Remaining required work is external/approval/RC-dependent:
 
-- Configure the real server-only RevenueCat erasure secret, deploy the reviewed
-  account-deletion function, then verify erasure across both providers with a
-  disposable identified account. The deployed version 1 gap remains open.
+- Verify erasure across both providers with a disposable identified account.
+  Subsequent [deployment evidence](2026-09-11-delete-account-deployment.md)
+  confirms secret-name presence and hardened version 4 deployment; E2E remains open.
 - Recover the approved Releaf Guide voice identity; approve natural breathing
   cues and final sound selection. Only Mindfulness Basics has approved narration.
   Fal balance currently blocks breathing candidate generation; no substitute was
@@ -259,9 +259,8 @@ Remaining required work is external/approval/RC-dependent:
   Samsung physical-device matrix, including audio, media controls, sensors,
   haptics, back navigation, accessibility and performance. No such run is claimed.
 
-Next owner action for account deletion: in Supabase project
-`mgajdbdzflspypxhgmaw`, open Edge Functions → Secrets and configure
-`REVENUECAT_SECRET_API_KEY` with the real server-only RevenueCat erasure credential.
-Do not paste its value into chat or commit it. After configuration is confirmed,
-deploy `supabase/functions/delete-account/index.ts` and execute the existing
-disposable-account verification plan. Do not deploy before the secret exists.
+Account-deletion secret configuration and deployment have subsequently completed.
+Next owner action: sign into Releaf using a dedicated disposable test account,
+without purchasing a subscription or deleting it yet. Verify its Supabase UUID
+is identified in RevenueCat before proceeding with DQA-18. Never paste credentials
+or tokens into chat. See the deployment evidence for verification limits.

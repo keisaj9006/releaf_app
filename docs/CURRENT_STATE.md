@@ -29,7 +29,7 @@ Its current high-level state:
 | Sleep player/timer | DONE / CONTENT |
 | Meditation player | DONE / CONTENT |
 | Account auth | DONE / QA |
-| Account deletion | CODE READY / EDGE DEPLOY + SECRET REQUIRED |
+| Account deletion | DEPLOYED / DISPOSABLE E2E REQUIRED |
 | Emergency privacy/access | DONE |
 | Progress sync | DEFERRED / HARDENED |
 | Supabase security | DONE / MONITOR |
@@ -255,7 +255,7 @@ Current code contains:
 
 Progress sync remains intentionally **inactive/deferred for 1.0** as a user-facing cloud-backup claim.
 
-Read-only live verification on 2026-09-11 found `delete-account` version **1**, ACTIVE, with JWT verification enabled. Its deployed source deletes the Supabase user but **does not contain the repository's RevenueCat erasure step**. Deployment of the hardened source and server-secret configuration remain required; no live deletion was performed. The live Supabase security advisor returned **0 lints**.
+The initial read-only audit found outdated account-deletion code and **0 security-advisor lints**. Subsequent deployment on 2026-09-11 replaced outdated live version 3 with **version 4**, ACTIVE with JWT verification. Secret name presence was verified without reading its value; deployed source matches the repository. Three unauthenticated/invalid-auth POST checks returned **401**. No real account was deleted. Disposable-account E2E and eventual RevenueCat erasure remain unverified; see [deployment evidence](release/2026-09-11-delete-account-deployment.md).
 
 ## Tests / release infrastructure
 
@@ -292,7 +292,7 @@ provider identity is still missing. The separate Atmosphere II headroom candidat
 is available under `audio-candidates/2026-09-11` for later listening approval;
 the active source has not been replaced.
 
-1. Deploy/verify account-deletion Edge function with required server secret.
+1. Verify deployed account deletion end-to-end with a disposable identified account.
 2. Complete real RevenueCat + Google Play product/offering configuration and Play-distributed purchase/restore verification.
 3. Configure production upload signing/private key outside repo.
 4. Publish/finalize privacy policy details + stable HTTPS URL.
