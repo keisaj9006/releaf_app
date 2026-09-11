@@ -10,7 +10,10 @@ continues the completed internal pass. Its first milestone (Meditation guidance
 disclosure, captions and large text) passed 383 tests, clean analysis and a debug
 Android build. The following [Reset milestone](release/2026-09-11-reset-cue-eligibility.md)
 excludes rejected tones and fixes audio-sheet readability, with 386 passing tests.
-Next is reliable Sound playback when track selection changes during loading.
+The following Sound milestone protects delayed track starts, notification
+cancellation and timer/volume ordering. Its exact verification is in
+[Sound playback evidence](release/2026-09-11-sound-playback-intent.md).
+Next is visible Sound loading, safe retry and interruptions during startup.
 Content approvals and production-equivalent device/release gates remain open.
 
 ## Phase 0 — Re-establish verified baseline

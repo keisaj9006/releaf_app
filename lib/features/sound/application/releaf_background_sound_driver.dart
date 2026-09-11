@@ -6,8 +6,9 @@ import 'package:audioplayers/audioplayers.dart' as audio;
 import 'sound_player_controller.dart';
 
 class ReleafBackgroundSoundDriver extends BaseAudioHandler
-    implements SoundPlaybackDriver {
-  ReleafBackgroundSoundDriver() {
+    implements SoundPlaybackDriver, SoundPlaybackIntentTracker {
+  ReleafBackgroundSoundDriver({audio.AudioPlayer? player})
+    : _player = player ?? audio.AudioPlayer() {
     _durationSubscription = _player.onDurationChanged.listen((duration) {
       final current = mediaItem.value;
       if (current != null) {
@@ -19,8 +20,9 @@ class ReleafBackgroundSoundDriver extends BaseAudioHandler
       _lastPosition = position;
     });
 
-    _playerStateSubscription =
-        _player.onPlayerStateChanged.listen((playerState) {
+    _playerStateSubscription = _player.onPlayerStateChanged.listen((
+      playerState,
+    ) {
       _lastPlayerState = playerState;
 
       if (playerState == audio.PlayerState.completed) {
@@ -35,7 +37,13 @@ class ReleafBackgroundSoundDriver extends BaseAudioHandler
     });
   }
 
-  final audio.AudioPlayer _player = audio.AudioPlayer();
+  final audio.AudioPlayer _player;
+  late final _native = AudioplayersSoundPlaybackDriver(player: _player);
+  int _mediaRequest = 0;
+  bool _disposed = false;
+
+  @override
+  int get playbackIntentVersion => _native.playbackIntentVersion;
 
   StreamSubscription<Duration>? _durationSubscription;
   StreamSubscription<Duration>? _positionSubscription;
@@ -57,10 +65,10 @@ class ReleafBackgroundSoundDriver extends BaseAudioHandler
 
   @override
   Future<void> setReleaseMode(audio.ReleaseMode mode) =>
-      _player.setReleaseMode(mode);
+      _native.setReleaseMode(mode);
 
   @override
-  Future<void> setVolume(double volume) => _player.setVolume(volume);
+  Future<void> setVolume(double volume) => _native.setVolume(volume);
 
   @override
   Future<void> playAsset(
@@ -68,6 +76,8 @@ class ReleafBackgroundSoundDriver extends BaseAudioHandler
     String? trackId,
     String? title,
   }) async {
+    if (_disposed) return;
+    _mediaRequest++;
     _lastPosition = Duration.zero;
     _processingState = AudioProcessingState.loading;
 
@@ -77,19 +87,17 @@ class ReleafBackgroundSoundDriver extends BaseAudioHandler
         title: title ?? 'Releaf Sound',
         album: 'Releaf',
         artist: 'Releaf',
-        extras: <String, dynamic>{
-          'assetPath': assetPath,
-        },
+        extras: <String, dynamic>{'assetPath': assetPath},
       ),
     );
     _broadcastPlaybackState();
 
-    await _player.play(audio.AssetSource(assetPath));
+    await _native.playAsset(assetPath, trackId: trackId, title: title);
   }
 
   @override
   Future<void> play() async {
-    await _player.resume();
+    await _native.resume();
   }
 
   @override
@@ -97,12 +105,14 @@ class ReleafBackgroundSoundDriver extends BaseAudioHandler
 
   @override
   Future<void> pause() async {
-    await _player.pause();
+    await _native.pause();
   }
 
   @override
   Future<void> stop() async {
-    await _player.stop();
+    final request = ++_mediaRequest;
+    await _native.stop();
+    if (_disposed || request != _mediaRequest) return;
     _lastPosition = Duration.zero;
     _processingState = AudioProcessingState.idle;
     _broadcastPlaybackState();
@@ -111,7 +121,7 @@ class ReleafBackgroundSoundDriver extends BaseAudioHandler
   @override
   Future<void> seek(Duration position) async {
     _lastPosition = position;
-    await _player.seek(position);
+    await _native.seek(position);
     _broadcastPlaybackState();
   }
 
@@ -128,10 +138,12 @@ class ReleafBackgroundSoundDriver extends BaseAudioHandler
     playbackState.add(
       PlaybackState(
         controls: controls,
-        systemActions:
-            hasMedia ? const <MediaAction>{MediaAction.seek} : const <MediaAction>{},
-        androidCompactActionIndices:
-            controls.length >= 2 ? const <int>[0, 1] : null,
+        systemActions: hasMedia
+            ? const <MediaAction>{MediaAction.seek}
+            : const <MediaAction>{},
+        androidCompactActionIndices: controls.length >= 2
+            ? const <int>[0, 1]
+            : null,
         processingState: _processingState,
         playing: playing,
         updatePosition: _lastPosition,
@@ -143,9 +155,14 @@ class ReleafBackgroundSoundDriver extends BaseAudioHandler
 
   @override
   Future<void> dispose() async {
+    if (_disposed) return;
+    _disposed = true;
+    _mediaRequest++;
+    // Invalidate synchronously before subscription cancellation can yield.
+    final disposing = _native.dispose();
     await _durationSubscription?.cancel();
     await _positionSubscription?.cancel();
     await _playerStateSubscription?.cancel();
-    await _player.dispose();
+    await disposing;
   }
 }

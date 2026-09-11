@@ -3,15 +3,15 @@
 Snapshot: **2026-09-11**  
 Repo: `keisaj9006/releaf_app`  
 Branch: **`releaf-development`**  
-Latest committed baseline: **`03f65af`** (Meditation guidance quality); subsequent
-Reset work is recorded in [milestone evidence](release/2026-09-11-reset-cue-eligibility.md).
+Latest committed baseline: **`cb64fcd`** (Reset cue eligibility); subsequent
+Sound work is recorded in [milestone evidence](release/2026-09-11-sound-playback-intent.md).
 
 Subsequent internal quality work is tracked in
 [batch evidence](release/2026-09-11-internal-quality-batches.md), including
 recorded-audio cancellation during configuration and source loading, Sleep timer
 boundaries/ordering, all 30 browsable Daily Insights, large-text Home layouts and
 consistent difficulty controls across all 15 Brain games. Latest full suite:
-**386 tests passed** after the Reset milestone; analyzer clean and Android
+**425 tests passed** after the Sound playback milestone; analyzer clean and Android
 debug build passed. No production/device verification is implied.
 
 This file is a working snapshot. The code and canonical release gate remain authoritative if the branch moves.
@@ -218,6 +218,12 @@ Current bundled canonical sound catalog contains 10 real tracks:
 - Deep Drift — free
 
 Current player/timer is release-gated as DONE/CONTENT.
+
+Delayed starts now preserve the latest track/pause/stop choice in the controller
+and both native drivers, including media-notification cancellation. Source
+readiness controls resume, and ordered output writes preserve the latest volume.
+Timer expiry cannot override a newer transport choice or leave the next Play
+muted. Loading/error presentation is the next bounded internal task.
 
 Sleep must not contain narration.
 

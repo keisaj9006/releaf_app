@@ -26,6 +26,11 @@ class _FakeSoundPlaybackDriver implements SoundPlaybackDriver {
   Completer<void>? volumeStarted;
   Completer<void>? nextPauseGate;
   Completer<void>? pauseStarted;
+  Completer<void>? nextStopGate;
+  Completer<void>? stopStarted;
+  Completer<void>? nextPlayGate;
+  Completer<void>? playStarted;
+  final List<String> playedTrackIds = [];
 
   @override
   Stream<Duration> get onDurationChanged => const Stream<Duration>.empty();
@@ -57,9 +62,16 @@ class _FakeSoundPlaybackDriver implements SoundPlaybackDriver {
     String? trackId,
     String? title,
   }) async {
+    final gate = nextPlayGate;
+    nextPlayGate = null;
+    if (gate != null) {
+      playStarted?.complete();
+      await gate.future;
+    }
     lastAssetPath = assetPath;
     lastTrackId = trackId;
     lastTitle = title;
+    playedTrackIds.add(trackId ?? assetPath);
   }
 
   @override
@@ -79,7 +91,14 @@ class _FakeSoundPlaybackDriver implements SoundPlaybackDriver {
   }
 
   @override
-  Future<void> stop() async {}
+  Future<void> stop() async {
+    final gate = nextStopGate;
+    nextStopGate = null;
+    if (gate != null) {
+      stopStarted?.complete();
+      await gate.future;
+    }
+  }
 
   @override
   Future<void> seek(Duration position) async {}
@@ -120,6 +139,175 @@ class _StatefulSoundDriver extends _FakeSoundPlaybackDriver {
 }
 
 void main() {
+  test('an expired Sleep timer cannot pause a newer track start', () async {
+    final driver = _StatefulSoundDriver();
+    var now = DateTime(2026, 9, 11, 22);
+    final controller = SoundPlayerController(
+      const SoundCatalog(),
+      await _preferences(),
+      driver: driver,
+      now: () => now,
+    );
+    addTearDown(controller.dispose);
+    await controller.playById('deep-drift');
+    await controller.setSleepTimer(1);
+    now = now.add(const Duration(seconds: 61));
+    final gate = Completer<void>();
+    driver.nextVolumeGate = gate;
+    driver.volumeStarted = Completer<void>();
+    final expiring = controller.syncSleepTimerNow();
+    await driver.volumeStarted!.future;
+    await controller.playById('soft-rain');
+    gate.complete();
+    await expiring;
+    expect(controller.state.currentTrackId, 'soft-rain');
+    expect(controller.state.isPlaying, isTrue);
+    expect(controller.state.sleepTimerMinutes, isNull);
+    expect(driver.pauseCalls, 0);
+    expect(driver.volumeCalls.last, controller.state.volume);
+  });
+
+  test('latest Sound track wins delayed startup configuration', () async {
+    final driver = _FakeSoundPlaybackDriver();
+    final preferences = await _preferences();
+    final controller = SoundPlayerController(
+      const SoundCatalog(),
+      preferences,
+      driver: driver,
+    );
+    addTearDown(controller.dispose);
+    final gate = Completer<void>();
+    driver.nextVolumeGate = gate;
+    driver.volumeStarted = Completer<void>();
+    final first = controller.playById('deep-drift');
+    await driver.volumeStarted!.future;
+    await controller.playById('soft-rain');
+    gate.complete();
+    await first;
+    expect(controller.state.currentTrackId, 'soft-rain');
+    expect(driver.playedTrackIds, ['soft-rain']);
+    expect(preferences.getStringList('sound.recent_ids'), ['soft-rain']);
+  });
+
+  for (final action in ['pause', 'stop', 'dispose']) {
+    test('$action cancels Sound startup during configuration', () async {
+      final driver = _FakeSoundPlaybackDriver();
+      final controller = SoundPlayerController(
+        const SoundCatalog(),
+        await _preferences(),
+        driver: driver,
+      );
+      if (action != 'dispose') addTearDown(controller.dispose);
+      final gate = Completer<void>();
+      driver.nextVolumeGate = gate;
+      driver.volumeStarted = Completer<void>();
+      final first = controller.playById('deep-drift');
+      await driver.volumeStarted!.future;
+      if (action == 'pause') await controller.pause();
+      if (action == 'stop') await controller.stop();
+      if (action == 'dispose') controller.dispose();
+      gate.complete();
+      await first;
+      expect(driver.playedTrackIds, isEmpty);
+    });
+  }
+
+  test('a late stop cannot clear the new Sound selection', () async {
+    final driver = _FakeSoundPlaybackDriver();
+    final controller = SoundPlayerController(
+      const SoundCatalog(),
+      await _preferences(),
+      driver: driver,
+    );
+    addTearDown(controller.dispose);
+    await controller.playById('deep-drift');
+    final gate = Completer<void>();
+    driver.nextStopGate = gate;
+    driver.stopStarted = Completer<void>();
+    final stopping = controller.stop();
+    await driver.stopStarted!.future;
+    await controller.playById('soft-rain');
+    gate.complete();
+    await stopping;
+    expect(controller.state.currentTrackId, 'soft-rain');
+    expect(driver.lastTrackId, 'soft-rain');
+  });
+
+  test(
+    'paused source loading cannot enter recents or count as ready to resume',
+    () async {
+      final driver = _FakeSoundPlaybackDriver();
+      final controller = SoundPlayerController(
+        const SoundCatalog(),
+        await _preferences(),
+        driver: driver,
+      );
+      addTearDown(controller.dispose);
+      final gate = Completer<void>();
+      driver.nextPlayGate = gate;
+      driver.playStarted = Completer<void>();
+      final first = controller.playById('deep-drift');
+      await driver.playStarted!.future;
+      await controller.pause();
+      expect(driver.pauseCalls, 1);
+      gate.complete();
+      await first;
+      expect(controller.state.recentIds, isEmpty);
+      await controller.resume();
+      expect(driver.playedTrackIds, ['deep-drift', 'deep-drift']);
+      expect(driver.resumeCalls, 0);
+      expect(controller.state.recentIds, ['deep-drift']);
+    },
+  );
+
+  test('latest slider volume wins an earlier delayed output write', () async {
+    final driver = _FakeSoundPlaybackDriver();
+    final preferences = await _preferences();
+    final controller = SoundPlayerController(
+      const SoundCatalog(),
+      preferences,
+      driver: driver,
+    );
+    addTearDown(controller.dispose);
+    await controller.playById('deep-drift');
+    final gate = Completer<void>();
+    driver.nextVolumeGate = gate;
+    driver.volumeStarted = Completer<void>();
+    final first = controller.setVolume(0.8);
+    await driver.volumeStarted!.future;
+    await controller.setVolume(0.1);
+    gate.complete();
+    await first;
+    expect(driver.volumeCalls.last, 0.1);
+    expect(controller.state.volume, 0.1);
+    expect(preferences.getDouble('sound.volume.v1'), 0.1);
+  });
+
+  test('a delayed fade respects the newest base volume', () async {
+    final driver = _FakeSoundPlaybackDriver();
+    var now = DateTime(2026, 9, 11, 22);
+    final controller = SoundPlayerController(
+      const SoundCatalog(),
+      await _preferences(),
+      driver: driver,
+      now: () => now,
+    );
+    addTearDown(controller.dispose);
+    await controller.playById('deep-drift');
+    await controller.setSleepTimer(1);
+    now = now.add(const Duration(seconds: 50));
+    final gate = Completer<void>();
+    driver.nextVolumeGate = gate;
+    driver.volumeStarted = Completer<void>();
+    final fading = controller.syncSleepTimerNow();
+    await driver.volumeStarted!.future;
+    await controller.setVolume(0.2);
+    gate.complete();
+    await fading;
+    expect(driver.volumeCalls.last, closeTo(0.1, 0.0001));
+    expect(controller.state.volume, 0.2);
+  });
+
   for (final replacement in [30, null]) {
     test('old Sleep fade cannot silence replacement $replacement', () async {
       final driver = _FakeSoundPlaybackDriver();

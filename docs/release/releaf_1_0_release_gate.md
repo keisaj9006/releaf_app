@@ -21,7 +21,7 @@ When that state is reached, explicitly report:
 | --- | --- | --- |
 | RESET core | DONE / CONTENT | Canonical Reset model, completion history, lifecycle and access tests are in CI. Rejected breathing tones are excluded from runtime playback; cue controls disclose unavailable audio while silent/reduced-motion phase guidance remains usable. Natural gentle human inhale/longer exhale recordings require owner approval before runtime integration. Hold/rest remain silent. |
 | BRAIN core | DONE / QA | Canonical Brain flow, progression hardening, Labyrinth 50-stage architecture and lifecycle protections are implemented. Continue release QA; do not add games merely to increase scope. |
-| Sleep player/timer | DONE / CONTENT | Player/timer behaviour is tested. Final Sleep sound selection is owner-provided; engineering remains responsible for asset QA, looping, metadata and integration. Sleep must not contain narration. |
+| Sleep player/timer | DONE / CONTENT | Player/timer behaviour is tested, including delayed-start cancellation, media-notification intent and volume restoration after interrupted expiry. Final Sleep sound selection is owner-provided; engineering remains responsible for asset QA, looping, metadata and integration. Sleep must not contain narration. |
 | Meditation player | DONE / CONTENT | Player and scripted content exist. Library/preview/player disclose recording availability; incomplete narration has accessible caption controls and large-text coverage. Final approved Releaf Guide recordings remain a content dependency; do not silently substitute a new narrator identity. |
 | Account auth | DONE / QA | Sign-up, sign-in, confirmation resend, password recovery, profile update and sign-out are implemented. |
 | Account deletion | DONE / E2E VERIFIED | Hardened `delete-account` version 4 is ACTIVE with JWT verification. A Samsung SM-S928B Test Store debug run authenticated a dedicated disposable account, identified the same UUID in RevenueCat, completed in-app deletion, then verified zero target Auth/profile/progress/Storage records and `Customer not found` in RevenueCat. A protected primary QA account was explicitly excluded. See [deployment evidence](2026-09-11-delete-account-deployment.md). Repeat DQA-18 on the production-equivalent RC as part of the full device matrix. |
@@ -48,6 +48,8 @@ Owner-approved quality programme: [Meditation guidance milestone](2026-09-11-med
 was not performed for this milestone.
 The following [Reset cue eligibility milestone](2026-09-11-reset-cue-eligibility.md)
 passed 386 tests and clean analysis; no recording approval or physical QA is implied.
+The [Sound playback milestone](2026-09-11-sound-playback-intent.md) covers delayed
+loads and timer/notification races. DQA-04 still requires physical verification.
 The internal continuation through `3ddffee` passed 375 tests and clean analysis.
 It closes the identified player/collection/difficulty defects, not the remaining
 content approvals, credentials, production signing, public resources, store
