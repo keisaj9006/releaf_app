@@ -1,9 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:releaf_app/features/account/application/account_recovery_service.dart';
 import 'package:releaf_app/features/account/presentation/password_reset_screen.dart';
+import 'package:releaf_app/routing/app_routes.dart';
 
 class _FakeRecoveryService implements AccountRecoveryService {
   String? requestedEmail;
@@ -26,6 +29,40 @@ void main() {
       releafAuthCallbackUrl,
       'app.releaf.mobile://auth-callback',
     );
+  });
+
+  test('Android recovery deep link and reset route stay wired together', () {
+    final callback = Uri.parse(releafAuthCallbackUrl);
+    final manifest = File(
+      'android/app/src/main/AndroidManifest.xml',
+    ).readAsStringSync();
+    final mainSource = File('lib/main.dart').readAsStringSync();
+    final routerSource = File(
+      'lib/routing/app_router.dart',
+    ).readAsStringSync();
+
+    expect(callback.scheme, 'app.releaf.mobile');
+    expect(callback.host, 'auth-callback');
+    expect(
+      manifest,
+      contains('android:scheme="${callback.scheme}"'),
+    );
+    expect(
+      manifest,
+      contains('android:host="${callback.host}"'),
+    );
+
+    expect(AppRoutes.passwordReset, '/account/reset-password');
+    expect(mainSource, contains('AuthChangeEvent.passwordRecovery'));
+    expect(
+      mainSource,
+      contains('appRouter.go(AppRoutes.passwordReset)'),
+    );
+    expect(
+      routerSource,
+      contains('path: AppRoutes.passwordReset'),
+    );
+    expect(routerSource, contains('PasswordResetScreen'));
   });
 
   testWidgets('Password reset validates and updates password', (
