@@ -3,8 +3,8 @@
 Snapshot: **2026-09-11**  
 Repo: `keisaj9006/releaf_app`  
 Branch: **`releaf-development`**  
-Snapshot HEAD: **`7a422a753f2a048ed254aa1db008fcb2c30d0cbb`**  
-HEAD message: `feat: add guided Reset movement visuals`
+Snapshot HEAD: **`b949ab3fff6bcc460c376b682430d499e3c3682a`**
+HEAD message: `docs: add canonical Codex context for Releaf 1.0`
 
 This file is a working snapshot. The code and canonical release gate remain authoritative if the branch moves.
 
@@ -114,7 +114,7 @@ Recent project work immediately before this snapshot reported:
 - Brain total: 15 games already present.
 - prior automated verification at commit `1fd44b7` was reported green, including analyzer/tests/build checks.
 
-Current HEAD is one commit ahead of `1fd44b7`, adding Reset movement visuals/tests. Therefore **rerun the full automated baseline before carrying forward any “all green” claim**.
+The application code remains at the Reset movement change `7a422a7`; the following commit adds the context pack. On 2026-09-11, Flutter 3.47.2 / Dart 3.13.2 dependency resolution passed with no lockfile drift, `flutter analyze` reported no issues, and the full suite passed **333 tests**. The three Reset-change files then received formatter-only edits; formatter verification and **9 focused Reset guidance/lifecycle tests** passed. The web release build and its built deletion-resource contract also passed. See `docs/release/2026-09-11-repository-audit.md` for verification scope and remaining checks; these results do not close external or device gates.
 
 ### Historical specific game contracts
 
@@ -176,7 +176,7 @@ Do not collapse these layers.
 
 ### Remaining content dependency
 
-The canonical release gate says the meditation player is engineering-done/content-dependent. Final approved Releaf Guide recordings remain a content dependency.
+The canonical release gate says the meditation player is engineering-done/content-dependent. Final approved Releaf Guide recordings remain a content dependency. The freshly exported production manifest has **20 guided sessions / 103 steps**, with **4 recorded steps** (all in `mindfulness-basics-2`) and **99 steps still to render**. Recorded-path metadata does not replace decoding, listening or approval QA.
 
 ## Sound / Sleep
 
@@ -245,6 +245,8 @@ Current code contains:
 - Supabase functions/migrations.
 
 Progress sync remains intentionally **inactive/deferred for 1.0** as a user-facing cloud-backup claim.
+
+Read-only live verification on 2026-09-11 found `delete-account` version **1**, ACTIVE, with JWT verification enabled. Its deployed source deletes the Supabase user but **does not contain the repository's RevenueCat erasure step**. Deployment of the hardened source and server-secret configuration remain required; no live deletion was performed. The live Supabase security advisor returned **0 lints**.
 
 ## Tests / release infrastructure
 

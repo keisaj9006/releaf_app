@@ -97,10 +97,7 @@ void main() {
       ),
     );
 
-    expect(
-      find.byKey(const Key('reset-body-release-visual')),
-      findsOneWidget,
-    );
+    expect(find.byKey(const Key('reset-body-release-visual')), findsOneWidget);
     expect(
       find.bySemanticsLabel(
         'Illustrated upper-body guide. Jaw. The active jaw or shoulder area is highlighted.',
@@ -113,9 +110,9 @@ void main() {
 
   test('movement demonstrations map only to approved Reset sessions', () {
     const catalog = ResetCatalog();
-    final sessionsRequiringDemo = catalog
-        .getAll()
-        .where((session) => session.requiresMovementDemo);
+    final sessionsRequiringDemo = catalog.getAll().where(
+      (session) => session.requiresMovementDemo,
+    );
 
     expect(sessionsRequiringDemo, isNotEmpty);
     for (final session in sessionsRequiringDemo) {

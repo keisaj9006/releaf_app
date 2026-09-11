@@ -65,8 +65,9 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
 
   final audio.AudioPlayer _ambientPlayer = audio.AudioPlayer();
   final MeditationVoiceDriver _voiceDriver = FlutterMeditationVoiceDriver();
-  late final ResetVoicePlayback _voicePlayback =
-      ResetVoicePlayback(_voiceDriver);
+  late final ResetVoicePlayback _voicePlayback = ResetVoicePlayback(
+    _voiceDriver,
+  );
   bool _ambientStarted = false;
   late bool _voiceEnabled;
   late double _voiceVolume;
@@ -130,11 +131,11 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
       final deadline = _deadline;
       if (deadline == null) return;
 
-      final wallClockRemaining =
-          SessionDeadlineClock.remainingSeconds(deadline);
+      final wallClockRemaining = SessionDeadlineClock.remainingSeconds(
+        deadline,
+      );
       final timerTickRemaining = math.max(0, _remainingSeconds - 1);
-      final nextRemaining =
-          math.min(wallClockRemaining, timerTickRemaining);
+      final nextRemaining = math.min(wallClockRemaining, timerTickRemaining);
 
       if (nextRemaining > 0) {
         if (nextRemaining != _remainingSeconds) {
@@ -168,9 +169,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
       try {
         await _ambientPlayer.setReleaseMode(audio.ReleaseMode.loop);
         await _ambientPlayer.setVolume(_ambientVolume);
-        await _ambientPlayer.play(
-          audio.AssetSource('sounds/deep_drift.mp3'),
-        );
+        await _ambientPlayer.play(audio.AssetSource('sounds/deep_drift.mp3'));
         _ambientStarted = true;
       } catch (_) {
         _ambientStarted = false;
@@ -233,9 +232,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
   Future<void> _setVoiceVolume(double volume) async {
     final safe = volume.clamp(0.0, 1.0).toDouble();
     if (mounted) setState(() => _voiceVolume = safe);
-    await ref
-        .read(resetAudioPreferencesProvider.notifier)
-        .setVoiceVolume(safe);
+    await ref.read(resetAudioPreferencesProvider.notifier).setVoiceVolume(safe);
     try {
       await _voiceDriver.setVolume(safe);
     } catch (_) {}
@@ -260,9 +257,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
       } else {
         await _ambientPlayer.setReleaseMode(audio.ReleaseMode.loop);
         await _ambientPlayer.setVolume(_ambientVolume);
-        await _ambientPlayer.play(
-          audio.AssetSource('sounds/deep_drift.mp3'),
-        );
+        await _ambientPlayer.play(audio.AssetSource('sounds/deep_drift.mp3'));
         _ambientStarted = true;
       }
     } catch (_) {
@@ -373,9 +368,11 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
                           key: const Key('reset-active-master-mute'),
                           onPressed: () {
                             unawaited(
-                              _setAllAudioMuted(!_allAudioMuted).whenComplete(() {
-                                if (context.mounted) refresh();
-                              }),
+                              _setAllAudioMuted(!_allAudioMuted).whenComplete(
+                                () {
+                                  if (context.mounted) refresh();
+                                },
+                              ),
                             );
                           },
                           icon: Icon(
@@ -387,8 +384,9 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
                             _allAudioMuted ? 'Turn sound on' : 'Mute all sound',
                           ),
                           style: FilledButton.styleFrom(
-                            backgroundColor:
-                                ReleafColors.sage.withValues(alpha: 0.14),
+                            backgroundColor: ReleafColors.sage.withValues(
+                              alpha: 0.14,
+                            ),
                             foregroundColor: ReleafColors.textPrimary,
                           ),
                         ),
@@ -456,9 +454,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
                             const Icon(Icons.graphic_eq_rounded, size: 18),
                             Expanded(
                               child: Slider(
-                                key: const Key(
-                                  'reset-active-ambient-volume',
-                                ),
+                                key: const Key('reset-active-ambient-volume'),
                                 value: _ambientVolume,
                                 onChanged: (value) {
                                   unawaited(_setAmbientVolume(value));
@@ -513,7 +509,9 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
     if (!_completionRecorded) {
       _completionRecorded = true;
       try {
-        await ref.read(resetCompletionStoreProvider.notifier).recordCompletion(
+        await ref
+            .read(resetCompletionStoreProvider.notifier)
+            .recordCompletion(
               sessionId: session.id,
               durationSeconds: _activeDurationSeconds,
             );
@@ -525,8 +523,9 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
     if (_awarded) return;
     _awarded = true;
 
-    final result =
-        await ref.read(leavesNotifierProvider.notifier).markReliefDone();
+    final result = await ref
+        .read(leavesNotifierProvider.notifier)
+        .markReliefDone();
 
     if (!mounted || result == null) return;
 
@@ -535,9 +534,9 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
         ? '+${result.totalAdded} leaves • Perfect day bonus!'
         : '+${result.totalAdded} leaves';
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   void _abortSession() {
@@ -624,8 +623,10 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
     final nextElapsed = steps
         .take(currentIndex + 1)
         .fold<int>(0, (sum, step) => sum + step.durationSeconds);
-    final nextRemaining =
-        (_activeDurationSeconds - nextElapsed).clamp(0, _activeDurationSeconds);
+    final nextRemaining = (_activeDurationSeconds - nextElapsed).clamp(
+      0,
+      _activeDurationSeconds,
+    );
 
     HapticFeedback.lightImpact();
     setState(() => _remainingSeconds = nextRemaining);
@@ -641,7 +642,6 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
       context.go(AppRoutes.relief);
     }
   }
-
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
@@ -702,9 +702,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
           await _ambientPlayer.resume();
         } else {
           await _ambientPlayer.setReleaseMode(audio.ReleaseMode.loop);
-          await _ambientPlayer.play(
-            audio.AssetSource('sounds/deep_drift.mp3'),
-          );
+          await _ambientPlayer.play(audio.AssetSource('sounds/deep_drift.mp3'));
           _ambientStarted = true;
         }
       } catch (_) {
@@ -758,11 +756,11 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
             switchOutCurve: Curves.easeInCubic,
             child: _session!.isEmergency
                 ? (_phase == SessionPhase.running
-                    ? _buildEmergencyRunningState(timeString)
-                    : _buildEmergencyFeedbackState())
+                      ? _buildEmergencyRunningState(timeString)
+                      : _buildEmergencyFeedbackState())
                 : (_phase == SessionPhase.running
-                    ? _buildPremiumRunningState(timeString)
-                    : _buildPremiumFeedbackState()),
+                      ? _buildPremiumRunningState(timeString)
+                      : _buildPremiumFeedbackState()),
           ),
         ),
       ),
@@ -792,10 +790,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
       key: const ValueKey('running'),
       fit: StackFit.expand,
       children: [
-        ReleafArtwork(
-          variant: artwork,
-          intensity: 0.42,
-        ),
+        ReleafArtwork(variant: artwork, intensity: 0.42),
         DecoratedBox(
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -855,10 +850,12 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
                             ),
                             decoration: BoxDecoration(
                               color: ReleafColors.surfaceSoft,
-                              borderRadius:
-                                  BorderRadius.circular(ReleafRadii.pill),
-                              border:
-                                  Border.all(color: ReleafColors.borderSoft),
+                              borderRadius: BorderRadius.circular(
+                                ReleafRadii.pill,
+                              ),
+                              border: Border.all(
+                                color: ReleafColors.borderSoft,
+                              ),
                             ),
                             child: Text(
                               session.methodLabel!,
@@ -888,15 +885,17 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
                                     ResetVisualType.sensoryHalo =>
                                       ReleafSensoryHalo(
                                         progress: progress,
-                                        targetCount:
-                                            _sensoryTargetFor(phaseLabel),
-                                        completedCount:
-                                            _sensoryCompletedFor(session),
+                                        targetCount: _sensoryTargetFor(
+                                          phaseLabel,
+                                        ),
+                                        completedCount: _sensoryCompletedFor(
+                                          session,
+                                        ),
                                         phaseLabel: phaseLabel ?? 'Notice',
                                         onNotice:
                                             _sensoryTargetFor(phaseLabel) > 0
-                                                ? _registerSensoryNotice
-                                                : null,
+                                            ? _registerSensoryNotice
+                                            : null,
                                         reducedMotion: reducedMotion,
                                       ),
                                     ResetVisualType.bodyRelease =>
@@ -951,14 +950,14 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
                                             breathPattern?.inhaleSeconds ?? 4,
                                         holdAfterInhaleSeconds:
                                             breathPattern
-                                                    ?.holdAfterInhaleSeconds ??
-                                                0,
+                                                ?.holdAfterInhaleSeconds ??
+                                            0,
                                         exhaleSeconds:
                                             breathPattern?.exhaleSeconds ?? 4,
                                         holdAfterExhaleSeconds:
                                             breathPattern
-                                                    ?.holdAfterExhaleSeconds ??
-                                                0,
+                                                ?.holdAfterExhaleSeconds ??
+                                            0,
                                         showBreathPath: showBreathPath,
                                         reducedMotion: reducedMotion,
                                       ),
@@ -1051,7 +1050,9 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
                             style: OutlinedButton.styleFrom(
                               foregroundColor: ReleafColors.sage,
                               side: BorderSide(
-                                color: ReleafColors.sage.withValues(alpha: 0.30),
+                                color: ReleafColors.sage.withValues(
+                                  alpha: 0.30,
+                                ),
                               ),
                               backgroundColor: ReleafColors.sage.withValues(
                                 alpha: 0.06,
@@ -1061,8 +1062,9 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
                                 vertical: 11,
                               ),
                               shape: RoundedRectangleBorder(
-                                borderRadius:
-                                    BorderRadius.circular(ReleafRadii.pill),
+                                borderRadius: BorderRadius.circular(
+                                  ReleafRadii.pill,
+                                ),
                               ),
                             ),
                           ),
@@ -1102,8 +1104,9 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
                                   vertical: 12,
                                 ),
                                 shape: RoundedRectangleBorder(
-                                  borderRadius:
-                                      BorderRadius.circular(ReleafRadii.pill),
+                                  borderRadius: BorderRadius.circular(
+                                    ReleafRadii.pill,
+                                  ),
                                 ),
                               ),
                             ),
@@ -1114,7 +1117,9 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
                               'SIMPLIFIED 3–2–1',
                               key: const Key('reset-simplified-active'),
                               style: ReleafTypography.eyebrow.copyWith(
-                                color: ReleafColors.sage.withValues(alpha: 0.82),
+                                color: ReleafColors.sage.withValues(
+                                  alpha: 0.82,
+                                ),
                               ),
                             ),
                           ),
@@ -1138,10 +1143,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
       key: const ValueKey('feedback'),
       fit: StackFit.expand,
       children: [
-        ReleafArtwork(
-          variant: artwork,
-          intensity: 0.28,
-        ),
+        ReleafArtwork(variant: artwork, intensity: 0.28),
         DecoratedBox(
           decoration: BoxDecoration(
             color: ReleafColors.background.withValues(alpha: 0.84),
@@ -1164,10 +1166,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
                     child: SizedBox(
                       width: 170,
                       height: 170,
-                      child: ReleafLivingForm(
-                        variant: artwork,
-                        opacity: 0.92,
-                      ),
+                      child: ReleafLivingForm(variant: artwork, opacity: 0.92),
                     ),
                   ),
                   const SizedBox(height: ReleafSpacing.xl),
@@ -1208,8 +1207,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
                         backgroundColor: ReleafColors.sage,
                         foregroundColor: ReleafColors.background,
                         shape: RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.circular(ReleafRadii.pill),
+                          borderRadius: BorderRadius.circular(ReleafRadii.pill),
                         ),
                       ),
                       child: const Text(
@@ -1229,12 +1227,9 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
                       onPressed: () => _submitFeedbackAndClose(false),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: ReleafColors.textSecondary,
-                        side: const BorderSide(
-                          color: ReleafColors.border,
-                        ),
+                        side: const BorderSide(color: ReleafColors.border),
                         shape: RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.circular(ReleafRadii.pill),
+                          borderRadius: BorderRadius.circular(ReleafRadii.pill),
                         ),
                       ),
                       child: const Text(
@@ -1278,11 +1273,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [
-                Color(0xFF12120F),
-                Color(0xFF0D110F),
-                Color(0xFF070907),
-              ],
+              colors: [Color(0xFF12120F), Color(0xFF0D110F), Color(0xFF070907)],
               stops: [0, 0.58, 1],
             ),
           ),
@@ -1371,9 +1362,9 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
                           if (widget.launchOptions.showSessionTimer)
                             DecoratedBox(
                               decoration: BoxDecoration(
-                                color: const Color(0xFF171815).withValues(
-                                  alpha: 0.88,
-                                ),
+                                color: const Color(
+                                  0xFF171815,
+                                ).withValues(alpha: 0.88),
                                 borderRadius: BorderRadius.circular(
                                   ReleafRadii.pill,
                                 ),
@@ -1389,9 +1380,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
                                 ),
                                 child: Text(
                                   timeString,
-                                  key: const Key(
-                                    'reset-active-session-timer',
-                                  ),
+                                  key: const Key('reset-active-session-timer'),
                                   style: ReleafTypography.meta.copyWith(
                                     color: ReleafColors.textPrimary,
                                     fontWeight: FontWeight.w700,
@@ -1479,9 +1468,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
                                 : ReleafMotion.standard,
                             child: Text(
                               guidance,
-                              key: ValueKey(
-                                'emergency-guidance-$phaseLabel',
-                              ),
+                              key: ValueKey('emergency-guidance-$phaseLabel'),
                               textAlign: TextAlign.center,
                               style: ReleafTypography.body.copyWith(
                                 color: ReleafColors.textPrimary.withValues(
@@ -1512,10 +1499,8 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
                             label: Text(advanceLabel),
                             style: OutlinedButton.styleFrom(
                               foregroundColor: ReleafColors.textPrimary,
-                              backgroundColor:
-                                  ReleafFeatureAccents.emergency.withValues(
-                                alpha: 0.06,
-                              ),
+                              backgroundColor: ReleafFeatureAccents.emergency
+                                  .withValues(alpha: 0.06),
                               side: BorderSide(
                                 color: ReleafFeatureAccents.emergency
                                     .withValues(alpha: 0.28),
@@ -1630,9 +1615,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
                         backgroundColor: ReleafColors.sage,
                         foregroundColor: ReleafColors.background,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                            ReleafRadii.pill,
-                          ),
+                          borderRadius: BorderRadius.circular(ReleafRadii.pill),
                         ),
                       ),
                       child: const Text(
@@ -1654,9 +1637,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
                         foregroundColor: ReleafColors.textSecondary,
                         side: const BorderSide(color: ReleafColors.border),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                            ReleafRadii.pill,
-                          ),
+                          borderRadius: BorderRadius.circular(ReleafRadii.pill),
                         ),
                       ),
                       child: const Text(
@@ -1691,10 +1672,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
     }
 
     return program
-        .stepAtElapsedSeconds(
-          elapsed,
-          simplified: _usingSimplifiedProgram,
-        )
+        .stepAtElapsedSeconds(elapsed, simplified: _usingSimplifiedProgram)
         .label;
   }
 
@@ -1746,8 +1724,10 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
   }
 
   int _elapsedSeconds(ResetContent session) {
-    return (_activeDurationSeconds - _remainingSeconds)
-        .clamp(0, _activeDurationSeconds);
+    return (_activeDurationSeconds - _remainingSeconds).clamp(
+      0,
+      _activeDurationSeconds,
+    );
   }
 
   String _breathPhaseLabel(BreathPhase phase) {
@@ -1868,9 +1848,7 @@ class _SessionTopBar extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                session.level == ResetLevel.deep
-                    ? 'DEEP RESET'
-                    : 'QUICK RESET',
+                session.level == ResetLevel.deep ? 'DEEP RESET' : 'QUICK RESET',
                 style: ReleafTypography.eyebrow,
               ),
               const SizedBox(height: 2),
@@ -1892,9 +1870,7 @@ class _SessionTopBar extends StatelessWidget {
           onPressed: onAudioPressed,
           visualDensity: VisualDensity.compact,
           icon: Icon(
-            audioEnabled
-                ? Icons.volume_up_rounded
-                : Icons.volume_off_rounded,
+            audioEnabled ? Icons.volume_up_rounded : Icons.volume_off_rounded,
             color: ReleafColors.textSecondary,
           ),
         ),
@@ -1907,10 +1883,7 @@ class _SessionTopBar extends StatelessWidget {
               border: Border.all(color: ReleafColors.borderSoft),
             ),
             child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 8,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               child: Text(
                 timeString,
                 key: const Key('reset-active-session-timer'),
@@ -1927,10 +1900,7 @@ class _SessionTopBar extends StatelessWidget {
           Text(
             session.title,
             key: const Key('reset-active-session-title'),
-            style: const TextStyle(
-              fontSize: 0,
-              color: Colors.transparent,
-            ),
+            style: const TextStyle(fontSize: 0, color: Colors.transparent),
           ),
       ],
     );

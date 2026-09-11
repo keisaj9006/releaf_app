@@ -68,28 +68,28 @@ class _ReleafMovementDemoVisualState extends State<ReleafMovementDemoVisual>
   }
 
   String get _semanticsLabel => switch (widget.kind) {
-        ReleafMovementDemoKind.pushUps =>
-          'Animated movement guide. Choose a comfortable floor, wall, or seated press and move slowly. Current step: ${widget.phaseLabel}.',
-        ReleafMovementDemoKind.shakeOut =>
-          'Animated movement guide. Use small loose movements through the hands, arms, and legs. A seated option is shown. Current step: ${widget.phaseLabel}.',
-      };
+    ReleafMovementDemoKind.pushUps =>
+      'Animated movement guide. Choose a comfortable floor, wall, or seated press and move slowly. Current step: ${widget.phaseLabel}.',
+    ReleafMovementDemoKind.shakeOut =>
+      'Animated movement guide. Use small loose movements through the hands, arms, and legs. A seated option is shown. Current step: ${widget.phaseLabel}.',
+  };
 
   String get _caption => switch (widget.kind) {
-        ReleafMovementDemoKind.pushUps =>
-          widget.phaseLabel.toLowerCase().contains('move')
-              ? 'SLOW, CONTROLLED REPS'
-              : 'CHOOSE YOUR COMFORTABLE VERSION',
-        ReleafMovementDemoKind.shakeOut =>
-          widget.phaseLabel.toLowerCase().contains('still') ||
-                  widget.phaseLabel.toLowerCase().contains('return')
-              ? 'RETURN TO STILLNESS'
-              : 'SMALL, LOOSE MOVEMENT',
-      };
+    ReleafMovementDemoKind.pushUps =>
+      widget.phaseLabel.toLowerCase().contains('move')
+          ? 'SLOW, CONTROLLED REPS'
+          : 'CHOOSE YOUR COMFORTABLE VERSION',
+    ReleafMovementDemoKind.shakeOut =>
+      widget.phaseLabel.toLowerCase().contains('still') ||
+              widget.phaseLabel.toLowerCase().contains('return')
+          ? 'RETURN TO STILLNESS'
+          : 'SMALL, LOOSE MOVEMENT',
+  };
 
   String get _keySuffix => switch (widget.kind) {
-        ReleafMovementDemoKind.pushUps => 'pushups',
-        ReleafMovementDemoKind.shakeOut => 'shake-out',
-      };
+    ReleafMovementDemoKind.pushUps => 'pushups',
+    ReleafMovementDemoKind.shakeOut => 'shake-out',
+  };
 
   @override
   void dispose() {
@@ -139,8 +139,9 @@ class _ReleafMovementDemoVisualState extends State<ReleafMovementDemoVisual>
                             color: ReleafColors.surfaceSoft.withValues(
                               alpha: 0.86,
                             ),
-                            borderRadius:
-                                BorderRadius.circular(ReleafRadii.pill),
+                            borderRadius: BorderRadius.circular(
+                              ReleafRadii.pill,
+                            ),
                             border: Border.all(
                               color: ReleafColors.sage.withValues(alpha: 0.20),
                             ),
@@ -231,8 +232,8 @@ class _MovementDemoPainter extends CustomPainter {
     final repetition = shouldMove
         ? 0.5 - 0.5 * math.cos(t * math.pi * 2)
         : shouldSettle
-            ? 0.12
-            : 0.28;
+        ? 0.12
+        : 0.28;
     final centers = <double>[
       size.width * 0.22,
       size.width * 0.50,
@@ -332,7 +333,10 @@ class _MovementDemoPainter extends CustomPainter {
     );
 
     final lean = repetition * base * 0.035;
-    final head = Offset(center.dx - base * 0.025 + lean, center.dy - base * 0.085);
+    final head = Offset(
+      center.dx - base * 0.025 + lean,
+      center.dy - base * 0.085,
+    );
     final shoulder = Offset(
       center.dx - base * 0.025 + lean,
       center.dy - base * 0.045,
@@ -443,7 +447,14 @@ class _MovementDemoPainter extends CustomPainter {
   }) {
     final line = _linePaint(base);
     final accent = _accentPaint(base);
-    final handShift = wave * base * (hands ? 0.018 : arms ? 0.009 : 0.0);
+    final handShift =
+        wave *
+        base *
+        (hands
+            ? 0.018
+            : arms
+            ? 0.009
+            : 0.0);
     final armShift = wave * base * (arms ? 0.016 : 0.0);
     final legShift = wave * base * (legs ? 0.012 : 0.0);
     final head = Offset(center.dx, center.dy - base * 0.16);
@@ -496,7 +507,14 @@ class _MovementDemoPainter extends CustomPainter {
     final line = _linePaint(base);
     final accent = _accentPaint(base);
     final chair = _linePaint(base, alpha: 0.22);
-    final handShift = wave * base * (hands ? 0.018 : arms ? 0.009 : 0.0);
+    final handShift =
+        wave *
+        base *
+        (hands
+            ? 0.018
+            : arms
+            ? 0.009
+            : 0.0);
     final legShift = wave * base * (legs ? 0.012 : 0.0);
     final head = Offset(center.dx, center.dy - base * 0.15);
     final shoulder = Offset(center.dx, center.dy - base * 0.085);
