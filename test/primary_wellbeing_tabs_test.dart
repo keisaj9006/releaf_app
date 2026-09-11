@@ -418,7 +418,7 @@ void main() {
     expect(find.text('Meditate'), findsWidgets);
     expect(
       find.text(
-        'Press play, get comfortable, then let the voice carry the practice.',
+        'Press play, get comfortable, and let the practice create space.',
       ),
       findsOneWidget,
     );

@@ -65,6 +65,7 @@ class _ReleafBodyReleaseVisualState extends State<ReleafBodyReleaseVisual>
     return Semantics(
       container: true,
       image: true,
+      excludeSemantics: true,
       label:
           'Illustrated upper-body guide. ${widget.phaseLabel}. The active jaw or shoulder area is highlighted.',
       child: TweenAnimationBuilder<double>(

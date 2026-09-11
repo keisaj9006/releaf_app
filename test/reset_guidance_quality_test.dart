@@ -46,7 +46,6 @@ void main() {
     tester,
   ) async {
     final semantics = tester.ensureSemantics();
-    addTearDown(semantics.dispose);
 
     await tester.pumpWidget(
       const MaterialApp(
@@ -74,13 +73,13 @@ void main() {
       findsOneWidget,
     );
     expect(tester.takeException(), isNull);
+    semantics.dispose();
   });
 
   testWidgets('jaw and shoulder guide exposes its highlighted body area', (
     tester,
   ) async {
     final semantics = tester.ensureSemantics();
-    addTearDown(semantics.dispose);
 
     await tester.pumpWidget(
       const MaterialApp(
@@ -108,5 +107,6 @@ void main() {
       findsOneWidget,
     );
     expect(tester.takeException(), isNull);
+    semantics.dispose();
   });
 }
