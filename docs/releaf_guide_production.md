@@ -1,6 +1,6 @@
 # Releaf Guide — Narration Production Standard
 
-Last reviewed: 2026-09-09
+Last reviewed: 2026-09-11
 
 ## Scope
 
@@ -64,9 +64,15 @@ This guarantees one source of truth for:
 - session narration timing.
 
 Guided Reset sessions may play approved Releaf Guide recordings. Paced-
-breathing sessions never read their on-screen guidance aloud. A soft rising
-tone marks inhale, a soft falling tone marks exhale, and hold/rest phases are
-silent. The cue changes only when the canonical `BreathPattern` changes phase,
+breathing sessions never read their on-screen guidance aloud. The existing
+rising/falling tone assets were rejected by the owner as artificial and
+unpleasant. Their presence and successful decoding do not imply production
+approval. The required direction is a natural, gentle human inhale and a longer
+calming exhale; hold/rest phases remain silent. New audition candidates must
+stay outside runtime assets until explicit owner listening approval. Do not
+replace active cues with an unreviewed synthetic placeholder.
+
+The cue changes only when the canonical `BreathPattern` changes phase,
 so audio and visual rhythm cannot drift apart.
 
 ## Audio layering

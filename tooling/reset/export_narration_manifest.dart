@@ -30,11 +30,8 @@ String _targetPath(
       '$index-${_slug(label)}.mp3';
 }
 
-int _wordCount(String value) => value
-    .trim()
-    .split(RegExp(r'\s+'))
-    .where((word) => word.isNotEmpty)
-    .length;
+int _wordCount(String value) =>
+    value.trim().split(RegExp(r'\s+')).where((word) => word.isNotEmpty).length;
 
 Map<String, Object?> _breathPatternPayload(BreathPattern pattern) {
   return <String, Object?>{
@@ -63,12 +60,7 @@ List<Map<String, Object?>> _serializeSteps(
     }
 
     final target = spokenGuidanceEnabled
-        ? _targetPath(
-            sessionId,
-            index,
-            step.label,
-            simplified: simplified,
-          )
+        ? _targetPath(sessionId, index, step.label, simplified: simplified)
         : null;
     final recorded = spokenGuidanceEnabled
         ? step.narrationAssetPath?.trim()
@@ -104,7 +96,9 @@ Map<String, Object?> buildResetNarrationManifest() {
   final sessions = catalog.getAll();
 
   if (sessions.length != 50) {
-    throw StateError('Expected 50 active Reset sessions, found ${sessions.length}.');
+    throw StateError(
+      'Expected 50 active Reset sessions, found ${sessions.length}.',
+    );
   }
 
   var breathingSessionCount = 0;
@@ -144,10 +138,7 @@ Map<String, Object?> buildResetNarrationManifest() {
       spokenGuidanceEnabled: program.type != ResetProgramType.pacedBreathing,
     );
 
-    final allSteps = <Map<String, Object?>>[
-      ...mainSteps,
-      ...simplifiedSteps,
-    ];
+    final allSteps = <Map<String, Object?>>[...mainSteps, ...simplifiedSteps];
     totalStepCount += allSteps.length;
     recordedStepCount += allSteps
         .where((step) => step['recordedAssetPath'] != null)
@@ -179,20 +170,26 @@ Map<String, Object?> buildResetNarrationManifest() {
     );
   }
 
-  final breathCues = BreathPhase.values.map((phase) {
-    final target = resetBreathPhaseTargetAssetPath(phase);
-    if (target != null && !File('assets/$target').existsSync()) {
-      throw StateError('Missing non-verbal breathing cue: assets/$target');
-    }
-    return <String, Object?>{
-      'phase': phase.name,
-      'cueType': target == null ? 'silence' : 'nonVerbalTone',
-      'spokenGuidance': null,
-      'targetAssetPath': target,
-      'recordedAssetPath': target,
-      'renderRequired': false,
-    };
-  }).toList(growable: false);
+  final breathCues = BreathPhase.values
+      .map((phase) {
+        final target = resetBreathPhaseTargetAssetPath(phase);
+        if (target != null && !File('assets/$target').existsSync()) {
+          throw StateError('Missing non-verbal breathing cue: assets/$target');
+        }
+        return <String, Object?>{
+          'phase': phase.name,
+          'cueType': target == null ? 'silence' : 'naturalHumanBreath',
+          'existingCueType': target == null ? 'silence' : 'nonVerbalTone',
+          'existingAssetPresent': target != null,
+          'approvalStatus': target == null ? 'notRequired' : 'rejected',
+          'productionApproved': false,
+          'spokenGuidance': null,
+          'targetAssetPath': target,
+          'recordedAssetPath': target,
+          'renderRequired': target != null,
+        };
+      })
+      .toList(growable: false);
 
   return <String, Object?>{
     'schemaVersion': 1,
@@ -205,7 +202,15 @@ Map<String, Object?> buildResetNarrationManifest() {
     'resetSessionCount': sessions.length,
     'breathingSessionCount': breathingSessionCount,
     'breathCueCount': breathCues.length,
-    'breathCuesStillToRender': 0,
+    'breathCuesStillToRender': breathCues
+        .where((cue) => cue['renderRequired'] == true)
+        .length,
+    'breathCuesAwaitingApproval': breathCues
+        .where((cue) => cue['approvalStatus'] == 'rejected')
+        .length,
+    'breathingProductionDirection':
+        'natural gentle human inhale and longer calming exhale; hold/rest silent; '
+        'candidate files remain outside runtime assets until owner approval',
     'breathCues': breathCues,
     'totalStepCount': totalStepCount,
     'recordedStepCount': recordedStepCount,

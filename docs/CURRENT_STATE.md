@@ -21,7 +21,7 @@ Its current high-level state:
 
 | Area | Current release-gate status |
 |---|---|
-| RESET core | DONE |
+| RESET core | DONE / CONTENT |
 | BRAIN core | DONE / QA |
 | Sleep player/timer | DONE / CONTENT |
 | Meditation player | DONE / CONTENT |
@@ -64,7 +64,10 @@ Current architecture contains:
 
 Current access policy deliberately keeps internal Emergency content outside Premium entitlement.
 
-The latest branch commit adds guided Reset movement visuals and associated quality tests.
+Guided Reset movement visuals and associated quality tests are implemented.
+Recorded-audio cancellation has since been hardened. Existing breathing tones
+were rejected by the owner; replacement content approval remains open. Manifest
+readiness distinguishes asset presence from approval.
 
 ### Historical user direction still relevant
 

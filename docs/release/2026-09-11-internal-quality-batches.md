@@ -39,3 +39,27 @@ Separate natural-breath sound-effect audition requests to
 `fal-ai/elevenlabs/sound-effects/v2` returned HTTP 403: account balance exhausted.
 No candidate audio was generated or installed. No narration provider identity was
 selected or substituted. This dependency does not block local pipeline or player work.
+
+## Batch 2 — breathing-content readiness
+
+Base: `e5b1cab`. The Reset manifest previously reported zero breathing cues
+needing rendering because the two rejected tone assets existed. It now exposes
+presence, existing/target cue type, rejection and production-approval status
+separately, with two replacements and approvals pending. Hold/rest are silent
+and require no asset. Runtime paths and audio bytes are unchanged.
+
+Files: Reset manifest exporter and its test; Reset guidance quality test copy;
+Releaf Guide production standard; CURRENT_STATE; canonical gate; this evidence.
+The RESET core gate is now honestly DONE / CONTENT.
+
+Verification: the new manifest assertion failed with expected 2 / actual 0 before
+the fix. Final focused run passed **14 tests**; analyzer reported **No issues
+found**; web release build succeeded. An earlier command used a nonexistent test
+filename and was corrected. The web build emitted existing dependency Wasm
+dry-run warnings but completed successfully. `git diff --check` passed.
+The previous full-suite checkpoint remains 346 passing tests; this batch changes
+tooling metadata and documentation only.
+
+Next: objective Atmosphere II candidate comparison, followed by Sleep timer
+boundary verification. Owner listening/approval and natural-breath candidate
+generation remain external dependencies; no runtime candidate was shipped.

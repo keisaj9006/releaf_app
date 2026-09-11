@@ -19,7 +19,8 @@ void main() {
       expect(
         asset.lengthSync(),
         greaterThan(10000),
-        reason: '$path must contain a production cue',
+        reason:
+            '$path must contain the existing asset; size is not content approval',
       );
     }
   });
