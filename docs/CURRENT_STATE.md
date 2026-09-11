@@ -29,7 +29,7 @@ Its current high-level state:
 | Sleep player/timer | DONE / CONTENT |
 | Meditation player | DONE / CONTENT |
 | Account auth | DONE / QA |
-| Account deletion | DEPLOYED / DISPOSABLE E2E REQUIRED |
+| Account deletion | DONE / E2E VERIFIED |
 | Emergency privacy/access | DONE |
 | Progress sync | DEFERRED / HARDENED |
 | Supabase security | DONE / MONITOR |
@@ -255,7 +255,7 @@ Current code contains:
 
 Progress sync remains intentionally **inactive/deferred for 1.0** as a user-facing cloud-backup claim.
 
-The initial read-only audit found outdated account-deletion code and **0 security-advisor lints**. Subsequent deployment on 2026-09-11 replaced outdated live version 3 with **version 4**, ACTIVE with JWT verification. Secret name presence was verified without reading its value; deployed source matches the repository. Three unauthenticated/invalid-auth POST checks returned **401**. No real account was deleted. Disposable-account E2E and eventual RevenueCat erasure remain unverified; see [deployment evidence](release/2026-09-11-delete-account-deployment.md).
+The initial read-only audit found outdated account-deletion code and **0 security-advisor lints**. Subsequent deployment on 2026-09-11 replaced outdated live version 3 with **version 4**, ACTIVE with JWT verification. Secret name presence was verified without reading its value; deployed source matches the repository. Three unauthenticated/invalid-auth POST checks returned **401**. A later Samsung SM-S928B Test Store debug E2E run deleted only a dedicated disposable account after it was identified in RevenueCat. Post-checks found zero target Auth/profile/progress/Storage records and `Customer not found` in RevenueCat; the protected primary QA account remained present. See [deployment evidence](release/2026-09-11-delete-account-deployment.md). Repeat this flow on the production-equivalent RC as part of final device QA.
 
 ## Tests / release infrastructure
 
@@ -292,10 +292,9 @@ provider identity is still missing. The separate Atmosphere II headroom candidat
 is available under `audio-candidates/2026-09-11` for later listening approval;
 the active source has not been replaced.
 
-1. Verify deployed account deletion end-to-end with a disposable identified account.
-2. Complete real RevenueCat + Google Play product/offering configuration and Play-distributed purchase/restore verification.
-3. Configure production upload signing/private key outside repo.
-4. Publish/finalize privacy policy details + stable HTTPS URL.
+1. Complete real RevenueCat + Google Play product/offering configuration and Play-distributed purchase/restore verification.
+2. Configure production upload signing/private key outside repo.
+3. Publish/finalize privacy policy details + stable HTTPS URL.
 5. Deploy stable public account-deletion URL and verify it.
 6. Complete Play Console health declaration.
 7. Complete Data safety submission/verification.

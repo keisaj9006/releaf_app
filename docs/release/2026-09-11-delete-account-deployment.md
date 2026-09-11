@@ -81,15 +81,26 @@ Curl completed with exit 0. These are gateway rejection checks, not authenticate
 handler execution. No valid user token was used, no real account was deleted and
 no subscription was created.
 
-## Remaining gate and next interaction
+## Disposable-account E2E — completed
 
-Account deletion is **DEPLOYED / DISPOSABLE E2E REQUIRED**, not full PASS.
-Prepare a dedicated disposable Releaf account without purchasing or deleting it.
-Before deletion, confirm the same UUID exists in Supabase and as an identified
-RevenueCat customer. Then run DQA-18 through the app, verify eventual RevenueCat
-erasure, Supabase auth/profile/progress cleanup and the signed-out app state.
-Do not use RevenueCat's get-or-create customer endpoint to prove absence, because
-that can recreate the customer. Use the dashboard for provider verification.
+On Samsung SM-S928B, a dedicated confirmed disposable account was signed into
+the Test Store debug APK. Safe diagnostics showed `Purchases.logIn` using the
+same UUID as Supabase. The owner then authorized and completed the in-app
+account-deletion flow. No purchase was performed.
+
+Pre-deletion inventory: one `auth.users` row, one email identity, one active
+session, one `profiles` row, zero `progress_events` rows and zero Storage
+objects. The protected primary QA account was explicitly excluded.
+
+Post-deletion SQL checks returned zero for the disposable account's Auth user,
+identity, session, profile, progress-event and Storage-object counts; the
+protected primary QA Auth user and profile both remained present. The RevenueCat
+dashboard direct customer page reported **Customer not found** for the disposable
+UUID. The verification did not call a get-or-create RevenueCat endpoint.
+
+Account deletion is **DONE / E2E VERIFIED** for the deployed Test Store path.
+Repeat DQA-18 on the final production-equivalent RC as part of the complete
+device matrix.
 
 This deployment does not close device QA, public deletion URL, signing, Play,
 privacy or content gates. Releaf 1.0 is not yet release-ready.

@@ -244,9 +244,9 @@ issues. New defects found during RC testing must reopen the relevant gate.
 
 Remaining required work is external/approval/RC-dependent:
 
-- Verify erasure across both providers with a disposable identified account.
-  Subsequent [deployment evidence](2026-09-11-delete-account-deployment.md)
-  confirms secret-name presence and hardened version 4 deployment; E2E remains open.
+- Repeat the already-passing account-deletion flow on the production-equivalent
+  RC as part of final device QA. [Deployment evidence](2026-09-11-delete-account-deployment.md)
+  records the completed Samsung Test Store E2E run against hardened version 4.
 - Recover the approved Releaf Guide voice identity; approve natural breathing
   cues and final sound selection. Only Mindfulness Basics has approved narration.
   Fal balance currently blocks breathing candidate generation; no substitute was
@@ -259,8 +259,7 @@ Remaining required work is external/approval/RC-dependent:
   Samsung physical-device matrix, including audio, media controls, sensors,
   haptics, back navigation, accessibility and performance. No such run is claimed.
 
-Account-deletion secret configuration and deployment have subsequently completed.
-Next owner action: sign into Releaf using a dedicated disposable test account,
-without purchasing a subscription or deleting it yet. Verify its Supabase UUID
-is identified in RevenueCat before proceeding with DQA-18. Never paste credentials
-or tokens into chat. See the deployment evidence for verification limits.
+Account-deletion secret configuration, deployment and a disposable Samsung Test
+Store E2E run have subsequently completed. Repeat DQA-18 only on the final
+production-equivalent RC; never use a primary QA account, paste credentials or
+tokens into chat. See the deployment evidence for verification limits.

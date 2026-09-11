@@ -24,7 +24,7 @@ When that state is reached, explicitly report:
 | Sleep player/timer | DONE / CONTENT | Player/timer behaviour is tested. Final Sleep sound selection is owner-provided; engineering remains responsible for asset QA, looping, metadata and integration. Sleep must not contain narration. |
 | Meditation player | DONE / CONTENT | Player and scripted content exist. Final approved Releaf Guide recordings remain a content dependency; do not silently substitute a new narrator identity. |
 | Account auth | DONE / QA | Sign-up, sign-in, confirmation resend, password recovery, profile update and sign-out are implemented. |
-| Account deletion | DEPLOYED / DISPOSABLE E2E REQUIRED | Hardened `delete-account` version 4 is ACTIVE with JWT verification. Server secret name presence was verified without accessing its value. Deployed source matches the repository and requests RevenueCat erasure before Supabase deletion. Three missing/invalid-auth smoke requests returned 401. Closure still requires authenticated deletion end-to-end with a disposable identified RevenueCat customer, including eventual provider erasure and dependent Supabase data cleanup. See [deployment evidence](2026-09-11-delete-account-deployment.md). |
+| Account deletion | DONE / E2E VERIFIED | Hardened `delete-account` version 4 is ACTIVE with JWT verification. A Samsung SM-S928B Test Store debug run authenticated a dedicated disposable account, identified the same UUID in RevenueCat, completed in-app deletion, then verified zero target Auth/profile/progress/Storage records and `Customer not found` in RevenueCat. A protected primary QA account was explicitly excluded. See [deployment evidence](2026-09-11-delete-account-deployment.md). Repeat DQA-18 on the production-equivalent RC as part of the full device matrix. |
 | Emergency privacy/access | DONE | No Premium gate; excluded from standard progress sync and DB-enforced exclusion is present. |
 | Progress sync | DEFERRED / HARDENED | Local progress remains the user-facing truth for 1.0. Upload/download/reconciliation primitives remain inactive until materialization + multi-device conflict tests are complete. Do not claim cloud backup. |
 | Supabase security | DONE / MONITOR | RLS is enabled on product tables and current Supabase security advisor reports no lints. |
@@ -49,7 +49,8 @@ content approvals, credentials, production signing, public resources, store
 actions or production-equivalent physical-device gates. See the batch evidence
 for the internal completion record. Subsequent account-deletion deployment
 replaced the outdated live version 3 with reviewed version 4; secret presence
-and unauthorized-request rejection are verified. Disposable-account E2E remains open.
+and unauthorized-request rejection are verified. Disposable-account E2E has since
+passed; the final production-equivalent device matrix remains open.
 The same read-only audit returned zero Supabase security-advisor lints.
 Automated results do not close production-signing, content, external or device gates.
 
