@@ -142,3 +142,26 @@ collection without changing daily rotation, evidence copy or navigation.
   reproduce narration being masked at defaults; preserve user controls and verify
   perceived balance on Samsung at RC rather than arbitrarily remastering approved
   voice assets. Decode measurements are not listening approval.
+
+## Batch 6 — browsable Daily Insight and large-text Home
+
+Base: `2dd74b2`. The existing catalog contains 30 entries, but its sheet exposed
+only the daily entry. The same sheet now provides previous/next controls and an
+announced position count; navigation wraps through the existing collection.
+Each entry retains its own evidence/source link, and closing leaves today's
+Home recommendation unchanged. No routes or educational claims changed.
+
+The 320px/1.8 text-scale regression also exposed three existing Home overflows.
+Intent labels and the Insight badge can now wrap within their available width;
+feature-card height grows with text scale. These are layout corrections, not a
+navigation or product-pillar redesign.
+
+Files: Home screen, Home hub tests, this evidence. Browsing assertions failed
+before implementation; the large-text test reproduced the existing overflows.
+Final focused Home tests: **13 passed** (including all 30 entries, backward
+navigation and closing). Analyzer: **No issues found**. Independent review found
+no actionable regressions. Full suite: **362 tests passed**. Android debug APK
+built successfully. `git diff --check` passed.
+
+Affected gates: accessibility and general release QA; no external gate closes.
+Next: finish targeted legacy Brain difficulty/progression quality checks.
