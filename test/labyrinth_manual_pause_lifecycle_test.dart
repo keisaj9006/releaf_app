@@ -28,11 +28,12 @@ void main() {
       expect(find.byTooltip('Pause'), findsOneWidget);
       expect(find.byTooltip('Resume'), findsNothing);
 
-      await tester.tap(find.byTooltip('Pause'));
+      await tester.tap(find.widgetWithIcon(IconButton, Icons.pause_rounded));
       await tester.pump();
 
       expect(find.byTooltip('Resume'), findsOneWidget);
       expect(find.byTooltip('Pause'), findsNothing);
+      expect(find.widgetWithText(FilledButton, 'Resume'), findsOneWidget);
 
       tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
       await tester.pump(const Duration(seconds: 2));
@@ -43,12 +44,16 @@ void main() {
       // silently resume a session that the user explicitly paused.
       expect(find.byTooltip('Resume'), findsOneWidget);
       expect(find.byTooltip('Pause'), findsNothing);
+      expect(find.widgetWithText(FilledButton, 'Resume'), findsOneWidget);
 
-      await tester.tap(find.byTooltip('Resume'));
+      // The pause overlay intentionally covers the header Resume icon, so the
+      // user-facing way to continue is the visible overlay button.
+      await tester.tap(find.widgetWithText(FilledButton, 'Resume'));
       await tester.pump();
 
       expect(find.byTooltip('Pause'), findsOneWidget);
       expect(find.byTooltip('Resume'), findsNothing);
+      expect(find.widgetWithText(FilledButton, 'Resume'), findsNothing);
 
       await tester.pumpWidget(const SizedBox.shrink());
       await tester.pump();
