@@ -1,12 +1,7 @@
 // FILE: lib/features/brain/data/game_registry.dart
 import 'package:flutter/material.dart';
 
-enum BrainGameGroup {
-  memory,
-  attention,
-  reasoning,
-  spatial,
-}
+enum BrainGameGroup { memory, attention, reasoning, spatial }
 
 class BrainGameMeta {
   final String id;
@@ -33,6 +28,7 @@ const brainGames = <BrainGameMeta>[
     title: 'Memory',
     icon: Icons.grid_view,
     group: BrainGameGroup.memory,
+    hasDifficultyLevels: true,
   ),
   BrainGameMeta(
     id: 'labyrinth',
@@ -54,12 +50,14 @@ const brainGames = <BrainGameMeta>[
     title: 'Broken Mirror',
     icon: Icons.auto_fix_high,
     group: BrainGameGroup.spatial,
+    hasDifficultyLevels: true,
   ),
   BrainGameMeta(
     id: 'rule_shift',
     title: 'Rule Shift',
     icon: Icons.swap_horiz_rounded,
     group: BrainGameGroup.attention,
+    hasDifficultyLevels: true,
   ),
   BrainGameMeta(
     id: 'sequence_echo',

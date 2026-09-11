@@ -6,13 +6,10 @@ import '../../routing/app_routes.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/releaf_design_tokens.dart';
 import '../../theme/widgets/releaf_brain_artwork.dart';
+import '../../features/brain/presentation/widgets/brain_difficulty_selector.dart';
 
 class RuleShiftScreen extends StatefulWidget {
-  const RuleShiftScreen({
-    super.key,
-    this.onFinish,
-    this.trainingLevel = 1,
-  });
+  const RuleShiftScreen({super.key, this.onFinish, this.trainingLevel = 1});
 
   final ValueChanged<int?>? onFinish;
   final int trainingLevel;
@@ -28,19 +25,24 @@ class _RuleShiftScreenState extends State<RuleShiftScreen> {
   int _score = 0;
   bool _locked = false;
   bool? _lastCorrect;
+  BrainDifficulty _selectedDifficulty = BrainDifficulty.medium;
+  int get _practiceLevel => brainPracticeLevelForDifficulty(
+    widget.trainingLevel,
+    _selectedDifficulty,
+  );
 
-  int get _levelIndex => (widget.trainingLevel - 1).clamp(0, 11).toInt();
+  int get _levelIndex => (_practiceLevel - 1).clamp(0, 11).toInt();
   int get _trialCount => 12 + _levelIndex;
 
   int get _ruleCount {
-    if (widget.trainingLevel >= 7) return 4;
-    if (widget.trainingLevel >= 4) return 3;
+    if (_practiceLevel >= 7) return 4;
+    if (_practiceLevel >= 4) return 3;
     return 2;
   }
 
   int get _switchBlockSize {
-    if (widget.trainingLevel >= 6) return 1;
-    if (widget.trainingLevel >= 3) return 2;
+    if (_practiceLevel >= 6) return 1;
+    if (_practiceLevel >= 3) return 2;
     return 3;
   }
 
@@ -60,8 +62,8 @@ class _RuleShiftScreenState extends State<RuleShiftScreen> {
     final block = index ~/ _switchBlockSize;
     final rules = _availableRules;
     final rule = rules[block % rules.length];
-    final value = _values[
-        (index * 5 + _levelIndex * 3 + block * 2) % _values.length];
+    final value =
+        _values[(index * 5 + _levelIndex * 3 + block * 2) % _values.length];
 
     return _RuleShiftTrial(
       rule: rule,
@@ -182,10 +184,19 @@ class _RuleShiftScreenState extends State<RuleShiftScreen> {
                               ? ReleafSpacing.lg
                               : ReleafSpacing.xxl,
                         ),
+                        BrainDifficultySelector(
+                          value: _selectedDifficulty,
+                          accent: const Color(0xFFB59AF4),
+                          enabled: _index == 0 && !_locked,
+                          onChanged: (difficulty) {
+                            if (_index == 0 && !_locked) {
+                              setState(() => _selectedDifficulty = difficulty);
+                            }
+                          },
+                        ),
+                        const SizedBox(height: ReleafSpacing.md),
                         ClipRRect(
-                          borderRadius: BorderRadius.circular(
-                            ReleafRadii.pill,
-                          ),
+                          borderRadius: BorderRadius.circular(ReleafRadii.pill),
                           child: LinearProgressIndicator(
                             value: progress,
                             minHeight: 5,
@@ -226,13 +237,15 @@ class _RuleShiftScreenState extends State<RuleShiftScreen> {
                                 ReleafRadii.extraLarge,
                               ),
                               border: Border.all(
-                                color: const Color(0xFFB59AF4)
-                                    .withValues(alpha: 0.24),
+                                color: const Color(
+                                  0xFFB59AF4,
+                                ).withValues(alpha: 0.24),
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: const Color(0xFF8F72D8)
-                                      .withValues(alpha: 0.12),
+                                  color: const Color(
+                                    0xFF8F72D8,
+                                  ).withValues(alpha: 0.12),
                                   blurRadius: 34,
                                   offset: const Offset(0, 16),
                                 ),
@@ -281,10 +294,10 @@ class _RuleShiftScreenState extends State<RuleShiftScreen> {
                                           textAlign: TextAlign.center,
                                           style: ReleafTypography.cardTitle
                                               .copyWith(
-                                            color: _lastCorrect!
-                                                ? const Color(0xFF80CDB7)
-                                                : const Color(0xFFE1A184),
-                                          ),
+                                                color: _lastCorrect!
+                                                    ? const Color(0xFF80CDB7)
+                                                    : const Color(0xFFE1A184),
+                                              ),
                                         ),
                                 ),
                               ],
@@ -299,8 +312,9 @@ class _RuleShiftScreenState extends State<RuleShiftScreen> {
                                 height: 58,
                                 child: OutlinedButton(
                                   key: const Key('rule-shift-no'),
-                                  onPressed:
-                                      _locked ? null : () => _answer(false),
+                                  onPressed: _locked
+                                      ? null
+                                      : () => _answer(false),
                                   child: const Text('NO'),
                                 ),
                               ),
@@ -311,13 +325,12 @@ class _RuleShiftScreenState extends State<RuleShiftScreen> {
                                 height: 58,
                                 child: FilledButton(
                                   key: const Key('rule-shift-yes'),
-                                  onPressed:
-                                      _locked ? null : () => _answer(true),
+                                  onPressed: _locked
+                                      ? null
+                                      : () => _answer(true),
                                   style: FilledButton.styleFrom(
-                                    backgroundColor:
-                                        const Color(0xFFD8D0FF),
-                                    foregroundColor:
-                                        const Color(0xFF161224),
+                                    backgroundColor: const Color(0xFFD8D0FF),
+                                    foregroundColor: const Color(0xFF161224),
                                   ),
                                   child: const Text('YES'),
                                 ),
@@ -368,13 +381,13 @@ RuleShiftLevelProfile ruleShiftLevelProfileForTesting(int rawLevel) {
   final ruleCount = level >= 7
       ? 4
       : level >= 4
-          ? 3
-          : 2;
+      ? 3
+      : 2;
   final switchBlockSize = level >= 6
       ? 1
       : level >= 3
-          ? 2
-          : 3;
+      ? 2
+      : 3;
 
   return RuleShiftLevelProfile(
     level: level,
@@ -385,10 +398,7 @@ RuleShiftLevelProfile ruleShiftLevelProfileForTesting(int rawLevel) {
 }
 
 enum _Rule {
-  odd(
-    label: 'IS THE NUMBER ODD?',
-    semanticLabel: 'Rule: is the number odd',
-  ),
+  odd(label: 'IS THE NUMBER ODD?', semanticLabel: 'Rule: is the number odd'),
   high(
     label: 'IS IT GREATER THAN 5?',
     semanticLabel: 'Rule: is the number greater than five',
@@ -402,10 +412,7 @@ enum _Rule {
     semanticLabel: 'Rule: is the number between three and seven inclusive',
   );
 
-  const _Rule({
-    required this.label,
-    required this.semanticLabel,
-  });
+  const _Rule({required this.label, required this.semanticLabel});
 
   final String label;
   final String semanticLabel;

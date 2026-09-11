@@ -6,6 +6,7 @@ import 'memory_stats_screen.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/releaf_design_tokens.dart';
 import '../../theme/widgets/releaf_brain_artwork.dart';
+import '../../features/brain/presentation/widgets/brain_difficulty_selector.dart';
 
 class MemoryGameScreen extends StatefulWidget {
   /// If this screen is launched from Brain, completion is reported through
@@ -13,11 +14,7 @@ class MemoryGameScreen extends StatefulWidget {
   final void Function(int score)? onFinish;
   final int trainingLevel;
 
-  const MemoryGameScreen({
-    super.key,
-    this.onFinish,
-    this.trainingLevel = 1,
-  });
+  const MemoryGameScreen({super.key, this.onFinish, this.trainingLevel = 1});
 
   @override
   State<MemoryGameScreen> createState() => _MemoryGameScreenState();
@@ -26,7 +23,18 @@ class MemoryGameScreen extends StatefulWidget {
 class _MemoryGameScreenState extends State<MemoryGameScreen>
     with WidgetsBindingObserver {
   final List<String> _emojis = [
-    '🍀', '🌸', '🍄', '🌞', '🌻', '🪴', '🍎', '🥕', '🎈', '🚗', '🏀', '🎮',
+    '🍀',
+    '🌸',
+    '🍄',
+    '🌞',
+    '🌻',
+    '🪴',
+    '🍎',
+    '🥕',
+    '🎈',
+    '🚗',
+    '🏀',
+    '🎮',
   ];
 
   List<String> _shuffledCards = [];
@@ -43,6 +51,14 @@ class _MemoryGameScreenState extends State<MemoryGameScreen>
   int timeLeft = 60;
   Timer? countdownTimer;
   bool _pausedByLifecycle = false;
+  BrainDifficulty _selectedDifficulty = BrainDifficulty.medium;
+  bool _difficultyLocked = false;
+
+  void _selectDifficulty(BrainDifficulty difficulty) {
+    if (_difficultyLocked || difficulty == _selectedDifficulty) return;
+    _selectedDifficulty = difficulty;
+    _startLevel();
+  }
 
   int startTime = 0; // startowy czas na poziom
   int mistakes = 0;
@@ -70,10 +86,9 @@ class _MemoryGameScreenState extends State<MemoryGameScreen>
     final prefs = await SharedPreferences.getInstance();
     if (!mounted) return;
     setState(() {
-      currentLevel =
-          (prefs.getInt('memory_current_level') ?? 1)
-              .clamp(1, maxLevels)
-              .toInt();
+      currentLevel = (prefs.getInt('memory_current_level') ?? 1)
+          .clamp(1, maxLevels)
+          .toInt();
     });
     _startLevel();
   }
@@ -90,6 +105,7 @@ class _MemoryGameScreenState extends State<MemoryGameScreen>
   }
 
   void _startLevel() {
+    _difficultyLocked = false;
     final pairs = _calculatePairsForLevel(currentLevel);
 
     timeLeft = _calculateTimeForLevel(currentLevel);
@@ -111,12 +127,20 @@ class _MemoryGameScreenState extends State<MemoryGameScreen>
   }
 
   int _calculatePairsForLevel(int level) {
-    return (3 + ((level - 1) ~/ 2)).clamp(3, 8).toInt();
+    final practiceLevel = brainPracticeLevelForDifficulty(
+      level,
+      _selectedDifficulty,
+    );
+    return (3 + ((practiceLevel - 1) ~/ 2)).clamp(3, 8).toInt();
   }
 
   int _calculateTimeForLevel(int level) {
     final pairs = _calculatePairsForLevel(level);
-    return (58 - ((level - 1) * 2) + ((pairs - 3) * 2))
+    final practiceLevel = brainPracticeLevelForDifficulty(
+      level,
+      _selectedDifficulty,
+    );
+    return (58 - ((practiceLevel - 1) * 2) + ((pairs - 3) * 2))
         .clamp(34, 58)
         .toInt();
   }
@@ -182,7 +206,9 @@ class _MemoryGameScreenState extends State<MemoryGameScreen>
     final bonusPairs = pairs * 10;
     final penalty = (mistakes * 15) + timeSpent;
 
-    final completedBonus = completed ? 100 : 0; // mała nagroda za ukończenie poziomu
+    final completedBonus = completed
+        ? 100
+        : 0; // mała nagroda za ukończenie poziomu
     return max(0, base + bonusPairs + completedBonus - penalty);
   }
 
@@ -219,6 +245,7 @@ class _MemoryGameScreenState extends State<MemoryGameScreen>
     }
 
     setState(() {
+      _difficultyLocked = true;
       _cardFlipped[index] = true;
       _selectedIndices.add(index);
     });
@@ -266,8 +293,14 @@ class _MemoryGameScreenState extends State<MemoryGameScreen>
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text("Next time you'll succeed!", style: TextStyle(fontFamily: 'Poppins')),
-        content: const Text("Time's up. Try again.", style: TextStyle(fontFamily: 'Poppins')),
+        title: const Text(
+          "Next time you'll succeed!",
+          style: TextStyle(fontFamily: 'Poppins'),
+        ),
+        content: const Text(
+          "Time's up. Try again.",
+          style: TextStyle(fontFamily: 'Poppins'),
+        ),
         actions: [
           TextButton(
             onPressed: () {
@@ -281,7 +314,10 @@ class _MemoryGameScreenState extends State<MemoryGameScreen>
               Navigator.of(context).pop();
               _finishSession(completed: false);
             },
-            child: const Text('Finish session', style: TextStyle(fontFamily: 'Poppins')),
+            child: const Text(
+              'Finish session',
+              style: TextStyle(fontFamily: 'Poppins'),
+            ),
           ),
         ],
       ),
@@ -293,8 +329,14 @@ class _MemoryGameScreenState extends State<MemoryGameScreen>
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text("🎉 Good job!", style: TextStyle(fontFamily: 'Poppins')),
-        content: const Text("You've matched all cards.", style: TextStyle(fontFamily: 'Poppins')),
+        title: const Text(
+          "🎉 Good job!",
+          style: TextStyle(fontFamily: 'Poppins'),
+        ),
+        content: const Text(
+          "You've matched all cards.",
+          style: TextStyle(fontFamily: 'Poppins'),
+        ),
         actions: [
           TextButton(
             onPressed: () {
@@ -398,6 +440,19 @@ class _MemoryGameScreenState extends State<MemoryGameScreen>
 
                   return Column(
                     children: [
+                      if (embedded)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: ReleafSpacing.screen,
+                            vertical: ReleafSpacing.xs,
+                          ),
+                          child: BrainDifficultySelector(
+                            value: _selectedDifficulty,
+                            onChanged: _selectDifficulty,
+                            accent: accent,
+                            enabled: !_difficultyLocked,
+                          ),
+                        ),
                       Padding(
                         padding: EdgeInsets.fromLTRB(
                           ReleafSpacing.screen,
@@ -451,10 +506,10 @@ class _MemoryGameScreenState extends State<MemoryGameScreen>
                               ),
                               gridDelegate:
                                   SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 4,
-                                crossAxisSpacing: compact ? 7 : 10,
-                                mainAxisSpacing: compact ? 7 : 10,
-                              ),
+                                    crossAxisCount: 4,
+                                    crossAxisSpacing: compact ? 7 : 10,
+                                    mainAxisSpacing: compact ? 7 : 10,
+                                  ),
                               itemCount: _shuffledCards.length,
                               itemBuilder: (context, index) {
                                 if (_shuffledCards[index] == '') {
@@ -478,44 +533,51 @@ class _MemoryGameScreenState extends State<MemoryGameScreen>
                                   child: GestureDetector(
                                     onTap: () => _handleTap(index),
                                     child: AnimatedSwitcher(
-                                      duration:
-                                          const Duration(milliseconds: 260),
-                                      transitionBuilder: (
-                                        Widget child,
-                                        Animation<double> animation,
-                                      ) {
-                                        final rotate =
-                                            Tween(begin: pi, end: 0.0)
-                                                .animate(animation);
-                                        return AnimatedBuilder(
-                                          animation: rotate,
-                                          child: child,
-                                          builder: (context, child) {
-                                            final isUnder =
-                                                ValueKey(isFlipped) != child!.key;
-                                            final tilt = isUnder ? pi : 0.0;
-                                            return Transform(
-                                              transform: Matrix4.rotationY(
-                                                tilt + rotate.value,
-                                              ),
-                                              alignment: Alignment.center,
+                                      duration: const Duration(
+                                        milliseconds: 260,
+                                      ),
+                                      transitionBuilder:
+                                          (
+                                            Widget child,
+                                            Animation<double> animation,
+                                          ) {
+                                            final rotate = Tween(
+                                              begin: pi,
+                                              end: 0.0,
+                                            ).animate(animation);
+                                            return AnimatedBuilder(
+                                              animation: rotate,
                                               child: child,
+                                              builder: (context, child) {
+                                                final isUnder =
+                                                    ValueKey(isFlipped) !=
+                                                    child!.key;
+                                                final tilt = isUnder ? pi : 0.0;
+                                                return Transform(
+                                                  transform: Matrix4.rotationY(
+                                                    tilt + rotate.value,
+                                                  ),
+                                                  alignment: Alignment.center,
+                                                  child: child,
+                                                );
+                                              },
                                             );
                                           },
-                                        );
-                                      },
                                       child: Container(
                                         key: ValueKey(isFlipped),
                                         decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(16),
+                                          borderRadius: BorderRadius.circular(
+                                            16,
+                                          ),
                                           color: isFlipped
                                               ? const Color(0xFF202A46)
                                               : const Color(0xFF121A27),
                                           border: Border.all(
                                             color: isFlipped
                                                 ? accent.withValues(alpha: 0.68)
-                                                : accent.withValues(alpha: 0.18),
+                                                : accent.withValues(
+                                                    alpha: 0.18,
+                                                  ),
                                           ),
                                           boxShadow: isFlipped
                                               ? [
@@ -533,8 +595,7 @@ class _MemoryGameScreenState extends State<MemoryGameScreen>
                                             ? Text(
                                                 _shuffledCards[index],
                                                 style: TextStyle(
-                                                  fontSize:
-                                                      compact ? 24 : 28,
+                                                  fontSize: compact ? 24 : 28,
                                                 ),
                                               )
                                             : Icon(
@@ -566,9 +627,7 @@ class _MemoryGameScreenState extends State<MemoryGameScreen>
             decoration: BoxDecoration(
               color: const Color(0xF50B1119),
               border: Border(
-                top: BorderSide(
-                  color: accent.withValues(alpha: 0.14),
-                ),
+                top: BorderSide(color: accent.withValues(alpha: 0.14)),
               ),
             ),
             padding: const EdgeInsets.symmetric(

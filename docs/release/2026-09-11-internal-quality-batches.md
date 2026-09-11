@@ -165,3 +165,29 @@ built successfully. `git diff --check` passed.
 
 Affected gates: accessibility and general release QA; no external gate closes.
 Next: finish targeted legacy Brain difficulty/progression quality checks.
+
+## Batch 7 — consistent difficulty for legacy Brain games
+
+Base: `a3f76e0`. Memory, Broken Mirror and Rule Shift already had persistent
+training progression but lacked the shared difficulty control. Their canonical
+game flows now offer Easy/Medium/Hard before interaction. Medium is the existing
+behavior; other modes adjust the session practice level by two within 1–12.
+The displayed/saved training level is unchanged. Selection locks after the first
+card reveal, shard movement or answer. No completion is emitted by selection.
+
+Files: shared difficulty selector/helper; game registry flags; the three game
+screens; new legacy difficulty tests; this evidence. Existing statistics remain
+keyed to training level and therefore include sessions played at different chosen
+difficulties, as elsewhere in the portfolio. Leaves and completion persistence
+were not modified.
+
+All three missing-selector regressions failed before implementation. Focused
+tests: **68 passed**, covering the new controls at 320px, bounds, Medium
+compatibility, locking, Memory statistics, existing progression and completion
+idempotency. Independent review found no actionable regressions. Analyzer:
+**No issues found** after fixing three brace-style lints. Full suite: **366 tests
+passed**. Android debug APK built successfully. `git diff --check` passed.
+
+Affected gate: BRAIN core / QA. Labyrinth accelerometer/collision feel remains
+physical-device QA; selectable difficulty and automated progression are already
+implemented. Next: Sleep timer request-ordering regression.

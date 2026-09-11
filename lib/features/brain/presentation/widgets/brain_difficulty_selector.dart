@@ -8,10 +8,24 @@ enum BrainDifficulty {
   hard;
 
   String get label => switch (this) {
-        BrainDifficulty.easy => 'Easy',
-        BrainDifficulty.medium => 'Medium',
-        BrainDifficulty.hard => 'Hard',
-      };
+    BrainDifficulty.easy => 'Easy',
+    BrainDifficulty.medium => 'Medium',
+    BrainDifficulty.hard => 'Hard',
+  };
+}
+
+/// Session challenge adjustment; never writes the user's saved training level.
+int brainPracticeLevelForDifficulty(
+  int trainingLevel,
+  BrainDifficulty difficulty,
+) {
+  final level = trainingLevel.clamp(1, 12).toInt();
+  final offset = switch (difficulty) {
+    BrainDifficulty.easy => -2,
+    BrainDifficulty.medium => 0,
+    BrainDifficulty.hard => 2,
+  };
+  return (level + offset).clamp(1, 12).toInt();
 }
 
 class BrainDifficultySelector extends StatelessWidget {
@@ -39,9 +53,7 @@ class BrainDifficultySelector extends StatelessWidget {
         decoration: BoxDecoration(
           color: const Color(0xD9111620),
           borderRadius: BorderRadius.circular(ReleafRadii.pill),
-          border: Border.all(
-            color: accent.withValues(alpha: 0.16),
-          ),
+          border: Border.all(color: accent.withValues(alpha: 0.16)),
         ),
         child: Row(
           children: [

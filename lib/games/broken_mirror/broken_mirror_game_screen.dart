@@ -9,6 +9,7 @@ import '../../features/progress/data/leaves_repository.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/releaf_design_tokens.dart';
 import '../../theme/widgets/releaf_brain_artwork.dart';
+import '../../features/brain/presentation/widgets/brain_difficulty_selector.dart';
 
 class BrokenMirrorGameScreen extends ConsumerStatefulWidget {
   const BrokenMirrorGameScreen({
@@ -39,15 +40,29 @@ class _BrokenMirrorGameScreenState extends ConsumerState<BrokenMirrorGameScreen>
   int _timeLeft = 0;
   Timer? _timer;
   bool _pausedByLifecycle = false;
+  BrainDifficulty _selectedDifficulty = BrainDifficulty.medium;
+  bool _difficultyLocked = false;
+  int get _practiceLevel =>
+      brainPracticeLevelForDifficulty(widget.level, _selectedDifficulty);
+
+  void _selectDifficulty(BrainDifficulty difficulty) {
+    if (_difficultyLocked || difficulty == _selectedDifficulty) return;
+    setState(() {
+      _selectedDifficulty = difficulty;
+      _initLevel();
+      if (widget.enableTimer) _startTimer();
+    });
+  }
+
   late AnimationController _pulse;
 
-  int get _levelIndex => (widget.level - 1).clamp(0, 11).toInt();
+  int get _levelIndex => (_practiceLevel - 1).clamp(0, 11).toInt();
 
   int get _fragmentCount {
-    if (widget.level >= 12) return 8;
-    if (widget.level >= 10) return 7;
-    if (widget.level >= 7) return 6;
-    if (widget.level >= 4) return 5;
+    if (_practiceLevel >= 12) return 8;
+    if (_practiceLevel >= 10) return 7;
+    if (_practiceLevel >= 7) return 6;
+    if (_practiceLevel >= 4) return 5;
     return 4;
   }
 
@@ -78,6 +93,7 @@ class _BrokenMirrorGameScreenState extends ConsumerState<BrokenMirrorGameScreen>
 
   // ---------- LEVEL SETUP ----------
   void _initLevel() {
+    _difficultyLocked = false;
     final shards = <_Shard>[
       _Shard(
         id: 0,
@@ -229,17 +245,18 @@ class _BrokenMirrorGameScreenState extends ConsumerState<BrokenMirrorGameScreen>
     // Legacy entry points keep their existing reward. The canonical Brain host
     // delegates the reward to GameResultScreen.
     if (widget.onFinish == null) {
-      final result =
-          await ref.read(leavesNotifierProvider.notifier).markBrainDone();
+      final result = await ref
+          .read(leavesNotifierProvider.notifier)
+          .markBrainDone();
 
       if (mounted && result != null) {
         final msg = result.hasBonus
             ? '+${result.totalAdded} leaves • Perfect day bonus!'
             : '+${result.totalAdded} leaves';
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(msg)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(msg)));
       }
     }
 
@@ -285,10 +302,7 @@ class _BrokenMirrorGameScreenState extends ConsumerState<BrokenMirrorGameScreen>
       c.maxWidth - (ReleafSpacing.screen * 2) - 24,
     );
     final availableHeight = math.max(180.0, c.maxHeight - 220);
-    final size = math.min(
-      620.0,
-      math.min(availableWidth, availableHeight),
-    );
+    final size = math.min(620.0, math.min(availableWidth, availableHeight));
     return Size(size, size);
   }
 
@@ -380,6 +394,15 @@ class _BrokenMirrorGameScreenState extends ConsumerState<BrokenMirrorGameScreen>
                         constraints: const BoxConstraints(maxWidth: 680),
                         child: Column(
                           children: [
+                            if (embedded) ...[
+                              BrainDifficultySelector(
+                                value: _selectedDifficulty,
+                                onChanged: _selectDifficulty,
+                                accent: accent,
+                                enabled: !_difficultyLocked,
+                              ),
+                              const SizedBox(height: ReleafSpacing.md),
+                            ],
                             _BoardFrame(
                               accent: accent,
                               child: KeyedSubtree(
@@ -404,6 +427,7 @@ class _BrokenMirrorGameScreenState extends ConsumerState<BrokenMirrorGameScreen>
                                           snapFraction: _snapFraction,
                                           onUpdate: (updated) {
                                             setState(() {
+                                              _difficultyLocked = true;
                                               final idx = _shards.indexWhere(
                                                 (s) => s.id == updated.id,
                                               );
@@ -466,9 +490,7 @@ class _LeavesPill extends StatelessWidget {
       decoration: BoxDecoration(
         color: ReleafColors.sage.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(ReleafRadii.pill),
-        border: Border.all(
-          color: ReleafColors.sage.withValues(alpha: 0.18),
-        ),
+        border: Border.all(color: ReleafColors.sage.withValues(alpha: 0.18)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -495,8 +517,7 @@ class _TimerPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final urgent = secondsLeft <= 10;
-    final accent =
-        urgent ? const Color(0xFFE1A184) : const Color(0xFFD490B9);
+    final accent = urgent ? const Color(0xFFE1A184) : const Color(0xFFD490B9);
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 12),
@@ -521,10 +542,7 @@ class _BoardFrame extends StatelessWidget {
   final Widget child;
   final Color accent;
 
-  const _BoardFrame({
-    required this.child,
-    required this.accent,
-  });
+  const _BoardFrame({required this.child, required this.accent});
 
   @override
   Widget build(BuildContext context) {
@@ -569,18 +587,17 @@ BrokenMirrorLevelProfile brokenMirrorLevelProfileForTesting(int rawLevel) {
   final fragmentCount = level >= 12
       ? 8
       : level >= 10
-          ? 7
-          : level >= 7
-              ? 6
-              : level >= 4
-                  ? 5
-                  : 4;
+      ? 7
+      : level >= 7
+      ? 6
+      : level >= 4
+      ? 5
+      : 4;
 
   return BrokenMirrorLevelProfile(
     level: level,
     fragmentCount: fragmentCount,
-    snapFraction:
-        (0.13 - (index * 0.0035)).clamp(0.09, 0.13).toDouble(),
+    snapFraction: (0.13 - (index * 0.0035)).clamp(0.09, 0.13).toDouble(),
   );
 }
 
@@ -599,10 +616,7 @@ class _Shard {
     this.placed = false,
   });
 
-  _Shard copyWith({
-    Offset? position,
-    bool? placed,
-  }) {
+  _Shard copyWith({Offset? position, bool? placed}) {
     return _Shard(
       id: id,
       polygon: polygon,
@@ -642,9 +656,9 @@ class _TargetPainter extends CustomPainter {
         Paint()
           ..style = PaintingStyle.stroke
           ..strokeWidth = s.placed ? 2.4 : 1.4
-          ..color = const Color(0xFFD490B9).withValues(
-            alpha: s.placed ? 0.62 : 0.16,
-          ),
+          ..color = const Color(
+            0xFFD490B9,
+          ).withValues(alpha: s.placed ? 0.62 : 0.16),
       );
     }
   }
@@ -820,10 +834,7 @@ class _FailDialog extends StatelessWidget {
   final VoidCallback onRetry;
   final VoidCallback onExit;
 
-  const _FailDialog({
-    required this.onRetry,
-    required this.onExit,
-  });
+  const _FailDialog({required this.onRetry, required this.onExit});
 
   @override
   Widget build(BuildContext context) {
