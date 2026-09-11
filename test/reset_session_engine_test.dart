@@ -7,33 +7,15 @@ import 'package:releaf_app/features/relief/domain/reset_voice_guidance.dart';
 void main() {
   group('BreathPattern', () {
     test('4–4 pattern resolves inhale and exhale phases', () {
-      const pattern = BreathPattern(
-        inhaleSeconds: 4,
-        exhaleSeconds: 4,
-      );
+      const pattern = BreathPattern(inhaleSeconds: 4, exhaleSeconds: 4);
 
       expect(pattern.cycleSeconds, 8);
       expect(pattern.hasHolds, isFalse);
-      expect(
-        pattern.frameAtElapsedSeconds(0).phase,
-        BreathPhase.inhale,
-      );
-      expect(
-        pattern.frameAtElapsedSeconds(3).phase,
-        BreathPhase.inhale,
-      );
-      expect(
-        pattern.frameAtElapsedSeconds(4).phase,
-        BreathPhase.exhale,
-      );
-      expect(
-        pattern.frameAtElapsedSeconds(7).phase,
-        BreathPhase.exhale,
-      );
-      expect(
-        pattern.frameAtElapsedSeconds(8).phase,
-        BreathPhase.inhale,
-      );
+      expect(pattern.frameAtElapsedSeconds(0).phase, BreathPhase.inhale);
+      expect(pattern.frameAtElapsedSeconds(3).phase, BreathPhase.inhale);
+      expect(pattern.frameAtElapsedSeconds(4).phase, BreathPhase.exhale);
+      expect(pattern.frameAtElapsedSeconds(7).phase, BreathPhase.exhale);
+      expect(pattern.frameAtElapsedSeconds(8).phase, BreathPhase.inhale);
     });
 
     test('box pattern resolves all four phases', () {
@@ -60,10 +42,7 @@ void main() {
     });
 
     test('asymmetric 3–4 pattern preserves unequal timing', () {
-      const pattern = BreathPattern(
-        inhaleSeconds: 3,
-        exhaleSeconds: 4,
-      );
+      const pattern = BreathPattern(inhaleSeconds: 3, exhaleSeconds: 4);
 
       expect(pattern.cycleSeconds, 7);
       expect(pattern.frameAtElapsedSeconds(2).phase, BreathPhase.inhale);
@@ -74,7 +53,7 @@ void main() {
   });
 
   group('Reset voice guidance', () {
-    test('paced breathing uses non-verbal phase cues and silent holds', () {
+    test('paced breathing keeps rejected cues and hold phases silent', () {
       const program = ResetSessionProgram.breathing(
         breathPattern: BreathPattern(
           inhaleSeconds: 4,
@@ -135,14 +114,8 @@ void main() {
       expect(exhale.spokenText, isEmpty);
       expect(rest.spokenText, isEmpty);
       expect(rest.narrationAssetPath, isNull);
-      expect(
-        inhale.narrationAssetPath,
-        'sounds/reset/breath-cues/inhale.mp3',
-      );
-      expect(
-        exhale.narrationAssetPath,
-        'sounds/reset/breath-cues/exhale.mp3',
-      );
+      expect(inhale.narrationAssetPath, isNull);
+      expect(exhale.narrationAssetPath, isNull);
     });
 
     test('guided Reset keeps scripted step narration and recorded asset', () {

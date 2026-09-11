@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:releaf_app/features/meditation/application/meditation_voice_controller.dart';
 import 'package:releaf_app/features/relief/application/reset_voice_playback.dart';
+import 'package:releaf_app/features/relief/data/reset_catalog.dart';
 import 'package:releaf_app/features/relief/domain/reset_voice_guidance.dart';
 
 class _FakeVoiceDriver implements MeditationVoiceDriver {
@@ -45,6 +46,25 @@ class _FakeVoiceDriver implements MeditationVoiceDriver {
 
 void main() {
   group('ResetVoicePlayback', () {
+    test('rejected breathing assets never reach the audio driver', () async {
+      final driver = _FakeVoiceDriver();
+      final playback = ResetVoicePlayback(driver);
+      final program = const ResetCatalog().getById('equal-rhythm')!.program!;
+
+      for (final second in [0, 5, 10, 15]) {
+        await playback.playCue(
+          resetVoiceGuidanceCue(
+            program: program,
+            elapsedSeconds: second,
+            simplified: false,
+          ),
+          volume: 0.72,
+        );
+      }
+
+      expect(driver.calls, ['stop', 'stop', 'stop', 'stop']);
+      expect(playback.unavailableRecordedAssets, isEmpty);
+    });
     test('cancelled configuration cannot start a Reset cue', () async {
       final driver = _FakeVoiceDriver()..configureGate = Completer<void>();
       final playback = ResetVoicePlayback(driver);

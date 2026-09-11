@@ -3,15 +3,15 @@
 Snapshot: **2026-09-11**  
 Repo: `keisaj9006/releaf_app`  
 Branch: **`releaf-development`**  
-Latest committed baseline: **`1b24990`** (account-deletion E2E evidence); subsequent
-Meditation quality work is recorded in [milestone evidence](release/2026-09-11-meditation-guidance-quality.md).
+Latest committed baseline: **`03f65af`** (Meditation guidance quality); subsequent
+Reset work is recorded in [milestone evidence](release/2026-09-11-reset-cue-eligibility.md).
 
 Subsequent internal quality work is tracked in
 [batch evidence](release/2026-09-11-internal-quality-batches.md), including
 recorded-audio cancellation during configuration and source loading, Sleep timer
 boundaries/ordering, all 30 browsable Daily Insights, large-text Home layouts and
 consistent difficulty controls across all 15 Brain games. Latest full suite:
-**383 tests passed** after the Meditation milestone; analyzer clean and Android
+**386 tests passed** after the Reset milestone; analyzer clean and Android
 debug build passed. No production/device verification is implied.
 
 This file is a working snapshot. The code and canonical release gate remain authoritative if the branch moves.
@@ -72,7 +72,10 @@ Current access policy deliberately keeps internal Emergency content outside Prem
 Guided Reset movement visuals and associated quality tests are implemented.
 Recorded-audio cancellation has since been hardened. Existing breathing tones
 were rejected by the owner; replacement content approval remains open. Manifest
-readiness distinguishes asset presence from approval.
+readiness distinguishes asset presence from approval. Runtime now excludes both
+rejected tones, and cue switches disclose unavailable audio without rewriting
+saved preferences. Silent/reduced-motion phase labels remain visible and
+semantic; the active audio sheet now has readable dark-theme text.
 
 ### Historical user direction still relevant
 
@@ -174,7 +177,7 @@ Library, Premium preview and player now disclose recorded, partial, captions-onl
 or unguided availability. Incomplete narration starts with usable on-screen
 guidance without changing the saved caption preference on entry. Caption controls
 and large-text layouts have regression coverage; silent partial steps do not
-promise a voice. See the Meditation milestone evidence above.
+promise a voice. See [Meditation evidence](release/2026-09-11-meditation-guidance-quality.md).
 
 ### Releaf Guide contract
 

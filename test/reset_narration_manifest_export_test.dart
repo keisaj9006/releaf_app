@@ -50,6 +50,8 @@ void main() {
         expect(cue['renderRequired'], audible);
         expect(cue['productionApproved'], isFalse);
         expect(cue['existingAssetPresent'], audible);
+        expect(cue, containsPair('runtimeAssetPath', null));
+        expect(cue['runtimeEligible'], isFalse);
       }
 
       final sessions = (manifest['sessions']! as List<Object?>)

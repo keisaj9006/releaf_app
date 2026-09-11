@@ -3,7 +3,7 @@ import '../domain/reset_voice_guidance.dart';
 
 /// Session-scoped Reset narration playback.
 ///
-/// Only approved recorded Releaf Guide assets or the non-verbal breathing cues
+/// Only approved recorded Releaf Guide assets or approved natural breathing cues
 /// may play. If an asset is not bundled or cannot be decoded, the path is
 /// remembered for the rest of this session so we do not repeatedly trigger the
 /// same asset error. Releaf deliberately stays silent instead of substituting a

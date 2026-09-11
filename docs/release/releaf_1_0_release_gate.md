@@ -19,7 +19,7 @@ When that state is reached, explicitly report:
 
 | Gate | Status | Notes |
 | --- | --- | --- |
-| RESET core | DONE / CONTENT | Canonical Reset model, completion history, lifecycle and access tests are in CI. Existing breathing tones were rejected; natural gentle human inhale/longer exhale recordings require owner approval before runtime replacement. Hold/rest remain silent. |
+| RESET core | DONE / CONTENT | Canonical Reset model, completion history, lifecycle and access tests are in CI. Rejected breathing tones are excluded from runtime playback; cue controls disclose unavailable audio while silent/reduced-motion phase guidance remains usable. Natural gentle human inhale/longer exhale recordings require owner approval before runtime integration. Hold/rest remain silent. |
 | BRAIN core | DONE / QA | Canonical Brain flow, progression hardening, Labyrinth 50-stage architecture and lifecycle protections are implemented. Continue release QA; do not add games merely to increase scope. |
 | Sleep player/timer | DONE / CONTENT | Player/timer behaviour is tested. Final Sleep sound selection is owner-provided; engineering remains responsible for asset QA, looping, metadata and integration. Sleep must not contain narration. |
 | Meditation player | DONE / CONTENT | Player and scripted content exist. Library/preview/player disclose recording availability; incomplete narration has accessible caption controls and large-text coverage. Final approved Releaf Guide recordings remain a content dependency; do not silently substitute a new narrator identity. |
@@ -46,6 +46,8 @@ Subsequent implementation: [internal quality batches](2026-09-11-internal-qualit
 Owner-approved quality programme: [Meditation guidance milestone](2026-09-11-meditation-guidance-quality.md),
 383 tests passed, analyzer clean and Android debug APK built. Physical-device QA
 was not performed for this milestone.
+The following [Reset cue eligibility milestone](2026-09-11-reset-cue-eligibility.md)
+passed 386 tests and clean analysis; no recording approval or physical QA is implied.
 The internal continuation through `3ddffee` passed 375 tests and clean analysis.
 It closes the identified player/collection/difficulty defects, not the remaining
 content approvals, credentials, production signing, public resources, store

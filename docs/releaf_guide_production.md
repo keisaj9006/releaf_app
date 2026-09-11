@@ -72,6 +72,12 @@ calming exhale; hold/rest phases remain silent. New audition candidates must
 stay outside runtime assets until explicit owner listening approval. Do not
 replace active cues with an unreviewed synthetic placeholder.
 
+Runtime playback now excludes these rejected tones. The shared
+`resetBreathingCuesProductionApproved` guard is false; the phase resolver returns
+no audio path until approved replacements are integrated. Preview and active
+settings disclose unavailable breathing audio, retaining saved preferences and
+visual phase guidance. No new cue has been approved by this engineering change.
+
 The cue changes only when the canonical `BreathPattern` changes phase,
 so audio and visual rhythm cannot drift apart.
 
@@ -102,12 +108,13 @@ Reset guided steps:
 
 `assets/narration/releaf-guide/reset/<session-id>/<main|simplified>/<NN>-<step-label>.mp3`
 
-Shared non-verbal Reset breathing cues:
+Shared Reset breathing cue production targets:
 
 `assets/sounds/reset/breath-cues/<inhale|exhale>.mp3`
 
-The runtime already targets these production paths. Until the exact approved
-Releaf Guide recording is bundled, a missing/corrupt narration asset stays
+Breathing target paths remain in the content manifest but are ineligible for
+runtime playback while rejected. Until the exact approved Releaf Guide recording
+is bundled, a missing/corrupt narration asset stays
 silent. Missing paths are cached for the current Reset session so the app does
 not retry the same failed asset on every cycle.
 
@@ -122,8 +129,9 @@ Every P0 build exports two narration manifests:
 
 The Reset manifest covers all **50** active Reset sessions, including Emergency,
 and verifies that all **10** breathing methods use the canonical paced-breathing
-engine. Breathing audio uses two shared non-verbal cue assets (inhale/exhale)
-across every method; hold and rest phases intentionally have no asset.
+engine. Breathing audio has two shared target paths (inhale/exhale) across every
+method; hold and rest phases intentionally have no asset. `runtimeEligible` and
+`runtimeAssetPath` distinguish approved playback from existing rejected files.
 
 The manifests contain the canonical script, timing, target asset path, recorded
 asset path and render status. Do not maintain a second manual spreadsheet with

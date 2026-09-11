@@ -13,6 +13,11 @@ class ResetVoiceGuidanceCue {
   final String? narrationAssetPath;
 }
 
+/// The bundled artificial tones were rejected. Change this only after the
+/// owner approves the replacement inhale/exhale recordings at the target paths.
+/// File presence or successful decoding is never production approval.
+const bool resetBreathingCuesProductionApproved = false;
+
 String? resetBreathPhaseTargetAssetPath(BreathPhase phase) {
   return switch (phase) {
     BreathPhase.inhale => 'sounds/reset/breath-cues/inhale.mp3',
@@ -21,12 +26,18 @@ String? resetBreathPhaseTargetAssetPath(BreathPhase phase) {
   };
 }
 
+String? resetBreathPhaseRuntimeAssetPath(BreathPhase phase) =>
+    resetBreathingCuesProductionApproved
+    ? resetBreathPhaseTargetAssetPath(phase)
+    : null;
+
 /// Resolves the single audio cue for the current Reset frame.
 ///
 /// Guided Reset sessions may use approved recorded Releaf Guide narration.
 /// Paced-breathing sessions never read their instructional copy aloud: inhale
-/// and exhale use two restrained non-verbal tones, while every hold/rest phase
-/// is silent. The program's BreathPattern remains the source of truth for both
+/// and exhale require approved natural breath recordings. Until then they stay
+/// silent, as every hold/rest phase always does. The program's BreathPattern
+/// remains the source of truth for both
 /// the visual and the audio phase.
 ResetVoiceGuidanceCue resetVoiceGuidanceCue({
   required ResetSessionProgram program,
@@ -51,7 +62,7 @@ ResetVoiceGuidanceCue resetVoiceGuidanceCue({
     return ResetVoiceGuidanceCue(
       key: 'breath:${phase.name}',
       spokenText: '',
-      narrationAssetPath: resetBreathPhaseTargetAssetPath(phase),
+      narrationAssetPath: resetBreathPhaseRuntimeAssetPath(phase),
     );
   }
 

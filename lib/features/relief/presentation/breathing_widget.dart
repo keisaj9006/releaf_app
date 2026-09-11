@@ -12,6 +12,7 @@ import '../../meditation/application/meditation_voice_controller.dart';
 import '../../progress/data/leaves_repository.dart';
 import '../../sound/application/sound_player_controller.dart';
 import '../../../routing/app_routes.dart';
+import '../../../theme/app_theme.dart';
 import '../../../theme/releaf_design_tokens.dart';
 import '../../../theme/widgets/releaf_artwork.dart';
 import '../../../theme/widgets/releaf_body_release_visual.dart';
@@ -274,7 +275,12 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
     } catch (_) {}
   }
 
-  bool get _allAudioMuted => !_voiceEnabled && !_ambientEnabled;
+  bool get _voiceAvailable =>
+      _session?.program?.type != ResetProgramType.pacedBreathing ||
+      resetBreathingCuesProductionApproved;
+
+  bool get _allAudioMuted =>
+      !(_voiceAvailable && _voiceEnabled) && !_ambientEnabled;
 
   Future<void> _setAllAudioMuted(bool muted) async {
     if (muted) {
@@ -310,181 +316,196 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
       builder: (sheetContext) {
-        return StatefulBuilder(
-          builder: (context, setSheetState) {
-            void refresh() => setSheetState(() {});
+        return Theme(
+          data: AppTheme.premiumDark(),
+          child: StatefulBuilder(
+            builder: (context, setSheetState) {
+              void refresh() => setSheetState(() {});
 
-            return SingleChildScrollView(
-              key: const Key('reset-active-audio-settings'),
-              padding: const EdgeInsets.fromLTRB(
-                ReleafSpacing.screen,
-                ReleafSpacing.lg,
-                ReleafSpacing.screen,
-                ReleafSpacing.xl,
-              ),
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 560),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'SESSION AUDIO',
-                                  style: ReleafTypography.eyebrow.copyWith(
-                                    color: ReleafColors.sage,
+              return SingleChildScrollView(
+                key: const Key('reset-active-audio-settings'),
+                padding: const EdgeInsets.fromLTRB(
+                  ReleafSpacing.screen,
+                  ReleafSpacing.lg,
+                  ReleafSpacing.screen,
+                  ReleafSpacing.xl,
+                ),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 560),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'SESSION AUDIO',
+                                    style: ReleafTypography.eyebrow.copyWith(
+                                      color: ReleafColors.sage,
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  isBreathing
-                                      ? 'Breathing cues and calming background'
-                                      : 'Releaf Guide and calming background',
-                                  style: ReleafTypography.sectionTitle.copyWith(
-                                    fontSize: 22,
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    isBreathing
+                                        ? 'Breathing cues and calming background'
+                                        : 'Releaf Guide and calming background',
+                                    style: ReleafTypography.sectionTitle
+                                        .copyWith(fontSize: 22),
                                   ),
+                                ],
+                              ),
+                            ),
+                            IconButton(
+                              tooltip: 'Close audio settings',
+                              onPressed: () => Navigator.of(sheetContext).pop(),
+                              icon: const Icon(Icons.close_rounded),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: ReleafSpacing.lg),
+                        SizedBox(
+                          width: double.infinity,
+                          child: FilledButton.icon(
+                            key: const Key('reset-active-master-mute'),
+                            onPressed: () {
+                              unawaited(
+                                _setAllAudioMuted(!_allAudioMuted).whenComplete(
+                                  () {
+                                    if (context.mounted) refresh();
+                                  },
                                 ),
-                              ],
+                              );
+                            },
+                            icon: Icon(
+                              _allAudioMuted
+                                  ? Icons.volume_up_rounded
+                                  : Icons.volume_off_rounded,
+                            ),
+                            label: Text(
+                              _allAudioMuted
+                                  ? 'Turn sound on'
+                                  : 'Mute all sound',
+                            ),
+                            style: FilledButton.styleFrom(
+                              backgroundColor: ReleafColors.sage.withValues(
+                                alpha: 0.14,
+                              ),
+                              foregroundColor: ReleafColors.textPrimary,
+                              textStyle: ReleafTypography.body.copyWith(
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
                           ),
-                          IconButton(
-                            tooltip: 'Close audio settings',
-                            onPressed: () => Navigator.of(sheetContext).pop(),
-                            icon: const Icon(Icons.close_rounded),
+                        ),
+                        const SizedBox(height: ReleafSpacing.sm),
+                        SwitchListTile.adaptive(
+                          key: const Key('reset-active-voice-toggle'),
+                          contentPadding: EdgeInsets.zero,
+                          title: Text(
+                            isBreathing ? 'Breathing cues' : 'Releaf Guide',
+                            style: ReleafTypography.cardTitle,
+                          ),
+                          subtitle: Text(
+                            isBreathing
+                                ? _voiceAvailable
+                                      ? 'Gentle inhale and exhale cues. Hold and rest stay silent.'
+                                      : 'Follow the on-screen breathing rhythm. Breathing audio is not available yet.'
+                                : 'Only approved Releaf Guide recordings play. Unrecorded guidance stays silent.',
+                            style: ReleafTypography.meta.copyWith(
+                              color: ReleafColors.textSecondary,
+                            ),
+                          ),
+                          value: _voiceAvailable && _voiceEnabled,
+                          onChanged: !_voiceAvailable
+                              ? null
+                              : (value) {
+                                  unawaited(_setVoiceEnabled(value));
+                                  refresh();
+                                },
+                        ),
+                        if (_voiceAvailable && _voiceEnabled) ...[
+                          Row(
+                            children: [
+                              const Icon(Icons.volume_down_rounded, size: 18),
+                              Expanded(
+                                child: Slider(
+                                  key: const Key('reset-active-voice-volume'),
+                                  value: _voiceVolume,
+                                  onChanged: (value) {
+                                    unawaited(_setVoiceVolume(value));
+                                    refresh();
+                                  },
+                                ),
+                              ),
+                              SizedBox(
+                                width: 42,
+                                child: Text(
+                                  '${(_voiceVolume * 100).round()}%',
+                                  textAlign: TextAlign.end,
+                                  style: ReleafTypography.meta,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
-                      ),
-                      const SizedBox(height: ReleafSpacing.lg),
-                      SizedBox(
-                        width: double.infinity,
-                        child: FilledButton.icon(
-                          key: const Key('reset-active-master-mute'),
-                          onPressed: () {
-                            unawaited(
-                              _setAllAudioMuted(!_allAudioMuted).whenComplete(
-                                () {
-                                  if (context.mounted) refresh();
-                                },
-                              ),
-                            );
+                        const Divider(height: ReleafSpacing.xl),
+                        SwitchListTile.adaptive(
+                          key: const Key('reset-active-ambient-toggle'),
+                          contentPadding: EdgeInsets.zero,
+                          title: const Text('Calming background'),
+                          subtitle: const Text(
+                            'Deep Drift — a slow tonal pad kept deliberately quiet.',
+                          ),
+                          value: _ambientEnabled,
+                          onChanged: (value) {
+                            unawaited(_setAmbientEnabled(value));
+                            refresh();
                           },
-                          icon: Icon(
-                            _allAudioMuted
-                                ? Icons.volume_up_rounded
-                                : Icons.volume_off_rounded,
-                          ),
-                          label: Text(
-                            _allAudioMuted ? 'Turn sound on' : 'Mute all sound',
-                          ),
-                          style: FilledButton.styleFrom(
-                            backgroundColor: ReleafColors.sage.withValues(
-                              alpha: 0.14,
-                            ),
-                            foregroundColor: ReleafColors.textPrimary,
-                          ),
                         ),
-                      ),
-                      const SizedBox(height: ReleafSpacing.sm),
-                      SwitchListTile.adaptive(
-                        key: const Key('reset-active-voice-toggle'),
-                        contentPadding: EdgeInsets.zero,
-                        title: Text(
-                          isBreathing ? 'Breathing cues' : 'Releaf Guide',
-                        ),
-                        subtitle: Text(
-                          isBreathing
-                              ? 'A soft tone marks inhale and exhale. Hold and rest phases stay silent.'
-                              : 'Only approved Releaf Guide recordings play. Unrecorded guidance stays silent.',
-                        ),
-                        value: _voiceEnabled,
-                        onChanged: (value) {
-                          unawaited(_setVoiceEnabled(value));
-                          refresh();
-                        },
-                      ),
-                      if (_voiceEnabled) ...[
-                        Row(
-                          children: [
-                            const Icon(Icons.volume_down_rounded, size: 18),
-                            Expanded(
-                              child: Slider(
-                                key: const Key('reset-active-voice-volume'),
-                                value: _voiceVolume,
-                                onChanged: (value) {
-                                  unawaited(_setVoiceVolume(value));
-                                  refresh();
-                                },
+                        if (_ambientEnabled) ...[
+                          Row(
+                            children: [
+                              const Icon(Icons.graphic_eq_rounded, size: 18),
+                              Expanded(
+                                child: Slider(
+                                  key: const Key('reset-active-ambient-volume'),
+                                  value: _ambientVolume,
+                                  onChanged: (value) {
+                                    unawaited(_setAmbientVolume(value));
+                                    refresh();
+                                  },
+                                ),
                               ),
-                            ),
-                            SizedBox(
-                              width: 42,
-                              child: Text(
-                                '${(_voiceVolume * 100).round()}%',
-                                textAlign: TextAlign.end,
-                                style: ReleafTypography.meta,
+                              SizedBox(
+                                width: 42,
+                                child: Text(
+                                  '${(_ambientVolume * 100).round()}%',
+                                  textAlign: TextAlign.end,
+                                  style: ReleafTypography.meta,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
+                        ],
+                        const SizedBox(height: ReleafSpacing.sm),
+                        Text(
+                          'The background starts at a low level on purpose. Releaf does not claim that a specific tuning frequency is required for relaxation.',
+                          style: ReleafTypography.meta.copyWith(
+                            color: ReleafColors.textMuted,
+                            height: 1.45,
+                          ),
                         ),
                       ],
-                      const Divider(height: ReleafSpacing.xl),
-                      SwitchListTile.adaptive(
-                        key: const Key('reset-active-ambient-toggle'),
-                        contentPadding: EdgeInsets.zero,
-                        title: const Text('Calming background'),
-                        subtitle: const Text(
-                          'Deep Drift — a slow tonal pad kept deliberately quiet.',
-                        ),
-                        value: _ambientEnabled,
-                        onChanged: (value) {
-                          unawaited(_setAmbientEnabled(value));
-                          refresh();
-                        },
-                      ),
-                      if (_ambientEnabled) ...[
-                        Row(
-                          children: [
-                            const Icon(Icons.graphic_eq_rounded, size: 18),
-                            Expanded(
-                              child: Slider(
-                                key: const Key('reset-active-ambient-volume'),
-                                value: _ambientVolume,
-                                onChanged: (value) {
-                                  unawaited(_setAmbientVolume(value));
-                                  refresh();
-                                },
-                              ),
-                            ),
-                            SizedBox(
-                              width: 42,
-                              child: Text(
-                                '${(_ambientVolume * 100).round()}%',
-                                textAlign: TextAlign.end,
-                                style: ReleafTypography.meta,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                      const SizedBox(height: ReleafSpacing.sm),
-                      Text(
-                        'The background starts at a low level on purpose. Releaf does not claim that a specific tuning frequency is required for relaxation.',
-                        style: ReleafTypography.meta.copyWith(
-                          color: ReleafColors.textMuted,
-                          height: 1.45,
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         );
       },
     );
@@ -835,7 +856,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
                         showTimer: widget.launchOptions.showSessionTimer,
                         onClose: _abortSession,
                         onAudioPressed: _showSessionAudioSettings,
-                        audioEnabled: _voiceEnabled || _ambientEnabled,
+                        audioEnabled: !_allAudioMuted,
                       ),
                       if (isPacedBreathing &&
                           session.methodLabel?.trim().isNotEmpty == true) ...[
@@ -1353,7 +1374,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
                             tooltip: 'Session audio',
                             onPressed: _showSessionAudioSettings,
                             icon: Icon(
-                              _voiceEnabled || _ambientEnabled
+                              !_allAudioMuted
                                   ? Icons.volume_up_rounded
                                   : Icons.volume_off_rounded,
                               color: ReleafColors.textSecondary,

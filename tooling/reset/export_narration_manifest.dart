@@ -173,6 +173,7 @@ Map<String, Object?> buildResetNarrationManifest() {
   final breathCues = BreathPhase.values
       .map((phase) {
         final target = resetBreathPhaseTargetAssetPath(phase);
+        final runtime = resetBreathPhaseRuntimeAssetPath(phase);
         if (target != null && !File('assets/$target').existsSync()) {
           throw StateError('Missing non-verbal breathing cue: assets/$target');
         }
@@ -181,12 +182,18 @@ Map<String, Object?> buildResetNarrationManifest() {
           'cueType': target == null ? 'silence' : 'naturalHumanBreath',
           'existingCueType': target == null ? 'silence' : 'nonVerbalTone',
           'existingAssetPresent': target != null,
-          'approvalStatus': target == null ? 'notRequired' : 'rejected',
-          'productionApproved': false,
+          'approvalStatus': target == null
+              ? 'notRequired'
+              : runtime == null
+              ? 'rejected'
+              : 'approved',
+          'productionApproved': runtime != null,
+          'runtimeEligible': runtime != null,
+          'runtimeAssetPath': runtime,
           'spokenGuidance': null,
           'targetAssetPath': target,
           'recordedAssetPath': target,
-          'renderRequired': target != null,
+          'renderRequired': target != null && runtime == null,
         };
       })
       .toList(growable: false);

@@ -21,8 +21,8 @@ generation, production deployment or store submission under this approval.
 | Priority | Track | Next milestone / dependency |
 | --- | --- | --- |
 | 1 | Meditate, visual design, accessibility | COMPLETE: honest recording availability in library/preview/player, usable captions and large-text layouts. Approved remaining recordings and device QA remain open. |
-| 2 | Reset / Emergency | NEXT: prevent rejected breathing cues from reaching runtime playback; preserve visible/semantic phase guidance and saved preferences. Approved natural breathing cues remain an owner/content dependency. |
-| 3 | Sleep / Sound | Target remaining playback, loop and mix quality defects; existing Atmosphere II candidate awaits listening approval. |
+| 2 | Reset / Emergency | COMPLETE: rejected breathing cues cannot reach runtime; silent/reduced-motion guidance and saved preferences are covered; audio settings are readable. Approved natural breathing cues remain an owner/content dependency. |
+| 3 | Sleep / Sound | NEXT: latest playback intent must survive delayed configuration/source loading; verify volume ordering and loading retry separately. Existing timer fixes remain protected; Atmosphere II candidate awaits listening approval. |
 | 4 | Brain | Memory currently caps gameplay at 12 while stats cover 50: implement defined, tested 50-level progression without changing rewards. Preserve existing Labyrinth 50-stage architecture; device review pending. |
 | 5 | Progress / personalisation / mascot | Improve useful continuation and understandable local progress; retain reward semantics and character identity. |
 | 6 | Backend / subscriptions / offline | Strengthen configured/missing-key SDK coverage and startup guarantees; preserve UUID identity, local-first behaviour and account isolation. |
@@ -49,6 +49,17 @@ verification remains pending while ADB reports no device.
 
 ## Completed evidence
 
+### Milestone 2 plan: silent breathing until approved
+
+The export manifest marks both bundled breathing tones rejected, but the runtime
+resolver still selects them. Add one shared production-approval guard to cue
+resolution and manifest runtime eligibility. Keep target paths/assets for the
+content pipeline. Disable unavailable cue controls without rewriting saved voice
+preferences; retain ambience controls and visible/semantic breathing phases.
+Regression sequence: fail runtime playback, manifest and UI tests first; implement
+the smallest shared guard; run Reset access/lifecycle/completion tests, analyzer,
+full checkpoint and Android debug build. No asset replacement or new approval.
+
 - Starting HEAD `1b24990`: clean and synchronised with origin. Fresh focused
   Meditate baseline 5/5 passed. Previous full checkpoint: 376 tests; analyzer clean.
 - Capability check: local Flutter/Gradle and GitHub/Supabase available. Canva and
@@ -57,3 +68,6 @@ verification remains pending while ADB reports no device.
 - Milestone 1: [guidance quality evidence](../release/2026-09-11-meditation-guidance-quality.md).
   Focused tests 40/40, full suite 383/383, analyzer clean, four local Flutter
   renders and Android debug APK built. ADB reported no device; physical QA is open.
+- Milestone 2: [Reset cue eligibility evidence](../release/2026-09-11-reset-cue-eligibility.md).
+  Focused Reset tests 69/69; follow-up contrast/UI tests 40/40; full suite 386/386;
+  analyzer clean. No audio replacement, recording approval or physical QA claimed.

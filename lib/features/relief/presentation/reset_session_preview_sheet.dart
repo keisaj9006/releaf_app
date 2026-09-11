@@ -10,6 +10,7 @@ import '../../../theme/widgets/releaf_components.dart';
 import '../application/reset_audio_preferences.dart';
 import '../domain/models/reset_content.dart';
 import '../domain/models/reset_launch_options.dart';
+import '../domain/reset_voice_guidance.dart';
 
 enum ResetSessionPreviewAction { start, unlock }
 
@@ -34,10 +35,8 @@ Future<ResetSessionPreviewResult?> showResetSessionPreview(
     useSafeArea: true,
     backgroundColor: Colors.transparent,
     barrierColor: Colors.black.withValues(alpha: 0.68),
-    builder: (_) => _ResetSessionPreviewSheet(
-      session: session,
-      isLocked: isLocked,
-    ),
+    builder: (_) =>
+        _ResetSessionPreviewSheet(session: session, isLocked: isLocked),
   );
 }
 
@@ -69,6 +68,7 @@ class _ResetSessionPreviewSheetState
   Widget build(BuildContext context) {
     final session = widget.session;
     final isBreathing = session.modality == ResetModality.breathing;
+    final voiceAvailable = !isBreathing || resetBreathingCuesProductionApproved;
     final size = MediaQuery.sizeOf(context);
     final maxHeight = math.min(size.height * 0.90, 780.0);
     final compact = size.width < 360;
@@ -76,10 +76,7 @@ class _ResetSessionPreviewSheetState
     return Align(
       alignment: Alignment.bottomCenter,
       child: ConstrainedBox(
-        constraints: BoxConstraints(
-          maxWidth: 720,
-          maxHeight: maxHeight,
-        ),
+        constraints: BoxConstraints(maxWidth: 720, maxHeight: maxHeight),
         child: Material(
           key: const Key('reset-session-preview-sheet'),
           color: ReleafColors.backgroundRaised,
@@ -112,10 +109,7 @@ class _ResetSessionPreviewSheetState
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      _PreviewArtworkHeader(
-                        session: session,
-                        compact: compact,
-                      ),
+                      _PreviewArtworkHeader(session: session, compact: compact),
                       Padding(
                         padding: EdgeInsets.fromLTRB(
                           compact ? ReleafSpacing.md : ReleafSpacing.xl,
@@ -155,8 +149,9 @@ class _ResetSessionPreviewSheetState
                                 Text(
                                   'Best for: ${session.bestFor!}',
                                   style: ReleafTypography.body.copyWith(
-                                    color: ReleafColors.textPrimary
-                                        .withValues(alpha: 0.82),
+                                    color: ReleafColors.textPrimary.withValues(
+                                      alpha: 0.82,
+                                    ),
                                     height: 1.45,
                                   ),
                                 ),
@@ -166,8 +161,9 @@ class _ResetSessionPreviewSheetState
                                 Text(
                                   'Why this method: ${session.whyItMayHelp!}',
                                   style: ReleafTypography.body.copyWith(
-                                    color: ReleafColors.textPrimary
-                                        .withValues(alpha: 0.82),
+                                    color: ReleafColors.textPrimary.withValues(
+                                      alpha: 0.82,
+                                    ),
                                     height: 1.45,
                                   ),
                                 ),
@@ -206,8 +202,9 @@ class _ResetSessionPreviewSheetState
                               style: ReleafTypography.eyebrow,
                             ),
                             const SizedBox(height: ReleafSpacing.sm),
-                            for (final instruction
-                                in session.instructions.take(4)) ...[
+                            for (final instruction in session.instructions.take(
+                              4,
+                            )) ...[
                               _ExpectationRow(text: instruction),
                               const SizedBox(height: ReleafSpacing.xs),
                             ],
@@ -229,9 +226,7 @@ class _ResetSessionPreviewSheetState
                               ),
                               const SizedBox(height: ReleafSpacing.sm),
                               _SessionPreferenceTile(
-                                key: const Key(
-                                  'reset-preview-guidance-toggle',
-                                ),
+                                key: const Key('reset-preview-guidance-toggle'),
                                 icon: Icons.subtitles_rounded,
                                 title: 'Guidance text',
                                 subtitle:
@@ -270,25 +265,33 @@ class _ResetSessionPreviewSheetState
                                     ? 'Breathing cues'
                                     : 'Releaf Guide',
                                 subtitle: isBreathing
-                                    ? 'A soft tone marks inhale and exhale. Hold and rest stay silent.'
+                                    ? voiceAvailable
+                                          ? 'Gentle inhale and exhale cues. Hold and rest stay silent.'
+                                          : 'Follow the on-screen breathing rhythm. Breathing audio is not available yet.'
                                     : 'Only approved Releaf Guide recordings play. Unrecorded guidance stays silent.',
-                                value: _options.voiceGuidanceEnabled,
-                                onChanged: (value) {
-                                  setState(() {
-                                    _options = _options.copyWith(
-                                      voiceGuidanceEnabled: value,
-                                    );
-                                  });
-                                  unawaited(
-                                    ref
-                                        .read(
-                                          resetAudioPreferencesProvider.notifier,
-                                        )
-                                        .setVoiceEnabled(value),
-                                  );
-                                },
+                                value:
+                                    voiceAvailable &&
+                                    _options.voiceGuidanceEnabled,
+                                onChanged: !voiceAvailable
+                                    ? null
+                                    : (value) {
+                                        setState(() {
+                                          _options = _options.copyWith(
+                                            voiceGuidanceEnabled: value,
+                                          );
+                                        });
+                                        unawaited(
+                                          ref
+                                              .read(
+                                                resetAudioPreferencesProvider
+                                                    .notifier,
+                                              )
+                                              .setVoiceEnabled(value),
+                                        );
+                                      },
                               ),
-                              if (_options.voiceGuidanceEnabled) ...[
+                              if (voiceAvailable &&
+                                  _options.voiceGuidanceEnabled) ...[
                                 const SizedBox(height: ReleafSpacing.xs),
                                 _SessionVolumeTile(
                                   key: const Key('reset-preview-voice-volume'),
@@ -306,7 +309,8 @@ class _ResetSessionPreviewSheetState
                                     unawaited(
                                       ref
                                           .read(
-                                            resetAudioPreferencesProvider.notifier,
+                                            resetAudioPreferencesProvider
+                                                .notifier,
                                           )
                                           .setVoiceVolume(value),
                                     );
@@ -330,7 +334,8 @@ class _ResetSessionPreviewSheetState
                                   unawaited(
                                     ref
                                         .read(
-                                          resetAudioPreferencesProvider.notifier,
+                                          resetAudioPreferencesProvider
+                                              .notifier,
                                         )
                                         .setAmbientEnabled(value),
                                   );
@@ -354,7 +359,8 @@ class _ResetSessionPreviewSheetState
                                     unawaited(
                                       ref
                                           .read(
-                                            resetAudioPreferencesProvider.notifier,
+                                            resetAudioPreferencesProvider
+                                                .notifier,
                                           )
                                           .setAmbientVolume(value),
                                     );
@@ -407,9 +413,7 @@ class _StickyPreviewAction extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: ReleafColors.backgroundRaised,
-        border: Border(
-          top: BorderSide(color: ReleafColors.borderSoft),
-        ),
+        border: Border(top: BorderSide(color: ReleafColors.borderSoft)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.24),
@@ -449,10 +453,7 @@ class _StickyPreviewAction extends StatelessWidget {
 }
 
 class _PreviewArtworkHeader extends StatelessWidget {
-  const _PreviewArtworkHeader({
-    required this.session,
-    required this.compact,
-  });
+  const _PreviewArtworkHeader({required this.session, required this.compact});
 
   final ResetContent session;
   final bool compact;
@@ -560,11 +561,7 @@ class _PreviewMeta extends StatelessWidget {
 }
 
 class _MetaPill extends StatelessWidget {
-  const _MetaPill({
-    required this.icon,
-    required this.label,
-    this.warm = false,
-  });
+  const _MetaPill({required this.icon, required this.label, this.warm = false});
 
   final IconData icon;
   final String label;
@@ -647,11 +644,12 @@ class _SessionPreferenceTile extends StatelessWidget {
   final String title;
   final String subtitle;
   final bool value;
-  final ValueChanged<bool> onChanged;
+  final ValueChanged<bool>? onChanged;
 
   @override
   Widget build(BuildContext context) {
     return Semantics(
+      enabled: onChanged != null,
       toggled: value,
       label: '$title. $subtitle',
       child: DecoratedBox(
@@ -792,17 +790,13 @@ class _PrimaryPreviewAction extends StatelessWidget {
     final warm = isLocked || session.isPremium;
     final background = warm ? ReleafColors.premium : ReleafColors.sage;
     final label = isLocked ? 'Unlock Premium' : 'Start reset';
-    final icon = isLocked
-        ? Icons.lock_open_rounded
-        : Icons.play_arrow_rounded;
+    final icon = isLocked ? Icons.lock_open_rounded : Icons.play_arrow_rounded;
 
     return SizedBox(
       width: double.infinity,
       height: ReleafControlSizes.prominent,
       child: FilledButton.icon(
-        key: Key(
-          isLocked ? 'reset-preview-unlock' : 'reset-preview-start',
-        ),
+        key: Key(isLocked ? 'reset-preview-unlock' : 'reset-preview-start'),
         onPressed: onPressed,
         icon: Icon(icon, size: 20),
         label: Text(
@@ -835,36 +829,63 @@ String _durationLabel(int durationSeconds) {
 String _previewSubtitle(ResetContent session) {
   return switch (session.id) {
     '60s-grounding' => 'A quick sensory reset for the present moment.',
-    'back-to-room' => 'A guided 5–4–3–2–1 grounding practice with a simpler 3–2–1 option.',
-    'jaw-shoulders' => 'A short body reset for tension held around the jaw and shoulders.',
-    'name-the-thought' => 'A guided thought-unhooking practice for repetitive thinking.',
+    'back-to-room' =>
+      'A guided 5–4–3–2–1 grounding practice with a simpler 3–2–1 option.',
+    'jaw-shoulders' =>
+      'A short body reset for tension held around the jaw and shoulders.',
+    'name-the-thought' =>
+      'A guided thought-unhooking practice for repetitive thinking.',
     'object-anchor' => 'A short grounding practice using one ordinary object.',
-    'sound-anchor' => 'A short grounding practice using sounds already around you.',
+    'sound-anchor' =>
+      'A short grounding practice using sounds already around you.',
     'press-release' => 'A gentle body reset using brief pressure and release.',
-    'make-room' => 'An acceptance-based practice for making space around a difficult moment.',
-    'one-small-next-step' => 'A practical reset for turning overwhelm into one doable action.',
-    'equal-rhythm' => 'A balanced five-count in and five-count out breathing practice.',
+    'make-room' =>
+      'An acceptance-based practice for making space around a difficult moment.',
+    'one-small-next-step' =>
+      'A practical reset for turning overwhelm into one doable action.',
+    'equal-rhythm' =>
+      'A balanced five-count in and five-count out breathing practice.',
     'before-interview' => 'A short reset for the minutes before an interview.',
-    'before-presentation' => 'A short reset for the minutes before speaking in front of others.',
-    'after-conflict' => 'A guided reset for the activation that can remain after a difficult interaction.',
-    'panic-spike' => 'Fast sensory grounding for a sudden surge of panic or alarm.',
-    'overthinking-night' => 'A thought-unhooking reset for repetitive thinking at night.',
-    'social-pressure' => 'A grounding reset for moments of intense self-consciousness around other people.',
-    'travel-stress' => 'A grounding reset for airports, stations, queues, delays, and unfamiliar places.',
-    'work-overwhelm' => 'A practical reset for when too many tasks feel active at once.',
-    'wired-steady' => 'An 8-minute paced-breathing protocol for high activation.',
-    'tension-body-scan' => 'An 8-minute full-body attention scan for held tension.',
-    'overwhelm-stability' => 'An 8-minute guided reset for cognitive overload and too many active demands.',
-    'evening-unwind' => 'An 8-minute evening protocol for setting down the unfinished day.',
-    'anger-release' => 'An 8-minute body-led protocol for creating space before the next response.',
-    'overthinking-let-go' => 'An 8-minute thought-unhooking protocol for repetitive thinking.',
-    '90s-calm-down' => 'A 4–6 breathing practice with a longer, comfortable exhale.',
-    'longer-exhale' => 'A 3–6 paced-breathing reset with a clear long-exhale emphasis.',
-    'box-breathing' => 'A structured 4–4–4–4 breathing practice with comfortable holds.',
-    'sleep-downshift' => 'A bedtime 4–7–8 practice for users who are comfortable with breath holds.',
-    'energy-up-breath' => 'A light 3–3 paced practice designed to feel more active than the calming protocols.',
-    'focus-breath' => 'A simple 4–4 rhythm that uses counting as an attentional anchor.',
-    'anxiety-slow-cycle' => 'A slower 5–7 continuous cycle with no breath holds.',
+    'before-presentation' =>
+      'A short reset for the minutes before speaking in front of others.',
+    'after-conflict' =>
+      'A guided reset for the activation that can remain after a difficult interaction.',
+    'panic-spike' =>
+      'Fast sensory grounding for a sudden surge of panic or alarm.',
+    'overthinking-night' =>
+      'A thought-unhooking reset for repetitive thinking at night.',
+    'social-pressure' =>
+      'A grounding reset for moments of intense self-consciousness around other people.',
+    'travel-stress' =>
+      'A grounding reset for airports, stations, queues, delays, and unfamiliar places.',
+    'work-overwhelm' =>
+      'A practical reset for when too many tasks feel active at once.',
+    'wired-steady' =>
+      'An 8-minute paced-breathing protocol for high activation.',
+    'tension-body-scan' =>
+      'An 8-minute full-body attention scan for held tension.',
+    'overwhelm-stability' =>
+      'An 8-minute guided reset for cognitive overload and too many active demands.',
+    'evening-unwind' =>
+      'An 8-minute evening protocol for setting down the unfinished day.',
+    'anger-release' =>
+      'An 8-minute body-led protocol for creating space before the next response.',
+    'overthinking-let-go' =>
+      'An 8-minute thought-unhooking protocol for repetitive thinking.',
+    '90s-calm-down' =>
+      'A 4–6 breathing practice with a longer, comfortable exhale.',
+    'longer-exhale' =>
+      'A 3–6 paced-breathing reset with a clear long-exhale emphasis.',
+    'box-breathing' =>
+      'A structured 4–4–4–4 breathing practice with comfortable holds.',
+    'sleep-downshift' =>
+      'A bedtime 4–7–8 practice for users who are comfortable with breath holds.',
+    'energy-up-breath' =>
+      'A light 3–3 paced practice designed to feel more active than the calming protocols.',
+    'focus-breath' =>
+      'A simple 4–4 rhythm that uses counting as an attentional anchor.',
+    'anxiety-slow-cycle' =>
+      'A slower 5–7 continuous cycle with no breath holds.',
     '5min-focus' => 'A focused sensory anchor for scattered attention.',
     '3min-breath' => 'The current focused Deep Reset breathing protocol.',
     _ => session.summary ?? 'A guided reset for the present moment.',
@@ -873,41 +894,76 @@ String _previewSubtitle(ResetContent session) {
 
 String _sessionPurpose(ResetContent session) {
   return switch (session.id) {
-    '60s-grounding' => 'Return attention to your body and immediate surroundings.',
-    'back-to-room' => 'Reconnect with the room through sight, touch, sound, smell and taste without focusing on breathing.',
-    'jaw-shoulders' => 'Notice, gently lift and release tension without forcing movement or focusing on breathing.',
-    'name-the-thought' => 'Notice a recurring thought, name it, create a little distance, then return attention to the present.',
-    'object-anchor' => 'Narrow attention to shape, texture, contact and one small detail in something real and nearby.',
-    'sound-anchor' => 'Shift attention toward nearby, distant and layered sounds without needing them to change.',
-    'press-release' => 'Use comfortable pressure against a stable surface, then release and notice the contrast.',
-    'make-room' => 'Notice what is here, stop trying to fix it for a moment, and create a little more psychological space around it.',
-    'one-small-next-step' => 'Choose one useful action, shrink it until it feels realistic, and keep only the first step.',
-    'equal-rhythm' => 'Use an even five-count rhythm without making the breath bigger or forcing the pace.',
-    'before-panic-builds' => 'Re-orient to the room, notice stable physical contact, widen attention and choose one simple next action before activation builds further.',
-    'before-exam' => 'Stop last-minute overload, settle against something stable and reduce the exam to the first instruction or question.',
-    'before-interview' => 'Reduce the urge to prepare everything, choose one message, settle the body, and keep only the first step.',
-    'before-presentation' => 'Release unnecessary tension, feel stable contact with the floor, and choose how you will begin.',
-    'after-conflict' => 'Notice the activation, name the strongest feeling, and create space before choosing what to do next.',
-    'panic-spike' => 'Use sight, touch, and sound to reconnect with the room without forcing the breath.',
-    'overthinking-night' => 'Name the thought as a thought, create distance from it, and return to one simple present-moment sensation.',
-    'social-pressure' => 'Shift attention from how you think you appear toward a neutral object, physical support, and one simple next action.',
-    'travel-stress' => 'Find stable contact, orient through sound, and reduce the journey to the next concrete step.',
-    'work-overwhelm' => 'Choose one task, shrink it to the first visible action, and set everything else aside for now.',
-    'wired-steady' => 'Use a gentle four-count inhale and slightly longer five-count exhale, then return gradually to a natural rhythm.',
-    'tension-body-scan' => 'Move attention slowly from face and shoulders through the rest of the body without forcing tension to disappear.',
-    'overwhelm-stability' => 'Reconnect with physical support, separate now from later, and reduce the whole problem to one useful action.',
-    'evening-unwind' => 'Let unfinished things remain unfinished, notice physical support, and create room around what the day is still carrying.',
-    'anger-release' => 'Notice activation, use comfortable pressure and release, then create space before choosing what to do next.',
-    'overthinking-let-go' => 'Name the recurring thought, unhook from it, create distance, and return attention to something real and present.',
-    '90s-calm-down' => 'Use a gentle 4-count inhale and a smooth 6-count exhale without holding the breath.',
-    'longer-exhale' => 'Use a gentle 3-count inhale and a long 6-count exhale without holding the breath.',
-    'box-breathing' => 'Use four equal 4-count phases to create a structured attentional rhythm.',
-    'sleep-downshift' => 'Use a slow 4–7–8 pattern as a bedtime downshift, only while the hold remains comfortable.',
-    'energy-up-breath' => 'Use a light 3-count inhale and 3-count exhale without turning the practice into fast or forceful breathing.',
-    'focus-breath' => 'Use four in and four out while returning attention to the next count whenever the mind wanders.',
-    'anxiety-slow-cycle' => 'Use five in and seven out as a slower continuous pattern, shortening the counts whenever it feels effortful.',
-    '5min-focus' => 'Anchor attention through your senses and one clear point of focus.',
-    '3min-breath' => 'Use a steady breathing pattern to create a longer, more focused reset.',
+    '60s-grounding' =>
+      'Return attention to your body and immediate surroundings.',
+    'back-to-room' =>
+      'Reconnect with the room through sight, touch, sound, smell and taste without focusing on breathing.',
+    'jaw-shoulders' =>
+      'Notice, gently lift and release tension without forcing movement or focusing on breathing.',
+    'name-the-thought' =>
+      'Notice a recurring thought, name it, create a little distance, then return attention to the present.',
+    'object-anchor' =>
+      'Narrow attention to shape, texture, contact and one small detail in something real and nearby.',
+    'sound-anchor' =>
+      'Shift attention toward nearby, distant and layered sounds without needing them to change.',
+    'press-release' =>
+      'Use comfortable pressure against a stable surface, then release and notice the contrast.',
+    'make-room' =>
+      'Notice what is here, stop trying to fix it for a moment, and create a little more psychological space around it.',
+    'one-small-next-step' =>
+      'Choose one useful action, shrink it until it feels realistic, and keep only the first step.',
+    'equal-rhythm' =>
+      'Use an even five-count rhythm without making the breath bigger or forcing the pace.',
+    'before-panic-builds' =>
+      'Re-orient to the room, notice stable physical contact, widen attention and choose one simple next action before activation builds further.',
+    'before-exam' =>
+      'Stop last-minute overload, settle against something stable and reduce the exam to the first instruction or question.',
+    'before-interview' =>
+      'Reduce the urge to prepare everything, choose one message, settle the body, and keep only the first step.',
+    'before-presentation' =>
+      'Release unnecessary tension, feel stable contact with the floor, and choose how you will begin.',
+    'after-conflict' =>
+      'Notice the activation, name the strongest feeling, and create space before choosing what to do next.',
+    'panic-spike' =>
+      'Use sight, touch, and sound to reconnect with the room without forcing the breath.',
+    'overthinking-night' =>
+      'Name the thought as a thought, create distance from it, and return to one simple present-moment sensation.',
+    'social-pressure' =>
+      'Shift attention from how you think you appear toward a neutral object, physical support, and one simple next action.',
+    'travel-stress' =>
+      'Find stable contact, orient through sound, and reduce the journey to the next concrete step.',
+    'work-overwhelm' =>
+      'Choose one task, shrink it to the first visible action, and set everything else aside for now.',
+    'wired-steady' =>
+      'Use a gentle four-count inhale and slightly longer five-count exhale, then return gradually to a natural rhythm.',
+    'tension-body-scan' =>
+      'Move attention slowly from face and shoulders through the rest of the body without forcing tension to disappear.',
+    'overwhelm-stability' =>
+      'Reconnect with physical support, separate now from later, and reduce the whole problem to one useful action.',
+    'evening-unwind' =>
+      'Let unfinished things remain unfinished, notice physical support, and create room around what the day is still carrying.',
+    'anger-release' =>
+      'Notice activation, use comfortable pressure and release, then create space before choosing what to do next.',
+    'overthinking-let-go' =>
+      'Name the recurring thought, unhook from it, create distance, and return attention to something real and present.',
+    '90s-calm-down' =>
+      'Use a gentle 4-count inhale and a smooth 6-count exhale without holding the breath.',
+    'longer-exhale' =>
+      'Use a gentle 3-count inhale and a long 6-count exhale without holding the breath.',
+    'box-breathing' =>
+      'Use four equal 4-count phases to create a structured attentional rhythm.',
+    'sleep-downshift' =>
+      'Use a slow 4–7–8 pattern as a bedtime downshift, only while the hold remains comfortable.',
+    'energy-up-breath' =>
+      'Use a light 3-count inhale and 3-count exhale without turning the practice into fast or forceful breathing.',
+    'focus-breath' =>
+      'Use four in and four out while returning attention to the next count whenever the mind wanders.',
+    'anxiety-slow-cycle' =>
+      'Use five in and seven out as a slower continuous pattern, shortening the counts whenever it feels effortful.',
+    '5min-focus' =>
+      'Anchor attention through your senses and one clear point of focus.',
+    '3min-breath' =>
+      'Use a steady breathing pattern to create a longer, more focused reset.',
     _ => session.summary ?? 'A guided reset for the present moment.',
   };
 }
