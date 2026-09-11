@@ -51,23 +51,28 @@ List<Map<String, Object?>> _serializeSteps(
   String sessionId,
   List<ResetSessionStep> steps, {
   required bool simplified,
+  required bool spokenGuidanceEnabled,
 }) {
   final payload = <Map<String, Object?>>[];
 
   for (var index = 0; index < steps.length; index++) {
     final step = steps[index];
-    final spoken = step.guidance.trim();
-    if (spoken.isEmpty) {
+    final spoken = spokenGuidanceEnabled ? step.guidance.trim() : null;
+    if (spokenGuidanceEnabled && (spoken == null || spoken.isEmpty)) {
       throw StateError('$sessionId / ${step.label} has no spoken guidance.');
     }
 
-    final target = _targetPath(
-      sessionId,
-      index,
-      step.label,
-      simplified: simplified,
-    );
-    final recorded = step.narrationAssetPath?.trim();
+    final target = spokenGuidanceEnabled
+        ? _targetPath(
+            sessionId,
+            index,
+            step.label,
+            simplified: simplified,
+          )
+        : null;
+    final recorded = spokenGuidanceEnabled
+        ? step.narrationAssetPath?.trim()
+        : null;
 
     if (recorded != null && recorded.isNotEmpty && recorded != target) {
       throw StateError(
@@ -82,11 +87,12 @@ List<Map<String, Object?>> _serializeSteps(
       'screenGuidance': step.guidance,
       'spokenGuidance': spoken,
       'durationSeconds': step.durationSeconds,
-      'wordCount': _wordCount(spoken),
+      'wordCount': spoken == null ? 0 : _wordCount(spoken),
       'advanceActionLabel': step.advanceActionLabel,
       'targetAssetPath': target,
       'recordedAssetPath': recorded,
-      'renderRequired': recorded == null || recorded.isEmpty,
+      'renderRequired':
+          spokenGuidanceEnabled && (recorded == null || recorded.isEmpty),
     });
   }
 
@@ -104,6 +110,7 @@ Map<String, Object?> buildResetNarrationManifest() {
   var breathingSessionCount = 0;
   var totalStepCount = 0;
   var recordedStepCount = 0;
+  var stepsStillToRender = 0;
 
   final sessionPayload = <Map<String, Object?>>[];
 
@@ -128,11 +135,13 @@ Map<String, Object?> buildResetNarrationManifest() {
       session.id,
       program.steps,
       simplified: false,
+      spokenGuidanceEnabled: program.type != ResetProgramType.pacedBreathing,
     );
     final simplifiedSteps = _serializeSteps(
       session.id,
       program.simplifiedSteps,
       simplified: true,
+      spokenGuidanceEnabled: program.type != ResetProgramType.pacedBreathing,
     );
 
     final allSteps = <Map<String, Object?>>[
@@ -141,7 +150,10 @@ Map<String, Object?> buildResetNarrationManifest() {
     ];
     totalStepCount += allSteps.length;
     recordedStepCount += allSteps
-        .where((step) => step['renderRequired'] == false)
+        .where((step) => step['recordedAssetPath'] != null)
+        .length;
+    stepsStillToRender += allSteps
+        .where((step) => step['renderRequired'] == true)
         .length;
 
     sessionPayload.add(<String, Object?>{
@@ -168,12 +180,17 @@ Map<String, Object?> buildResetNarrationManifest() {
   }
 
   final breathCues = BreathPhase.values.map((phase) {
+    final target = resetBreathPhaseTargetAssetPath(phase);
+    if (target != null && !File('assets/$target').existsSync()) {
+      throw StateError('Missing non-verbal breathing cue: assets/$target');
+    }
     return <String, Object?>{
       'phase': phase.name,
-      'spokenGuidance': resetBreathPhaseSpokenText(phase),
-      'targetAssetPath': resetBreathPhaseTargetAssetPath(phase),
-      'recordedAssetPath': null,
-      'renderRequired': true,
+      'cueType': target == null ? 'silence' : 'nonVerbalTone',
+      'spokenGuidance': null,
+      'targetAssetPath': target,
+      'recordedAssetPath': target,
+      'renderRequired': false,
     };
   }).toList(growable: false);
 
@@ -182,17 +199,17 @@ Map<String, Object?> buildResetNarrationManifest() {
     'guideProfile': releafGuideProductionProfile,
     'voiceGuidanceDefaultEnabled': true,
     'defaultVoiceVolume': resetGuideDefaultVoiceVolume,
-    'runtimeFallback':
-        'calm female en-GB device voice using the same driver as Meditation; '
-        'not a substitute for the approved studio Releaf Guide',
+    'runtimeVoicePolicy':
+        'approved recorded Releaf Guide only; missing narration stays silent; '
+        'device/system TTS prohibited',
     'resetSessionCount': sessions.length,
     'breathingSessionCount': breathingSessionCount,
     'breathCueCount': breathCues.length,
-    'breathCuesStillToRender': breathCues.length,
+    'breathCuesStillToRender': 0,
     'breathCues': breathCues,
     'totalStepCount': totalStepCount,
     'recordedStepCount': recordedStepCount,
-    'stepsStillToRender': totalStepCount - recordedStepCount,
+    'stepsStillToRender': stepsStillToRender,
     'sessions': sessionPayload,
   };
 }

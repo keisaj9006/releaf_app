@@ -17,6 +17,7 @@ import '../../../theme/widgets/releaf_artwork.dart';
 import '../../../theme/widgets/releaf_body_release_visual.dart';
 import '../../../theme/widgets/releaf_components.dart';
 import '../../../theme/widgets/releaf_emergency_visual.dart';
+import '../../../theme/widgets/releaf_grounding_body_visual.dart';
 import '../../../theme/widgets/releaf_session_living_form.dart';
 import '../../../theme/widgets/releaf_sensory_halo.dart';
 import '../../../theme/widgets/releaf_thought_unhook_visual.dart';
@@ -198,15 +199,15 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
     if (!force && cue.key == _lastNarrationKey) return;
     _lastNarrationKey = cue.key;
 
-    final guidance = cue.spokenText.trim();
-    if (guidance.isEmpty) return;
+    final assetPath = cue.narrationAssetPath?.trim();
+    if (assetPath == null || assetPath.isEmpty) return;
     try {
       await _voiceDriver.configure(volume: _voiceVolume);
       if (!_voiceEnabled || !mounted) return;
       await _voicePlayback.playCue(cue);
     } catch (_) {
-      // Recorded Releaf Guide audio has priority. Device speech remains a
-      // fallback only and audio failure must never interrupt a Reset session.
+      // Missing recorded audio stays silent. Audio failure must never
+      // interrupt a Reset session or substitute an unapproved voice.
     }
   }
 
@@ -304,6 +305,8 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
   }
 
   void _showSessionAudioSettings() {
+    final isBreathing =
+        _session?.program?.type == ResetProgramType.pacedBreathing;
     showModalBottomSheet<void>(
       context: context,
       useSafeArea: true,
@@ -345,7 +348,9 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  'Voice and calming background',
+                                  isBreathing
+                                      ? 'Breathing cues and calming background'
+                                      : 'Releaf Guide and calming background',
                                   style: ReleafTypography.sectionTitle.copyWith(
                                     fontSize: 22,
                                   ),
@@ -391,9 +396,13 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
                       SwitchListTile.adaptive(
                         key: const Key('reset-active-voice-toggle'),
                         contentPadding: EdgeInsets.zero,
-                        title: const Text('Voice guidance'),
-                        subtitle: const Text(
-                          'Releaf Guide pacing. Recorded guide audio takes priority; a calm female en-GB device voice is used only where studio audio is not yet available.',
+                        title: Text(
+                          isBreathing ? 'Breathing cues' : 'Releaf Guide',
+                        ),
+                        subtitle: Text(
+                          isBreathing
+                              ? 'A soft tone marks inhale and exhale. Hold and rest phases stay silent.'
+                              : 'Only approved Releaf Guide recordings play. Unrecorded guidance stays silent.',
                         ),
                         value: _voiceEnabled,
                         onChanged: (value) {
@@ -883,6 +892,12 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
                                 ReleafBodyReleaseVisual(
                                   progress: progress,
                                   phaseLabel: phaseLabel ?? 'Notice',
+                                  reducedMotion: reducedMotion,
+                                ),
+                              ResetVisualType.bodyGrounding =>
+                                ReleafGroundingBodyVisual(
+                                  progress: progress,
+                                  phaseLabel: phaseLabel ?? 'Arrive',
                                   reducedMotion: reducedMotion,
                                 ),
                               ResetVisualType.thoughtUnhook =>
@@ -1740,6 +1755,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
     return switch (session.visualType) {
       ResetVisualType.sensoryHalo => 'GROUND WITH YOUR SENSES',
       ResetVisualType.bodyRelease => 'RELEASE BODY TENSION',
+      ResetVisualType.bodyGrounding => 'FEEL THE SUPPORT BENEATH YOU',
       ResetVisualType.thoughtUnhook => 'CREATE A LITTLE DISTANCE',
       ResetVisualType.objectFocus => 'FOCUS ON ONE REAL THING',
       ResetVisualType.soundRipple => 'LISTEN TO WHAT IS HERE',

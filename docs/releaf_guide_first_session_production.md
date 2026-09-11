@@ -98,4 +98,4 @@ Reject/regenerate any segment if:
 - any word is mispronounced
 - the final file contains ambience, music, UI sounds, or clipping
 
-Once all four MP3s pass QA, the app should use them automatically and retain system TTS only as a fault-tolerant fallback.
+Once all four MP3s pass QA, the app uses them automatically. If an approved asset is missing or corrupt, the step stays silent; it must never switch to system TTS.

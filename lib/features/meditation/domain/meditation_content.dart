@@ -28,7 +28,8 @@ class MeditationStep {
   final String? spokenGuidance;
 
   /// Optional pre-rendered Releaf Guide narration for this step.
-  /// When present, the player uses this instead of device TTS.
+  /// When present, the player may use this approved Releaf Guide recording.
+  /// A missing path stays silent; Releaf never substitutes device TTS.
   final String? narrationAssetPath;
 }
 

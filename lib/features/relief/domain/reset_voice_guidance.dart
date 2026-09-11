@@ -1,8 +1,6 @@
 import 'models/breath_pattern.dart';
 import 'models/reset_session_program.dart';
 
-const int resetBreathRhythmLeadInSeconds = 8;
-
 class ResetVoiceGuidanceCue {
   const ResetVoiceGuidanceCue({
     required this.key,
@@ -15,36 +13,21 @@ class ResetVoiceGuidanceCue {
   final String? narrationAssetPath;
 }
 
-String resetBreathPhaseSpokenText(BreathPhase phase) {
+String? resetBreathPhaseTargetAssetPath(BreathPhase phase) {
   return switch (phase) {
-    BreathPhase.inhale => 'Breathe in.',
-    BreathPhase.holdAfterInhale => 'Hold gently.',
-    BreathPhase.exhale => 'Breathe out.',
-    BreathPhase.holdAfterExhale => 'Rest.',
+    BreathPhase.inhale => 'sounds/reset/breath-cues/inhale.mp3',
+    BreathPhase.exhale => 'sounds/reset/breath-cues/exhale.mp3',
+    BreathPhase.holdAfterInhale || BreathPhase.holdAfterExhale => null,
   };
 }
 
-String resetBreathPhaseAssetSlug(BreathPhase phase) {
-  return switch (phase) {
-    BreathPhase.inhale => 'breathe-in',
-    BreathPhase.holdAfterInhale => 'hold-gently',
-    BreathPhase.exhale => 'breathe-out',
-    BreathPhase.holdAfterExhale => 'rest',
-  };
-}
-
-String resetBreathPhaseTargetAssetPath(BreathPhase phase) {
-  return 'narration/releaf-guide/reset/breath-cues/'
-      '${resetBreathPhaseAssetSlug(phase)}.mp3';
-}
-
-/// Resolves the single spoken cue for the current Reset frame.
+/// Resolves the single audio cue for the current Reset frame.
 ///
-/// Guided Reset sessions speak their scripted step guidance. Paced-breathing
-/// sessions deliberately use short phase cues so the narrator never talks over
-/// the next inhale/exhale transition. All breathing methods therefore share
-/// the same four Releaf Guide cues while their [BreathPattern] remains the
-/// source of truth for timing.
+/// Guided Reset sessions may use approved recorded Releaf Guide narration.
+/// Paced-breathing sessions never read their instructional copy aloud: inhale
+/// and exhale use two restrained non-verbal tones, while every hold/rest phase
+/// is silent. The program's BreathPattern remains the source of truth for both
+/// the visual and the audio phase.
 ResetVoiceGuidanceCue resetVoiceGuidanceCue({
   required ResetSessionProgram program,
   required int elapsedSeconds,
@@ -64,36 +47,10 @@ ResetVoiceGuidanceCue resetVoiceGuidanceCue({
       throw StateError('Paced-breathing Reset has no BreathPattern.');
     }
 
-    // Breathing sessions use three semantic stages in the catalog:
-    // settle -> active rhythm -> release. Speak the full scripted guidance
-    // during settle/release. At the start of the active stage, give the user a
-    // short lead-in window to hear the method-specific instruction before
-    // switching to reusable phase cues.
-    if (index == 0 || index == steps.length - 1) {
-      return ResetVoiceGuidanceCue(
-        key: 'step:$track:$index',
-        spokenText: step.guidance,
-        narrationAssetPath: step.narrationAssetPath,
-      );
-    }
-
-    var stepStartSeconds = 0;
-    for (var stepIndex = 0; stepIndex < index; stepIndex++) {
-      stepStartSeconds += steps[stepIndex].durationSeconds;
-    }
-    final elapsedInStep = elapsedSeconds - stepStartSeconds;
-    if (elapsedInStep < resetBreathRhythmLeadInSeconds) {
-      return ResetVoiceGuidanceCue(
-        key: 'step:$track:$index',
-        spokenText: step.guidance,
-        narrationAssetPath: step.narrationAssetPath,
-      );
-    }
-
     final phase = pattern.frameAtElapsedSeconds(elapsedSeconds).phase;
     return ResetVoiceGuidanceCue(
       key: 'breath:${phase.name}',
-      spokenText: resetBreathPhaseSpokenText(phase),
+      spokenText: '',
       narrationAssetPath: resetBreathPhaseTargetAssetPath(phase),
     );
   }

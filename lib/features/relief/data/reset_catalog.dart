@@ -84,6 +84,7 @@ class ResetCatalog {
           'The exercise narrows attention to concrete body contact and present-moment sensation instead of asking you to solve the thought.',
       safetyNote:
           'Keep the position comfortable. If closing attention onto body sensations feels unpleasant, switch to an external object or sound anchor.',
+      visualType: ResetVisualType.bodyGrounding,
       instructions: [
         'Sit comfortably and place your feet on the ground.',
         'Notice three physical sensations where your body meets the floor or chair.',

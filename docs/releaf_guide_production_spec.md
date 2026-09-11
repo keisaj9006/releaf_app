@@ -2,7 +2,7 @@
 
 ## Decision — voice locked 6 September 2026
 
-System TTS is a fallback only. Releaf's premium guided experience uses one consistent, pre-rendered female Releaf Guide voice.
+System/device TTS is prohibited. Releaf's premium guided experience uses one consistent, pre-rendered female Releaf Guide voice; unrecorded guidance remains silent.
 
 The owner-selected voice is now the production baseline. Reference generation ID: `d730719be8654c93bddd639a96da7417`.
 
@@ -109,7 +109,7 @@ Example:
 assets/narration/releaf-guide/mindfulness-basics-2/01-arrive.mp3
 assets/narration/releaf-guide/mindfulness-basics-2/02-notice.mp3
 
-The player already supports recorded narration per MeditationStep and falls back to system TTS only when a recorded asset is unavailable.
+The player supports recorded narration per MeditationStep and stays silent when an approved recording is unavailable.
 
 ## Acceptance test
 

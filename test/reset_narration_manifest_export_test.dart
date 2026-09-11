@@ -11,7 +11,7 @@ void main() {
     expect(manifest['resetSessionCount'], 50);
     expect(manifest['breathingSessionCount'], 10);
     expect(manifest['breathCueCount'], 4);
-    expect(manifest['breathCuesStillToRender'], 4);
+    expect(manifest['breathCuesStillToRender'], 0);
     expect(manifest['voiceGuidanceDefaultEnabled'], isTrue);
     expect(manifest['defaultVoiceVolume'], 0.72);
     expect(manifest['totalStepCount'], greaterThan(50));
@@ -33,12 +33,16 @@ void main() {
       breathCues.singleWhere((cue) => cue['phase'] == 'inhale'),
       containsPair(
         'targetAssetPath',
-        'narration/releaf-guide/reset/breath-cues/breathe-in.mp3',
+        'sounds/reset/breath-cues/inhale.mp3',
       ),
     );
     expect(
       breathCues.singleWhere((cue) => cue['phase'] == 'exhale'),
-      containsPair('spokenGuidance', 'Breathe out.'),
+      containsPair('cueType', 'nonVerbalTone'),
+    );
+    expect(
+      breathCues.singleWhere((cue) => cue['phase'] == 'holdAfterInhale'),
+      containsPair('cueType', 'silence'),
     );
 
     final sessions = (manifest['sessions']! as List<Object?>)
@@ -58,9 +62,10 @@ void main() {
         (equalRhythm['steps']! as List<Object?>).cast<Map<String, Object?>>();
     expect(
       steps.first['targetAssetPath'],
-      'narration/releaf-guide/reset/equal-rhythm/main/01-settle.mp3',
+      isNull,
     );
-    expect(steps.first['spokenGuidance'], steps.first['screenGuidance']);
+    expect(steps.first['spokenGuidance'], isNull);
+    expect(steps.first['screenGuidance'], isNotEmpty);
 
     final file = await writeResetNarrationManifest(
       'build/qa-manifests/reset-releaf-guide-manifest.json',

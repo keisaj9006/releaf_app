@@ -74,7 +74,7 @@ void main() {
   });
 
   group('Reset voice guidance', () {
-    test('paced breathing preserves full guidance around phase cues', () {
+    test('paced breathing uses non-verbal phase cues and silent holds', () {
       const program = ResetSessionProgram.breathing(
         breathPattern: BreathPattern(
           inhaleSeconds: 4,
@@ -106,19 +106,9 @@ void main() {
         elapsedSeconds: 0,
         simplified: false,
       );
-      final rhythmLeadIn = resetVoiceGuidanceCue(
-        program: program,
-        elapsedSeconds: 14,
-        simplified: false,
-      );
-      final sameLeadIn = resetVoiceGuidanceCue(
-        program: program,
-        elapsedSeconds: 21,
-        simplified: false,
-      );
       final inhale = resetVoiceGuidanceCue(
         program: program,
-        elapsedSeconds: 28,
+        elapsedSeconds: 0,
         simplified: false,
       );
       final hold = resetVoiceGuidanceCue(
@@ -136,30 +126,22 @@ void main() {
         elapsedSeconds: 40,
         simplified: false,
       );
-      final release = resetVoiceGuidanceCue(
-        program: program,
-        elapsedSeconds: 106,
-        simplified: false,
-      );
-
-      expect(settle.key, 'step:main:0');
-      expect(settle.spokenText, 'Settle and keep the breath comfortable.');
-      expect(rhythmLeadIn.key, 'step:main:1');
-      expect(
-        rhythmLeadIn.spokenText,
-        'Follow the four-part rhythm without forcing it.',
-      );
-      expect(sameLeadIn.key, rhythmLeadIn.key);
+      expect(settle.key, 'breath:inhale');
+      expect(settle.spokenText, isEmpty);
       expect(inhale.key, 'breath:inhale');
-      expect(inhale.spokenText, 'Breathe in.');
-      expect(hold.spokenText, 'Hold gently.');
-      expect(exhale.spokenText, 'Breathe out.');
-      expect(rest.spokenText, 'Rest.');
-      expect(release.key, 'step:main:2');
-      expect(release.spokenText, 'Release the count and breathe naturally.');
+      expect(inhale.spokenText, isEmpty);
+      expect(hold.spokenText, isEmpty);
+      expect(hold.narrationAssetPath, isNull);
+      expect(exhale.spokenText, isEmpty);
+      expect(rest.spokenText, isEmpty);
+      expect(rest.narrationAssetPath, isNull);
       expect(
         inhale.narrationAssetPath,
-        'narration/releaf-guide/reset/breath-cues/breathe-in.mp3',
+        'sounds/reset/breath-cues/inhale.mp3',
+      );
+      expect(
+        exhale.narrationAssetPath,
+        'sounds/reset/breath-cues/exhale.mp3',
       );
     });
 
@@ -198,22 +180,22 @@ void main() {
       expect(second.spokenText, 'Notice the room.');
     });
 
-    test('production breath cue paths are shared across Reset methods', () {
+    test('breath cue paths are shared and hold phases are silent', () {
       expect(
         resetBreathPhaseTargetAssetPath(BreathPhase.inhale),
-        'narration/releaf-guide/reset/breath-cues/breathe-in.mp3',
+        'sounds/reset/breath-cues/inhale.mp3',
       );
       expect(
         resetBreathPhaseTargetAssetPath(BreathPhase.holdAfterInhale),
-        'narration/releaf-guide/reset/breath-cues/hold-gently.mp3',
+        isNull,
       );
       expect(
         resetBreathPhaseTargetAssetPath(BreathPhase.exhale),
-        'narration/releaf-guide/reset/breath-cues/breathe-out.mp3',
+        'sounds/reset/breath-cues/exhale.mp3',
       );
       expect(
         resetBreathPhaseTargetAssetPath(BreathPhase.holdAfterExhale),
-        'narration/releaf-guide/reset/breath-cues/rest.mp3',
+        isNull,
       );
     });
   });

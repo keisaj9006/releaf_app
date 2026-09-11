@@ -613,7 +613,7 @@ class _Header extends StatelessWidget {
         Text('Meditate', style: ReleafTypography.display),
         SizedBox(height: 6),
         Text(
-          'Press play, get comfortable, then let the voice carry the practice.',
+          'Press play, get comfortable, and let the practice create space.',
           style: ReleafTypography.body,
         ),
       ],

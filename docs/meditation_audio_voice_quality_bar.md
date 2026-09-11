@@ -18,11 +18,10 @@ The screen supports the session, but the session must remain usable with eyes cl
 - Narration should be mastered consistently across sessions.
 
 ### Current implementation vs production target
-- Current Android/iOS TTS remains a temporary fallback.
-- Releaf must not depend on whichever system voice a user's device happens to select.
-- Production target: pre-rendered Releaf narration assets with one approved female guide voice.
-- The player architecture should allow a recorded track to replace TTS without changing session UX.
-- TTS fallback should still prioritise an English female high-quality/network voice when one exists.
+- Android/iOS system TTS is not used.
+- Releaf never depends on whichever system voice a user's device selects.
+- Spoken guidance uses pre-rendered narration assets with the one approved female Releaf Guide.
+- Until a recording is approved and bundled, that guidance stays silent and may remain available as optional captions.
 
 ### Pace
 - Spoken guidance must be materially slower than conversational speech.
@@ -85,11 +84,10 @@ The legacy Releaf Atmosphere I/II tracks must not be used as automatic meditatio
 
 ### Voice QA
 - female voice confirmed
-- no male fallback selected when a female English option exists
 - calm pace on a real Android device
 - sentence pauses feel intentional
 - no clipped phrases
-- no unexpected TTS engine switching
+- no device/system TTS path or unexpected narrator switching
 - pronunciation reviewed
 
 ### Audio QA

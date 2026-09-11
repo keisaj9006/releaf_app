@@ -46,9 +46,9 @@ String meditationVoiceSourceLabel(MeditationContent item) {
     return 'Recorded Releaf Guide · female English voice · slow pace';
   }
   if (item.hasAnyRecordedNarration) {
-    return 'Recorded Releaf Guide + device voice fallback';
+    return 'Recorded Releaf Guide · remaining guidance stays silent';
   }
-  return 'Device English voice fallback · slow pace';
+  return 'Releaf Guide recording pending · captions only';
 }
 
 String meditationGuidanceSourceEyebrow(MeditationContent item) {
@@ -56,8 +56,8 @@ String meditationGuidanceSourceEyebrow(MeditationContent item) {
   if (item.hasRecordedNarration) {
     return 'GUIDED · RECORDED RELEAF GUIDE';
   }
-  if (item.hasAnyRecordedNarration) return 'GUIDED · MIXED VOICE';
-  return 'GUIDED · DEVICE VOICE';
+  if (item.hasAnyRecordedNarration) return 'GUIDED · PARTIAL RELEAF GUIDE';
+  return 'GUIDED · RELEAF GUIDE PENDING';
 }
 
 class MeditationPlayerScreen extends ConsumerStatefulWidget {
@@ -476,47 +476,49 @@ class _MeditationPlayerScreenState
                     ),
                     const SizedBox(height: ReleafSpacing.xl),
                     if (!item.unguided) ...[
-                      _ControlSection(
-                        key: const Key('meditation-voice-control'),
-                        icon: Icons.record_voice_over_outlined,
-                        title: 'Guide voice',
-                        subtitle: meditationVoiceSourceLabel(item),
-                        trailing: Switch.adaptive(
-                          key: const Key('meditation-voice-toggle'),
-                          value: voice.enabled,
-                          onChanged: (_) {
-                            unawaited(_toggleGuideVoice());
-                          },
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Narration volume · ${(voice.volume * 100).round()}%',
-                              style: ReleafTypography.meta.copyWith(
-                                color: ReleafColors.textSecondary,
+                      if (item.hasAnyRecordedNarration) ...[
+                        _ControlSection(
+                          key: const Key('meditation-voice-control'),
+                          icon: Icons.record_voice_over_outlined,
+                          title: 'Releaf Guide',
+                          subtitle: meditationVoiceSourceLabel(item),
+                          trailing: Switch.adaptive(
+                            key: const Key('meditation-voice-toggle'),
+                            value: voice.enabled,
+                            onChanged: (_) {
+                              unawaited(_toggleGuideVoice());
+                            },
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Narration volume · ${(voice.volume * 100).round()}%',
+                                style: ReleafTypography.meta.copyWith(
+                                  color: ReleafColors.textSecondary,
+                                ),
                               ),
-                            ),
-                            Slider(
-                              key: const Key('meditation-voice-volume'),
-                              value: voice.volume,
-                              onChanged: voice.enabled
-                                  ? (value) {
-                                      unawaited(
-                                        sheetRef
-                                            .read(
-                                              meditationVoiceControllerProvider
-                                                  .notifier,
-                                            )
-                                            .setVolume(value),
-                                      );
-                                    }
-                                  : null,
-                            ),
-                          ],
+                              Slider(
+                                key: const Key('meditation-voice-volume'),
+                                value: voice.volume,
+                                onChanged: voice.enabled
+                                    ? (value) {
+                                        unawaited(
+                                          sheetRef
+                                              .read(
+                                                meditationVoiceControllerProvider
+                                                    .notifier,
+                                              )
+                                              .setVolume(value),
+                                        );
+                                      }
+                                    : null,
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: ReleafSpacing.sm),
+                        const SizedBox(height: ReleafSpacing.sm),
+                      ],
                       _ControlSection(
                         icon: Icons.closed_caption_outlined,
                         title: 'On-screen guidance',
@@ -589,7 +591,7 @@ class _MeditationPlayerScreenState
                     ],
                     const SizedBox(height: ReleafSpacing.lg),
                     Text(
-                      'Voice guidance is designed to stay calm, spacious and unobtrusive. Voice, captions and ambience can be adjusted independently at any time.',
+                      'Only approved Releaf Guide recordings are used. Sessions awaiting narration remain quiet; captions and ambience can still be adjusted independently.',
                       style: ReleafTypography.meta.copyWith(
                         color: ReleafColors.textMuted,
                         fontSize: 9.5,
@@ -727,7 +729,10 @@ class _MeditationPlayerScreenState
                                 running: _running,
                                 completed: _remainingSeconds == 0,
                                 voiceEnabled:
-                                    !item.unguided && voiceState.enabled,
+                                    !item.unguided &&
+                                    item.hasAnyRecordedNarration &&
+                                    voiceState.enabled,
+                                hasVoice: item.hasAnyRecordedNarration,
                                 compact: compact,
                               ),
                             ),
@@ -741,10 +746,12 @@ class _MeditationPlayerScreenState
                               stepIndex: stepIndex,
                               stepCount: item.steps.length,
                               voiceEnabled:
-                                  !item.unguided && voiceState.enabled,
+                                  !item.unguided &&
+                                  item.hasAnyRecordedNarration &&
+                                  voiceState.enabled,
                               captionsEnabled:
                                   !item.unguided && voiceState.showCaptions,
-                              hasVoice: !item.unguided,
+                              hasVoice: item.hasAnyRecordedNarration,
                               hasAmbience: item.backgroundSoundId != null,
                               ambienceEnabled: audioState.enabled,
                               compact: compact,
@@ -883,6 +890,7 @@ class _MeditationStage extends StatelessWidget {
     required this.running,
     required this.completed,
     required this.voiceEnabled,
+    required this.hasVoice,
     required this.compact,
   });
 
@@ -892,6 +900,7 @@ class _MeditationStage extends StatelessWidget {
   final bool running;
   final bool completed;
   final bool voiceEnabled;
+  final bool hasVoice;
   final bool compact;
 
   @override
@@ -900,9 +909,11 @@ class _MeditationStage extends StatelessWidget {
         ? 'Practice complete'
         : !running
             ? 'Paused'
-            : voiceEnabled
+            : hasVoice && voiceEnabled
                 ? 'Close your eyes and follow the voice.'
-                : 'Voice is off. Use captions or continue in silence.';
+                : hasVoice
+                    ? 'Voice is off. Use captions or continue in silence.'
+                    : 'Use captions or continue in silence.';
 
     return Center(
       child: ConstrainedBox(

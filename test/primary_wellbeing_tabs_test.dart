@@ -85,25 +85,17 @@ class _FakeMeditationAudioDriver implements MeditationAudioDriver {
 
 class _FakeMeditationVoiceDriver implements MeditationVoiceDriver {
   int configureCalls = 0;
-  int speakCalls = 0;
   int volumeCalls = 0;
   int stopCalls = 0;
   int disposeCalls = 0;
   int playAssetCalls = 0;
   double? lastVolume;
-  String? lastSpokenText;
   String? lastNarrationAssetPath;
 
   @override
   Future<void> configure({required double volume}) async {
     configureCalls += 1;
     lastVolume = volume;
-  }
-
-  @override
-  Future<void> speak(String text) async {
-    speakCalls += 1;
-    lastSpokenText = text;
   }
 
   @override
@@ -347,14 +339,14 @@ void main() {
     }
   });
 
-  test('Recorded meditation narration is preferred over TTS', () async {
+  test('Meditation narration uses the approved recorded asset', () async {
     SharedPreferences.setMockInitialValues({});
     final preferences = await SharedPreferences.getInstance();
     final driver = _FakeMeditationVoiceDriver();
     final controller = MeditationVoiceController(preferences, driver);
 
     await controller.speakGuidance(
-      'Fallback guidance.',
+      'Recorded guidance.',
       narrationAssetPath: 'narration/releaf-guide/sample.mp3',
     );
 
@@ -364,15 +356,24 @@ void main() {
       driver.lastNarrationAssetPath,
       'narration/releaf-guide/sample.mp3',
     );
-    expect(driver.speakCalls, 0);
-
     controller.dispose();
   });
 
-  test('Releaf narration fallback keeps the approved 0.82x pacing', () {
+  test('Releaf narration keeps the approved 0.82x production pacing', () {
     expect(releafNarrationSpeedMultiplier, 0.82);
-    expect(releafFlutterTtsNeutralRate, 0.50);
-    expect(releafFlutterTtsSpeechRate, closeTo(0.41, 0.0001));
+  });
+
+  test('Meditation stays silent without an approved recording', () async {
+    SharedPreferences.setMockInitialValues({});
+    final preferences = await SharedPreferences.getInstance();
+    final driver = _FakeMeditationVoiceDriver();
+    final controller = MeditationVoiceController(preferences, driver);
+
+    await controller.speakGuidance('Do not synthesize this guidance.');
+
+    expect(driver.configureCalls, 0);
+    expect(driver.playAssetCalls, 0);
+    controller.dispose();
   });
 
   test('Meditation voice preferences persist independently', () async {
@@ -389,9 +390,8 @@ void main() {
     expect(controller.state.showCaptions, isTrue);
     expect(controller.state.volume, closeTo(0.56, 0.001));
     expect(controller.state.enabled, isFalse);
-    expect(driver.configureCalls, 1);
-    expect(driver.speakCalls, 1);
-    expect(driver.lastSpokenText, 'Follow the voice.');
+    expect(driver.configureCalls, 0);
+    expect(driver.playAssetCalls, 0);
 
     final restored = MeditationVoiceController(
       preferences,
@@ -686,7 +686,6 @@ void main() {
     expect(audioDriver.lastAssetPath, 'sounds/deep_drift.mp3');
     expect(voiceDriver.configureCalls, 1);
     expect(voiceDriver.playAssetCalls, 1);
-    expect(voiceDriver.speakCalls, 0);
     expect(
       voiceDriver.lastNarrationAssetPath,
       item.steps.first.narrationAssetPath,
@@ -713,7 +712,6 @@ void main() {
 
     expect(audioDriver.resumeCalls, 1);
     expect(voiceDriver.playAssetCalls, greaterThanOrEqualTo(2));
-    expect(voiceDriver.speakCalls, 0);
 
     await tester.tap(find.byKey(const Key('meditation-more-controls')));
     await tester.pump();
@@ -857,14 +855,12 @@ void main() {
     expect(find.text('Paused'), findsOneWidget);
     expect(audioDriver.playCalls, 0);
     expect(voiceDriver.playAssetCalls, 0);
-    expect(voiceDriver.speakCalls, 0);
 
     await tester.tap(find.byKey(const Key('meditation-primary-control')));
     await tester.pump(const Duration(milliseconds: 400));
 
     expect(audioDriver.playCalls, 1);
     expect(voiceDriver.playAssetCalls, 1);
-    expect(voiceDriver.speakCalls, 0);
   });
 
   testWidgets('Meditation player stays overflow-free at 320px', (

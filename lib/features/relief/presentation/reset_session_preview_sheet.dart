@@ -68,6 +68,7 @@ class _ResetSessionPreviewSheetState
   @override
   Widget build(BuildContext context) {
     final session = widget.session;
+    final isBreathing = session.modality == ResetModality.breathing;
     final size = MediaQuery.sizeOf(context);
     final maxHeight = math.min(size.height * 0.90, 780.0);
     final compact = size.width < 360;
@@ -262,10 +263,15 @@ class _ResetSessionPreviewSheetState
                               const SizedBox(height: ReleafSpacing.xs),
                               _SessionPreferenceTile(
                                 key: const Key('reset-preview-voice-toggle'),
-                                icon: Icons.record_voice_over_rounded,
-                                title: 'Voice guidance',
-                                subtitle:
-                                    'Optional device English voice fallback · off by default. Recorded Releaf Guide will replace fallback where available.',
+                                icon: isBreathing
+                                    ? Icons.graphic_eq_rounded
+                                    : Icons.record_voice_over_rounded,
+                                title: isBreathing
+                                    ? 'Breathing cues'
+                                    : 'Releaf Guide',
+                                subtitle: isBreathing
+                                    ? 'A soft tone marks inhale and exhale. Hold and rest stay silent.'
+                                    : 'Only approved Releaf Guide recordings play. Unrecorded guidance stays silent.',
                                 value: _options.voiceGuidanceEnabled,
                                 onChanged: (value) {
                                   setState(() {
@@ -287,7 +293,9 @@ class _ResetSessionPreviewSheetState
                                 _SessionVolumeTile(
                                   key: const Key('reset-preview-voice-volume'),
                                   icon: Icons.volume_up_rounded,
-                                  title: 'Voice volume',
+                                  title: isBreathing
+                                      ? 'Cue volume'
+                                      : 'Guide volume',
                                   value: _options.voiceVolume,
                                   onChanged: (value) {
                                     setState(() {

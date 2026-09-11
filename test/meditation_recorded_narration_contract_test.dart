@@ -69,7 +69,7 @@ void main() {
     expect(declaredAssets, greaterThan(0));
   });
 
-  test('Sessions without recorded narration are labelled as device fallback', () {
+  test('Sessions without recorded narration are labelled captions-only', () {
     const catalog = MeditationCatalog();
     final session = catalog.getById('breath-and-body-4');
 
@@ -78,11 +78,11 @@ void main() {
     expect(session.hasAnyRecordedNarration, isFalse);
     expect(
       meditationVoiceSourceLabel(session),
-      'Device English voice fallback · slow pace',
+      'Releaf Guide recording pending · captions only',
     );
     expect(
       meditationGuidanceSourceEyebrow(session),
-      'GUIDED · DEVICE VOICE',
+      'GUIDED · RELEAF GUIDE PENDING',
     );
   });
 }

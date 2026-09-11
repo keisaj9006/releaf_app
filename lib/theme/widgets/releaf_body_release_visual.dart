@@ -27,20 +27,6 @@ class _ReleafBodyReleaseVisualState extends State<ReleafBodyReleaseVisual>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
 
-  bool get _isReleasePhase {
-    final label = widget.phaseLabel.toLowerCase();
-    return label.contains('release') ||
-        label.contains('let go') ||
-        label.contains('notice');
-  }
-
-  bool get _isTensionPhase {
-    final label = widget.phaseLabel.toLowerCase();
-    return label.contains('shoulders') ||
-        label.contains('again') ||
-        label.contains('press');
-  }
-
   @override
   void initState() {
     super.initState();
@@ -78,7 +64,9 @@ class _ReleafBodyReleaseVisualState extends State<ReleafBodyReleaseVisual>
 
     return Semantics(
       container: true,
-      label: 'Body reset. ${widget.phaseLabel}.',
+      image: true,
+      label:
+          'Illustrated upper-body guide. ${widget.phaseLabel}. The active jaw or shoulder area is highlighted.',
       child: TweenAnimationBuilder<double>(
         tween: Tween(begin: 0, end: progress),
         duration: const Duration(milliseconds: 720),
@@ -96,34 +84,22 @@ class _ReleafBodyReleaseVisualState extends State<ReleafBodyReleaseVisual>
             return CustomPaint(
               painter: _BodyReleasePainter(
                 t: _controller.value,
-                tension: _isTensionPhase,
-                release: _isReleasePhase,
+                phaseLabel: widget.phaseLabel,
               ),
-              child: Center(
+              child: Align(
+                alignment: Alignment.bottomCenter,
                 child: AnimatedSwitcher(
                   duration: ReleafMotion.standard,
-                  child: Column(
+                  child: Padding(
                     key: ValueKey(widget.phaseLabel),
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        _isReleasePhase
-                            ? Icons.expand_more_rounded
-                            : _isTensionPhase
-                                ? Icons.expand_less_rounded
-                                : Icons.self_improvement_rounded,
-                        size: 46,
+                    padding: const EdgeInsets.only(bottom: 30),
+                    child: Text(
+                      widget.phaseLabel.toUpperCase(),
+                      style: ReleafTypography.eyebrow.copyWith(
                         color: ReleafColors.sage,
+                        letterSpacing: 1.3,
                       ),
-                      const SizedBox(height: 6),
-                      Text(
-                        widget.phaseLabel.toUpperCase(),
-                        style: ReleafTypography.eyebrow.copyWith(
-                          color: ReleafColors.sage,
-                          letterSpacing: 1.3,
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
               ),
@@ -138,80 +114,154 @@ class _ReleafBodyReleaseVisualState extends State<ReleafBodyReleaseVisual>
 class _BodyReleasePainter extends CustomPainter {
   const _BodyReleasePainter({
     required this.t,
-    required this.tension,
-    required this.release,
+    required this.phaseLabel,
   });
 
   final double t;
-  final bool tension;
-  final bool release;
+  final String phaseLabel;
 
   @override
   void paint(Canvas canvas, Size size) {
     if (size.isEmpty) return;
 
     final center = Offset(size.width / 2, size.height / 2);
-    final base = size.shortestSide * 0.27;
-    final pulse = math.sin(t * math.pi * 2) * 0.04;
-
-    final contraction = tension ? 0.78 : (release ? 1.12 : 1.0);
-    final glowAlpha = tension ? 0.13 : (release ? 0.22 : 0.16);
+    final base = size.shortestSide;
+    final label = phaseLabel.toLowerCase();
+    final jaw = label.contains('jaw');
+    final shoulders = label.contains('shoulder') ||
+        label.contains('again') ||
+        label.contains('press');
+    final release = label.contains('release') || label.contains('let go');
+    final notice = label.contains('notice');
+    final pulse = 0.5 + 0.5 * math.sin(t * math.pi * 2);
+    final shoulderLift = shoulders ? base * (0.024 + pulse * 0.012) : 0.0;
+    final shoulderDrop = release ? base * 0.025 : 0.0;
 
     canvas.drawCircle(
-      center,
-      base * (0.70 + pulse),
+      Offset(center.dx, center.dy - base * 0.015),
+      base * (0.29 + pulse * 0.006),
       Paint()
-        ..color = ReleafColors.sage.withValues(alpha: glowAlpha)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 28),
+        ..color = ReleafColors.sage.withValues(alpha: 0.08 + pulse * 0.035)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 32),
     );
 
-    final shoulderPaint = Paint()
+    final figurePaint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 4
+      ..strokeWidth = math.max(3.5, base * 0.013)
       ..strokeCap = StrokeCap.round
-      ..color = ReleafColors.sage.withValues(alpha: 0.74);
+      ..strokeJoin = StrokeJoin.round
+      ..color = ReleafColors.textPrimary.withValues(alpha: 0.70);
+    final accentPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = math.max(4.5, base * 0.018)
+      ..strokeCap = StrokeCap.round
+      ..color = ReleafColors.sage.withValues(alpha: 0.88);
+    final glowPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = math.max(9.0, base * 0.038)
+      ..strokeCap = StrokeCap.round
+      ..color = ReleafColors.sage.withValues(alpha: 0.20 + pulse * 0.10)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 15);
 
-    final y = center.dy + (release ? 16 : (tension ? -14 : 0));
-    final span = base * 1.55 * contraction;
+    final head = Offset(center.dx, center.dy - base * 0.18);
+    final headRadius = base * 0.075;
+    canvas.drawCircle(head, headRadius, figurePaint);
 
-    final leftRect = Rect.fromCenter(
-      center: Offset(center.dx - base * 0.78, y),
-      width: span,
-      height: base * 0.9,
+    final jawRect = Rect.fromCenter(
+      center: Offset(head.dx, head.dy + headRadius * 0.33),
+      width: headRadius * 1.35,
+      height: headRadius * 1.18,
     );
-    final rightRect = Rect.fromCenter(
-      center: Offset(center.dx + base * 0.78, y),
-      width: span,
-      height: base * 0.9,
-    );
+    if (jaw || notice) {
+      canvas.drawArc(jawRect, 0.18, math.pi - 0.36, false, glowPaint);
+      canvas.drawArc(jawRect, 0.18, math.pi - 0.36, false, accentPaint);
+    }
 
-    canvas.drawArc(
-      leftRect,
-      -math.pi * 0.10,
-      math.pi * 0.62,
-      false,
-      shoulderPaint,
-    );
-    canvas.drawArc(
-      rightRect,
-      math.pi * 0.48,
-      math.pi * 0.62,
-      false,
-      shoulderPaint,
-    );
+    final neckTop = Offset(center.dx, head.dy + headRadius);
+    final neckBottom = Offset(center.dx, center.dy - base * 0.075);
+    canvas.drawLine(neckTop, neckBottom, figurePaint);
 
-    canvas.drawCircle(
-      center,
-      base * 0.12,
-      Paint()..color = ReleafColors.premium.withValues(alpha: 0.86),
-    );
+    final shoulderY = center.dy - base * 0.055 - shoulderLift + shoulderDrop;
+    final leftShoulder = Offset(center.dx - base * 0.19, shoulderY);
+    final rightShoulder = Offset(center.dx + base * 0.19, shoulderY);
+    final shoulderPath = Path()
+      ..moveTo(leftShoulder.dx, leftShoulder.dy)
+      ..quadraticBezierTo(
+        center.dx - base * 0.08,
+        shoulderY - base * 0.028,
+        neckBottom.dx,
+        neckBottom.dy,
+      )
+      ..quadraticBezierTo(
+        center.dx + base * 0.08,
+        shoulderY - base * 0.028,
+        rightShoulder.dx,
+        rightShoulder.dy,
+      );
+    if (shoulders || release || notice) {
+      canvas.drawPath(shoulderPath, glowPaint);
+      canvas.drawPath(shoulderPath, accentPaint);
+    } else {
+      canvas.drawPath(shoulderPath, figurePaint);
+    }
+
+    final torsoPath = Path()
+      ..moveTo(leftShoulder.dx, leftShoulder.dy)
+      ..quadraticBezierTo(
+        center.dx - base * 0.16,
+        center.dy + base * 0.10,
+        center.dx - base * 0.12,
+        center.dy + base * 0.19,
+      )
+      ..moveTo(rightShoulder.dx, rightShoulder.dy)
+      ..quadraticBezierTo(
+        center.dx + base * 0.16,
+        center.dy + base * 0.10,
+        center.dx + base * 0.12,
+        center.dy + base * 0.19,
+      );
+    canvas.drawPath(torsoPath, figurePaint);
+
+    if (shoulders) {
+      final arrowPaint = Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = math.max(2.0, base * 0.007)
+        ..strokeCap = StrokeCap.round
+        ..color = ReleafColors.premium.withValues(alpha: 0.72);
+      for (final x in [leftShoulder.dx, rightShoulder.dx]) {
+        canvas.drawLine(
+          Offset(x, shoulderY + base * 0.07),
+          Offset(x, shoulderY + base * 0.025),
+          arrowPaint,
+        );
+      }
+    } else if (release) {
+      final arrowPaint = Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = math.max(2.0, base * 0.007)
+        ..strokeCap = StrokeCap.round
+        ..color = ReleafColors.sage.withValues(alpha: 0.68);
+      for (final x in [leftShoulder.dx, rightShoulder.dx]) {
+        canvas.drawLine(
+          Offset(x, shoulderY - base * 0.045),
+          Offset(x, shoulderY + base * 0.005),
+          arrowPaint,
+        );
+      }
+    }
+
+    if (notice) {
+      canvas.drawCircle(
+        Offset(center.dx, center.dy + base * 0.04),
+        base * (0.012 + pulse * 0.004),
+        Paint()..color = ReleafColors.premium.withValues(alpha: 0.78),
+      );
+    }
   }
 
   @override
   bool shouldRepaint(covariant _BodyReleasePainter oldDelegate) {
-    return oldDelegate.t != t ||
-        oldDelegate.tension != tension ||
-        oldDelegate.release != release;
+    return oldDelegate.t != t || oldDelegate.phaseLabel != phaseLabel;
   }
 }
 

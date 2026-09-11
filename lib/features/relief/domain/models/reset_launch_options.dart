@@ -15,9 +15,9 @@ class ResetLaunchOptions {
   final bool showGuidanceText;
   final bool showSessionTimer;
 
-  /// Spoken guidance uses the same Releaf Guide contract as Meditation.
-  /// Recorded guide assets take priority; until the exact studio voice is
-  /// available, both features share the same calm female en-GB fallback.
+  /// Guided sessions use only approved recorded Releaf Guide assets.
+  /// Breathing sessions use the same switch for non-verbal inhale/exhale cues.
+  /// Missing recorded guidance stays silent; device/system TTS is prohibited.
   final bool voiceGuidanceEnabled;
   final double voiceVolume;
 

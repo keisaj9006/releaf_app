@@ -22,9 +22,8 @@ void main() {
         );
 
         // Text length is not a reliable proxy for recorded duration:
-        // Releaf Guide uses deliberately slow delivery and pauses, while
-        // device TTS and production MP3s have different timing. Actual pacing
-        // is validated against the rendered narration asset duration.
+        // Releaf Guide uses deliberately slow delivery and pauses. Actual
+        // pacing is validated against the rendered narration asset duration.
         expect(
           spoken.length,
           greaterThan(40),

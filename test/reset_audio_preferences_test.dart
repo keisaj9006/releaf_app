@@ -8,7 +8,6 @@ import 'package:releaf_app/features/relief/domain/models/reset_launch_options.da
 void main() {
   test('Meditation and Reset share the locked 0.82x Releaf Guide pacing', () {
     expect(releafNarrationSpeedMultiplier, 0.82);
-    expect(releafFlutterTtsSpeechRate, closeTo(0.41, 0.0001));
   });
 
   test('Reset Releaf Guide voice is on by default', () async {

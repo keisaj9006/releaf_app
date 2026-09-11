@@ -36,16 +36,16 @@ Never present a newly selected voice as if it were the approved original.
 
 Meditation and Reset share the same `FlutterMeditationVoiceDriver`.
 
-- recorded Releaf Guide assets always take priority;
-- where recorded studio audio is unavailable, the development/runtime fallback
-  prefers a calm female English voice and British English where available;
-- fallback pacing is derived from the same **0.82×** contract;
+- only approved recorded Releaf Guide assets may carry spoken guidance;
+- where recorded studio audio is unavailable or cannot be decoded, spoken
+  guidance stays silent instead of using device/system TTS;
 - Reset voice guidance is enabled by default for new installs;
 - Reset starts voice at a deliberately quieter default volume of **0.72**;
 - a user's explicit voice-off preference is preserved.
 
-The device fallback is not the recorded Releaf Guide and must never be labelled
-as such.
+Device/system TTS is prohibited in production and development builds. This
+guarantees that the selected Releaf Guide remains the only spoken voice in the
+application.
 
 ## Reset breathing standard
 
@@ -63,13 +63,11 @@ This guarantees one source of truth for:
 - recorded phase cues and haptics;
 - session narration timing.
 
-Guided Reset sessions speak their scripted step guidance. Paced-breathing
-sessions preserve the complete method-specific **settle**, **rhythm lead-in**
-and **release** guidance. After an 8-second spoken lead-in to the active rhythm,
-the player switches to four deliberately short shared cues: **Breathe in**,
-**Hold gently**, **Breathe out**, and **Rest**. The cue changes only when the
-canonical `BreathPattern` changes phase, so a slow narrator cannot drift
-independently from the visual rhythm or interrupt the entry/exit instructions.
+Guided Reset sessions may play approved Releaf Guide recordings. Paced-
+breathing sessions never read their on-screen guidance aloud. A soft rising
+tone marks inhale, a soft falling tone marks exhale, and hold/rest phases are
+silent. The cue changes only when the canonical `BreathPattern` changes phase,
+so audio and visual rhythm cannot drift apart.
 
 ## Audio layering
 
@@ -79,14 +77,14 @@ Do:
 
 - render dry narration to its own MP3 asset;
 - keep ambience controlled by the app so volume can be mixed independently;
-- let the player prefer recorded Releaf Guide audio over device voice fallback.
+- keep unrecorded spoken guidance silent until its approved asset is bundled.
 
 Do not:
 
 - bake music or soundscape audio into the narration file;
 - use a different narrator for individual sessions;
 - add narration to Sleep;
-- label device TTS as recorded Releaf Guide.
+- use device/system TTS as substitute narration.
 
 ## Canonical asset naming
 
@@ -98,15 +96,14 @@ Reset guided steps:
 
 `assets/narration/releaf-guide/reset/<session-id>/<main|simplified>/<NN>-<step-label>.mp3`
 
-Shared Reset breathing cues:
+Shared non-verbal Reset breathing cues:
 
-`assets/narration/releaf-guide/reset/breath-cues/<cue>.mp3`
+`assets/sounds/reset/breath-cues/<inhale|exhale>.mp3`
 
-The runtime already targets these production paths. Recorded assets are
-preferred automatically; until the exact approved Releaf Guide recordings are
-bundled, a missing/corrupt asset falls back to device TTS. Missing paths are
-cached for the current Reset session so the app does not retry the same failed
-asset on every breathing cycle.
+The runtime already targets these production paths. Until the exact approved
+Releaf Guide recording is bundled, a missing/corrupt narration asset stays
+silent. Missing paths are cached for the current Reset session so the app does
+not retry the same failed asset on every cycle.
 
 The app stores paths without the leading `assets/` prefix.
 
@@ -119,9 +116,8 @@ Every P0 build exports two narration manifests:
 
 The Reset manifest covers all **50** active Reset sessions, including Emergency,
 and verifies that all **10** breathing methods use the canonical paced-breathing
-engine. It also exports the four shared breathing cue targets so they can later
-be rendered once with the exact approved Releaf Guide voice and reused across
-all breathing methods.
+engine. Breathing audio uses two shared non-verbal cue assets (inhale/exhale)
+across every method; hold and rest phases intentionally have no asset.
 
 The manifests contain the canonical script, timing, target asset path, recorded
 asset path and render status. Do not maintain a second manual spreadsheet with
@@ -162,7 +158,7 @@ Before an asset is declared recorded:
 - Fully recorded Meditation sessions: **Mindfulness Basics**
 - Recorded Reset sessions: **0**
 - Remaining studio rendering is blocked only by the missing exact provider voice
-  identity; runtime fallback remains available for development and testing.
+  identity; unrecorded guidance intentionally remains silent.
 
 
 ## Reset app lifecycle

@@ -14,6 +14,7 @@ enum ResetVisualType {
   livingForm,
   sensoryHalo,
   bodyRelease,
+  bodyGrounding,
   thoughtUnhook,
   objectFocus,
   soundRipple,

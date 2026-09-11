@@ -32,11 +32,6 @@ class _FakeVoiceDriver implements MeditationVoiceDriver {
   }
 
   @override
-  Future<void> speak(String text) async {
-    calls.add('speak:$text');
-  }
-
-  @override
   Future<void> stop() async {
     calls.add('stop');
   }
@@ -63,7 +58,7 @@ void main() {
       expect(playback.unavailableRecordedAssets, isEmpty);
     });
 
-    test('falls back to TTS when a recorded asset is unavailable', () async {
+    test('stays silent when a recorded asset is unavailable', () async {
       final driver = _FakeVoiceDriver()
         ..failingAssets.add('narration/reset/missing.mp3');
       final playback = ResetVoicePlayback(driver);
@@ -78,10 +73,7 @@ void main() {
 
       expect(
         driver.calls,
-        <String>[
-          'asset:narration/reset/missing.mp3',
-          'speak:Follow the rhythm.',
-        ],
+        <String>['asset:narration/reset/missing.mp3'],
       );
       expect(
         playback.unavailableRecordedAssets,
@@ -92,15 +84,14 @@ void main() {
     test('does not retry the same missing asset every breathing cycle', () async {
       final driver = _FakeVoiceDriver()
         ..failingAssets.add(
-          'narration/releaf-guide/reset/breath-cues/breathe-in.mp3',
+          'sounds/reset/breath-cues/inhale.mp3',
         );
       final playback = ResetVoicePlayback(driver);
 
       const cue = ResetVoiceGuidanceCue(
         key: 'breath:inhale',
-        spokenText: 'Breathe in.',
-        narrationAssetPath:
-            'narration/releaf-guide/reset/breath-cues/breathe-in.mp3',
+        spokenText: '',
+        narrationAssetPath: 'sounds/reset/breath-cues/inhale.mp3',
       );
 
       await playback.playCue(cue);
@@ -108,15 +99,11 @@ void main() {
 
       expect(
         driver.calls,
-        <String>[
-          'asset:narration/releaf-guide/reset/breath-cues/breathe-in.mp3',
-          'speak:Breathe in.',
-          'speak:Breathe in.',
-        ],
+        <String>['asset:sounds/reset/breath-cues/inhale.mp3'],
       );
     });
 
-    test('speaks directly when a cue has no recorded asset target', () async {
+    test('stays silent when a cue has no approved asset target', () async {
       final driver = _FakeVoiceDriver();
       final playback = ResetVoicePlayback(driver);
 
@@ -127,7 +114,7 @@ void main() {
         ),
       );
 
-      expect(driver.calls, <String>['speak:Return gently.']);
+      expect(driver.calls, isEmpty);
     });
   });
 }
