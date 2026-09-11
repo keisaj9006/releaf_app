@@ -210,8 +210,28 @@ class SoundPlayerController extends StateNotifier<SoundPlayerState> {
   StreamSubscription<audio.PlayerState>? _playerStateSubscription;
   Timer? _sleepTimer;
   DateTime? _sleepTimerDeadline;
+  int _sleepTimerRequest = 0;
+  int _playbackRequest = 0;
+
+  bool _currentSleepTimerRequest(int request) =>
+      mounted && request == _sleepTimerRequest;
+
+  Future<void> _restoreTimerVolumeAfterObsoleteWrite(int request) async {
+    while (mounted &&
+        request != _sleepTimerRequest &&
+        state.currentTrackId != null) {
+      request = _sleepTimerRequest;
+      await _driver.setVolume(
+        soundOutputVolumeForSleepTimer(
+          baseVolume: state.volume,
+          remainingSeconds: state.sleepTimerRemainingSeconds,
+        ),
+      );
+    }
+  }
 
   Future<void> play(SoundContent track) async {
+    _playbackRequest++;
     await _driver.setReleaseMode(audio.ReleaseMode.loop);
     await _driver.setVolume(
       soundOutputVolumeForSleepTimer(
@@ -246,6 +266,7 @@ class SoundPlayerController extends StateNotifier<SoundPlayerState> {
   }
 
   Future<void> togglePlayPause() async {
+    _playbackRequest++;
     if (state.currentTrackId == null) return;
     if (state.isPlaying) {
       await _driver.pause();
@@ -255,11 +276,13 @@ class SoundPlayerController extends StateNotifier<SoundPlayerState> {
   }
 
   Future<void> pause() async {
+    _playbackRequest++;
     if (state.currentTrackId == null || !state.isPlaying) return;
     await _driver.pause();
   }
 
   Future<void> resume() async {
+    _playbackRequest++;
     if (state.currentTrackId == null || state.isPlaying) return;
     await _driver.resume();
   }
@@ -294,10 +317,13 @@ class SoundPlayerController extends StateNotifier<SoundPlayerState> {
   }
 
   Future<void> stop() async {
+    _playbackRequest++;
+    final request = ++_sleepTimerRequest;
     _sleepTimer?.cancel();
     _sleepTimer = null;
     _sleepTimerDeadline = null;
     await _driver.stop();
+    if (!_currentSleepTimerRequest(request)) return;
     state = state.copyWith(
       clearCurrentTrack: true,
       clearSleepTimer: true,
@@ -317,6 +343,11 @@ class SoundPlayerController extends StateNotifier<SoundPlayerState> {
   }
 
   Future<void> setSleepTimer(int? minutes) async {
+    if (!mounted) return;
+    final request = ++_sleepTimerRequest;
+    final selectedDeadline = minutes == null
+        ? null
+        : _now().add(Duration(minutes: minutes));
     _sleepTimer?.cancel();
     _sleepTimer = null;
     _sleepTimerDeadline = null;
@@ -333,15 +364,17 @@ class SoundPlayerController extends StateNotifier<SoundPlayerState> {
       await _driver.setVolume(state.volume);
     }
 
+    if (!_currentSleepTimerRequest(request)) return;
+
     final totalSeconds = minutes * 60;
-    _sleepTimerDeadline = _now().add(Duration(minutes: minutes));
+    _sleepTimerDeadline = selectedDeadline;
     state = state.copyWith(
       sleepTimerMinutes: minutes,
       sleepTimerRemainingSeconds: totalSeconds,
     );
 
     _sleepTimer = Timer.periodic(const Duration(seconds: 1), (timer) async {
-      if (!mounted) {
+      if (!_currentSleepTimerRequest(request)) {
         timer.cancel();
         return;
       }
@@ -351,6 +384,7 @@ class SoundPlayerController extends StateNotifier<SoundPlayerState> {
         timer.cancel();
       }
     });
+    await syncSleepTimerNow();
   }
 
   Future<void> syncSleepTimerNow() async {
@@ -358,6 +392,7 @@ class SoundPlayerController extends StateNotifier<SoundPlayerState> {
 
     final deadline = _sleepTimerDeadline;
     if (deadline == null) return;
+    final request = _sleepTimerRequest;
 
     final remaining =
         (deadline.difference(_now()).inMicroseconds /
@@ -373,6 +408,7 @@ class SoundPlayerController extends StateNotifier<SoundPlayerState> {
             remainingSeconds: remaining,
           ),
         );
+        await _restoreTimerVolumeAfterObsoleteWrite(request);
       }
       return;
     }
@@ -381,15 +417,31 @@ class SoundPlayerController extends StateNotifier<SoundPlayerState> {
     _sleepTimer = null;
     _sleepTimerDeadline = null;
 
+    final playbackRequest = _playbackRequest;
+    final wasPlaying = state.isPlaying;
+    final trackId = state.currentTrackId;
     if (state.currentTrackId != null) {
       await _driver.setVolume(0);
     }
+    if (!_currentSleepTimerRequest(request)) {
+      await _restoreTimerVolumeAfterObsoleteWrite(request);
+      return;
+    }
     await _driver.pause();
+    if (!_currentSleepTimerRequest(request)) {
+      if (mounted &&
+          wasPlaying &&
+          playbackRequest == _playbackRequest &&
+          trackId == state.currentTrackId) {
+        await _driver.resume();
+      }
+      return;
+    }
     if (state.currentTrackId != null) {
       await _driver.setVolume(state.volume);
     }
 
-    if (!mounted) return;
+    if (!_currentSleepTimerRequest(request)) return;
     state = state.copyWith(isPlaying: false, clearSleepTimer: true);
   }
 
@@ -405,6 +457,7 @@ class SoundPlayerController extends StateNotifier<SoundPlayerState> {
 
   @override
   void dispose() {
+    _sleepTimerRequest++;
     _sleepTimer?.cancel();
     _sleepTimerDeadline = null;
     _durationSubscription?.cancel();

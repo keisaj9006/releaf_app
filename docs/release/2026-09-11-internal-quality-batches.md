@@ -191,3 +191,25 @@ passed**. Android debug APK built successfully. `git diff --check` passed.
 Affected gate: BRAIN core / QA. Labyrinth accelerometer/collision feel remains
 physical-device QA; selectable difficulty and automated progression are already
 implemented. Next: Sleep timer request-ordering regression.
+
+## Batch 8 — latest Sleep timer request wins
+
+Base: `b1f6184`. An earlier timer selection could overwrite a later selection
+after delayed audio setup; setup latency extended the selected duration, and
+pending work could update a disposed controller. Request generations now protect
+timer state, and the deadline is captured at selection time.
+
+Obsolete expiry/fade work cannot clear a newer timer or leave its volume faded.
+A late native expiry pause resumes only if the same track was playing and no
+explicit play/pause/resume/stop action superseded it. A manual pause remains
+paused. Physical media-button/interruption behavior still requires RC device QA.
+
+Files: Sound player controller, Sound experience tests, this evidence. Five
+initial race regressions failed before fixes; review added two stale-fade cases
+and late-pause recovery, also red-confirmed. The manual-pause protection test
+passes. Final focused Sound/Sleep tests: **25 passed**. Analyzer: **No issues
+found**. Independent review closed both follow-up findings. Full suite: **375 tests
+passed**. Android debug APK built successfully. `git diff --check` passed.
+
+Affected gate: Sleep player/timer reliability. Next: final existing release
+tooling verification and completion-plan/context handoff; external gates remain.

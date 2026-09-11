@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:async';
 
 import 'package:audioplayers/audioplayers.dart' as audio;
 import 'package:flutter/material.dart';
@@ -21,6 +22,10 @@ class _FakeSoundPlaybackDriver implements SoundPlaybackDriver {
   String? lastAssetPath;
   String? lastTrackId;
   String? lastTitle;
+  Completer<void>? nextVolumeGate;
+  Completer<void>? volumeStarted;
+  Completer<void>? nextPauseGate;
+  Completer<void>? pauseStarted;
 
   @override
   Stream<Duration> get onDurationChanged => const Stream<Duration>.empty();
@@ -37,6 +42,12 @@ class _FakeSoundPlaybackDriver implements SoundPlaybackDriver {
 
   @override
   Future<void> setVolume(double volume) async {
+    final gate = nextVolumeGate;
+    nextVolumeGate = null;
+    if (gate != null) {
+      volumeStarted?.complete();
+      await gate.future;
+    }
     volumeCalls.add(volume);
   }
 
@@ -58,6 +69,12 @@ class _FakeSoundPlaybackDriver implements SoundPlaybackDriver {
 
   @override
   Future<void> pause() async {
+    final gate = nextPauseGate;
+    nextPauseGate = null;
+    if (gate != null) {
+      pauseStarted?.complete();
+      await gate.future;
+    }
     pauseCalls += 1;
   }
 
@@ -76,7 +93,89 @@ Future<SharedPreferences> _preferences() async {
   return SharedPreferences.getInstance();
 }
 
+class _StatefulSoundDriver extends _FakeSoundPlaybackDriver {
+  final events = StreamController<audio.PlayerState>.broadcast(sync: true);
+  @override
+  Stream<audio.PlayerState> get onPlayerStateChanged => events.stream;
+  @override
+  Future<void> playAsset(String path, {String? trackId, String? title}) async {
+    await super.playAsset(path, trackId: trackId, title: title);
+    events.add(audio.PlayerState.playing);
+  }
+
+  @override
+  Future<void> pause() async {
+    await super.pause();
+    events.add(audio.PlayerState.paused);
+  }
+
+  @override
+  Future<void> resume() async {
+    await super.resume();
+    events.add(audio.PlayerState.playing);
+  }
+
+  @override
+  Future<void> dispose() => events.close();
+}
+
 void main() {
+  for (final replacement in [30, null]) {
+    test('old Sleep fade cannot silence replacement $replacement', () async {
+      final driver = _FakeSoundPlaybackDriver();
+      var now = DateTime(2026, 9, 11, 22);
+      final controller = SoundPlayerController(
+        const SoundCatalog(),
+        await _preferences(),
+        driver: driver,
+        now: () => now,
+      );
+      addTearDown(controller.dispose);
+      await controller.playById('deep-drift');
+      await controller.setSleepTimer(1);
+      now = now.add(const Duration(seconds: 59));
+      final gate = Completer<void>();
+      driver.nextVolumeGate = gate;
+      driver.volumeStarted = Completer<void>();
+      final fading = controller.syncSleepTimerNow();
+      await driver.volumeStarted!.future;
+      await controller.setSleepTimer(replacement);
+      gate.complete();
+      await fading;
+      expect(driver.volumeCalls.last, controller.state.volume);
+    });
+  }
+  for (final manualPause in [false, true]) {
+    test(
+      'replacement Sleep timer recovers late expiry pause unless user paused: $manualPause',
+      () async {
+        final driver = _StatefulSoundDriver();
+        var now = DateTime(2026, 9, 11, 22);
+        final controller = SoundPlayerController(
+          const SoundCatalog(),
+          await _preferences(),
+          driver: driver,
+          now: () => now,
+        );
+        addTearDown(controller.dispose);
+        await controller.playById('deep-drift');
+        await controller.setSleepTimer(1);
+        now = now.add(const Duration(minutes: 2));
+        final gate = Completer<void>();
+        driver.nextPauseGate = gate;
+        driver.pauseStarted = Completer<void>();
+        final expiring = controller.syncSleepTimerNow();
+        await driver.pauseStarted!.future;
+        await controller.setSleepTimer(30);
+        if (manualPause) await controller.pause();
+        gate.complete();
+        await expiring;
+        expect(controller.state.sleepTimerMinutes, 30);
+        expect(driver.resumeCalls, manualPause ? 0 : 1);
+        expect(controller.state.isPlaying, !manualPause);
+      },
+    );
+  }
   test('Sound catalog only exposes real Flutter-bundled audio', () {
     const catalog = SoundCatalog();
     final tracks = catalog.getAll();
@@ -205,6 +304,103 @@ void main() {
       soundOutputVolumeForSleepTimer(baseVolume: 0.8, remainingSeconds: 0),
       0,
     );
+  });
+
+  for (final replacement in [30, null]) {
+    test(
+      'latest Sleep timer choice $replacement wins delayed audio setup',
+      () async {
+        final driver = _FakeSoundPlaybackDriver();
+        final controller = SoundPlayerController(
+          const SoundCatalog(),
+          await _preferences(),
+          driver: driver,
+        );
+        addTearDown(controller.dispose);
+        await controller.playById('deep-drift');
+        final gate = Completer<void>();
+        driver.nextVolumeGate = gate;
+        driver.volumeStarted = Completer<void>();
+        final earlier = controller.setSleepTimer(15);
+        await driver.volumeStarted!.future;
+        await controller.setSleepTimer(replacement);
+        gate.complete();
+        await earlier;
+        expect(controller.state.sleepTimerMinutes, replacement);
+      },
+    );
+  }
+
+  test(
+    'old Sleep expiry cannot pause or clear a newly selected timer',
+    () async {
+      final driver = _FakeSoundPlaybackDriver();
+      var now = DateTime(2026, 9, 11, 22);
+      final controller = SoundPlayerController(
+        const SoundCatalog(),
+        await _preferences(),
+        driver: driver,
+        now: () => now,
+      );
+      addTearDown(controller.dispose);
+      await controller.playById('deep-drift');
+      await controller.setSleepTimer(1);
+      now = now.add(const Duration(minutes: 2));
+      final gate = Completer<void>();
+      driver.nextVolumeGate = gate;
+      driver.volumeStarted = Completer<void>();
+      final expiring = controller.syncSleepTimerNow();
+      await driver.volumeStarted!.future;
+      await controller.setSleepTimer(30);
+      gate.complete();
+      await expiring;
+      expect(driver.pauseCalls, 0);
+      expect(controller.state.sleepTimerMinutes, 30);
+    },
+  );
+
+  test(
+    'Sleep timer duration starts when selected, not after audio setup',
+    () async {
+      final driver = _FakeSoundPlaybackDriver();
+      var now = DateTime(2026, 9, 11, 22);
+      final controller = SoundPlayerController(
+        const SoundCatalog(),
+        await _preferences(),
+        driver: driver,
+        now: () => now,
+      );
+      addTearDown(controller.dispose);
+      await controller.playById('deep-drift');
+      final gate = Completer<void>();
+      driver.nextVolumeGate = gate;
+      driver.volumeStarted = Completer<void>();
+      final setting = controller.setSleepTimer(15);
+      await driver.volumeStarted!.future;
+      now = now.add(const Duration(seconds: 5));
+      gate.complete();
+      await setting;
+      await controller.syncSleepTimerNow();
+      expect(controller.state.sleepTimerRemainingSeconds, 895);
+    },
+  );
+
+  test('disposed Sleep controller ignores delayed timer setup', () async {
+    final driver = _FakeSoundPlaybackDriver();
+    final controller = SoundPlayerController(
+      const SoundCatalog(),
+      await _preferences(),
+      driver: driver,
+    );
+    await controller.playById('deep-drift');
+    final gate = Completer<void>();
+    driver.nextVolumeGate = gate;
+    driver.volumeStarted = Completer<void>();
+    final setting = controller.setSleepTimer(15);
+    await driver.volumeStarted!.future;
+    controller.dispose();
+    gate.complete();
+    await setting;
   });
 
   test('Sleep timer stores a visible real-time countdown', () async {
