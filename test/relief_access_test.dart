@@ -194,7 +194,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
 
     expect(
-      find.byKey(const Key('reset-grounding-body-visual')),
+      find.byKey(const Key('reset-living-form')),
       findsOneWidget,
     );
     expect(find.byKey(const Key('reset-breath-path')), findsOneWidget);
@@ -222,7 +222,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
 
     expect(
-      find.byKey(const Key('reset-grounding-body-visual')),
+      find.byKey(const Key('reset-living-form')),
       findsOneWidget,
     );
     expect(find.byKey(const Key('reset-breath-path')), findsOneWidget);
