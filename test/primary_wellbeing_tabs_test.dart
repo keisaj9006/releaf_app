@@ -27,9 +27,38 @@ Future<SharedPreferences> _preferences() async {
   return SharedPreferences.getInstance();
 }
 
+class _PartialNarrationCatalog extends MeditationCatalog {
+  const _PartialNarrationCatalog();
+
+  @override
+  MeditationContent? getById(String id) => id == 'partial-qa'
+      ? const MeditationContent(
+          id: 'partial-qa',
+          title: 'Partial recording fixture',
+          subtitle: 'Test practice',
+          durationSeconds: 30,
+          category: MeditationCategory.body,
+          accessTier: MeditationAccessTier.free,
+          steps: [
+            MeditationStep(
+              label: 'Arrive',
+              guidance: 'Feel supported.',
+              durationSeconds: 10,
+              narrationAssetPath: 'fixture/arrive.mp3',
+            ),
+            MeditationStep(
+              label: 'Notice',
+              guidance: 'Notice your surroundings.',
+              durationSeconds: 20,
+            ),
+          ],
+        )
+      : super.getById(id);
+}
+
 class _FixedSubscriptionController extends SubscriptionController {
   _FixedSubscriptionController({required bool isPremium})
-      : super(RevenueCatService()) {
+    : super(RevenueCatService()) {
     state = SubscriptionState(isPremium: isPremium);
   }
 
@@ -50,10 +79,7 @@ class _FakeMeditationAudioDriver implements MeditationAudioDriver {
   double? lastVolume;
 
   @override
-  Future<void> playAsset(
-    String assetPath, {
-    required double volume,
-  }) async {
+  Future<void> playAsset(String assetPath, {required double volume}) async {
     playCalls += 1;
     lastAssetPath = assetPath;
   }
@@ -128,6 +154,8 @@ Future<void> _pumpRoute(
   bool isPremium = false,
   MeditationAudioDriver? meditationAudioDriver,
   MeditationVoiceDriver? meditationVoiceDriver,
+  MeditationCatalog? catalog,
+  double textScale = 1,
 }) async {
   final router = createAppRouter(initialLocation: location);
   addTearDown(router.dispose);
@@ -135,6 +163,8 @@ Future<void> _pumpRoute(
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
+        if (catalog != null)
+          meditationCatalogProvider.overrideWithValue(catalog),
         sharedPreferencesProvider.overrideWithValue(preferences),
         subscriptionControllerProvider.overrideWith(
           (ref) => _FixedSubscriptionController(isPremium: isPremium),
@@ -146,7 +176,15 @@ Future<void> _pumpRoute(
           meditationVoiceDriver ?? _FakeMeditationVoiceDriver(),
         ),
       ],
-      child: MaterialApp.router(routerConfig: router),
+      child: MaterialApp.router(
+        routerConfig: router,
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(
+            context,
+          ).copyWith(textScaler: TextScaler.linear(textScale)),
+          child: child!,
+        ),
+      ),
     ),
   );
   await tester.pump();
@@ -188,22 +226,24 @@ void main() {
     }
   });
 
-  test('Meditation defaults never use the legacy song-like atmosphere tracks', () {
-    const catalog = MeditationCatalog();
+  test(
+    'Meditation defaults never use the legacy song-like atmosphere tracks',
+    () {
+      const catalog = MeditationCatalog();
 
-    for (final item in catalog.getAll()) {
-      expect(
-        item.backgroundSoundId,
-        isNot(anyOf('releaf-atmosphere-01', 'releaf-atmosphere-02')),
-        reason: '${item.id} must use a curated non-song meditation sound bed',
-      );
-    }
-  });
+      for (final item in catalog.getAll()) {
+        expect(
+          item.backgroundSoundId,
+          isNot(anyOf('releaf-atmosphere-01', 'releaf-atmosphere-02')),
+          reason: '${item.id} must use a curated non-song meditation sound bed',
+        );
+      }
+    },
+  );
 
   test('Meditation catalog exposes a premium Deeper Practice course', () {
     const catalog = MeditationCatalog();
-    final course =
-        catalog.getSeries(MeditationCatalog.deeperPracticeSeriesId);
+    final course = catalog.getSeries(MeditationCatalog.deeperPracticeSeriesId);
 
     expect(course, hasLength(4));
     expect(course.every((item) => item.isPremium), isTrue);
@@ -220,16 +260,15 @@ void main() {
     expect(sleep.first.title, 'Let the Day Go');
     expect(sleep.first.isPremium, isFalse);
     expect(sleep.skip(1).every((item) => item.isPremium), isTrue);
-    expect(
-      sleep.map((item) => item.seriesOrder),
-      orderedEquals([1, 2, 3]),
-    );
+    expect(sleep.map((item) => item.seriesOrder), orderedEquals([1, 2, 3]));
     expect(sleep.every((item) => item.backgroundSoundId != null), isTrue);
   });
 
   test('Meditation catalog exposes a real Foundations series', () {
     const catalog = MeditationCatalog();
-    final foundations = catalog.getSeries(MeditationCatalog.foundationsSeriesId);
+    final foundations = catalog.getSeries(
+      MeditationCatalog.foundationsSeriesId,
+    );
 
     expect(foundations, hasLength(4));
     expect(foundations.first.title, 'Mindfulness Basics');
@@ -246,32 +285,22 @@ void main() {
     final free = catalog.getById('mindfulness-basics-2')!;
     final premium = catalog.getById('steady-attention-10')!;
 
-    expect(
-      canAccessMeditationSession(free, isPremiumUser: false),
-      isTrue,
-    );
-    expect(
-      canAccessMeditationSession(premium, isPremiumUser: false),
-      isFalse,
-    );
-    expect(
-      canAccessMeditationSession(premium, isPremiumUser: true),
-      isTrue,
-    );
+    expect(canAccessMeditationSession(free, isPremiumUser: false), isTrue);
+    expect(canAccessMeditationSession(premium, isPremiumUser: false), isFalse);
+    expect(canAccessMeditationSession(premium, isPremiumUser: true), isTrue);
   });
 
   test('Meditation library stores favorites, recents and completion', () async {
     SharedPreferences.setMockInitialValues({});
     final preferences = await SharedPreferences.getInstance();
     final container = ProviderContainer(
-      overrides: [
-        sharedPreferencesProvider.overrideWithValue(preferences),
-      ],
+      overrides: [sharedPreferencesProvider.overrideWithValue(preferences)],
     );
     addTearDown(container.dispose);
 
-    final controller =
-        container.read(meditationLibraryControllerProvider.notifier);
+    final controller = container.read(
+      meditationLibraryControllerProvider.notifier,
+    );
 
     await controller.toggleFavorite('mindfulness-basics-2');
     await controller.markRecent('mindfulness-basics-2');
@@ -294,10 +323,7 @@ void main() {
     );
     addTearDown(controller.dispose);
 
-    await controller.start(
-      soundId: 'releaf-atmosphere-01',
-      volume: 0.20,
-    );
+    await controller.start(soundId: 'releaf-atmosphere-01', volume: 0.20);
     await controller.setMix(0.50);
 
     expect(controller.state.mix, 0.50);
@@ -352,10 +378,7 @@ void main() {
 
     expect(driver.configureCalls, 1);
     expect(driver.playAssetCalls, 1);
-    expect(
-      driver.lastNarrationAssetPath,
-      'narration/releaf-guide/sample.mp3',
-    );
+    expect(driver.lastNarrationAssetPath, 'narration/releaf-guide/sample.mp3');
     controller.dispose();
   });
 
@@ -417,12 +440,10 @@ void main() {
     expect(find.text('MEDITATION'), findsOneWidget);
     expect(find.text('Meditate'), findsWidgets);
     expect(
-      find.text(
-        'Press play, get comfortable, and let the practice create space.',
-      ),
+      find.text('Choose recorded guidance, on-screen prompts, or quiet time.'),
       findsOneWidget,
     );
-    expect(find.text('TODAY’S PRACTICE · RELEAF GUIDE'), findsOneWidget);
+    expect(find.text('TODAY’S PRACTICE'), findsOneWidget);
     expect(find.text('Start practice'), findsOneWidget);
     expect(
       find.byKey(const Key('meditation-time-quick-start')),
@@ -431,10 +452,7 @@ void main() {
     expect(find.text('HOW MUCH TIME DO YOU HAVE?'), findsOneWidget);
     expect(find.text('FOUNDATIONS'), findsOneWidget);
     expect(find.text('NIGHT PRACTICE'), findsOneWidget);
-    expect(
-      find.byKey(const Key('meditation-sleep-course')),
-      findsOneWidget,
-    );
+    expect(find.byKey(const Key('meditation-sleep-course')), findsOneWidget);
     expect(find.text('QUICK PRACTICES'), findsOneWidget);
     expect(find.text('EXPLORE BY INTENTION'), findsOneWidget);
     expect(find.byKey(const Key('meditation-back')), findsOneWidget);
@@ -485,26 +503,29 @@ void main() {
     }
   });
 
-  testWidgets('Sound is the fourth primary destination and opens wellbeing spaces', (
-    WidgetTester tester,
-  ) async {
-    await _pumpRoute(
-      tester,
-      location: AppRoutes.sound,
-      preferences: await _preferences(),
-    );
+  testWidgets(
+    'Sound is the fourth primary destination and opens wellbeing spaces',
+    (WidgetTester tester) async {
+      await _pumpRoute(
+        tester,
+        location: AppRoutes.sound,
+        preferences: await _preferences(),
+      );
 
-    expect(find.text('Sound'), findsWidgets);
-    expect(find.byKey(const Key('sound-emergency-action')), findsOneWidget);
-    expect(find.byKey(const Key('sound-open-meditate')), findsOneWidget);
-    expect(find.byKey(const Key('sound-open-sleep')), findsOneWidget);
+      expect(find.text('Sound'), findsWidgets);
+      expect(find.byKey(const Key('sound-emergency-action')), findsOneWidget);
+      expect(find.byKey(const Key('sound-open-meditate')), findsOneWidget);
+      expect(find.byKey(const Key('sound-open-sleep')), findsOneWidget);
 
-    final navigation = tester.widget<NavigationBar>(find.byType(NavigationBar));
-    expect(navigation.destinations, hasLength(4));
-    expect(navigation.selectedIndex, 3);
-    expect(find.text('Meditate'), findsOneWidget);
-    expect(find.text('Sleep'), findsOneWidget);
-  });
+      final navigation = tester.widget<NavigationBar>(
+        find.byType(NavigationBar),
+      );
+      expect(navigation.destinations, hasLength(4));
+      expect(navigation.selectedIndex, 3);
+      expect(find.text('Meditate'), findsOneWidget);
+      expect(find.text('Sleep'), findsOneWidget);
+    },
+  );
 
   testWidgets('Sound shortcuts round-trip through Meditation and Sleep', (
     WidgetTester tester,
@@ -557,8 +578,9 @@ void main() {
 
       expect(find.text('RELEAF'), findsOneWidget);
       expect(find.text('RIGHT NOW'), findsOneWidget);
-      final navigation =
-          tester.widget<NavigationBar>(find.byType(NavigationBar));
+      final navigation = tester.widget<NavigationBar>(
+        find.byType(NavigationBar),
+      );
       expect(navigation.selectedIndex, 0);
 
       await tester.pumpWidget(const SizedBox.shrink());
@@ -625,10 +647,7 @@ void main() {
 
     expect(find.text('RELEAF PREMIUM'), findsOneWidget);
     expect(find.text('Unlock Premium'), findsOneWidget);
-    expect(
-      find.byKey(const Key('meditation-ambient-visual')),
-      findsNothing,
-    );
+    expect(find.byKey(const Key('meditation-ambient-visual')), findsNothing);
   });
 
   testWidgets('Direct premium meditation route opens with entitlement', (
@@ -641,12 +660,111 @@ void main() {
       isPremium: true,
     );
 
-    expect(
-      find.byKey(const Key('meditation-ambient-visual')),
-      findsOneWidget,
-    );
+    expect(find.byKey(const Key('meditation-ambient-visual')), findsOneWidget);
     expect(find.text('Steady Attention'), findsWidgets);
   });
+
+  testWidgets(
+    'Unrecorded meditation starts with readable guidance and no voice',
+    (tester) async {
+      final preferences = await _preferences();
+      final voice = _FakeMeditationVoiceDriver();
+      await _pumpRoute(
+        tester,
+        location: AppRoutes.meditationSessionFor('breath-and-body-4'),
+        preferences: preferences,
+        meditationVoiceDriver: voice,
+      );
+      final captions = find.byKey(const Key('meditation-caption-panel'));
+      final toggle = find.byKey(const Key('meditation-captions-chip'));
+      final semantics = tester.ensureSemantics();
+      await tester.pump();
+      expect(captions, findsOneWidget);
+      expect(toggle, findsOneWidget);
+      expect(
+        tester.getSemantics(toggle),
+        isSemantics(
+          label: 'Captions',
+          isButton: true,
+          hasToggledState: true,
+          isToggled: true,
+          hasTapAction: true,
+        ),
+      );
+      semantics.dispose();
+      expect(find.byKey(const Key('meditation-voice-chip')), findsNothing);
+      expect(voice.playAssetCalls, 0);
+      // Starting a captioned practice must not overwrite the recorded-voice preference.
+      expect(preferences.getBool('meditation.voice.captions'), isNull);
+      await tester.tap(toggle);
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(captions, findsNothing);
+      await tester.tap(toggle);
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(captions, findsOneWidget);
+      await tester.tap(find.byKey(const Key('meditation-more-controls')));
+      await tester.pump(const Duration(milliseconds: 350));
+      final switchFinder = find.byKey(const Key('meditation-captions-toggle'));
+      expect(tester.widget<Switch>(switchFinder).value, isTrue);
+      await tester.ensureVisible(switchFinder);
+      await tester.pump(const Duration(milliseconds: 350));
+      await tester.tap(switchFinder);
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(tester.widget<Switch>(switchFinder).value, isFalse);
+      expect(find.textContaining('works with closed eyes'), findsNothing);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets('Captioned meditation remains readable at 320px and large text', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(320, 640));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await _pumpRoute(
+      tester,
+      location: AppRoutes.meditationSessionFor('breath-and-body-4'),
+      preferences: await _preferences(),
+      textScale: 2,
+    );
+    expect(find.byKey(const Key('meditation-caption-panel')), findsOneWidget);
+    final pause = find.byKey(const Key('meditation-primary-control'));
+    expect(pause.hitTestable(), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Unguided timer does not suggest unavailable captions', (
+    tester,
+  ) async {
+    await _pumpRoute(
+      tester,
+      location: AppRoutes.meditationSessionFor('unguided-5'),
+      preferences: await _preferences(),
+    );
+    expect(
+      find.text('Stay with the practice in your own way.'),
+      findsOneWidget,
+    );
+    expect(find.byKey(const Key('meditation-captions-chip')), findsNothing);
+    expect(find.textContaining('Use captions'), findsNothing);
+  });
+
+  testWidgets(
+    'Silent steps in partial narration never ask users to follow a voice',
+    (tester) async {
+      await _pumpRoute(
+        tester,
+        location: AppRoutes.meditationSessionFor('partial-qa'),
+        preferences: await _preferences(),
+        catalog: const _PartialNarrationCatalog(),
+      );
+      expect(find.byKey(const Key('meditation-caption-panel')), findsOneWidget);
+      await tester.tap(find.byKey(const Key('meditation-forward-10')));
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(find.text('Notice your surroundings.'), findsOneWidget);
+      expect(find.text('Close your eyes and follow the voice.'), findsNothing);
+    },
+  );
 
   testWidgets('Meditation player is audio-first with optional captions', (
     WidgetTester tester,
@@ -664,22 +782,10 @@ void main() {
       meditationVoiceDriver: voiceDriver,
     );
 
-    expect(
-      find.byKey(const Key('meditation-ambient-visual')),
-      findsOneWidget,
-    );
-    expect(
-      find.byKey(const Key('meditation-primary-control')),
-      findsOneWidget,
-    );
-    expect(
-      find.byKey(const Key('meditation-voice-chip')),
-      findsOneWidget,
-    );
-    expect(
-      find.byKey(const Key('meditation-caption-panel')),
-      findsNothing,
-    );
+    expect(find.byKey(const Key('meditation-ambient-visual')), findsOneWidget);
+    expect(find.byKey(const Key('meditation-primary-control')), findsOneWidget);
+    expect(find.byKey(const Key('meditation-voice-chip')), findsOneWidget);
+    expect(find.byKey(const Key('meditation-caption-panel')), findsNothing);
     expect(find.text('ARRIVE'), findsOneWidget);
     expect(find.text('Close your eyes and follow the voice.'), findsOneWidget);
     expect(audioDriver.playCalls, 1);
@@ -694,10 +800,7 @@ void main() {
     await tester.tap(find.byKey(const Key('meditation-captions-chip')));
     await tester.pump(const Duration(milliseconds: 300));
 
-    expect(
-      find.byKey(const Key('meditation-caption-panel')),
-      findsOneWidget,
-    );
+    expect(find.byKey(const Key('meditation-caption-panel')), findsOneWidget);
     expect(find.text(item.steps.first.guidance), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('meditation-primary-control')));
@@ -717,18 +820,9 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 350));
 
-    expect(
-      find.byKey(const Key('meditation-voice-volume')),
-      findsOneWidget,
-    );
-    expect(
-      find.byKey(const Key('meditation-sound-control')),
-      findsOneWidget,
-    );
-    expect(
-      find.byKey(const Key('meditation-sound-mix')),
-      findsOneWidget,
-    );
+    expect(find.byKey(const Key('meditation-voice-volume')), findsOneWidget);
+    expect(find.byKey(const Key('meditation-sound-control')), findsOneWidget);
+    expect(find.byKey(const Key('meditation-sound-mix')), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('meditation-sound-toggle')));
     await tester.pump(const Duration(milliseconds: 300));
@@ -761,17 +855,12 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
 
     router
-        .push<void>(
-          AppRoutes.meditationSessionFor('mindfulness-basics-2'),
-        )
+        .push<void>(AppRoutes.meditationSessionFor('mindfulness-basics-2'))
         .ignore();
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 1300));
 
-    expect(
-      find.byKey(const Key('meditation-ambient-visual')),
-      findsOneWidget,
-    );
+    expect(find.byKey(const Key('meditation-ambient-visual')), findsOneWidget);
 
     final container = ProviderScope.containerOf(
       tester.element(find.byKey(const Key('meditation-ambient-visual'))),

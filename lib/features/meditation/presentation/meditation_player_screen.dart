@@ -22,6 +22,7 @@ import '../application/meditation_voice_controller.dart';
 import '../data/meditation_catalog.dart';
 import '../domain/meditation_content.dart';
 import '../domain/meditation_resume_state.dart';
+import 'meditation_guidance_labels.dart';
 
 int meditationRemainingAfterSeek({
   required int durationSeconds,
@@ -35,8 +36,7 @@ int meditationRemainingAfterSeek({
   final safeRemaining = remainingSeconds.clamp(1, durationSeconds).toInt();
   final elapsed = durationSeconds - safeRemaining;
   final maxElapsed = durationSeconds - 1;
-  final nextElapsed =
-      (elapsed + deltaSeconds).clamp(0, maxElapsed).toInt();
+  final nextElapsed = (elapsed + deltaSeconds).clamp(0, maxElapsed).toInt();
   return durationSeconds - nextElapsed;
 }
 
@@ -52,12 +52,7 @@ String meditationVoiceSourceLabel(MeditationContent item) {
 }
 
 String meditationGuidanceSourceEyebrow(MeditationContent item) {
-  if (item.unguided) return 'UNGUIDED MEDITATION';
-  if (item.hasRecordedNarration) {
-    return 'GUIDED · RECORDED RELEAF GUIDE';
-  }
-  if (item.hasAnyRecordedNarration) return 'GUIDED · PARTIAL RELEAF GUIDE';
-  return 'GUIDED · RELEAF GUIDE PENDING';
+  return meditationGuidanceLabel(item).toUpperCase();
 }
 
 class MeditationPlayerScreen extends ConsumerStatefulWidget {
@@ -81,6 +76,7 @@ class _MeditationPlayerScreenState
   DateTime? _deadline;
   int _remainingSeconds = 0;
   bool _running = true;
+  bool _captionChoiceMade = false;
   int _lastSpokenStepIndex = -1;
   bool _allowPop = false;
   bool _exiting = false;
@@ -92,8 +88,9 @@ class _MeditationPlayerScreenState
   void initState() {
     super.initState();
 
-    final item =
-        ref.read(meditationCatalogProvider).getById(widget.meditationId);
+    final item = ref
+        .read(meditationCatalogProvider)
+        .getById(widget.meditationId);
     final fullDuration = item?.durationSeconds ?? 0;
     final resumed = widget.resumeState?.remainingSeconds;
 
@@ -124,7 +121,9 @@ class _MeditationPlayerScreenState
       }
 
       unawaited(
-        ref.read(meditationAudioControllerProvider.notifier).start(
+        ref
+            .read(meditationAudioControllerProvider.notifier)
+            .start(
               soundId: item.backgroundSoundId,
               volume: item.backgroundSoundVolume,
               playImmediately: _running,
@@ -138,17 +137,18 @@ class _MeditationPlayerScreenState
   }
 
   Future<void> _configureAudioSession() async {
-    final session =
-        await configureReleafAudioSession(ReleafAudioMode.guidedMeditation);
+    final session = await configureReleafAudioSession(
+      ReleafAudioMode.guidedMeditation,
+    );
     if (!mounted) return;
 
     _interruptionSubscription?.cancel();
     _becomingNoisySubscription?.cancel();
 
-    _interruptionSubscription =
-        session.interruptionEventStream.listen(_handleAudioInterruption);
-    _becomingNoisySubscription =
-        session.becomingNoisyEventStream.listen((_) {
+    _interruptionSubscription = session.interruptionEventStream.listen(
+      _handleAudioInterruption,
+    );
+    _becomingNoisySubscription = session.becomingNoisyEventStream.listen((_) {
       _resumeAfterInterruption = false;
       unawaited(_pauseForSystemInterruption());
     });
@@ -170,7 +170,8 @@ class _MeditationPlayerScreenState
       return;
     }
 
-    final shouldResume = _resumeAfterInterruption &&
+    final shouldResume =
+        _resumeAfterInterruption &&
         releafShouldAutoResumeAfterInterruption(
           ReleafAudioMode.guidedMeditation,
           event.type,
@@ -206,19 +207,17 @@ class _MeditationPlayerScreenState
       final deadline = _deadline;
       if (deadline == null) return;
 
-      final item =
-          ref.read(meditationCatalogProvider).getById(widget.meditationId);
+      final item = ref
+          .read(meditationCatalogProvider)
+          .getById(widget.meditationId);
       final previousStepIndex = item == null
           ? -1
-          : _stepIndexAt(
-              item,
-              item.durationSeconds - _remainingSeconds,
-            );
-      final wallClockRemaining =
-          SessionDeadlineClock.remainingSeconds(deadline);
+          : _stepIndexAt(item, item.durationSeconds - _remainingSeconds);
+      final wallClockRemaining = SessionDeadlineClock.remainingSeconds(
+        deadline,
+      );
       final timerTickRemaining = math.max(0, _remainingSeconds - 1);
-      final nextRemaining =
-          math.min(wallClockRemaining, timerTickRemaining);
+      final nextRemaining = math.min(wallClockRemaining, timerTickRemaining);
 
       if (nextRemaining <= 0) {
         timer.cancel();
@@ -230,12 +229,8 @@ class _MeditationPlayerScreenState
           _running = false;
         });
 
-        unawaited(
-          ref.read(meditationAudioControllerProvider.notifier).stop(),
-        );
-        unawaited(
-          ref.read(meditationVoiceControllerProvider.notifier).stop(),
-        );
+        unawaited(ref.read(meditationAudioControllerProvider.notifier).stop());
+        unawaited(ref.read(meditationVoiceControllerProvider.notifier).stop());
 
         if (item != null) {
           ref.read(sessionManagerProvider.notifier).clear();
@@ -289,8 +284,7 @@ class _MeditationPlayerScreenState
       _running = running;
     }
 
-    final ambience =
-        ref.read(meditationAudioControllerProvider.notifier);
+    final ambience = ref.read(meditationAudioControllerProvider.notifier);
     final voice = ref.read(meditationVoiceControllerProvider.notifier);
 
     if (running) {
@@ -308,8 +302,9 @@ class _MeditationPlayerScreenState
   void _seekBy(int seconds) {
     if (_remainingSeconds <= 0) return;
 
-    final item =
-        ref.read(meditationCatalogProvider).getById(widget.meditationId);
+    final item = ref
+        .read(meditationCatalogProvider)
+        .getById(widget.meditationId);
     if (item == null || item.durationSeconds <= 1) return;
 
     final nextRemaining = meditationRemainingAfterSeek(
@@ -345,8 +340,9 @@ class _MeditationPlayerScreenState
   Future<void> _announceCurrentStep({bool force = false}) async {
     if (!_running || _remainingSeconds <= 0) return;
 
-    final item =
-        ref.read(meditationCatalogProvider).getById(widget.meditationId);
+    final item = ref
+        .read(meditationCatalogProvider)
+        .getById(widget.meditationId);
     if (item == null || item.unguided || item.steps.isEmpty) return;
 
     final elapsed = item.durationSeconds - _remainingSeconds;
@@ -360,14 +356,12 @@ class _MeditationPlayerScreenState
         .speakGuidance(
           item.steps[stepIndex].spokenGuidance ??
               item.steps[stepIndex].guidance,
-          narrationAssetPath:
-              item.steps[stepIndex].narrationAssetPath,
+          narrationAssetPath: item.steps[stepIndex].narrationAssetPath,
         );
   }
 
   Future<void> _toggleGuideVoice() async {
-    final controller =
-        ref.read(meditationVoiceControllerProvider.notifier);
+    final controller = ref.read(meditationVoiceControllerProvider.notifier);
     await controller.toggleEnabled();
 
     if (!mounted) return;
@@ -385,13 +379,16 @@ class _MeditationPlayerScreenState
     _timer?.cancel();
     _deadline = null;
 
-    final item =
-        ref.read(meditationCatalogProvider).getById(widget.meditationId);
+    final item = ref
+        .read(meditationCatalogProvider)
+        .getById(widget.meditationId);
 
     if (item != null &&
         _remainingSeconds > 0 &&
         _remainingSeconds < item.durationSeconds) {
-      ref.read(sessionManagerProvider.notifier).setPausedSession(
+      ref
+          .read(sessionManagerProvider.notifier)
+          .setPausedSession(
             title: item.title,
             subtitle:
                 'Meditation · ${_resumeTimeLabel(_remainingSeconds)} remaining',
@@ -417,6 +414,26 @@ class _MeditationPlayerScreenState
     } else {
       context.go(AppRoutes.meditate);
     }
+  }
+
+  bool _showCaptions(MeditationContent item, MeditationVoiceState voice) {
+    if (item.unguided) return false;
+    // Opening a practice with missing recordings must still provide guidance,
+    // without changing the stored preference for audio-first sessions.
+    return !_captionChoiceMade && !item.hasRecordedNarration
+        ? true
+        : voice.showCaptions;
+  }
+
+  Future<void> _toggleCaptions(MeditationContent item) async {
+    final current = _showCaptions(
+      item,
+      ref.read(meditationVoiceControllerProvider),
+    );
+    _captionChoiceMade = true;
+    await ref
+        .read(meditationVoiceControllerProvider.notifier)
+        .setCaptions(!current);
   }
 
   Future<void> _showControls(MeditationContent item) async {
@@ -522,19 +539,14 @@ class _MeditationPlayerScreenState
                       _ControlSection(
                         icon: Icons.closed_caption_outlined,
                         title: 'On-screen guidance',
-                        subtitle:
-                            'Off by default so the practice works with closed eyes.',
+                        subtitle: item.hasRecordedNarration
+                            ? 'Optional text to accompany the recorded guide.'
+                            : 'Read the guidance while the recorded voice is unavailable.',
                         trailing: Switch.adaptive(
                           key: const Key('meditation-captions-toggle'),
-                          value: voice.showCaptions,
+                          value: _showCaptions(item, voice),
                           onChanged: (_) {
-                            unawaited(
-                              sheetRef
-                                  .read(
-                                    meditationVoiceControllerProvider.notifier,
-                                  )
-                                  .toggleCaptions(),
-                            );
+                            unawaited(_toggleCaptions(item));
                           },
                         ),
                       ),
@@ -545,8 +557,7 @@ class _MeditationPlayerScreenState
                         key: const Key('meditation-sound-control'),
                         icon: Icons.graphic_eq_rounded,
                         title: 'Ambience',
-                        subtitle:
-                            ambience.trackTitle ?? 'Background sound',
+                        subtitle: ambience.trackTitle ?? 'Background sound',
                         trailing: Switch.adaptive(
                           key: const Key('meditation-sound-toggle'),
                           value: ambience.enabled,
@@ -620,8 +631,9 @@ class _MeditationPlayerScreenState
 
   @override
   Widget build(BuildContext context) {
-    final item =
-        ref.watch(meditationCatalogProvider).getById(widget.meditationId);
+    final item = ref
+        .watch(meditationCatalogProvider)
+        .getById(widget.meditationId);
 
     if (item == null) {
       return Theme(
@@ -655,145 +667,144 @@ class _MeditationPlayerScreenState
         child: Scaffold(
           backgroundColor: ReleafColors.background,
           body: Stack(
-          children: [
-            Positioned.fill(
-              child: _SlowMeditationBackdrop(
-                key: const Key('meditation-ambient-visual'),
-                reducedMotion: reducedMotion,
-                child: ReleafMeditationArtwork(
-                  variant: _meditationArtworkFor(item.category),
-                  intensity: 0.96,
-                ),
-              ),
-            ),
-            Positioned.fill(
-              child: _MeditationAtmosphereMotion(
-                key: const Key('meditation-atmosphere-motion'),
-                reducedMotion: reducedMotion,
-                variant: _meditationArtworkFor(item.category),
-              ),
-            ),
-            const Positioned.fill(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Color(0x50050A08),
-                      Color(0x66070C0A),
-                      Color(0xE9080C0A),
-                    ],
-                    stops: [0, 0.54, 1],
+            children: [
+              Positioned.fill(
+                child: _SlowMeditationBackdrop(
+                  key: const Key('meditation-ambient-visual'),
+                  reducedMotion: reducedMotion,
+                  child: ReleafMeditationArtwork(
+                    variant: _meditationArtworkFor(item.category),
+                    intensity: 0.96,
                   ),
                 ),
               ),
-            ),
-            SafeArea(
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 720),
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      final compactHeight = constraints.maxHeight < 680;
-                      final compactWidth = constraints.maxWidth < 360;
-                      final compact = compactHeight || compactWidth;
+              Positioned.fill(
+                child: _MeditationAtmosphereMotion(
+                  key: const Key('meditation-atmosphere-motion'),
+                  reducedMotion: reducedMotion,
+                  variant: _meditationArtworkFor(item.category),
+                ),
+              ),
+              const Positioned.fill(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Color(0x50050A08),
+                        Color(0x66070C0A),
+                        Color(0xE9080C0A),
+                      ],
+                      stops: [0, 0.54, 1],
+                    ),
+                  ),
+                ),
+              ),
+              SafeArea(
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 720),
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final compactHeight = constraints.maxHeight < 680;
+                        final compactWidth = constraints.maxWidth < 360;
+                        final compact = compactHeight || compactWidth;
 
-                      return Padding(
-                        padding: EdgeInsets.fromLTRB(
-                          ReleafSpacing.screen,
-                          compact ? ReleafSpacing.sm : ReleafSpacing.lg,
-                          ReleafSpacing.screen,
-                          compact ? ReleafSpacing.sm : ReleafSpacing.lg,
-                        ),
-                        child: Column(
-                          children: [
-                            _MeditationHeader(
-                              item: item,
-                              remainingSeconds: _remainingSeconds,
-                              compact: compact,
-                              onClose: _exitMeditation,
-                              onControls: () => _showControls(item),
-                            ),
-                            const SizedBox(height: ReleafSpacing.sm),
-                            Expanded(
-                              child: _MeditationStage(
-                                phaseLabel: item.unguided
-                                    ? 'UNGUIDED'
-                                    : step.label.toUpperCase(),
-                                guidance: item.unguided
-                                    ? 'Stay with the practice in your own way.'
-                                    : step.guidance,
-                                showCaptions:
-                                    !item.unguided && voiceState.showCaptions,
+                        return Padding(
+                          padding: EdgeInsets.fromLTRB(
+                            ReleafSpacing.screen,
+                            compact ? ReleafSpacing.sm : ReleafSpacing.lg,
+                            ReleafSpacing.screen,
+                            compact ? ReleafSpacing.sm : ReleafSpacing.lg,
+                          ),
+                          child: Column(
+                            children: [
+                              _MeditationHeader(
+                                item: item,
+                                remainingSeconds: _remainingSeconds,
+                                compact: compact,
+                                onClose: _exitMeditation,
+                                onControls: () => _showControls(item),
+                              ),
+                              const SizedBox(height: ReleafSpacing.sm),
+                              Expanded(
+                                child: _MeditationStage(
+                                  unguided: item.unguided,
+                                  phaseLabel: item.unguided
+                                      ? 'UNGUIDED'
+                                      : step.label.toUpperCase(),
+                                  guidance: item.unguided
+                                      ? 'Stay with the practice in your own way.'
+                                      : step.guidance,
+                                  showCaptions: _showCaptions(item, voiceState),
+                                  running: _running,
+                                  completed: _remainingSeconds == 0,
+                                  voiceEnabled:
+                                      !item.unguided &&
+                                      item.hasAnyRecordedNarration &&
+                                      voiceState.enabled,
+                                  hasVoice:
+                                      step.narrationAssetPath
+                                          ?.trim()
+                                          .isNotEmpty ??
+                                      false,
+                                  compact: compact,
+                                ),
+                              ),
+                              const SizedBox(height: ReleafSpacing.sm),
+                              _MeditationPlaybackDock(
+                                progress: progress,
+                                elapsedSeconds: elapsed,
+                                remainingSeconds: _remainingSeconds,
                                 running: _running,
                                 completed: _remainingSeconds == 0,
+                                stepIndex: stepIndex,
+                                stepCount: item.steps.length,
                                 voiceEnabled:
                                     !item.unguided &&
                                     item.hasAnyRecordedNarration &&
                                     voiceState.enabled,
+                                captionsEnabled: _showCaptions(
+                                  item,
+                                  voiceState,
+                                ),
+                                hasGuidance: !item.unguided,
                                 hasVoice: item.hasAnyRecordedNarration,
+                                hasAmbience: item.backgroundSoundId != null,
+                                ambienceEnabled: audioState.enabled,
                                 compact: compact,
+                                onBack10: () => _seekBy(-10),
+                                onForward10: () => _seekBy(10),
+                                onPrimary: () {
+                                  unawaited(_togglePause());
+                                },
+                                onVoice: _toggleGuideVoice,
+                                onCaptions: () =>
+                                    unawaited(_toggleCaptions(item)),
+                                onAmbience: () {
+                                  unawaited(
+                                    ref
+                                        .read(
+                                          meditationAudioControllerProvider
+                                              .notifier,
+                                        )
+                                        .toggleEnabled(),
+                                  );
+                                },
+                                onControls: () => _showControls(item),
                               ),
-                            ),
-                            const SizedBox(height: ReleafSpacing.sm),
-                            _MeditationPlaybackDock(
-                              progress: progress,
-                              elapsedSeconds: elapsed,
-                              remainingSeconds: _remainingSeconds,
-                              running: _running,
-                              completed: _remainingSeconds == 0,
-                              stepIndex: stepIndex,
-                              stepCount: item.steps.length,
-                              voiceEnabled:
-                                  !item.unguided &&
-                                  item.hasAnyRecordedNarration &&
-                                  voiceState.enabled,
-                              captionsEnabled:
-                                  !item.unguided && voiceState.showCaptions,
-                              hasVoice: item.hasAnyRecordedNarration,
-                              hasAmbience: item.backgroundSoundId != null,
-                              ambienceEnabled: audioState.enabled,
-                              compact: compact,
-                              onBack10: () => _seekBy(-10),
-                              onForward10: () => _seekBy(10),
-                              onPrimary: () {
-                                unawaited(_togglePause());
-                              },
-                              onVoice: _toggleGuideVoice,
-                              onCaptions: () {
-                                unawaited(
-                                  ref
-                                      .read(
-                                        meditationVoiceControllerProvider
-                                            .notifier,
-                                      )
-                                      .toggleCaptions(),
-                                );
-                              },
-                              onAmbience: () {
-                                unawaited(
-                                  ref
-                                      .read(
-                                        meditationAudioControllerProvider
-                                            .notifier,
-                                      )
-                                      .toggleEnabled(),
-                                );
-                              },
-                              onControls: () => _showControls(item),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
+                            ],
+                          ),
+                        );
+                      },
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
       ),
     );
   }
@@ -844,8 +855,6 @@ class _MeditationHeader extends StatelessWidget {
             children: [
               Text(
                 meditationGuidanceSourceEyebrow(item),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
                 style: ReleafTypography.eyebrow.copyWith(
                   color: ReleafFeatureAccents.meditation,
                   fontSize: compact ? 8.5 : 9.5,
@@ -865,7 +874,9 @@ class _MeditationHeader extends StatelessWidget {
           ),
         ),
         const SizedBox(width: ReleafSpacing.xs),
-        _TimerPill(seconds: remainingSeconds),
+        if (MediaQuery.sizeOf(context).width >= 360 &&
+            MediaQuery.textScalerOf(context).scale(10) <= 13)
+          _TimerPill(seconds: remainingSeconds),
         const SizedBox(width: 4),
         IconButton(
           key: const Key('meditation-controls-button'),
@@ -885,6 +896,7 @@ class _MeditationHeader extends StatelessWidget {
 class _MeditationStage extends StatelessWidget {
   const _MeditationStage({
     required this.phaseLabel,
+    required this.unguided,
     required this.guidance,
     required this.showCaptions,
     required this.running,
@@ -895,6 +907,7 @@ class _MeditationStage extends StatelessWidget {
   });
 
   final String phaseLabel;
+  final bool unguided;
   final String guidance;
   final bool showCaptions;
   final bool running;
@@ -908,93 +921,98 @@ class _MeditationStage extends StatelessWidget {
     final status = completed
         ? 'Practice complete'
         : !running
-            ? 'Paused'
-            : hasVoice && voiceEnabled
-                ? 'Close your eyes and follow the voice.'
-                : hasVoice
-                    ? 'Voice is off. Use captions or continue in silence.'
-                    : 'Use captions or continue in silence.';
+        ? 'Paused'
+        : unguided
+        ? 'Stay with the practice in your own way.'
+        : hasVoice && voiceEnabled
+        ? 'Close your eyes and follow the voice.'
+        : hasVoice
+        ? 'Voice is off. Use captions or continue in silence.'
+        : 'Use captions or continue in silence.';
 
     return Center(
       child: ConstrainedBox(
-        constraints: BoxConstraints(
-          maxWidth: 520,
-          maxHeight: compact ? 330 : 460,
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _MeditationFocusGlow(
-              running: running,
-              completed: completed,
-              compact: compact,
-            ),
-            SizedBox(
-              height: compact ? ReleafSpacing.sm : ReleafSpacing.lg,
-            ),
-            AnimatedSwitcher(
-              duration: ReleafMotion.standard,
-              child: Text(
-                completed ? 'COMPLETE' : phaseLabel,
-                key: ValueKey(completed ? 'complete' : phaseLabel),
-                textAlign: TextAlign.center,
-                style: ReleafTypography.eyebrow.copyWith(
-                  color: ReleafFeatureAccents.meditation,
-                  fontSize: 10,
-                  letterSpacing: 2.0,
+        constraints: const BoxConstraints(maxWidth: 520),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _MeditationFocusGlow(
+                running: running,
+                completed: completed,
+                compact: compact,
+              ),
+              SizedBox(height: compact ? ReleafSpacing.sm : ReleafSpacing.lg),
+              AnimatedSwitcher(
+                duration: ReleafMotion.standard,
+                child: Text(
+                  completed ? 'COMPLETE' : phaseLabel,
+                  key: ValueKey(completed ? 'complete' : phaseLabel),
+                  textAlign: TextAlign.center,
+                  style: ReleafTypography.eyebrow.copyWith(
+                    color: ReleafFeatureAccents.meditation,
+                    fontSize: 10,
+                    letterSpacing: 2.0,
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              status,
-              textAlign: TextAlign.center,
-              style: ReleafTypography.meta.copyWith(
-                color: ReleafColors.textPrimary.withValues(alpha: 0.78),
-                fontSize: compact ? 11 : 12,
-                height: 1.4,
+              const SizedBox(height: 6),
+              Text(
+                status,
+                textAlign: TextAlign.center,
+                style: ReleafTypography.meta.copyWith(
+                  color: ReleafColors.textPrimary.withValues(alpha: 0.78),
+                  fontSize: compact ? 11 : 12,
+                  height: 1.4,
+                ),
               ),
-            ),
-            AnimatedSize(
-              duration: ReleafMotion.standard,
-              child: showCaptions && !completed
-                  ? Padding(
-                      padding: const EdgeInsets.only(top: ReleafSpacing.md),
-                      child: Container(
-                        key: const Key('meditation-caption-panel'),
-                        constraints: const BoxConstraints(maxWidth: 480),
-                        padding: EdgeInsets.symmetric(
-                          horizontal: compact
-                              ? ReleafSpacing.md
-                              : ReleafSpacing.lg,
-                          vertical: compact
-                              ? ReleafSpacing.sm
-                              : ReleafSpacing.md,
-                        ),
-                        decoration: BoxDecoration(
-                          color: ReleafColors.background.withValues(alpha: 0.58),
-                          borderRadius:
-                              BorderRadius.circular(ReleafRadii.large),
-                          border: Border.all(
-                            color: ReleafFeatureAccents.meditation
-                                .withValues(alpha: 0.18),
+              AnimatedSize(
+                duration: ReleafMotion.standard,
+                child: showCaptions && !completed
+                    ? Padding(
+                        padding: const EdgeInsets.only(top: ReleafSpacing.md),
+                        child: Container(
+                          key: const Key('meditation-caption-panel'),
+                          constraints: const BoxConstraints(maxWidth: 480),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: compact
+                                ? ReleafSpacing.md
+                                : ReleafSpacing.lg,
+                            vertical: compact
+                                ? ReleafSpacing.sm
+                                : ReleafSpacing.md,
+                          ),
+                          decoration: BoxDecoration(
+                            color: ReleafColors.background.withValues(
+                              alpha: 0.58,
+                            ),
+                            borderRadius: BorderRadius.circular(
+                              ReleafRadii.large,
+                            ),
+                            border: Border.all(
+                              color: ReleafFeatureAccents.meditation.withValues(
+                                alpha: 0.18,
+                              ),
+                            ),
+                          ),
+                          child: Text(
+                            guidance,
+                            textAlign: TextAlign.center,
+                            style: ReleafTypography.body.copyWith(
+                              color: ReleafColors.textPrimary.withValues(
+                                alpha: 0.88,
+                              ),
+                              fontSize: compact ? 13 : 15,
+                              height: 1.5,
+                            ),
                           ),
                         ),
-                        child: Text(
-                          guidance,
-                          textAlign: TextAlign.center,
-                          style: ReleafTypography.body.copyWith(
-                            color:
-                                ReleafColors.textPrimary.withValues(alpha: 0.88),
-                            fontSize: compact ? 13 : 15,
-                            height: 1.5,
-                          ),
-                        ),
-                      ),
-                    )
-                  : const SizedBox.shrink(),
-            ),
-          ],
+                      )
+                    : const SizedBox.shrink(),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -1083,8 +1101,8 @@ class _MeditationFocusGlowState extends State<_MeditationFocusGlow>
           widget.completed
               ? Icons.check_rounded
               : widget.running
-                  ? Icons.headphones_rounded
-                  : Icons.pause_rounded,
+              ? Icons.headphones_rounded
+              : Icons.pause_rounded,
           key: ValueKey((widget.completed, widget.running)),
           size: widget.compact ? 27 : 32,
           color: accent.withValues(alpha: 0.90),
@@ -1105,6 +1123,7 @@ class _MeditationPlaybackDock extends StatelessWidget {
     required this.stepCount,
     required this.voiceEnabled,
     required this.captionsEnabled,
+    required this.hasGuidance,
     required this.hasVoice,
     required this.hasAmbience,
     required this.ambienceEnabled,
@@ -1127,6 +1146,7 @@ class _MeditationPlaybackDock extends StatelessWidget {
   final int stepCount;
   final bool voiceEnabled;
   final bool captionsEnabled;
+  final bool hasGuidance;
   final bool hasVoice;
   final bool hasAmbience;
   final bool ambienceEnabled;
@@ -1153,9 +1173,7 @@ class _MeditationPlaybackDock extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xE80A0F0D),
         borderRadius: BorderRadius.circular(ReleafRadii.extraLarge),
-        border: Border.all(
-          color: accent.withValues(alpha: 0.18),
-        ),
+        border: Border.all(color: accent.withValues(alpha: 0.18)),
         boxShadow: const [
           BoxShadow(
             color: Color(0x5A000000),
@@ -1187,17 +1205,20 @@ class _MeditationPlaybackDock extends StatelessWidget {
                   fontSize: 9,
                 ),
               ),
-              const Spacer(),
-              Text(
-                stepCount <= 1
-                    ? 'Practice'
-                    : 'Part ${math.min(stepIndex + 1, stepCount)} of $stepCount',
-                style: ReleafTypography.meta.copyWith(
-                  color: ReleafColors.textMuted,
-                  fontSize: 9,
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  stepCount <= 1
+                      ? 'Practice'
+                      : 'Part ${math.min(stepIndex + 1, stepCount)} of $stepCount',
+                  textAlign: TextAlign.center,
+                  style: ReleafTypography.meta.copyWith(
+                    color: ReleafColors.textMuted,
+                    fontSize: 9,
+                  ),
                 ),
               ),
-              const Spacer(),
+              const SizedBox(width: 8),
               Text(
                 '-${_clockLabel(remainingSeconds)}',
                 style: ReleafTypography.meta.copyWith(
@@ -1232,8 +1253,8 @@ class _MeditationPlaybackDock extends StatelessWidget {
                       completed
                           ? Icons.check_rounded
                           : running
-                              ? Icons.pause_rounded
-                              : Icons.play_arrow_rounded,
+                          ? Icons.pause_rounded
+                          : Icons.play_arrow_rounded,
                       size: compact ? 28 : 32,
                       color: ReleafColors.background,
                     ),
@@ -1265,7 +1286,7 @@ class _MeditationPlaybackDock extends StatelessWidget {
                   active: voiceEnabled,
                   onPressed: onVoice,
                 ),
-              if (hasVoice)
+              if (hasGuidance)
                 _UtilityChip(
                   key: const Key('meditation-captions-chip'),
                   icon: Icons.closed_caption_outlined,
@@ -1288,6 +1309,7 @@ class _MeditationPlaybackDock extends StatelessWidget {
                 icon: Icons.tune_rounded,
                 label: 'Mix',
                 active: false,
+                toggleable: false,
                 onPressed: onControls,
               ),
             ],
@@ -1336,48 +1358,59 @@ class _UtilityChip extends StatelessWidget {
     required this.label,
     required this.active,
     required this.onPressed,
+    this.toggleable = true,
   });
 
   final IconData icon;
   final String label;
   final bool active;
   final VoidCallback onPressed;
+  final bool toggleable;
 
   @override
   Widget build(BuildContext context) {
     final accent = ReleafFeatureAccents.meditation;
-
-    return Material(
-      color: active
-          ? accent.withValues(alpha: 0.10)
-          : ReleafColors.surfaceSoft.withValues(alpha: 0.76),
-      borderRadius: BorderRadius.circular(ReleafRadii.pill),
-      child: InkWell(
+    return Semantics(
+      container: true,
+      button: true,
+      toggled: toggleable ? active : null,
+      label: label,
+      onTap: onPressed,
+      excludeSemantics: true,
+      child: Material(
+        color: active
+            ? accent.withValues(alpha: 0.10)
+            : ReleafColors.surfaceSoft.withValues(alpha: 0.76),
         borderRadius: BorderRadius.circular(ReleafRadii.pill),
-        onTap: onPressed,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 10,
-            vertical: 7,
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                icon,
-                size: 15,
-                color: active ? accent : ReleafColors.textSecondary,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(ReleafRadii.pill),
+          onTap: onPressed,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 48),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    icon,
+                    size: 15,
+                    color: active ? accent : ReleafColors.textSecondary,
+                  ),
+                  const SizedBox(width: 5),
+                  Flexible(
+                    child: Text(
+                      label,
+                      style: ReleafTypography.meta.copyWith(
+                        color: active ? accent : ReleafColors.textSecondary,
+                        fontSize: 9,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: 5),
-              Text(
-                label,
-                style: ReleafTypography.meta.copyWith(
-                  color: active ? accent : ReleafColors.textSecondary,
-                  fontSize: 9,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),
@@ -1410,9 +1443,7 @@ class _ControlSection extends StatelessWidget {
       decoration: BoxDecoration(
         color: ReleafColors.surfaceSoft.withValues(alpha: 0.72),
         borderRadius: BorderRadius.circular(ReleafRadii.large),
-        border: Border.all(
-          color: accent.withValues(alpha: 0.14),
-        ),
+        border: Border.all(color: accent.withValues(alpha: 0.14)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1505,14 +1536,8 @@ class _SlowMeditationBackdropState extends State<_SlowMeditationBackdrop>
         builder: (context, child) {
           final value = Curves.easeInOut.transform(_controller.value);
           return Transform.translate(
-            offset: Offset(
-              (value - 0.5) * 8,
-              (0.5 - value) * 5,
-            ),
-            child: Transform.scale(
-              scale: 1.025 + (value * 0.02),
-              child: child,
-            ),
+            offset: Offset((value - 0.5) * 8, (0.5 - value) * 5),
+            child: Transform.scale(scale: 1.025 + (value * 0.02), child: child),
           );
         },
         child: widget.child,

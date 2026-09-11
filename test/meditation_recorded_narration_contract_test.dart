@@ -30,7 +30,8 @@ void main() {
 
     expect(
       session.steps.every(
-        (step) => step.spokenGuidance != null && step.spokenGuidance!.isNotEmpty,
+        (step) =>
+            step.spokenGuidance != null && step.spokenGuidance!.isNotEmpty,
       ),
       isTrue,
     );
@@ -80,9 +81,6 @@ void main() {
       meditationVoiceSourceLabel(session),
       'Releaf Guide recording pending · captions only',
     );
-    expect(
-      meditationGuidanceSourceEyebrow(session),
-      'GUIDED · RELEAF GUIDE PENDING',
-    );
+    expect(meditationGuidanceSourceEyebrow(session), 'CAPTIONS ONLY');
   });
 }

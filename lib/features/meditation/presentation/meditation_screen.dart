@@ -14,12 +14,10 @@ import '../../relief/application/relief_paywall_hooks.dart';
 import '../application/meditation_library_controller.dart';
 import '../data/meditation_catalog.dart';
 import '../domain/meditation_content.dart';
+import 'meditation_guidance_labels.dart';
 
 class MeditationScreen extends ConsumerWidget {
-  const MeditationScreen({
-    super.key,
-    this.showBack = false,
-  });
+  const MeditationScreen({super.key, this.showBack = false});
 
   final bool showBack;
 
@@ -29,8 +27,9 @@ class MeditationScreen extends ConsumerWidget {
     final library = ref.watch(meditationLibraryControllerProvider);
     final isPremium = ref.watch(subscriptionControllerProvider).isPremium;
     final all = catalog.getAll();
-    final foundations =
-        catalog.getSeries(MeditationCatalog.foundationsSeriesId);
+    final foundations = catalog.getSeries(
+      MeditationCatalog.foundationsSeriesId,
+    );
     final foundationIds = foundations.map((item) => item.id);
     final completedFoundations = library.completedInSeries(foundationIds);
     final nextFoundation = foundations.firstWhere(
@@ -38,8 +37,9 @@ class MeditationScreen extends ConsumerWidget {
       orElse: () => foundations.first,
     );
 
-    final deeperPractice =
-        catalog.getSeries(MeditationCatalog.deeperPracticeSeriesId);
+    final deeperPractice = catalog.getSeries(
+      MeditationCatalog.deeperPracticeSeriesId,
+    );
     final deeperIds = deeperPractice.map((item) => item.id);
     final completedDeeper = library.completedInSeries(deeperIds);
     final nextDeeper = deeperPractice.isEmpty
@@ -49,8 +49,7 @@ class MeditationScreen extends ConsumerWidget {
             orElse: () => deeperPractice.first,
           );
 
-    final sleepPractice =
-        catalog.getSeries(MeditationCatalog.sleepSeriesId);
+    final sleepPractice = catalog.getSeries(MeditationCatalog.sleepSeriesId);
     final sleepIds = sleepPractice.map((item) => item.id);
     final completedSleep = library.completedInSeries(sleepIds);
     final nextSleep = sleepPractice.isEmpty
@@ -74,8 +73,8 @@ class MeditationScreen extends ConsumerWidget {
     final featured = recent.isNotEmpty
         ? recent.first
         : (!nextFoundation.isPremium || isPremium)
-            ? nextFoundation
-            : accessible.first;
+        ? nextFoundation
+        : accessible.first;
 
     final quickPractices = accessible
         .where(
@@ -109,11 +108,11 @@ class MeditationScreen extends ConsumerWidget {
     final unguided = catalog.getById('unguided-5');
 
     Future<void> open(MeditationContent item) => _openMeditation(
-          context: context,
-          ref: ref,
-          item: item,
-          isPremium: isPremium,
-        );
+      context: context,
+      ref: ref,
+      item: item,
+      isPremium: isPremium,
+    );
 
     return Theme(
       data: AppTheme.premiumDark(),
@@ -153,9 +152,7 @@ class MeditationScreen extends ConsumerWidget {
                                         context.go(AppRoutes.home);
                                       }
                                     },
-                                    icon: const Icon(
-                                      Icons.arrow_back_rounded,
-                                    ),
+                                    icon: const Icon(Icons.arrow_back_rounded),
                                   ),
                                 ),
                                 const SizedBox(height: ReleafSpacing.sm),
@@ -278,7 +275,7 @@ class MeditationScreen extends ConsumerWidget {
                                 eyebrow: 'QUICK PRACTICES',
                                 title: 'A few minutes is enough to begin.',
                                 description:
-                                    'Short audio-guided sessions for a pause in the middle of real life.',
+                                    'Short practices with recorded guidance or on-screen prompts.',
                               ),
                               const SizedBox(height: ReleafSpacing.md),
                               _PracticeRail(
@@ -379,12 +376,7 @@ Future<void> _openMeditation({
 
     if (unlock != true || !context.mounted) return;
 
-    await maybeShowPaywall(
-      context,
-      ref,
-      force: true,
-      softOffer: true,
-    );
+    await maybeShowPaywall(context, ref, force: true, softOffer: true);
     if (!context.mounted) return;
 
     final nowPremium = ref.read(subscriptionControllerProvider).isPremium;
@@ -475,10 +467,7 @@ class _MeditationPremiumPreviewSheet extends StatelessWidget {
                           gradient: LinearGradient(
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
-                            colors: [
-                              Color(0x12000000),
-                              Color(0xD7090D0B),
-                            ],
+                            colors: [Color(0x12000000), Color(0xD7090D0B)],
                           ),
                         ),
                       ),
@@ -511,7 +500,16 @@ class _MeditationPremiumPreviewSheet extends StatelessWidget {
                       icon: Icons.spa_outlined,
                       label: _categoryLabel(item.category),
                     ),
+                    _MetaPill(
+                      icon: _guidanceIcon(item),
+                      label: meditationGuidanceLabel(item),
+                    ),
                   ],
+                ),
+                const SizedBox(height: ReleafSpacing.sm),
+                Text(
+                  meditationGuidanceDescription(item),
+                  style: ReleafTypography.body,
                 ),
                 if (sample != null && sample.trim().isNotEmpty) ...[
                   const SizedBox(height: ReleafSpacing.lg),
@@ -534,7 +532,7 @@ class _MeditationPremiumPreviewSheet extends StatelessWidget {
                 ],
                 const SizedBox(height: ReleafSpacing.lg),
                 Text(
-                  'You can review the practice before deciding. Starting the full guided session requires Releaf Premium.',
+                  'You can review the practice before deciding. Access to this practice requires Releaf Premium.',
                   style: ReleafTypography.meta.copyWith(
                     color: ReleafColors.textMuted,
                     height: 1.45,
@@ -613,7 +611,7 @@ class _Header extends StatelessWidget {
         Text('Meditate', style: ReleafTypography.display),
         SizedBox(height: 6),
         Text(
-          'Press play, get comfortable, and let the practice create space.',
+          'Choose recorded guidance, on-screen prompts, or quiet time.',
           style: ReleafTypography.body,
         ),
       ],
@@ -638,158 +636,114 @@ class _FeaturedPractice extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final compact = constraints.maxWidth < 360;
-
-        return Semantics(
-          container: true,
-          label:
-              'Featured meditation. ${item.title}. ${_durationLabel(item)}.',
-          child: Container(
-            key: const Key('meditation-featured-practice'),
-            height: compact ? 350 : 318,
-            clipBehavior: Clip.antiAlias,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(ReleafRadii.extraLarge),
-              border: Border.all(
-                color: const Color(0xFFB5A8C0).withValues(alpha: 0.20),
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFF8D7B9C).withValues(alpha: 0.10),
-                  blurRadius: 34,
-                  offset: const Offset(0, 18),
-                ),
-              ],
+    return Container(
+      key: const Key('meditation-featured-practice'),
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(ReleafRadii.extraLarge),
+        border: Border.all(
+          color: const Color(0xFFB5A8C0).withValues(alpha: 0.20),
+        ),
+      ),
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: ReleafMeditationArtwork(
+              variant: _artworkFor(item.category),
+              intensity: 0.92,
             ),
-            child: Stack(
-              fit: StackFit.expand,
+          ),
+          const Positioned.fill(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Color(0x39000000), Color(0xED080A09)],
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(ReleafSpacing.lg),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                ReleafMeditationArtwork(
-                  variant: _artworkFor(item.category),
-                  intensity: 0.92,
-                ),
-                const DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Color(0x09000000),
-                        Color(0x39000000),
-                        Color(0xED080A09),
-                      ],
-                      stops: [0, 0.54, 1],
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'TODAY’S PRACTICE',
+                        style: ReleafTypography.eyebrow.copyWith(
+                          color: const Color(0xFFD8CFE0),
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-                Positioned(
-                  top: ReleafSpacing.md,
-                  right: ReleafSpacing.md,
-                  child: _FavoriteButton(
-                    itemId: item.id,
-                    selected: isFavorite,
-                    onPressed: onFavorite,
-                  ),
-                ),
-                Positioned(
-                  top: compact ? ReleafSpacing.lg : ReleafSpacing.xl,
-                  left: compact ? ReleafSpacing.lg : ReleafSpacing.xl,
-                  right: 72,
-                  child: const Text(
-                    'TODAY’S PRACTICE · RELEAF GUIDE',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      color: Color(0xFFD8CFE0),
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 1.5,
+                    _FavoriteButton(
+                      itemId: item.id,
+                      selected: isFavorite,
+                      onPressed: onFavorite,
                     ),
+                  ],
+                ),
+                const SizedBox(height: 36),
+                Text(
+                  item.title,
+                  style: ReleafTypography.display.copyWith(fontSize: 28),
+                ),
+                const SizedBox(height: ReleafSpacing.xs),
+                Text(item.subtitle, style: ReleafTypography.body),
+                const SizedBox(height: ReleafSpacing.md),
+                Wrap(
+                  spacing: ReleafSpacing.xs,
+                  runSpacing: ReleafSpacing.xs,
+                  children: [
+                    _MetaPill(
+                      icon: Icons.schedule_rounded,
+                      label: _durationLabel(item),
+                    ),
+                    _MetaPill(
+                      icon: _guidanceIcon(item),
+                      label: meditationGuidanceLabel(item),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: ReleafSpacing.sm),
+                Text(
+                  meditationGuidanceDescription(item),
+                  style: ReleafTypography.meta.copyWith(
+                    color: ReleafColors.textSecondary,
                   ),
                 ),
-                Positioned(
-                  left: compact ? ReleafSpacing.lg : ReleafSpacing.xl,
-                  right: compact ? ReleafSpacing.lg : ReleafSpacing.xl,
-                  bottom: compact ? ReleafSpacing.lg : ReleafSpacing.xl,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        item.title,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: ReleafTypography.display.copyWith(
-                          fontSize: compact ? 27 : 31,
-                          letterSpacing: -0.8,
-                        ),
+                const SizedBox(height: ReleafSpacing.md),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    onPressed: onPressed,
+                    icon: Icon(
+                      isLocked
+                          ? Icons.lock_outline_rounded
+                          : _guidanceIcon(item),
+                    ),
+                    label: Text(
+                      isLocked ? 'Unlock practice' : meditationStartLabel(item),
+                    ),
+                    style: FilledButton.styleFrom(
+                      minimumSize: const Size(0, ReleafControlSizes.standard),
+                      backgroundColor: const Color(0xFFD8D0C7),
+                      foregroundColor: const Color(0xFF151416),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: ReleafSpacing.md,
+                        vertical: ReleafSpacing.sm,
                       ),
-                      const SizedBox(height: ReleafSpacing.xs),
-                      Text(
-                        item.subtitle,
-                        maxLines: compact ? 3 : 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: ReleafTypography.body.copyWith(
-                          color:
-                              ReleafColors.textPrimary.withValues(alpha: 0.78),
-                        ),
-                      ),
-                      const SizedBox(height: ReleafSpacing.md),
-                      Wrap(
-                        spacing: ReleafSpacing.xs,
-                        runSpacing: ReleafSpacing.xs,
-                        children: [
-                          _MetaPill(
-                            icon: Icons.schedule_rounded,
-                            label: _durationLabel(item),
-                          ),
-                          _MetaPill(
-                            icon: item.unguided
-                                ? Icons.timer_outlined
-                                : Icons.record_voice_over_outlined,
-                            label: item.unguided ? 'Unguided' : 'Releaf Guide',
-                          ),
-                          if (!item.unguided)
-                            const _MetaPill(
-                              icon: Icons.visibility_off_outlined,
-                              label: 'Eyes-closed ready',
-                            ),
-                        ],
-                      ),
-                      const SizedBox(height: ReleafSpacing.md),
-                      SizedBox(
-                        width: compact ? double.infinity : null,
-                        height: ReleafControlSizes.standard,
-                        child: FilledButton.icon(
-                          onPressed: onPressed,
-                          icon: Icon(
-                            isLocked
-                                ? Icons.lock_outline_rounded
-                                : Icons.play_arrow_rounded,
-                          ),
-                          label: Text(
-                            isLocked ? 'Unlock practice' : 'Start practice',
-                          ),
-                          style: FilledButton.styleFrom(
-                            backgroundColor: const Color(0xFFD8D0C7),
-                            foregroundColor: const Color(0xFF151416),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: ReleafSpacing.lg,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
               ],
             ),
           ),
-        );
-      },
+        ],
+      ),
     );
   }
 }
@@ -811,23 +765,11 @@ class _TimeQuickStart extends StatelessWidget {
   Widget build(BuildContext context) {
     final options = <({String label, String sublabel, MeditationContent item})>[
       if (twoMinute != null)
-        (
-          label: '2 min',
-          sublabel: 'Reset attention',
-          item: twoMinute!,
-        ),
+        (label: '2 min', sublabel: 'Reset attention', item: twoMinute!),
       if (fourMinute != null)
-        (
-          label: '4 min',
-          sublabel: 'Settle in',
-          item: fourMinute!,
-        ),
+        (label: '4 min', sublabel: 'Settle in', item: fourMinute!),
       if (longer != null)
-        (
-          label: '5+ min',
-          sublabel: 'Go deeper',
-          item: longer!,
-        ),
+        (label: '5+ min', sublabel: 'Go deeper', item: longer!),
     ];
 
     return Container(
@@ -864,7 +806,7 @@ class _TimeQuickStart extends StatelessWidget {
                 Expanded(
                   child: _TimeQuickStartButton(
                     label: options[index].label,
-                    sublabel: options[index].sublabel,
+                    sublabel: meditationGuidanceLabel(options[index].item),
                     onPressed: () => onOpen(options[index].item),
                   ),
                 ),
@@ -897,10 +839,7 @@ class _TimeQuickStartButton extends StatelessWidget {
         borderRadius: BorderRadius.circular(ReleafRadii.medium),
         onTap: onPressed,
         child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 10,
-            vertical: 11,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 11),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -914,8 +853,6 @@ class _TimeQuickStartButton extends StatelessWidget {
               const SizedBox(height: 2),
               Text(
                 sublabel,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
                 style: ReleafTypography.meta.copyWith(
                   color: ReleafColors.textMuted,
                   fontSize: 8.5,
@@ -969,7 +906,10 @@ class _ProgramRail extends StatelessWidget {
     final compact = MediaQuery.sizeOf(context).width < 360;
 
     return SizedBox(
-      height: compact ? 238 : 222,
+      height:
+          (compact ? 258 : 242) +
+          (MediaQuery.textScalerOf(context).scale(14) / 14 - 1).clamp(0, 4) *
+              170,
       child: ListView(
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
@@ -980,7 +920,7 @@ class _ProgramRail extends StatelessWidget {
               cardKey: const Key('meditation-foundations-course'),
               eyebrow: 'FOUNDATIONS',
               title: 'Learn the basics',
-              description: 'Four audio-guided sessions that build one skill at a time.',
+              description: 'Four practices that build one skill at a time.',
               artwork: ReleafMeditationArtworkVariant.editorial,
               accent: const Color(0xFFC9BBCF),
               completed: foundationsCompleted,
@@ -1077,10 +1017,7 @@ class _ProgramCard extends StatelessWidget {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              ReleafMeditationArtwork(
-                variant: artwork,
-                intensity: 0.90,
-              ),
+              ReleafMeditationArtwork(variant: artwork, intensity: 0.90),
               const DecoratedBox(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
@@ -1132,15 +1069,16 @@ class _ProgramCard extends StatelessWidget {
                       children: [
                         Expanded(
                           child: ClipRRect(
-                            borderRadius:
-                                BorderRadius.circular(ReleafRadii.pill),
+                            borderRadius: BorderRadius.circular(
+                              ReleafRadii.pill,
+                            ),
                             child: LinearProgressIndicator(
                               minHeight: 4,
                               value: progress,
-                              backgroundColor:
-                                  Colors.white.withValues(alpha: 0.10),
-                              valueColor:
-                                  AlwaysStoppedAnimation<Color>(accent),
+                              backgroundColor: Colors.white.withValues(
+                                alpha: 0.10,
+                              ),
+                              valueColor: AlwaysStoppedAnimation<Color>(accent),
                             ),
                           ),
                         ),
@@ -1155,6 +1093,10 @@ class _ProgramCard extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: ReleafSpacing.sm),
+                    Text(
+                      meditationGuidanceLabel(nextItem),
+                      style: ReleafTypography.meta.copyWith(color: accent),
+                    ),
                     Row(
                       children: [
                         Expanded(
@@ -1174,8 +1116,7 @@ class _ProgramCard extends StatelessWidget {
                               ? Icons.lock_outline_rounded
                               : Icons.arrow_forward_rounded,
                           size: 18,
-                          color:
-                              isLocked ? ReleafColors.premium : accent,
+                          color: isLocked ? ReleafColors.premium : accent,
                         ),
                       ],
                     ),
@@ -1239,7 +1180,10 @@ class _PracticeRail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 224,
+      height:
+          224 +
+          (MediaQuery.textScalerOf(context).scale(14) / 14 - 1).clamp(0, 4) *
+              130,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
@@ -1364,7 +1308,9 @@ class _PracticeCardState extends State<_PracticeCard> {
                         widget.item.title,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: ReleafTypography.cardTitle.copyWith(fontSize: 17),
+                        style: ReleafTypography.cardTitle.copyWith(
+                          fontSize: 17,
+                        ),
                       ),
                       const SizedBox(height: 3),
                       Text(
@@ -1376,14 +1322,15 @@ class _PracticeCardState extends State<_PracticeCard> {
                       const SizedBox(height: ReleafSpacing.xs),
                       Row(
                         children: [
-                          Text(
-                            widget.item.unguided ? 'Timer' : 'Releaf Guide',
-                            style: ReleafTypography.meta.copyWith(
-                              color: const Color(0xFFB8AFC2),
-                              fontWeight: FontWeight.w700,
+                          Expanded(
+                            child: Text(
+                              meditationGuidanceLabel(widget.item),
+                              style: ReleafTypography.meta.copyWith(
+                                color: const Color(0xFFB8AFC2),
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
                           ),
-                          const Spacer(),
                           Icon(
                             widget.isLocked
                                 ? Icons.lock_outline_rounded
@@ -1440,8 +1387,7 @@ class _FavoriteButton extends StatelessWidget {
           iconSize: compact ? 17 : 19,
           icon: Icon(
             selected ? Icons.favorite_rounded : Icons.favorite_border_rounded,
-            color:
-                selected ? const Color(0xFFD8BEC8) : const Color(0xFFD9D4D9),
+            color: selected ? const Color(0xFFD8BEC8) : const Color(0xFFD9D4D9),
           ),
         ),
       ),
@@ -1498,7 +1444,10 @@ class _IntentionRail extends StatelessWidget {
     final compact = MediaQuery.sizeOf(context).width < 360;
 
     return SizedBox(
-      height: compact ? 152 : 164,
+      height:
+          (compact ? 152 : 164) +
+          (MediaQuery.textScalerOf(context).scale(14) / 14 - 1).clamp(0, 4) *
+              110,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
@@ -1520,10 +1469,7 @@ class _IntentionRail extends StatelessWidget {
 }
 
 class _IntentionTile extends StatelessWidget {
-  const _IntentionTile({
-    required this.category,
-    required this.onTap,
-  });
+  const _IntentionTile({required this.category, required this.onTap});
 
   final MeditationCategory category;
   final VoidCallback onTap;
@@ -1549,10 +1495,7 @@ class _IntentionTile extends StatelessWidget {
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    colors: [
-                      Color(0x10000000),
-                      Color(0xC70A0C0B),
-                    ],
+                    colors: [Color(0x10000000), Color(0xC70A0C0B)],
                     stops: [0.20, 1],
                   ),
                 ),
@@ -1572,9 +1515,7 @@ class _IntentionTile extends StatelessWidget {
                       _categoryLabel(category),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: ReleafTypography.cardTitle.copyWith(
-                        fontSize: 15,
-                      ),
+                      style: ReleafTypography.cardTitle.copyWith(fontSize: 15),
                     ),
                     const SizedBox(height: 3),
                     Text(
@@ -1687,10 +1628,7 @@ class _UnguidedTimerCard extends StatelessWidget {
 }
 
 class _MetaPill extends StatelessWidget {
-  const _MetaPill({
-    required this.icon,
-    required this.label,
-  });
+  const _MetaPill({required this.icon, required this.label});
 
   final IconData icon;
   final String label;
@@ -1712,12 +1650,14 @@ class _MetaPill extends StatelessWidget {
           children: [
             Icon(icon, size: 13, color: const Color(0xFFD7D1D9)),
             const SizedBox(width: 5),
-            Text(
-              label,
-              style: ReleafTypography.meta.copyWith(
-                color: const Color(0xFFD7D1D9),
-                fontSize: 10,
-                fontWeight: FontWeight.w600,
+            Flexible(
+              child: Text(
+                label,
+                style: ReleafTypography.meta.copyWith(
+                  color: const Color(0xFFD7D1D9),
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ],
@@ -1842,7 +1782,7 @@ class _SheetPracticeRow extends StatelessWidget {
                   Text(item.title, style: ReleafTypography.cardTitle),
                   const SizedBox(height: 4),
                   Text(
-                    '${_durationLabel(item)} · ${item.unguided ? 'Unguided' : 'Releaf Guide'}',
+                    '${_durationLabel(item)} · ${meditationGuidanceLabel(item)}',
                     style: ReleafTypography.meta,
                   ),
                 ],
@@ -1863,9 +1803,7 @@ class _SheetPracticeRow extends StatelessWidget {
               isLocked
                   ? Icons.lock_outline_rounded
                   : Icons.play_circle_outline_rounded,
-              color: isLocked
-                  ? ReleafColors.premium
-                  : const Color(0xFFB8AFC2),
+              color: isLocked ? ReleafColors.premium : const Color(0xFFB8AFC2),
             ),
           ),
         ],
@@ -1877,6 +1815,13 @@ class _SheetPracticeRow extends StatelessWidget {
 String _durationLabel(MeditationContent item) {
   final minutes = (item.durationSeconds / 60).round();
   return '$minutes min';
+}
+
+IconData _guidanceIcon(MeditationContent item) {
+  if (item.unguided) return Icons.timer_outlined;
+  return item.hasAnyRecordedNarration
+      ? Icons.record_voice_over_outlined
+      : Icons.closed_caption_outlined;
 }
 
 String _categoryLabel(MeditationCategory category) {
@@ -1924,8 +1869,7 @@ IconData _categoryIcon(MeditationCategory category) {
 
 ReleafMeditationArtworkVariant _artworkFor(MeditationCategory category) {
   return switch (category) {
-    MeditationCategory.startHere =>
-      ReleafMeditationArtworkVariant.editorial,
+    MeditationCategory.startHere => ReleafMeditationArtworkVariant.editorial,
     MeditationCategory.anxiety => ReleafMeditationArtworkVariant.anxiety,
     MeditationCategory.focus => ReleafMeditationArtworkVariant.focus,
     MeditationCategory.mind => ReleafMeditationArtworkVariant.compassion,

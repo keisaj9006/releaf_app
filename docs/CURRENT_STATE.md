@@ -3,14 +3,16 @@
 Snapshot: **2026-09-11**  
 Repo: `keisaj9006/releaf_app`  
 Branch: **`releaf-development`**  
-Verified implementation HEAD: **`3ddffee`** (`fix: preserve latest Sleep timer and playback intent`)
+Latest committed baseline: **`1b24990`** (account-deletion E2E evidence); subsequent
+Meditation quality work is recorded in [milestone evidence](release/2026-09-11-meditation-guidance-quality.md).
 
 Subsequent internal quality work is tracked in
 [batch evidence](release/2026-09-11-internal-quality-batches.md), including
 recorded-audio cancellation during configuration and source loading, Sleep timer
 boundaries/ordering, all 30 browsable Daily Insights, large-text Home layouts and
 consistent difficulty controls across all 15 Brain games. Latest full suite:
-**375 tests passed**; analyzer clean. No production/device verification is implied.
+**383 tests passed** after the Meditation milestone; analyzer clean and Android
+debug build passed. No production/device verification is implied.
 
 This file is a working snapshot. The code and canonical release gate remain authoritative if the branch moves.
 
@@ -123,7 +125,11 @@ Recent project work immediately before this snapshot reported:
 - Brain total: 15 games already present.
 - prior automated verification at commit `1fd44b7` was reported green, including analyzer/tests/build checks.
 
-The application code remains at the Reset movement change `7a422a7`; the following commit adds the context pack. On 2026-09-11, Flutter 3.47.2 / Dart 3.13.2 dependency resolution passed with no lockfile drift, `flutter analyze` reported no issues, and the full suite passed **333 tests**. The three Reset-change files then received formatter-only edits; formatter verification and **9 focused Reset guidance/lifecycle tests** passed. The web release build and its built deletion-resource contract also passed. See `docs/release/2026-09-11-repository-audit.md` for verification scope and remaining checks; these results do not close external or device gates.
+The historical audit started from the Reset movement change `7a422a7` plus its
+context pack. That checkpoint passed **333 tests**, clean analysis, **9 focused
+Reset guidance/lifecycle tests**, and a web release build/resource contract.
+See `docs/release/2026-09-11-repository-audit.md` for its scope. Subsequent
+implementation has moved beyond that snapshot; current evidence is linked above.
 
 ### Historical specific game contracts
 
@@ -163,6 +169,12 @@ Current architecture includes:
 - separate recorded voice controller,
 - resume state,
 - production/voice documentation.
+
+Library, Premium preview and player now disclose recorded, partial, captions-only
+or unguided availability. Incomplete narration starts with usable on-screen
+guidance without changing the saved caption preference on entry. Caption controls
+and large-text layouts have regression coverage; silent partial steps do not
+promise a voice. See the Meditation milestone evidence above.
 
 ### Releaf Guide contract
 

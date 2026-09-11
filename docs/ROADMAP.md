@@ -5,6 +5,12 @@ This roadmap converts the current repo + release gate + latest project decisions
 The canonical release gate remains:
 `docs/release/releaf_1_0_release_gate.md`
 
+The owner-approved [quality programme](plans/2026-09-11-product-quality-programme.md)
+continues the completed internal pass. Its first milestone (Meditation guidance
+disclosure, captions and large text) passed 383 tests, clean analysis and a debug
+Android build. Next is preventing rejected breathing tones from runtime playback.
+Content approvals and production-equivalent device/release gates remain open.
+
 ## Phase 0 — Re-establish verified baseline
 
 **Priority: immediate**

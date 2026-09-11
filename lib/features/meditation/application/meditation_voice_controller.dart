@@ -206,10 +206,11 @@ class MeditationVoiceController extends StateNotifier<MeditationVoiceState> {
     }
   }
 
-  Future<void> toggleCaptions() async {
-    final next = !state.showCaptions;
-    state = state.copyWith(showCaptions: next);
-    await _preferences.setBool(_captionsKey, next);
+  Future<void> toggleCaptions() => setCaptions(!state.showCaptions);
+
+  Future<void> setCaptions(bool showCaptions) async {
+    state = state.copyWith(showCaptions: showCaptions);
+    await _preferences.setBool(_captionsKey, showCaptions);
   }
 
   Future<void> setVolume(double volume) async {
