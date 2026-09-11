@@ -94,14 +94,35 @@ class _ReleafGroundingBodyVisualState
             return AnimatedBuilder(
               animation: _controller,
               builder: (context, _) {
-                return CustomPaint(
-                  key: const Key('reset-grounding-body-visual'),
-                  painter: _GroundingBodyPainter(
-                    t: _controller.value,
-                    progress: animatedProgress,
-                    phaseLabel: widget.phaseLabel,
-                  ),
-                  child: const SizedBox.expand(),
+                return Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    CustomPaint(
+                      key: const Key('reset-grounding-body-visual'),
+                      painter: _GroundingBodyPainter(
+                        t: _controller.value,
+                        progress: animatedProgress,
+                        phaseLabel: widget.phaseLabel,
+                      ),
+                    ),
+                    Align(
+                      alignment: Alignment.bottomCenter,
+                      child: AnimatedSwitcher(
+                        duration: ReleafMotion.standard,
+                        child: Padding(
+                          key: ValueKey(widget.phaseLabel),
+                          padding: const EdgeInsets.only(bottom: 30),
+                          child: Text(
+                            widget.phaseLabel,
+                            style: ReleafTypography.eyebrow.copyWith(
+                              color: ReleafColors.sage,
+                              letterSpacing: 1.3,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 );
               },
             );

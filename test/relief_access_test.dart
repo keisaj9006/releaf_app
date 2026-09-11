@@ -193,7 +193,10 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
 
-    expect(find.byKey(const Key('reset-living-form')), findsOneWidget);
+    expect(
+      find.byKey(const Key('reset-grounding-body-visual')),
+      findsOneWidget,
+    );
     expect(find.byKey(const Key('reset-breath-path')), findsOneWidget);
     expect(find.text('Breathe in'), findsOneWidget);
   });
@@ -218,7 +221,10 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
 
-    expect(find.byKey(const Key('reset-living-form')), findsOneWidget);
+    expect(
+      find.byKey(const Key('reset-grounding-body-visual')),
+      findsOneWidget,
+    );
     expect(find.byKey(const Key('reset-breath-path')), findsOneWidget);
     expect(find.text('Breathe in'), findsOneWidget);
   });
@@ -243,7 +249,10 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
 
-    expect(find.byKey(const Key('reset-living-form')), findsOneWidget);
+    expect(
+      find.byKey(const Key('reset-grounding-body-visual')),
+      findsOneWidget,
+    );
     expect(find.byKey(const Key('reset-breath-path')), findsNothing);
     expect(find.text('Arrive'), findsOneWidget);
   });
@@ -544,7 +553,10 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 250));
     expect(find.text('01:00'), findsOneWidget);
-    expect(find.byKey(const Key('reset-living-form')), findsOneWidget);
+    expect(
+      find.byKey(const Key('reset-grounding-body-visual')),
+      findsOneWidget,
+    );
 
     await tester.tap(find.byTooltip('Exit reset'));
     await tester.pump();
@@ -699,7 +711,10 @@ void main() {
     await tester.tap(find.byKey(const Key('reset-preview-start')));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 250));
-    expect(find.byKey(const Key('reset-living-form')), findsOneWidget);
+    expect(
+      find.byKey(const Key('reset-grounding-body-visual')),
+      findsOneWidget,
+    );
     await tester.pump(const Duration(seconds: 60));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
