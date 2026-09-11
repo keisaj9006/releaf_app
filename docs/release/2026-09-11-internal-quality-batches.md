@@ -63,3 +63,23 @@ tooling metadata and documentation only.
 Next: objective Atmosphere II candidate comparison, followed by Sleep timer
 boundary verification. Owner listening/approval and natural-breath candidate
 generation remain external dependencies; no runtime candidate was shipped.
+
+## Batch 3 — Atmosphere II headroom audition
+
+Base: `97ab2ce`. Created a separate unapproved MP3 and objective JSON comparison
+under `audio-candidates/2026-09-11`, with a README containing processing commands
+and limitations. Active `relief_02.mp3` SHA-256 is unchanged. No Flutter asset
+registration or runtime code changed.
+
+FFmpeg decode/EBU R128 scans passed for both files. Source: +0.8 dBTP, -9.0 LUFS,
+5,646,537 bytes. Candidate: -2.5 dBTP, -12.3 LUFS, 5,550,432 bytes. Static -3 dB
+attenuation plus MP3 re-encoding creates headroom; it is not restoration of
+existing distortion or owner listening approval. The initial measurement helper
+hit a Windows metadata-decoding error; explicit UTF-8 fixed it without replacing
+the already-created candidate.
+
+Affected gate: Sleep/Sound CONTENT remains open pending owner listening and
+selection. Runtime build/test evidence remains the verified batch 1 Android and
+batch 2 web artifacts. Fresh analyzer: **No issues found**. `git diff --check`
+passed; no `audio-candidates` references exist in lib or pubspec. Next internal
+task: Sleep timer deadline boundaries.

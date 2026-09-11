@@ -1,0 +1,22 @@
+{
+  "approval": "unapproved audition candidate; not registered in runtime",
+  "processing": "FFmpeg volume=-3dB; libmp3lame 192k; no dynamics processing",
+  "ffmpegVersion": "7.1-essentials_build-www.gyan.dev",
+  "sourceUnchanged": true,
+  "files": [
+    {
+      "path": "assets/sounds/relief_02.mp3",
+      "integratedLufs": -9.0,
+      "truePeakDbtp": 0.8,
+      "bytes": 5646537,
+      "sha256": "0b6beca4bbdf8f1d66d500868ed2c06b38cca244009670b0f1fe3e45ffc8f6c3"
+    },
+    {
+      "path": "audio-candidates/2026-09-11/atmosphere-ii-minus-3db.mp3",
+      "integratedLufs": -12.3,
+      "truePeakDbtp": -2.5,
+      "bytes": 5550432,
+      "sha256": "8f2e7cacbbd59b5c045acb774c85bdd47843222a48fb2f0a9ff738cf6cf37615"
+    }
+  ]
+}
