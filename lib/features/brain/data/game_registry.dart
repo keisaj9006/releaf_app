@@ -39,6 +39,7 @@ const brainGames = <BrainGameMeta>[
     title: 'Labyrinth',
     icon: Icons.route,
     group: BrainGameGroup.spatial,
+    hasDifficultyLevels: true,
   ),
   BrainGameMeta(
     id: 'math_race',

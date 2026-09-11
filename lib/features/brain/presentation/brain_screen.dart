@@ -1076,8 +1076,9 @@ class _SkillGameCardState extends State<_SkillGameCard> {
                             if (widget.trainingLevel != null) ...[
                               const SizedBox(width: 6),
                               _SkillBadge(
-                                label:
-                                    'LEVEL ${widget.trainingLevel}/$maxBrainTrainingLevel',
+                                label: widget.game.hasDifficultyLevels
+                                    ? 'L${widget.trainingLevel} · 3 MODES'
+                                    : 'LEVEL ${widget.trainingLevel}/$maxBrainTrainingLevel',
                                 accent: widget.presentation.accent,
                               ),
                             ] else if (widget.game.hasDifficultyLevels) ...[

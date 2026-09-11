@@ -13,6 +13,7 @@ import 'package:releaf_app/features/brain/data/game_registry.dart';
 import 'package:releaf_app/features/brain/presentation/brain_screen.dart';
 import 'package:releaf_app/features/brain/presentation/game_host_screen.dart';
 import 'package:releaf_app/features/brain/presentation/game_result_screen.dart';
+import 'package:releaf_app/features/brain/presentation/widgets/brain_difficulty_selector.dart';
 import 'package:releaf_app/features/progress/data/leaves_repository.dart';
 import 'package:releaf_app/games/math_race/math_puzzle_generator.dart';
 import 'package:releaf_app/games/math_race/math_race_screen.dart';
@@ -84,6 +85,36 @@ void main() {
 
     expect(game.trainingLevel, 6);
     expect(game.mazeStage, 23);
+    expect(
+      brainGames
+          .singleWhere((game) => game.id == 'labyrinth')
+          .hasDifficultyLevels,
+      isTrue,
+    );
+  });
+
+  test('Labyrinth difficulty is relative to the persisted Brain level', () {
+    expect(
+      labyrinthProfileLevelForDifficulty(6, BrainDifficulty.easy),
+      4,
+    );
+    expect(
+      labyrinthProfileLevelForDifficulty(6, BrainDifficulty.medium),
+      6,
+    );
+    expect(
+      labyrinthProfileLevelForDifficulty(6, BrainDifficulty.hard),
+      8,
+    );
+
+    expect(
+      labyrinthProfileLevelForDifficulty(1, BrainDifficulty.easy),
+      1,
+    );
+    expect(
+      labyrinthProfileLevelForDifficulty(12, BrainDifficulty.hard),
+      12,
+    );
   });
 
   testWidgets('Broken Mirror timer pauses while the app is backgrounded', (
@@ -878,9 +909,8 @@ void main() {
     expect(find.text('23/50'), findsOneWidget);
     expect(find.text('L6'), findsOneWidget);
     expect(find.text('Ready'), findsOneWidget);
+    expect(find.byKey(const Key('brain-difficulty-selector')), findsOneWidget);
     expect(find.byKey(const Key('labyrinth-board')), findsOneWidget);
-    expect(find.text('ENTRY'), findsOneWidget);
-    expect(find.text('Top'), findsOneWidget);
     expect(find.text('MAZE'), findsOneWidget);
     expect(find.text('23/50'), findsOneWidget);
     expect(
@@ -889,11 +919,19 @@ void main() {
     );
     expect(find.textContaining('Drag anywhere'), findsOneWidget);
 
+    await tester.tap(find.byKey(const Key('brain-difficulty-hard')));
+    await tester.pump();
+    expect(find.text('Hard'), findsOneWidget);
+
     final board = find.byKey(const Key('labyrinth-board'));
     await tester.drag(board, const Offset(0, -36));
     await tester.pump(const Duration(milliseconds: 50));
 
     expect(find.text('Ready'), findsNothing);
+    final hardButton = tester.widget<FilledButton>(
+      find.byKey(const Key('brain-difficulty-hard')),
+    );
+    expect(hardButton.onPressed, isNull);
     expect(tester.takeException(), isNull);
 
     await tester.pumpWidget(const SizedBox.shrink());
@@ -1012,8 +1050,8 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
 
     expect(find.byKey(const Key('labyrinth-board')), findsOneWidget);
-    expect(find.text('ENTRY'), findsOneWidget);
     expect(find.text('MAZE'), findsOneWidget);
+    expect(find.byKey(const Key('brain-difficulty-selector')), findsOneWidget);
     expect(tester.takeException(), isNull);
 
     await tester.pumpWidget(const SizedBox.shrink());

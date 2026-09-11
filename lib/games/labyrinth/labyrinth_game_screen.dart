@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 
 import '../../features/brain/presentation/game_result_screen.dart';
+import '../../features/brain/presentation/widgets/brain_difficulty_selector.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/releaf_design_tokens.dart';
 
@@ -21,6 +22,23 @@ const int maxLabyrinthMazeStages = 50;
 
 int labyrinthMazeStageForCompletionCount(int completedSessions) {
   return (completedSessions + 1).clamp(1, maxLabyrinthMazeStages).toInt();
+}
+
+/// Keeps the persistent Brain level as the medium baseline while allowing a
+/// player to choose a calmer or more demanding maze before the timer starts.
+/// The public progression model remains unchanged.
+@visibleForTesting
+int labyrinthProfileLevelForDifficulty(
+  int rawTrainingLevel,
+  BrainDifficulty difficulty,
+) {
+  final trainingLevel = rawTrainingLevel.clamp(1, 12).toInt();
+  final offset = switch (difficulty) {
+    BrainDifficulty.easy => -2,
+    BrainDifficulty.medium => 0,
+    BrainDifficulty.hard => 2,
+  };
+  return (trainingLevel + offset).clamp(1, 12).toInt();
 }
 
 @visibleForTesting
@@ -111,7 +129,7 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen>
   static const int _motionCalibrationSampleTarget = 12;
   static const double _motionDeadZone = 0.08;
 
-  late final _MazeLevel _level;
+  late _MazeLevel _level;
   late Offset _position;
   Offset _velocity = Offset.zero;
   Offset _tilt = Offset.zero;
@@ -128,12 +146,18 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen>
   bool _pausedByLifecycle = false;
   bool _finished = false;
   bool _motionAvailable = false;
+  BrainDifficulty _difficulty = BrainDifficulty.medium;
   int _timeLeft = 0;
   int _wallHits = 0;
   DateTime _lastWallHaptic = DateTime.fromMillisecondsSinceEpoch(0);
 
-  int get _levelNumber =>
+  int get _trainingLevelNumber =>
       widget.trainingLevel.clamp(1, _maxTrainingLevel).toInt();
+
+  int get _profileLevelNumber => labyrinthProfileLevelForDifficulty(
+        _trainingLevelNumber,
+        _difficulty,
+      );
 
   int get _mazeStage =>
       widget.mazeStage.clamp(1, maxLabyrinthMazeStages).toInt();
@@ -143,7 +167,7 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _level = _MazeLevel.generate(
-      _levelNumber,
+      _profileLevelNumber,
       mazeStage: _mazeStage,
     );
     _position = _level.start;
@@ -344,7 +368,7 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen>
   }
 
   bool _canOccupy(Offset point) {
-    final r = labyrinthBallRadiusForLevel(_levelNumber) +
+    final r = labyrinthBallRadiusForLevel(_profileLevelNumber) +
         (_wallThickness / 2);
 
     if (point.dx - r <= 0 ||
@@ -422,7 +446,7 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen>
     final timeBonus = (_timeLeft / math.max(1, _level.timeLimitSeconds) * 40)
         .round();
     final precisionBonus = math.max(0, 30 - (_wallHits * 2)).toInt();
-    final difficultyBonus = _levelNumber * 5;
+    final difficultyBonus = _profileLevelNumber * 5;
     final score = 100 + timeBonus + precisionBonus + difficultyBonus;
 
     _showSuccess(score);
@@ -476,6 +500,22 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen>
     });
   }
 
+  void _setDifficulty(BrainDifficulty difficulty) {
+    if (_started || _finished || _paused || difficulty == _difficulty) return;
+
+    setState(() {
+      _difficulty = difficulty;
+      _level = _MazeLevel.generate(
+        _profileLevelNumber,
+        mazeStage: _mazeStage,
+      );
+      _position = _level.start;
+      _velocity = Offset.zero;
+      _timeLeft = _level.timeLimitSeconds;
+      _wallHits = 0;
+    });
+  }
+
   void _restart() {
     Navigator.of(context).pop();
     _countdown?.cancel();
@@ -501,7 +541,8 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen>
             ? 'You completed all 50 Labyrinth mazes.'
             : 'Your next Labyrinth session will open a new maze.',
         stats: [
-          ('Brain level', 'L$_levelNumber'),
+          ('Brain level', 'L$_trainingLevelNumber'),
+          ('Difficulty', _difficulty.label),
           ('Time left', '${_timeLeft}s'),
           ('Wall touches', '$_wallHits'),
           ('Grid', '${_level.columns}×${_level.rows}'),
@@ -544,7 +585,8 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen>
         title: 'Time up',
         subtitle: 'Try the route again. The maze stays the same for this level.',
         stats: [
-          ('Level', 'L$_levelNumber'),
+          ('Brain level', 'L$_trainingLevelNumber'),
+          ('Difficulty', _difficulty.label),
           ('Wall touches', '$_wallHits'),
           ('Maze', '${_level.columns}×${_level.rows}'),
           ('Shortest route', '${_level.shortestPathMoves} moves'),
@@ -571,7 +613,7 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen>
           child: LayoutBuilder(
             builder: (context, constraints) {
               final compact = constraints.maxWidth < 380;
-              final hudHeight = compact ? 132.0 : 104.0;
+              final hudHeight = compact ? 216.0 : 180.0;
               final availableHeight =
                   math.max(220.0, constraints.maxHeight - hudHeight).toDouble();
               final boardWidth = math
@@ -590,14 +632,16 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen>
                   Column(
                     children: [
                       _MazeHeader(
-                        level: _levelNumber,
+                        level: _trainingLevelNumber,
                         mazeStage: _mazeStage,
                         timeLeft: _timeLeft,
-                        wallHits: _wallHits,
-                        entryLabel: _level.entryLabel,
                         started: _started,
                         paused: _paused,
                         motionAvailable: _motionAvailable,
+                        difficulty: _difficulty,
+                        difficultyEnabled:
+                            !_started && !_finished && !_paused,
+                        onDifficultyChanged: _setDifficulty,
                         onPause: _togglePause,
                         onExit: () => Navigator.of(context).maybePop(),
                       ),
@@ -667,7 +711,8 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen>
                                   'Maze',
                                   '$_mazeStage/$maxLabyrinthMazeStages',
                                 ),
-                                ('Brain level', 'L$_levelNumber'),
+                                ('Brain level', 'L$_trainingLevelNumber'),
+                                ('Difficulty', _difficulty.label),
                                 ('Time left', '${_timeLeft}s'),
                               ],
                               primaryLabel: 'Restart',
@@ -1316,11 +1361,12 @@ class _MazeHeader extends StatelessWidget {
     required this.level,
     required this.mazeStage,
     required this.timeLeft,
-    required this.wallHits,
-    required this.entryLabel,
     required this.started,
     required this.paused,
     required this.motionAvailable,
+    required this.difficulty,
+    required this.difficultyEnabled,
+    required this.onDifficultyChanged,
     required this.onPause,
     required this.onExit,
   });
@@ -1328,11 +1374,12 @@ class _MazeHeader extends StatelessWidget {
   final int level;
   final int mazeStage;
   final int timeLeft;
-  final int wallHits;
-  final String entryLabel;
   final bool started;
   final bool paused;
   final bool motionAvailable;
+  final BrainDifficulty difficulty;
+  final bool difficultyEnabled;
+  final ValueChanged<BrainDifficulty> onDifficultyChanged;
   final VoidCallback onPause;
   final VoidCallback onExit;
 
@@ -1398,13 +1445,18 @@ class _MazeHeader extends StatelessWidget {
                 label: 'TIME',
                 value: started ? '${timeLeft}s' : 'Ready',
               ),
-              _MazeStat(label: 'WALLS', value: '$wallHits'),
-              _MazeStat(label: 'ENTRY', value: entryLabel),
               _MazeStat(
                 label: 'CONTROL',
                 value: motionAvailable ? 'Tilt + touch' : 'Touch',
               ),
             ],
+          ),
+          const SizedBox(height: ReleafSpacing.sm),
+          BrainDifficultySelector(
+            value: difficulty,
+            enabled: difficultyEnabled,
+            accent: ReleafColors.sage,
+            onChanged: onDifficultyChanged,
           ),
         ],
       ),
