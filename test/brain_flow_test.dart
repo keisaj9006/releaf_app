@@ -117,6 +117,35 @@ void main() {
     );
   });
 
+  test('Math Race difficulty is relative to the persisted Brain level', () {
+    expect(
+      mathRaceStartingPuzzleLevelForDifficulty(5, BrainDifficulty.easy),
+      11,
+    );
+    expect(
+      mathRaceStartingPuzzleLevelForDifficulty(5, BrainDifficulty.medium),
+      13,
+    );
+    expect(
+      mathRaceStartingPuzzleLevelForDifficulty(5, BrainDifficulty.hard),
+      15,
+    );
+    expect(
+      mathRaceStartingPuzzleLevelForDifficulty(1, BrainDifficulty.easy),
+      1,
+    );
+    expect(
+      mathRaceStartingPuzzleLevelForDifficulty(12, BrainDifficulty.hard),
+      36,
+    );
+    expect(
+      brainGames
+          .singleWhere((game) => game.id == 'math_race')
+          .hasDifficultyLevels,
+      isTrue,
+    );
+  });
+
   testWidgets('Broken Mirror timer pauses while the app is backgrounded', (
     WidgetTester tester,
   ) async {
@@ -1073,6 +1102,58 @@ void main() {
 
     expect(find.text('Brain L5'), findsOneWidget);
     expect(find.text('Puzzle 13'), findsOneWidget);
+    expect(find.byKey(const Key('brain-difficulty-selector')), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
+  });
+
+  testWidgets('Math Race offers difficulty choice without losing Brain level', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MathRaceScreen(
+          trainingLevel: 5,
+          onFinish: (_) {},
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('Puzzle 13'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('brain-difficulty-hard')));
+    await tester.pump();
+
+    expect(find.text('Brain L5'), findsOneWidget);
+    expect(find.text('Puzzle 15'), findsOneWidget);
+    expect(find.text('60s'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
+  });
+
+  testWidgets('Math Race stays usable on a 320px phone', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(320, 700);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MathRaceScreen(onFinish: (_) {}),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.byKey(const Key('brain-difficulty-selector')), findsOneWidget);
+    expect(find.byKey(const Key('math-race-puzzle-card')), findsOneWidget);
     expect(tester.takeException(), isNull);
 
     await tester.pumpWidget(const SizedBox.shrink());

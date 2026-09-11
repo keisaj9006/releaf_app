@@ -46,6 +46,7 @@ const brainGames = <BrainGameMeta>[
     title: 'Math Race',
     icon: Icons.calculate,
     group: BrainGameGroup.reasoning,
+    hasDifficultyLevels: true,
   ),
 
   BrainGameMeta(

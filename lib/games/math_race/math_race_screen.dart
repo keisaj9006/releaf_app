@@ -4,11 +4,26 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/brain/presentation/game_result_screen.dart';
+import '../../features/brain/presentation/widgets/brain_difficulty_selector.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/releaf_design_tokens.dart';
 import '../../theme/widgets/releaf_brain_artwork.dart';
 import 'math_puzzle_generator.dart';
 import 'math_race_stats.dart';
+
+int mathRaceStartingPuzzleLevelForDifficulty(
+  int trainingLevel,
+  BrainDifficulty difficulty,
+) {
+  final safeTrainingLevel = trainingLevel.clamp(1, 12).toInt();
+  final baseline = 1 + ((safeTrainingLevel - 1) * 3);
+  final offset = switch (difficulty) {
+    BrainDifficulty.easy => -2,
+    BrainDifficulty.medium => 0,
+    BrainDifficulty.hard => 2,
+  };
+  return (baseline + offset).clamp(1, 36).toInt();
+}
 
 class MathRaceScreen extends ConsumerStatefulWidget {
   final ValueChanged<int>? onFinish;
@@ -35,10 +50,15 @@ class _MathRaceScreenState extends ConsumerState<MathRaceScreen>
 
   int _level = 1;
   int _score = 0;
+  BrainDifficulty _selectedDifficulty = BrainDifficulty.medium;
+  bool _difficultyLocked = false;
 
   int get _trainingLevel => widget.trainingLevel.clamp(1, 12).toInt();
 
-  int get _startingPuzzleLevel => 1 + ((_trainingLevel - 1) * 3);
+  int get _startingPuzzleLevel => mathRaceStartingPuzzleLevelForDifficulty(
+        _trainingLevel,
+        _selectedDifficulty,
+      );
 
   Difficulty _difficulty = Difficulty.easy;
   MathPuzzle? _puzzle;
@@ -64,6 +84,7 @@ class _MathRaceScreenState extends ConsumerState<MathRaceScreen>
     _timeLeft = _sessionSeconds;
 
     _locked = false;
+    _difficultyLocked = false;
     _feedback = null;
     _level = _startingPuzzleLevel;
     _score = 0;
@@ -150,6 +171,7 @@ class _MathRaceScreenState extends ConsumerState<MathRaceScreen>
   Future<void> _answer(int value) async {
     if (_locked || _puzzle == null) return;
     _locked = true;
+    _difficultyLocked = true;
 
     final correct = value == _puzzle!.correctAnswer;
     if (correct) {
@@ -182,6 +204,12 @@ class _MathRaceScreenState extends ConsumerState<MathRaceScreen>
   }
 
   void _restartSession() {
+    _startSession();
+  }
+
+  void _selectDifficulty(BrainDifficulty value) {
+    if (_difficultyLocked || _locked || value == _selectedDifficulty) return;
+    _selectedDifficulty = value;
     _startSession();
   }
 
@@ -347,6 +375,13 @@ class _MathRaceScreenState extends ConsumerState<MathRaceScreen>
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.stretch,
                                 children: [
+                                  BrainDifficultySelector(
+                                    value: _selectedDifficulty,
+                                    accent: accent,
+                                    enabled: !_difficultyLocked && !_locked,
+                                    onChanged: _selectDifficulty,
+                                  ),
+                                  const SizedBox(height: ReleafSpacing.md),
                                   Wrap(
                                     spacing: ReleafSpacing.xs,
                                     runSpacing: ReleafSpacing.xs,
@@ -618,6 +653,7 @@ class _MathRaceScreenState extends ConsumerState<MathRaceScreen>
                                                 ? null
                                                 : () {
                                                     setState(() {
+                                                      _difficultyLocked = true;
                                                       _score = (_score - 2)
                                                           .clamp(0, 999999);
                                                       _level++;
