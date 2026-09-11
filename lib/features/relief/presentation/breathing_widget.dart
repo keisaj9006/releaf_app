@@ -18,6 +18,7 @@ import '../../../theme/widgets/releaf_body_release_visual.dart';
 import '../../../theme/widgets/releaf_components.dart';
 import '../../../theme/widgets/releaf_emergency_visual.dart';
 import '../../../theme/widgets/releaf_grounding_body_visual.dart';
+import '../../../theme/widgets/releaf_movement_demo_visual.dart';
 import '../../../theme/widgets/releaf_session_living_form.dart';
 import '../../../theme/widgets/releaf_sensory_halo.dart';
 import '../../../theme/widgets/releaf_thought_unhook_visual.dart';
@@ -777,6 +778,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
         : 1 - (_remainingSeconds / _activeDurationSeconds);
     final phaseLabel = _sessionPhaseLabel(session);
     final artwork = _artworkFor(session);
+    final movementDemoKind = releafMovementDemoKindForSession(session.id);
     final breathPattern = session.program?.breathPattern;
     final isPacedBreathing =
         session.program?.type == ResetProgramType.pacedBreathing &&
@@ -875,83 +877,92 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
                           child: SizedBox(
                             width: formSize,
                             height: formSize,
-                            child: switch (session.visualType) {
-                              ResetVisualType.sensoryHalo =>
-                                ReleafSensoryHalo(
-                                  progress: progress,
-                                  targetCount: _sensoryTargetFor(phaseLabel),
-                                  completedCount:
-                                      _sensoryCompletedFor(session),
-                                  phaseLabel: phaseLabel ?? 'Notice',
-                                  onNotice: _sensoryTargetFor(phaseLabel) > 0
-                                      ? _registerSensoryNotice
-                                      : null,
-                                  reducedMotion: reducedMotion,
-                                ),
-                              ResetVisualType.bodyRelease =>
-                                ReleafBodyReleaseVisual(
-                                  progress: progress,
-                                  phaseLabel: phaseLabel ?? 'Notice',
-                                  reducedMotion: reducedMotion,
-                                ),
-                              ResetVisualType.bodyGrounding =>
-                                ReleafGroundingBodyVisual(
-                                  progress: progress,
-                                  phaseLabel: phaseLabel ?? 'Arrive',
-                                  reducedMotion: reducedMotion,
-                                ),
-                              ResetVisualType.thoughtUnhook =>
-                                ReleafThoughtUnhookVisual(
-                                  progress: progress,
-                                  phaseLabel: phaseLabel ?? 'Notice',
-                                  reducedMotion: reducedMotion,
-                                ),
-                              ResetVisualType.objectFocus =>
-                                ReleafObjectFocusVisual(
-                                  progress: progress,
-                                  phaseLabel: phaseLabel ?? 'Choose',
-                                  reducedMotion: reducedMotion,
-                                ),
-                              ResetVisualType.soundRipple =>
-                                ReleafSoundRippleVisual(
-                                  progress: progress,
-                                  phaseLabel: phaseLabel ?? 'Listen',
-                                  reducedMotion: reducedMotion,
-                                ),
-                              ResetVisualType.acceptanceSpace =>
-                                ReleafAcceptanceSpaceVisual(
-                                  progress: progress,
-                                  phaseLabel: phaseLabel ?? 'Notice',
-                                  reducedMotion: reducedMotion,
-                                ),
-                              ResetVisualType.nextStep =>
-                                ReleafNextStepVisual(
-                                  progress: progress,
-                                  phaseLabel: phaseLabel ?? 'Pause',
-                                  reducedMotion: reducedMotion,
-                                ),
-                              ResetVisualType.livingForm =>
-                                ReleafSessionLivingForm(
-                                  variant: artwork,
-                                  progress: progress,
-                                  breathing: isPacedBreathing,
-                                  phaseLabel: phaseLabel,
-                                  inhaleSeconds:
-                                      breathPattern?.inhaleSeconds ?? 4,
-                                  holdAfterInhaleSeconds:
-                                      breathPattern
-                                              ?.holdAfterInhaleSeconds ??
-                                          0,
-                                  exhaleSeconds:
-                                      breathPattern?.exhaleSeconds ?? 4,
-                                  holdAfterExhaleSeconds:
-                                      breathPattern
-                                              ?.holdAfterExhaleSeconds ??
-                                          0,
-                                  showBreathPath: showBreathPath,
-                                  reducedMotion: reducedMotion,
-                                ),
-                            },
+                            child: movementDemoKind != null
+                                ? ReleafMovementDemoVisual(
+                                    kind: movementDemoKind,
+                                    progress: progress,
+                                    phaseLabel: phaseLabel ?? 'Choose',
+                                    reducedMotion: reducedMotion,
+                                  )
+                                : switch (session.visualType) {
+                                    ResetVisualType.sensoryHalo =>
+                                      ReleafSensoryHalo(
+                                        progress: progress,
+                                        targetCount:
+                                            _sensoryTargetFor(phaseLabel),
+                                        completedCount:
+                                            _sensoryCompletedFor(session),
+                                        phaseLabel: phaseLabel ?? 'Notice',
+                                        onNotice:
+                                            _sensoryTargetFor(phaseLabel) > 0
+                                                ? _registerSensoryNotice
+                                                : null,
+                                        reducedMotion: reducedMotion,
+                                      ),
+                                    ResetVisualType.bodyRelease =>
+                                      ReleafBodyReleaseVisual(
+                                        progress: progress,
+                                        phaseLabel: phaseLabel ?? 'Notice',
+                                        reducedMotion: reducedMotion,
+                                      ),
+                                    ResetVisualType.bodyGrounding =>
+                                      ReleafGroundingBodyVisual(
+                                        progress: progress,
+                                        phaseLabel: phaseLabel ?? 'Arrive',
+                                        reducedMotion: reducedMotion,
+                                      ),
+                                    ResetVisualType.thoughtUnhook =>
+                                      ReleafThoughtUnhookVisual(
+                                        progress: progress,
+                                        phaseLabel: phaseLabel ?? 'Notice',
+                                        reducedMotion: reducedMotion,
+                                      ),
+                                    ResetVisualType.objectFocus =>
+                                      ReleafObjectFocusVisual(
+                                        progress: progress,
+                                        phaseLabel: phaseLabel ?? 'Choose',
+                                        reducedMotion: reducedMotion,
+                                      ),
+                                    ResetVisualType.soundRipple =>
+                                      ReleafSoundRippleVisual(
+                                        progress: progress,
+                                        phaseLabel: phaseLabel ?? 'Listen',
+                                        reducedMotion: reducedMotion,
+                                      ),
+                                    ResetVisualType.acceptanceSpace =>
+                                      ReleafAcceptanceSpaceVisual(
+                                        progress: progress,
+                                        phaseLabel: phaseLabel ?? 'Notice',
+                                        reducedMotion: reducedMotion,
+                                      ),
+                                    ResetVisualType.nextStep =>
+                                      ReleafNextStepVisual(
+                                        progress: progress,
+                                        phaseLabel: phaseLabel ?? 'Pause',
+                                        reducedMotion: reducedMotion,
+                                      ),
+                                    ResetVisualType.livingForm =>
+                                      ReleafSessionLivingForm(
+                                        variant: artwork,
+                                        progress: progress,
+                                        breathing: isPacedBreathing,
+                                        phaseLabel: phaseLabel,
+                                        inhaleSeconds:
+                                            breathPattern?.inhaleSeconds ?? 4,
+                                        holdAfterInhaleSeconds:
+                                            breathPattern
+                                                    ?.holdAfterInhaleSeconds ??
+                                                0,
+                                        exhaleSeconds:
+                                            breathPattern?.exhaleSeconds ?? 4,
+                                        holdAfterExhaleSeconds:
+                                            breathPattern
+                                                    ?.holdAfterExhaleSeconds ??
+                                                0,
+                                        showBreathPath: showBreathPath,
+                                        reducedMotion: reducedMotion,
+                                      ),
+                                  },
                           ),
                         ),
                       ),

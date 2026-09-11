@@ -6,6 +6,7 @@ import 'package:releaf_app/features/relief/data/reset_catalog.dart';
 import 'package:releaf_app/features/relief/domain/models/reset_content.dart';
 import 'package:releaf_app/theme/widgets/releaf_body_release_visual.dart';
 import 'package:releaf_app/theme/widgets/releaf_grounding_body_visual.dart';
+import 'package:releaf_app/theme/widgets/releaf_movement_demo_visual.dart';
 
 void main() {
   test('breathing phase cues are bundled and contain audio', () {
@@ -106,6 +107,103 @@ void main() {
       ),
       findsOneWidget,
     );
+    expect(tester.takeException(), isNull);
+    semantics.dispose();
+  });
+
+  test('movement demonstrations map only to approved Reset sessions', () {
+    const catalog = ResetCatalog();
+    final sessionsRequiringDemo = catalog
+        .getAll()
+        .where((session) => session.requiresMovementDemo);
+
+    expect(sessionsRequiringDemo, isNotEmpty);
+    for (final session in sessionsRequiringDemo) {
+      expect(
+        releafMovementDemoKindForSession(session.id),
+        isNotNull,
+        reason: '${session.id} needs a concrete movement demonstration',
+      );
+    }
+    expect(
+      releafMovementDemoKindForSession('pushups-activation'),
+      ReleafMovementDemoKind.pushUps,
+    );
+    expect(
+      releafMovementDemoKindForSession('shake-it-out'),
+      ReleafMovementDemoKind.shakeOut,
+    );
+    expect(releafMovementDemoKindForSession('60s-grounding'), isNull);
+  });
+
+  testWidgets('push-up guide shows accessible movement alternatives', (
+    tester,
+  ) async {
+    final semantics = tester.ensureSemantics();
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: SizedBox.square(
+            dimension: 320,
+            child: ReleafMovementDemoVisual(
+              kind: ReleafMovementDemoKind.pushUps,
+              progress: 0.3,
+              phaseLabel: 'Move',
+              reducedMotion: true,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      find.byKey(const Key('reset-movement-demo-pushups')),
+      findsOneWidget,
+    );
+    expect(
+      find.bySemanticsLabel(
+        'Animated movement guide. Choose a comfortable floor, wall, or seated press and move slowly. Current step: Move.',
+      ),
+      findsOneWidget,
+    );
+    expect(find.text('SLOW, CONTROLLED REPS'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    semantics.dispose();
+  });
+
+  testWidgets('shake guide includes standing and seated safe movement', (
+    tester,
+  ) async {
+    final semantics = tester.ensureSemantics();
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: SizedBox.square(
+            dimension: 320,
+            child: ReleafMovementDemoVisual(
+              kind: ReleafMovementDemoKind.shakeOut,
+              progress: 0.4,
+              phaseLabel: 'Hands',
+              reducedMotion: true,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      find.byKey(const Key('reset-movement-demo-shake-out')),
+      findsOneWidget,
+    );
+    expect(
+      find.bySemanticsLabel(
+        'Animated movement guide. Use small loose movements through the hands, arms, and legs. A seated option is shown. Current step: Hands.',
+      ),
+      findsOneWidget,
+    );
+    expect(find.text('SMALL, LOOSE MOVEMENT'), findsOneWidget);
     expect(tester.takeException(), isNull);
     semantics.dispose();
   });
