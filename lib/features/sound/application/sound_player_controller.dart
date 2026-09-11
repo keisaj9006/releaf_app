@@ -21,8 +21,9 @@ double soundOutputVolumeForSleepTimer({
     return safeBase;
   }
 
-  final safeRemaining =
-      remainingSeconds.clamp(0, soundSleepTimerFadeSeconds).toInt();
+  final safeRemaining = remainingSeconds
+      .clamp(0, soundSleepTimerFadeSeconds)
+      .toInt();
   final factor = safeRemaining / soundSleepTimerFadeSeconds;
   return (safeBase * factor).clamp(0.0, 1.0).toDouble();
 }
@@ -34,11 +35,7 @@ abstract class SoundPlaybackDriver {
 
   Future<void> setReleaseMode(audio.ReleaseMode mode);
   Future<void> setVolume(double volume);
-  Future<void> playAsset(
-    String assetPath, {
-    String? trackId,
-    String? title,
-  });
+  Future<void> playAsset(String assetPath, {String? trackId, String? title});
   Future<void> resume();
   Future<void> pause();
   Future<void> stop();
@@ -67,11 +64,7 @@ class AudioplayersSoundPlaybackDriver implements SoundPlaybackDriver {
   Future<void> setVolume(double volume) => _player.setVolume(volume);
 
   @override
-  Future<void> playAsset(
-    String assetPath, {
-    String? trackId,
-    String? title,
-  }) =>
+  Future<void> playAsset(String assetPath, {String? trackId, String? title}) =>
       _player.play(audio.AssetSource(assetPath));
 
   @override
@@ -134,16 +127,18 @@ class SoundPlayerState {
     bool clearSleepTimer = false,
   }) {
     return SoundPlayerState(
-      currentTrackId:
-          clearCurrentTrack ? null : (currentTrackId ?? this.currentTrackId),
+      currentTrackId: clearCurrentTrack
+          ? null
+          : (currentTrackId ?? this.currentTrackId),
       isPlaying: isPlaying ?? this.isPlaying,
       position: position ?? this.position,
       duration: duration ?? this.duration,
       volume: volume ?? this.volume,
       favoriteIds: favoriteIds ?? this.favoriteIds,
       recentIds: recentIds ?? this.recentIds,
-      sleepTimerMinutes:
-          clearSleepTimer ? null : (sleepTimerMinutes ?? this.sleepTimerMinutes),
+      sleepTimerMinutes: clearSleepTimer
+          ? null
+          : (sleepTimerMinutes ?? this.sleepTimerMinutes),
       sleepTimerRemainingSeconds: clearSleepTimer
           ? null
           : (sleepTimerRemainingSeconds ?? this.sleepTimerRemainingSeconds),
@@ -157,12 +152,12 @@ final soundPlaybackDriverProvider = Provider<SoundPlaybackDriver?>((ref) {
 
 final soundPlayerControllerProvider =
     StateNotifierProvider<SoundPlayerController, SoundPlayerState>((ref) {
-  return SoundPlayerController(
-    ref.watch(soundCatalogProvider),
-    ref.watch(sharedPreferencesProvider),
-    driver: ref.watch(soundPlaybackDriverProvider),
-  );
-});
+      return SoundPlayerController(
+        ref.watch(soundCatalogProvider),
+        ref.watch(sharedPreferencesProvider),
+        driver: ref.watch(soundPlaybackDriverProvider),
+      );
+    });
 
 class SoundPlayerController extends StateNotifier<SoundPlayerState> {
   SoundPlayerController(
@@ -170,19 +165,19 @@ class SoundPlayerController extends StateNotifier<SoundPlayerState> {
     this._prefs, {
     SoundPlaybackDriver? driver,
     DateTime Function()? now,
-  })  : _driver = driver ?? AudioplayersSoundPlaybackDriver(),
-        _now = now ?? DateTime.now,
-        super(
-          SoundPlayerState(
-            volume: (_prefs.getDouble(_volumeKey) ?? defaultSoundVolume)
-                .clamp(0.0, 1.0)
-                .toDouble(),
-            favoriteIds:
-                (_prefs.getStringList(_favoritesKey) ?? const <String>[]).toSet(),
-            recentIds:
-                _prefs.getStringList(_recentsKey) ?? const <String>[],
-          ),
-        ) {
+  }) : _driver = driver ?? AudioplayersSoundPlaybackDriver(),
+       _now = now ?? DateTime.now,
+       super(
+         SoundPlayerState(
+           volume: (_prefs.getDouble(_volumeKey) ?? defaultSoundVolume)
+               .clamp(0.0, 1.0)
+               .toDouble(),
+           favoriteIds:
+               (_prefs.getStringList(_favoritesKey) ?? const <String>[])
+                   .toSet(),
+           recentIds: _prefs.getStringList(_recentsKey) ?? const <String>[],
+         ),
+       ) {
     _durationSubscription = _driver.onDurationChanged.listen((duration) {
       if (!mounted) return;
       state = state.copyWith(duration: duration);
@@ -191,7 +186,9 @@ class SoundPlayerController extends StateNotifier<SoundPlayerState> {
       if (!mounted) return;
       state = state.copyWith(position: position);
     });
-    _playerStateSubscription = _driver.onPlayerStateChanged.listen((playerState) {
+    _playerStateSubscription = _driver.onPlayerStateChanged.listen((
+      playerState,
+    ) {
       if (!mounted) return;
       state = state.copyWith(
         isPlaying: playerState == audio.PlayerState.playing,
@@ -362,11 +359,12 @@ class SoundPlayerController extends StateNotifier<SoundPlayerState> {
     final deadline = _sleepTimerDeadline;
     if (deadline == null) return;
 
-    final remaining = deadline.difference(_now()).inSeconds + 1;
+    final remaining =
+        (deadline.difference(_now()).inMicroseconds /
+                Duration.microsecondsPerSecond)
+            .ceil();
     if (remaining > 0) {
-      state = state.copyWith(
-        sleepTimerRemainingSeconds: remaining,
-      );
+      state = state.copyWith(sleepTimerRemainingSeconds: remaining);
 
       if (state.currentTrackId != null) {
         await _driver.setVolume(
@@ -392,10 +390,7 @@ class SoundPlayerController extends StateNotifier<SoundPlayerState> {
     }
 
     if (!mounted) return;
-    state = state.copyWith(
-      isPlaying: false,
-      clearSleepTimer: true,
-    );
+    state = state.copyWith(isPlaying: false, clearSleepTimer: true);
   }
 
   Future<void> _markRecent(String trackId) async {

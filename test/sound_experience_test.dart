@@ -111,79 +111,79 @@ void main() {
     final premium = catalog.getById('pink-noise')!;
     final free = catalog.getById('soft-rain')!;
 
-    expect(
-      canAccessSoundTrack(premium, isPremiumUser: false),
-      isFalse,
-    );
-    expect(
-      canAccessSoundTrack(premium, isPremiumUser: true),
-      isTrue,
-    );
-    expect(
-      canAccessSoundTrack(free, isPremiumUser: false),
-      isTrue,
-    );
+    expect(canAccessSoundTrack(premium, isPremiumUser: false), isFalse);
+    expect(canAccessSoundTrack(premium, isPremiumUser: true), isTrue);
+    expect(canAccessSoundTrack(free, isPremiumUser: false), isTrue);
   });
 
-  test('Sound controller can explicitly resume the interrupted track', () async {
-    final preferences = await _preferences();
-    final driver = _FakeSoundPlaybackDriver();
-    final controller = SoundPlayerController(
-      const SoundCatalog(),
-      preferences,
-      driver: driver,
-    );
-    addTearDown(controller.dispose);
+  test(
+    'Sound controller can explicitly resume the interrupted track',
+    () async {
+      final preferences = await _preferences();
+      final driver = _FakeSoundPlaybackDriver();
+      final controller = SoundPlayerController(
+        const SoundCatalog(),
+        preferences,
+        driver: driver,
+      );
+      addTearDown(controller.dispose);
 
-    final track = const SoundCatalog().getById('deep-drift')!;
-    await controller.play(track);
-    await controller.resume();
+      final track = const SoundCatalog().getById('deep-drift')!;
+      await controller.play(track);
+      await controller.resume();
 
-    expect(controller.state.currentTrackId, track.id);
-    expect(driver.resumeCalls, 1);
-  });
+      expect(controller.state.currentTrackId, track.id);
+      expect(driver.resumeCalls, 1);
+    },
+  );
 
-  test('Sound controller forwards media metadata to the playback driver', () async {
-    final preferences = await _preferences();
-    final driver = _FakeSoundPlaybackDriver();
-    final controller = SoundPlayerController(
-      const SoundCatalog(),
-      preferences,
-      driver: driver,
-    );
-    addTearDown(controller.dispose);
+  test(
+    'Sound controller forwards media metadata to the playback driver',
+    () async {
+      final preferences = await _preferences();
+      final driver = _FakeSoundPlaybackDriver();
+      final controller = SoundPlayerController(
+        const SoundCatalog(),
+        preferences,
+        driver: driver,
+      );
+      addTearDown(controller.dispose);
 
-    final track = const SoundCatalog().getById('deep-drift')!;
-    await controller.play(track);
+      final track = const SoundCatalog().getById('deep-drift')!;
+      await controller.play(track);
 
-    expect(driver.lastAssetPath, track.assetPath);
-    expect(driver.lastTrackId, track.id);
-    expect(driver.lastTitle, track.title);
-  });
+      expect(driver.lastAssetPath, track.assetPath);
+      expect(driver.lastTrackId, track.id);
+      expect(driver.lastTitle, track.title);
+    },
+  );
 
-  test('Sound volume starts gently and persists across controller instances', () async {
-    final preferences = await _preferences();
-    final first = SoundPlayerController(
-      const SoundCatalog(),
-      preferences,
-      driver: _FakeSoundPlaybackDriver(),
-    );
+  test(
+    'Sound volume starts gently and persists across controller instances',
+    () async {
+      final preferences = await _preferences();
+      final first = SoundPlayerController(
+        const SoundCatalog(),
+        preferences,
+        driver: _FakeSoundPlaybackDriver(),
+      );
 
-    expect(first.state.volume, closeTo(defaultSoundVolume, 0.0001));
+      expect(first.state.volume, closeTo(defaultSoundVolume, 0.0001));
 
-    await first.setVolume(0.41);
-    expect(first.state.volume, closeTo(0.41, 0.0001));
-    first.dispose();
+      await first.setVolume(0.41);
+      expect(first.state.volume, closeTo(0.41, 0.0001));
+      first.dispose();
 
-    final restored = SoundPlayerController(
-      const SoundCatalog(),
-      preferences,
-      driver: _FakeSoundPlaybackDriver(),
-    );
-    addTearDown(restored.dispose);
+      final restored = SoundPlayerController(
+        const SoundCatalog(),
+        preferences,
+        driver: _FakeSoundPlaybackDriver(),
+      );
+      addTearDown(restored.dispose);
 
-    expect(restored.state.volume, closeTo(0.41, 0.0001));
-  });
+      expect(restored.state.volume, closeTo(0.41, 0.0001));
+    },
+  );
 
   test('Sleep timer fade preserves the base volume curve', () {
     expect(
@@ -198,17 +198,11 @@ void main() {
       closeTo(0.8, 0.0001),
     );
     expect(
-      soundOutputVolumeForSleepTimer(
-        baseVolume: 0.8,
-        remainingSeconds: 10,
-      ),
+      soundOutputVolumeForSleepTimer(baseVolume: 0.8, remainingSeconds: 10),
       closeTo(0.4, 0.0001),
     );
     expect(
-      soundOutputVolumeForSleepTimer(
-        baseVolume: 0.8,
-        remainingSeconds: 0,
-      ),
+      soundOutputVolumeForSleepTimer(baseVolume: 0.8, remainingSeconds: 0),
       0,
     );
   });
@@ -236,11 +230,35 @@ void main() {
     expect(controller.state.sleepTimerRemainingSeconds, isNull);
   });
 
-  test('Sleep timer resync expires a deadline that passed in background', () async {
+  test(
+    'Sleep countdown rounds partial seconds without adding a full second',
+    () async {
+      final preferences = await _preferences();
+      var now = DateTime(2026, 9, 11, 22);
+      final controller = SoundPlayerController(
+        const SoundCatalog(),
+        preferences,
+        driver: _FakeSoundPlaybackDriver(),
+        now: () => now,
+      );
+      addTearDown(controller.dispose);
+      await controller.setSleepTimer(15);
+      await controller.syncSleepTimerNow();
+      expect(controller.state.sleepTimerRemainingSeconds, 900);
+      now = now.add(const Duration(milliseconds: 1));
+      await controller.syncSleepTimerNow();
+      expect(controller.state.sleepTimerRemainingSeconds, 900);
+      now = now.add(const Duration(milliseconds: 999));
+      await controller.syncSleepTimerNow();
+      expect(controller.state.sleepTimerRemainingSeconds, 899);
+    },
+  );
+
+  test('Sleep timer expires exactly at the selected deadline once', () async {
     final preferences = await _preferences();
     final driver = _FakeSoundPlaybackDriver();
-    var now = DateTime(2026, 9, 8, 22);
-
+    final start = DateTime(2026, 9, 11, 22);
+    var now = start;
     final controller = SoundPlayerController(
       const SoundCatalog(),
       preferences,
@@ -248,25 +266,56 @@ void main() {
       now: () => now,
     );
     addTearDown(controller.dispose);
-
-    final track = const SoundCatalog().getById('deep-drift')!;
-    await controller.play(track);
+    await controller.playById('deep-drift');
     await controller.setSleepTimer(15);
-
-    expect(controller.state.sleepTimerMinutes, 15);
-    expect(controller.state.sleepTimerRemainingSeconds, 900);
-
-    now = now.add(const Duration(minutes: 16));
+    now = start
+        .add(const Duration(minutes: 15))
+        .subtract(const Duration(microseconds: 1));
     await controller.syncSleepTimerNow();
-
+    expect(controller.state.sleepTimerRemainingSeconds, 1);
+    expect(driver.pauseCalls, 0);
+    now = start.add(const Duration(minutes: 15));
+    await controller.syncSleepTimerNow();
     expect(controller.state.sleepTimerMinutes, isNull);
-    expect(controller.state.sleepTimerRemainingSeconds, isNull);
     expect(driver.pauseCalls, 1);
-    expect(
-      driver.volumeCalls.sublist(driver.volumeCalls.length - 2),
-      [0.0, controller.state.volume],
-    );
+    await controller.syncSleepTimerNow();
+    expect(driver.pauseCalls, 1);
   });
+
+  test(
+    'Sleep timer resync expires a deadline that passed in background',
+    () async {
+      final preferences = await _preferences();
+      final driver = _FakeSoundPlaybackDriver();
+      var now = DateTime(2026, 9, 8, 22);
+
+      final controller = SoundPlayerController(
+        const SoundCatalog(),
+        preferences,
+        driver: driver,
+        now: () => now,
+      );
+      addTearDown(controller.dispose);
+
+      final track = const SoundCatalog().getById('deep-drift')!;
+      await controller.play(track);
+      await controller.setSleepTimer(15);
+
+      expect(controller.state.sleepTimerMinutes, 15);
+      expect(controller.state.sleepTimerRemainingSeconds, 900);
+
+      now = now.add(const Duration(minutes: 16));
+      await controller.syncSleepTimerNow();
+
+      expect(controller.state.sleepTimerMinutes, isNull);
+      expect(controller.state.sleepTimerRemainingSeconds, isNull);
+      expect(driver.pauseCalls, 1);
+      expect(driver.volumeCalls.sublist(driver.volumeCalls.length - 2), [
+        0.0,
+        controller.state.volume,
+      ]);
+    },
+  );
 
   testWidgets('Sound library renders its own audio-first visual language', (
     WidgetTester tester,
@@ -275,9 +324,7 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          sharedPreferencesProvider.overrideWithValue(preferences),
-        ],
+        overrides: [sharedPreferencesProvider.overrideWithValue(preferences)],
         child: const MaterialApp(home: SoundScreen()),
       ),
     );
@@ -343,9 +390,7 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          sharedPreferencesProvider.overrideWithValue(preferences),
-        ],
+        overrides: [sharedPreferencesProvider.overrideWithValue(preferences)],
         child: const MaterialApp(home: SoundScreen()),
       ),
     );
@@ -385,9 +430,7 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          sharedPreferencesProvider.overrideWithValue(preferences),
-        ],
+        overrides: [sharedPreferencesProvider.overrideWithValue(preferences)],
         child: const MaterialApp(home: SoundScreen()),
       ),
     );

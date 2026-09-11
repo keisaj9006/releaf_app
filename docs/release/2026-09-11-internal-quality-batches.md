@@ -83,3 +83,23 @@ selection. Runtime build/test evidence remains the verified batch 1 Android and
 batch 2 web artifacts. Fresh analyzer: **No issues found**. `git diff --check`
 passed; no `audio-candidates` references exist in lib or pubspec. Next internal
 task: Sleep timer deadline boundaries.
+
+## Batch 4 — exact Sleep timer expiry
+
+Base: `f1b6856`. The wall-clock countdown added one to truncated seconds,
+showing 901 seconds immediately after a 15-minute selection and remaining active
+at its exact deadline. It now rounds fractional seconds upward without adding a
+whole second. The final positive fraction displays one second; the exact deadline
+expires once. Fade behavior, selected duration, background resync and narration-free
+Sleep are preserved.
+
+Files: Sound player controller, Sound experience tests, this evidence.
+Both new deterministic-time regressions failed before the fix. Focused
+Sound/Sleep tests: **16 passed**. Analyzer: **No issues found**.
+Full suite: **348 tests passed**. Android debug APK built successfully at
+`build/app/outputs/flutter-apk/app-debug.apk`; existing Gradle/Kotlin warnings
+remain. `git diff --check` passed.
+
+Affected gate: Sleep player/timer reliability. Samsung screen-off/background
+verification remains deferred to the production-equivalent RC. Next priority:
+Meditation ambience cancellation during delayed startup.
