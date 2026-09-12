@@ -8,6 +8,7 @@ import 'package:releaf_app/features/relief/data/reset_catalog.dart';
 import 'package:releaf_app/features/relief/domain/models/reset_launch_options.dart';
 import 'package:releaf_app/features/relief/presentation/breathing_widget.dart';
 import 'package:releaf_app/features/relief/presentation/reset_session_preview_sheet.dart';
+import 'package:releaf_app/theme/widgets/releaf_session_living_form.dart';
 
 Future<SharedPreferences> _pump(WidgetTester tester, Widget home) async {
   SharedPreferences.setMockInitialValues({
@@ -33,6 +34,38 @@ Future<SharedPreferences> _pump(WidgetTester tester, Widget home) async {
 }
 
 void main() {
+  testWidgets('reduced motion keeps unequal breathing path stationary', (
+    tester,
+  ) async {
+    await _pump(tester, const BreathingWidget(sessionId: '90s-calm-down'));
+    CustomPainter path() => tester
+        .widget<CustomPaint>(find.byKey(const Key('reset-breath-path')))
+        .painter!;
+    final first = path();
+    void paintPath(Canvas canvas) => first.paint(canvas, const Size(240, 240));
+    expect(paintPath, paintsExactlyCountTimes(#drawOval, 1));
+    expect(paintPath, paintsExactlyCountTimes(#drawCircle, 0));
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(path().shouldRepaint(first), isFalse);
+    expect(find.text('Breathe in'), findsOneWidget);
+    final form = find.byType(ReleafSessionLivingForm);
+    final progress = tester.widget<TweenAnimationBuilder<double>>(
+      find.descendant(
+        of: form,
+        matching: find.byType(TweenAnimationBuilder<double>),
+      ),
+    );
+    expect(progress.duration, Duration.zero);
+    final phase = tester.widget<AnimatedOpacity>(
+      find.descendant(of: form, matching: find.byType(AnimatedOpacity)),
+    );
+    expect(phase.duration, Duration.zero);
+    await tester.pump(const Duration(seconds: 4));
+    expect(find.text('Breathe out'), findsOneWidget);
+    expect(path().shouldRepaint(first), isFalse);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
   testWidgets('no words mode omits the added breathing phase countdown', (
     tester,
   ) async {

@@ -2,6 +2,10 @@
 
 Snapshot: **2026-09-12**
 
+Reduced-motion follow-up: [static breathing path](release/2026-09-12-reset-static-breath-path.md)
+retains the outline and current captions without a moving marker or interpolated
+progress. 23 focused tests passed; analysis clean. Device review remains pending.
+
 Latest: [shared breathing clock](release/2026-09-12-shared-breathing-clock.md),
 540 full tests, clean analysis and configured Android debug build. Session time,
 phase text/countdown and Living Form now share elapsed time, including fractional

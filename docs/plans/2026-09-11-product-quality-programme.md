@@ -1,5 +1,9 @@
 # Releaf product-quality programme
 
+Reduced-motion follow-up: [static breathing path](../release/2026-09-12-reset-static-breath-path.md).
+The orbit marker no longer moves under reduced motion; phase text and timing
+remain active. Physical accessibility review is still required.
+
 Reset phase/motion synchronization: [shared-clock evidence](../release/2026-09-12-shared-breathing-clock.md),
 540 tests, clean analysis and Android build. One elapsed clock preserves fractional
 lifecycle progress, exact methods and completion duration. No device connected;

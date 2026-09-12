@@ -2,6 +2,10 @@
 
 This roadmap converts the current repo + release gate + latest project decisions + Deep Research into execution order.
 
+[Reduced-motion path](release/2026-09-12-reset-static-breath-path.md) now retains
+a static outline and advancing phase text. Continue phase-announcement
+accessibility verification; physical TalkBack and rendering QA remain pending.
+
 [Shared paced-breathing clock](release/2026-09-12-shared-breathing-clock.md)
 passed 540 tests, analysis and Android build, preserving fractional lifecycle
 progress and all ten exact methods independently of artwork choice. Samsung

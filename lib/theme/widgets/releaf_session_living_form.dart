@@ -121,7 +121,9 @@ class _ReleafSessionLivingFormState extends State<ReleafSessionLivingForm>
           : 'Releaf calming visual. ${widget.phaseLabel}',
       child: TweenAnimationBuilder<double>(
         tween: Tween<double>(begin: 0, end: progress),
-        duration: const Duration(milliseconds: 720),
+        duration: widget.reducedMotion
+            ? Duration.zero
+            : const Duration(milliseconds: 720),
         curve: Curves.easeOutCubic,
         builder: (context, animatedProgress, child) {
           return CustomPaint(
@@ -207,6 +209,7 @@ class _ReleafSessionLivingFormState extends State<ReleafSessionLivingForm>
                         key: const Key('reset-breath-path'),
                         painter: _BreathOrbitPainter(
                           cycleValue: cycleValue,
+                          reducedMotion: widget.reducedMotion,
                           inhaleSeconds: widget.inhaleSeconds,
                           holdAfterInhaleSeconds: widget.holdAfterInhaleSeconds,
                           exhaleSeconds: widget.exhaleSeconds,
@@ -216,7 +219,9 @@ class _ReleafSessionLivingFormState extends State<ReleafSessionLivingForm>
                     ),
                   Center(
                     child: AnimatedOpacity(
-                      duration: ReleafMotion.standard,
+                      duration: widget.reducedMotion
+                          ? Duration.zero
+                          : ReleafMotion.standard,
                       opacity: widget.phaseLabel == null ? 0 : 1,
                       child: Text(
                         widget.phaseLabel ?? '',
@@ -334,6 +339,7 @@ class _SessionProgressPainter extends CustomPainter {
 class _BreathOrbitPainter extends CustomPainter {
   const _BreathOrbitPainter({
     required this.cycleValue,
+    required this.reducedMotion,
     required this.inhaleSeconds,
     required this.holdAfterInhaleSeconds,
     required this.exhaleSeconds,
@@ -341,6 +347,7 @@ class _BreathOrbitPainter extends CustomPainter {
   });
 
   final double cycleValue;
+  final bool reducedMotion;
   final int inhaleSeconds;
   final int holdAfterInhaleSeconds;
   final int exhaleSeconds;
@@ -375,6 +382,8 @@ class _BreathOrbitPainter extends CustomPainter {
       ..color = ReleafColors.borderSoft.withValues(alpha: 0.38);
 
     canvas.drawOval(rect, trackPaint);
+    // The phase caption remains current; reduced motion keeps this outline static.
+    if (reducedMotion) return;
 
     var cursor = 0.0;
     late final double angle;
@@ -433,7 +442,8 @@ class _BreathOrbitPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _BreathOrbitPainter oldDelegate) {
-    return oldDelegate.cycleValue != cycleValue ||
+    return oldDelegate.reducedMotion != reducedMotion ||
+        (!reducedMotion && oldDelegate.cycleValue != cycleValue) ||
         oldDelegate.inhaleSeconds != inhaleSeconds ||
         oldDelegate.holdAfterInhaleSeconds != holdAfterInhaleSeconds ||
         oldDelegate.exhaleSeconds != exhaleSeconds ||
