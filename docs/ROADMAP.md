@@ -2,6 +2,10 @@
 
 This roadmap converts the current repo + release gate + latest project decisions + Deep Research into execution order.
 
+[CI full audio decoding](release/2026-09-12-ci-full-audio-decode.md) closes the
+metadata-only validation gap. Local valid/corrupt checks and shell syntax pass;
+the next Actions run must establish remote execution evidence independently.
+
 [Atmosphere I candidate](release/2026-09-12-atmosphere-i-candidate.md) provides
 measured headroom outside runtime, alongside the existing Atmosphere II candidate.
 Both require owner listening and source rights evidence before any promotion.

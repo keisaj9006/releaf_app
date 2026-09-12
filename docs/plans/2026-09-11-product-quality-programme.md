@@ -1,5 +1,9 @@
 # Releaf product-quality programme
 
+[CI audio decoding](../release/2026-09-12-ci-full-audio-decode.md) now validates
+full Sound packets, not only metadata. This does not approve content or close
+native/device playback gates.
+
 [Atmosphere I headroom candidate](../release/2026-09-12-atmosphere-i-candidate.md)
 is available for later owner review, outside active assets. Measured improvement
 is not listening approval, loop acceptance or a source licence.

@@ -44,7 +44,7 @@ jobs:
       - name: Audit bundled sound assets
         timeout-minutes: 5
         run: |
-          if ! command -v ffprobe >/dev/null 2>&1; then
+          if ! command -v ffprobe >/dev/null 2>&1 || ! command -v ffmpeg >/dev/null 2>&1; then
             sudo apt-get update
             sudo apt-get install -y ffmpeg
           fi
@@ -62,7 +62,13 @@ jobs:
               "$file" "$duration" "$bitrate" "$sample_rate" "$channels" "$size"
 
             if [ -z "$duration" ] || [ -z "$sample_rate" ] || [ -z "$channels" ]; then
-              echo "::error file=$file::Unable to decode bundled sound asset."
+              echo "::error file=$file::Unable to read bundled sound metadata."
+              failed=1
+              continue
+            fi
+
+            if ! timeout 30s ffmpeg -v error -nostdin -xerror -i "$file" -map 0:a:0 -f null -; then
+              echo "::error file=$file::Bundled sound failed full audio decoding."
               failed=1
               continue
             fi

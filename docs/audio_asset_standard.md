@@ -37,7 +37,7 @@ second conflicting document. The owner-corrected
 
 Every bundled looping MP3 must:
 
-- decode successfully with ffprobe;
+- expose valid metadata with ffprobe and fully decode without errors with ffmpeg;
 - be at least 60 seconds long;
 - report a valid sample rate and channel count;
 - remain loop-safe enough that the boundary is not an obvious transient;

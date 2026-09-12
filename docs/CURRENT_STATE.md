@@ -2,6 +2,10 @@
 
 Snapshot: **2026-09-12**
 
+[CI audio decoding](release/2026-09-12-ci-full-audio-decode.md) now performs a
+full ffmpeg decoder pass in addition to metadata probing. Ten valid tracks pass;
+a deliberately corrupted local fixture is rejected. Remote CI still requires separate verification.
+
 [Atmosphere I headroom candidate](release/2026-09-12-atmosphere-i-candidate.md)
 is prepared outside runtime: -1.8 dBTP / -13.9 LUFS. Source unchanged. Owner
 listening, rights evidence and loop-compatible mastering remain open; not approved.
