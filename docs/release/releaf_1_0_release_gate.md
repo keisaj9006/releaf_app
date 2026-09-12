@@ -20,7 +20,7 @@ When that state is reached, explicitly report:
 | Gate | Status | Notes |
 | --- | --- | --- |
 | RESET core | DONE / CONTENT | Canonical Reset model, completion history, lifecycle and access tests are in CI. Rejected breathing tones are excluded from runtime playback; cue controls disclose unavailable audio while silent/reduced-motion phase guidance remains usable. Natural gentle human inhale/longer exhale recordings require owner approval before runtime integration. Hold/rest remain silent. |
-| BRAIN core | DONE / QA | Canonical Brain flow, progression hardening, Labyrinth 50-stage architecture and lifecycle protections are implemented. Continue release QA; do not add games merely to increase scope. |
+| BRAIN core | DONE / QA | Canonical Brain flow, Memory 50-level profiles/progression, Labyrinth 50-stage architecture and lifecycle protections are implemented. Continue release QA; do not add games merely to increase scope. |
 | Sleep player/timer | DONE / CONTENT | Player/timer behaviour is tested, including delayed-start cancellation, media-notification intent and volume restoration after interrupted expiry. Final Sleep sound selection is owner-provided; engineering remains responsible for asset QA, looping, metadata and integration. Sleep must not contain narration. |
 | Meditation player | DONE / CONTENT | Player and scripted content exist. Library/preview/player disclose recording availability; incomplete narration has accessible caption controls and large-text coverage. Final approved Releaf Guide recordings remain a content dependency; do not silently substitute a new narrator identity. |
 | Account auth | DONE / QA | Sign-up, sign-in, confirmation resend, password recovery, profile update and sign-out are implemented. |

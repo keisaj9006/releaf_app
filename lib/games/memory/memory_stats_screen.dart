@@ -36,11 +36,7 @@ class _MemoryStatsScreenState extends State<MemoryStatsScreen> {
       final mistakes = prefs.getInt('memory_stats_mistakes_$level');
       if (time == null || mistakes == null) continue;
       stats.add(
-        _MemoryLevelStat(
-          level: level,
-          timeSeconds: time,
-          mistakes: mistakes,
-        ),
+        _MemoryLevelStat(level: level, timeSeconds: time, mistakes: mistakes),
       );
     }
 
@@ -87,10 +83,14 @@ class _MemoryStatsScreenState extends State<MemoryStatsScreen> {
     final stats = _visibleStats;
     final bestTime = _allStats.isEmpty
         ? null
-        : _allStats.map((item) => item.timeSeconds).reduce((a, b) => a < b ? a : b);
+        : _allStats
+              .map((item) => item.timeSeconds)
+              .reduce((a, b) => a < b ? a : b);
     final fewestMistakes = _allStats.isEmpty
         ? null
-        : _allStats.map((item) => item.mistakes).reduce((a, b) => a < b ? a : b);
+        : _allStats
+              .map((item) => item.mistakes)
+              .reduce((a, b) => a < b ? a : b);
 
     return Theme(
       data: AppTheme.premiumDark(),
@@ -157,15 +157,22 @@ class _MemoryStatsScreenState extends State<MemoryStatsScreen> {
                     else ...[
                       _ChartCard(
                         title: 'Completion time',
-                        subtitle: 'Seconds used on each completed level.',
-                        child: _TimeChart(stats: stats),
+                        subtitle:
+                            'Seconds used on each completed level. Swipe the chart to browse.',
+                        child: _HistoryChartViewport(
+                          stats: stats,
+                          child: _TimeChart(stats: stats),
+                        ),
                       ),
                       const SizedBox(height: ReleafSpacing.md),
                       _ChartCard(
                         title: 'Mistakes',
                         subtitle:
-                            'Fewer mismatched pairs means more efficient recall.',
-                        child: _MistakeChart(stats: stats),
+                            'Mismatched pairs on each completed level. Swipe the chart to browse.',
+                        child: _HistoryChartViewport(
+                          stats: stats,
+                          child: _MistakeChart(stats: stats),
+                        ),
                       ),
                     ],
                   ],
@@ -289,11 +296,7 @@ class _RangeToggle extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(
-            Icons.history_rounded,
-            color: Color(0xFF91A4EF),
-            size: 20,
-          ),
+          const Icon(Icons.history_rounded, color: Color(0xFF91A4EF), size: 20),
           const SizedBox(width: ReleafSpacing.sm),
           Expanded(
             child: Text(
@@ -356,6 +359,29 @@ class _ChartCard extends StatelessWidget {
   }
 }
 
+class _HistoryChartViewport extends StatelessWidget {
+  const _HistoryChartViewport({required this.stats, required this.child});
+  final List<_MemoryLevelStat> stats;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, constraints) {
+      final levels = stats.last.level - stats.first.level + 1;
+      final minimumWidth =
+          42 + levels * MediaQuery.textScalerOf(context).scale(32);
+      return SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: SizedBox(
+          width: minimumWidth.clamp(constraints.maxWidth, double.infinity),
+          height: constraints.maxHeight,
+          child: child,
+        ),
+      );
+    },
+  );
+}
+
 class _TimeChart extends StatelessWidget {
   const _TimeChart({required this.stats});
 
@@ -368,10 +394,8 @@ class _TimeChart extends StatelessWidget {
         alignment: BarChartAlignment.spaceAround,
         gridData: FlGridData(
           drawVerticalLine: false,
-          getDrawingHorizontalLine: (_) => FlLine(
-            color: ReleafColors.borderSoft,
-            strokeWidth: 1,
-          ),
+          getDrawingHorizontalLine: (_) =>
+              FlLine(color: ReleafColors.borderSoft, strokeWidth: 1),
         ),
         borderData: FlBorderData(show: false),
         titlesData: _titles(),
@@ -407,10 +431,8 @@ class _MistakeChart extends StatelessWidget {
         minY: 0,
         gridData: FlGridData(
           drawVerticalLine: false,
-          getDrawingHorizontalLine: (_) => FlLine(
-            color: ReleafColors.borderSoft,
-            strokeWidth: 1,
-          ),
+          getDrawingHorizontalLine: (_) =>
+              FlLine(color: ReleafColors.borderSoft, strokeWidth: 1),
         ),
         borderData: FlBorderData(show: false),
         titlesData: _titles(),
@@ -437,17 +459,10 @@ class _MistakeChart extends StatelessWidget {
 
 FlTitlesData _titles() {
   return FlTitlesData(
-    topTitles: const AxisTitles(
-      sideTitles: SideTitles(showTitles: false),
-    ),
-    rightTitles: const AxisTitles(
-      sideTitles: SideTitles(showTitles: false),
-    ),
+    topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+    rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
     leftTitles: const AxisTitles(
-      sideTitles: SideTitles(
-        showTitles: true,
-        reservedSize: 34,
-      ),
+      sideTitles: SideTitles(showTitles: true, reservedSize: 34),
     ),
     bottomTitles: AxisTitles(
       sideTitles: SideTitles(
@@ -493,10 +508,7 @@ class _EmptyStats extends StatelessWidget {
             size: 38,
           ),
           const SizedBox(height: ReleafSpacing.sm),
-          Text(
-            'No completed levels yet',
-            style: ReleafTypography.cardTitle,
-          ),
+          Text('No completed levels yet', style: ReleafTypography.cardTitle),
           const SizedBox(height: 4),
           Text(
             'Finish a Memory level and Releaf will show your time and mistake trend here.',

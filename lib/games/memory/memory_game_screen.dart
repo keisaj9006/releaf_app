@@ -3,6 +3,7 @@ import 'dart:async';
 import 'dart:math' show pi, max;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'memory_stats_screen.dart';
+import 'memory_level_profile.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/releaf_design_tokens.dart';
 import '../../theme/widgets/releaf_brain_artwork.dart';
@@ -44,9 +45,10 @@ class _MemoryGameScreenState extends State<MemoryGameScreen>
   bool _canTap = true;
   bool _gameCompleted = false;
   bool _timeExpired = false;
+  int _boardVersion = 0;
 
   int currentLevel = 1;
-  static const int maxLevels = 12;
+  static const int maxLevels = maxMemoryLevel;
 
   int timeLeft = 60;
   Timer? countdownTimer;
@@ -105,6 +107,7 @@ class _MemoryGameScreenState extends State<MemoryGameScreen>
   }
 
   void _startLevel() {
+    _boardVersion++;
     _difficultyLocked = false;
     final pairs = _calculatePairsForLevel(currentLevel);
 
@@ -127,22 +130,11 @@ class _MemoryGameScreenState extends State<MemoryGameScreen>
   }
 
   int _calculatePairsForLevel(int level) {
-    final practiceLevel = brainPracticeLevelForDifficulty(
-      level,
-      _selectedDifficulty,
-    );
-    return (3 + ((practiceLevel - 1) ~/ 2)).clamp(3, 8).toInt();
+    return memoryLevelProfile(level, _selectedDifficulty).pairs;
   }
 
   int _calculateTimeForLevel(int level) {
-    final pairs = _calculatePairsForLevel(level);
-    final practiceLevel = brainPracticeLevelForDifficulty(
-      level,
-      _selectedDifficulty,
-    );
-    return (58 - ((practiceLevel - 1) * 2) + ((pairs - 3) * 2))
-        .clamp(34, 58)
-        .toInt();
+    return memoryLevelProfile(level, _selectedDifficulty).seconds;
   }
 
   void _startTimer() {
@@ -252,9 +244,10 @@ class _MemoryGameScreenState extends State<MemoryGameScreen>
 
     if (_selectedIndices.length == 2) {
       _canTap = false;
+      final boardVersion = _boardVersion;
 
       Future.delayed(const Duration(milliseconds: 800), () {
-        if (!mounted) return;
+        if (!mounted || boardVersion != _boardVersion || _timeExpired) return;
 
         final first = _selectedIndices[0];
         final second = _selectedIndices[1];
@@ -526,6 +519,7 @@ class _MemoryGameScreenState extends State<MemoryGameScreen>
                                 final isFlipped = _cardFlipped[index];
 
                                 return Semantics(
+                                  key: ValueKey('memory-card-$index'),
                                   button: true,
                                   label: isFlipped
                                       ? 'Revealed memory card'

@@ -50,16 +50,16 @@ class _GameResultScreenState extends ConsumerState<GameResultScreen> {
     _awardHandled = true;
 
     if (widget.gameId != null) {
-      await ref.read(brainTrainingControllerProvider.notifier).recordCompletion(
-            gameId: widget.gameId!,
-            score: widget.score,
-          );
+      await ref
+          .read(brainTrainingControllerProvider.notifier)
+          .recordCompletion(gameId: widget.gameId!, score: widget.score);
     }
 
     if (!mounted) return;
 
-    final result =
-        await ref.read(leavesNotifierProvider.notifier).markBrainDone();
+    final result = await ref
+        .read(leavesNotifierProvider.notifier)
+        .markBrainDone();
 
     if (!mounted || result == null) return;
 
@@ -82,14 +82,14 @@ class _GameResultScreenState extends ConsumerState<GameResultScreen> {
         : training.bestScoreFor(widget.gameId!);
     final isPersonalBest =
         widget.score != null && bestScore != null && widget.score == bestScore;
-    final trainingLevel = widget.gameId != null &&
-            usesProgressiveBrainLevel(widget.gameId!)
+    final trainingLevel =
+        widget.gameId != null && usesProgressiveBrainLevel(widget.gameId!)
         ? training.trainingLevelFor(widget.gameId!)
         : null;
     final sessionsUntilNextLevel =
         widget.gameId != null && trainingLevel != null
-            ? training.sessionsUntilNextTrainingLevelFor(widget.gameId!)
-            : 0;
+        ? training.sessionsUntilNextTrainingLevelFor(widget.gameId!)
+        : 0;
 
     return Theme(
       data: AppTheme.premiumDark(),
@@ -156,13 +156,15 @@ class _GameResultScreenState extends ConsumerState<GameResultScreen> {
                             color: const Color(0xFF171E31),
                             borderRadius: BorderRadius.circular(28),
                             border: Border.all(
-                              color: const Color(0xFF9FB0F4)
-                                  .withValues(alpha: 0.34),
+                              color: const Color(
+                                0xFF9FB0F4,
+                              ).withValues(alpha: 0.34),
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: const Color(0xFF7187E8)
-                                    .withValues(alpha: 0.20),
+                                color: const Color(
+                                  0xFF7187E8,
+                                ).withValues(alpha: 0.20),
                                 blurRadius: 34,
                               ),
                             ],
@@ -197,11 +199,13 @@ class _GameResultScreenState extends ConsumerState<GameResultScreen> {
                           padding: const EdgeInsets.all(ReleafSpacing.lg),
                           decoration: BoxDecoration(
                             color: const Color(0xB8121822),
-                            borderRadius:
-                                BorderRadius.circular(ReleafRadii.large),
+                            borderRadius: BorderRadius.circular(
+                              ReleafRadii.large,
+                            ),
                             border: Border.all(
-                              color: _accentForGame(widget.gameId)
-                                  .withValues(alpha: 0.18),
+                              color: _accentForGame(
+                                widget.gameId,
+                              ).withValues(alpha: 0.18),
                             ),
                           ),
                           child: Column(
@@ -218,8 +222,9 @@ class _GameResultScreenState extends ConsumerState<GameResultScreen> {
                               Text(
                                 _trainingBenefit(widget.gameId),
                                 style: ReleafTypography.body.copyWith(
-                                  color: ReleafColors.textPrimary
-                                      .withValues(alpha: 0.88),
+                                  color: ReleafColors.textPrimary.withValues(
+                                    alpha: 0.88,
+                                  ),
                                   height: 1.45,
                                 ),
                               ),
@@ -241,11 +246,13 @@ class _GameResultScreenState extends ConsumerState<GameResultScreen> {
                             padding: const EdgeInsets.all(ReleafSpacing.xl),
                             decoration: BoxDecoration(
                               color: const Color(0xE9121822),
-                              borderRadius:
-                                  BorderRadius.circular(ReleafRadii.large),
+                              borderRadius: BorderRadius.circular(
+                                ReleafRadii.large,
+                              ),
                               border: Border.all(
-                                color: _accentForGame(widget.gameId)
-                                    .withValues(alpha: 0.24),
+                                color: _accentForGame(
+                                  widget.gameId,
+                                ).withValues(alpha: 0.24),
                               ),
                             ),
                             child: Column(
@@ -298,13 +305,14 @@ class _GameResultScreenState extends ConsumerState<GameResultScreen> {
                               vertical: 10,
                             ),
                             decoration: BoxDecoration(
-                              color:
-                                  ReleafColors.sage.withValues(alpha: 0.10),
-                              borderRadius:
-                                  BorderRadius.circular(ReleafRadii.pill),
+                              color: ReleafColors.sage.withValues(alpha: 0.10),
+                              borderRadius: BorderRadius.circular(
+                                ReleafRadii.pill,
+                              ),
                               border: Border.all(
-                                color:
-                                    ReleafColors.sage.withValues(alpha: 0.22),
+                                color: ReleafColors.sage.withValues(
+                                  alpha: 0.22,
+                                ),
                               ),
                             ),
                             child: Text(
@@ -325,18 +333,22 @@ class _GameResultScreenState extends ConsumerState<GameResultScreen> {
                               vertical: 9,
                             ),
                             decoration: BoxDecoration(
-                              color: _accentForGame(widget.gameId)
-                                  .withValues(alpha: 0.10),
-                              borderRadius:
-                                  BorderRadius.circular(ReleafRadii.pill),
+                              color: _accentForGame(
+                                widget.gameId,
+                              ).withValues(alpha: 0.10),
+                              borderRadius: BorderRadius.circular(
+                                ReleafRadii.pill,
+                              ),
                               border: Border.all(
-                                color: _accentForGame(widget.gameId)
-                                    .withValues(alpha: 0.22),
+                                color: _accentForGame(
+                                  widget.gameId,
+                                ).withValues(alpha: 0.22),
                               ),
                             ),
                             child: Text(
-                              trainingLevel >= maxBrainTrainingLevel
-                                  ? 'TRAINING LEVEL $maxBrainTrainingLevel · MAX'
+                              trainingLevel >=
+                                      maxBrainTrainingLevelFor(widget.gameId!)
+                                  ? 'TRAINING LEVEL ${maxBrainTrainingLevelFor(widget.gameId!)} · MAX'
                                   : 'TRAINING LEVEL $trainingLevel',
                               style: ReleafTypography.meta.copyWith(
                                 color: _accentForGame(widget.gameId),
@@ -344,7 +356,8 @@ class _GameResultScreenState extends ConsumerState<GameResultScreen> {
                               ),
                             ),
                           ),
-                          if (trainingLevel < maxBrainTrainingLevel) ...[
+                          if (trainingLevel <
+                              maxBrainTrainingLevelFor(widget.gameId!)) ...[
                             const SizedBox(height: ReleafSpacing.xs),
                             Text(
                               sessionsUntilNextLevel == 1
@@ -369,10 +382,8 @@ class _GameResultScreenState extends ConsumerState<GameResultScreen> {
                               icon: const Icon(Icons.replay_rounded),
                               label: const Text('Play again'),
                               style: FilledButton.styleFrom(
-                                backgroundColor:
-                                    const Color(0xFFD4DBFF),
-                                foregroundColor:
-                                    const Color(0xFF101526),
+                                backgroundColor: const Color(0xFFD4DBFF),
+                                foregroundColor: const Color(0xFF101526),
                               ),
                             ),
                           ),
@@ -440,21 +451,36 @@ Color _accentForGame(String? gameId) {
 
 String _trainingBenefit(String? gameId) {
   return switch (gameId) {
-    'memory' => 'Recall locations and recognise visual pairs while keeping recent information active.',
-    'labyrinth' => 'Plan a route, monitor position and update a spatial goal as you move.',
-    'math_race' => 'Practise mental arithmetic and response selection under limited time.',
-    'broken_mirror' => 'Reconstruct spatial relationships from separate visual fragments.',
-    'rule_shift' => 'Switch between simple rules without automatically carrying the previous rule forward.',
-    'sequence_echo' => 'Hold a short visual sequence in working memory and reproduce it in order.',
-    'n_back' => 'Continuously update working memory as each new item changes what must be compared.',
-    'spatial_span' => 'Hold and reproduce a sequence of locations in visuospatial working memory.',
-    'mental_rotation' => 'Compare shapes across orientation changes and distinguish rotation from reflection.',
-    'trail_switch' => 'Scan visually while maintaining an ordered rule and switching between target types.',
-    'tower_plan' => 'Plan several legal moves ahead while respecting constraints.',
-    'symbol_code' => 'Use a temporary mapping key accurately across repeated decisions.',
-    'color_conflict' => 'Inhibit a competing word response and select the relevant colour information.',
-    'pattern_logic' => 'Detect rules across sequences and reject plausible but incorrect alternatives.',
-    'signal_scan' => 'Select a target among increasingly similar visual distractors.',
+    'memory' =>
+      'Recall locations and recognise visual pairs while keeping recent information active.',
+    'labyrinth' =>
+      'Plan a route, monitor position and update a spatial goal as you move.',
+    'math_race' =>
+      'Practise mental arithmetic and response selection under limited time.',
+    'broken_mirror' =>
+      'Reconstruct spatial relationships from separate visual fragments.',
+    'rule_shift' =>
+      'Switch between simple rules without automatically carrying the previous rule forward.',
+    'sequence_echo' =>
+      'Hold a short visual sequence in working memory and reproduce it in order.',
+    'n_back' =>
+      'Continuously update working memory as each new item changes what must be compared.',
+    'spatial_span' =>
+      'Hold and reproduce a sequence of locations in visuospatial working memory.',
+    'mental_rotation' =>
+      'Compare shapes across orientation changes and distinguish rotation from reflection.',
+    'trail_switch' =>
+      'Scan visually while maintaining an ordered rule and switching between target types.',
+    'tower_plan' =>
+      'Plan several legal moves ahead while respecting constraints.',
+    'symbol_code' =>
+      'Use a temporary mapping key accurately across repeated decisions.',
+    'color_conflict' =>
+      'Inhibit a competing word response and select the relevant colour information.',
+    'pattern_logic' =>
+      'Detect rules across sequences and reject plausible but incorrect alternatives.',
+    'signal_scan' =>
+      'Select a target among increasingly similar visual distractors.',
     _ => 'Practise a focused cognitive task with repeatable feedback.',
   };
 }

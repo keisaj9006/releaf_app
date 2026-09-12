@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/providers.dart';
 import '../../../core/sync/progress_sync_event_store.dart';
+import '../../../games/memory/memory_level_profile.dart';
 
 const progressiveBrainGameIds = <String>{
   'memory',
@@ -23,6 +24,8 @@ const progressiveBrainGameIds = <String>{
 };
 
 const maxBrainTrainingLevel = 12;
+int maxBrainTrainingLevelFor(String gameId) =>
+    gameId == 'memory' ? maxMemoryLevel : maxBrainTrainingLevel;
 const brainSessionsPerTrainingLevel = 2;
 
 bool usesProgressiveBrainLevel(String gameId) =>
@@ -105,7 +108,9 @@ class BrainTrainingState {
 
     return List<int>.generate(7, (index) {
       final day = today.subtract(Duration(days: 6 - index));
-      return records.where((record) => _sameLocalDay(record.completedAt, day)).length;
+      return records
+          .where((record) => _sameLocalDay(record.completedAt, day))
+          .length;
     });
   }
 
@@ -119,8 +124,9 @@ class BrainTrainingState {
   }
 
   int completionCountFor(String gameId) {
-    final recentCount =
-        records.where((record) => record.gameId == gameId).length;
+    final recentCount = records
+        .where((record) => record.gameId == gameId)
+        .length;
     final cumulativeCount = completionCounts[gameId] ?? 0;
     return cumulativeCount > recentCount ? cumulativeCount : recentCount;
   }
@@ -129,14 +135,14 @@ class BrainTrainingState {
     if (!usesProgressiveBrainLevel(gameId)) return 1;
     final completed = completionCountFor(gameId);
     return (1 + (completed ~/ brainSessionsPerTrainingLevel))
-        .clamp(1, maxBrainTrainingLevel)
+        .clamp(1, maxBrainTrainingLevelFor(gameId))
         .toInt();
   }
 
   int sessionsUntilNextTrainingLevelFor(String gameId) {
     if (!usesProgressiveBrainLevel(gameId)) return 0;
     final level = trainingLevelFor(gameId);
-    if (level >= maxBrainTrainingLevel) return 0;
+    if (level >= maxBrainTrainingLevelFor(gameId)) return 0;
 
     final completed = completionCountFor(gameId);
     final withinLevel = completed % brainSessionsPerTrainingLevel;
@@ -197,23 +203,21 @@ bool _sameLocalDay(DateTime a, DateTime b) {
 
 final brainTrainingControllerProvider =
     StateNotifierProvider<BrainTrainingController, BrainTrainingState>((ref) {
-  return BrainTrainingController(
-    ref.watch(sharedPreferencesProvider),
-    syncEvents: ref.read(progressSyncEventStoreProvider.notifier),
-  );
-});
+      return BrainTrainingController(
+        ref.watch(sharedPreferencesProvider),
+        syncEvents: ref.read(progressSyncEventStoreProvider.notifier),
+      );
+    });
 
 class BrainTrainingController extends StateNotifier<BrainTrainingState> {
-  BrainTrainingController(
-    this._prefs, {
-    ProgressSyncEventStore? syncEvents,
-  })  : _syncEvents = syncEvents,
-        super(
-          BrainTrainingState(
-            records: _readRecords(_prefs),
-            completionCounts: _readCompletionCounts(_prefs),
-          ),
-        );
+  BrainTrainingController(this._prefs, {ProgressSyncEventStore? syncEvents})
+    : _syncEvents = syncEvents,
+      super(
+        BrainTrainingState(
+          records: _readRecords(_prefs),
+          completionCounts: _readCompletionCounts(_prefs),
+        ),
+      );
 
   static const _historyKey = 'brain.training.history.v1';
   static const _completionCountsKey = 'brain.training.completion_counts.v1';
@@ -222,10 +226,7 @@ class BrainTrainingController extends StateNotifier<BrainTrainingState> {
   final SharedPreferences _prefs;
   final ProgressSyncEventStore? _syncEvents;
 
-  Future<void> recordCompletion({
-    required String gameId,
-    int? score,
-  }) async {
+  Future<void> recordCompletion({required String gameId, int? score}) async {
     final completedAt = DateTime.now();
     final next = <BrainSessionRecord>[
       BrainSessionRecord(
@@ -240,10 +241,7 @@ class BrainTrainingController extends StateNotifier<BrainTrainingState> {
       gameId: state.completionCountFor(gameId) + 1,
     };
 
-    state = BrainTrainingState(
-      records: next,
-      completionCounts: nextCounts,
-    );
+    state = BrainTrainingState(records: next, completionCounts: nextCounts);
     await _prefs.setStringList(
       _historyKey,
       next.map((record) => record.encode()).toList(growable: false),
@@ -257,9 +255,7 @@ class BrainTrainingController extends StateNotifier<BrainTrainingState> {
       kind: ProgressSyncEventKind.brainSessionCompleted,
       entityId: gameId,
       occurredAt: completedAt,
-      payload: <String, Object?>{
-        if (score != null) 'score': score,
-      },
+      payload: <String, Object?>{if (score != null) 'score': score},
     );
   }
 
@@ -294,8 +290,7 @@ class BrainTrainingController extends StateNotifier<BrainTrainingState> {
 
   static Map<String, int> _readCompletionCounts(SharedPreferences prefs) {
     final result = <String, int>{};
-    final raw =
-        prefs.getStringList(_completionCountsKey) ?? const <String>[];
+    final raw = prefs.getStringList(_completionCountsKey) ?? const <String>[];
 
     for (final item in raw) {
       final separator = item.lastIndexOf('|');
@@ -325,10 +320,11 @@ class BrainTrainingController extends StateNotifier<BrainTrainingState> {
   }
 
   static List<String> _encodeCompletionCounts(Map<String, int> counts) {
-    final entries = counts.entries
-        .where((entry) => entry.key.trim().isNotEmpty && entry.value >= 0)
-        .toList(growable: false)
-      ..sort((a, b) => a.key.compareTo(b.key));
+    final entries =
+        counts.entries
+            .where((entry) => entry.key.trim().isNotEmpty && entry.value >= 0)
+            .toList(growable: false)
+          ..sort((a, b) => a.key.compareTo(b.key));
 
     return entries
         .map((entry) => '${entry.key}|${entry.value}')

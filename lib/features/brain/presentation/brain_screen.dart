@@ -21,10 +21,7 @@ class BrainScreen extends ConsumerWidget {
     final enabledGames = brainGames
         .where((game) => game.enabled && isSupportedBrainGame(game.id))
         .toList(growable: false);
-    final workoutGames = _selectWorkoutGames(
-      enabledGames,
-      training,
-    );
+    final workoutGames = _selectWorkoutGames(enabledGames, training);
 
     return Theme(
       data: AppTheme.premiumDark(),
@@ -151,19 +148,16 @@ class _BrainBackdropPainter extends CustomPainter {
     }
 
     final glow = Paint()
-      ..shader = const RadialGradient(
-        colors: [
-          Color(0x225F72D8),
-          Color(0x1056B6A8),
-          Colors.transparent,
-        ],
-        stops: [0, 0.42, 1],
-      ).createShader(
-        Rect.fromCircle(
-          center: Offset(size.width * 0.78, size.height * 0.10),
-          radius: size.width * 0.75,
-        ),
-      );
+      ..shader =
+          const RadialGradient(
+            colors: [Color(0x225F72D8), Color(0x1056B6A8), Colors.transparent],
+            stops: [0, 0.42, 1],
+          ).createShader(
+            Rect.fromCircle(
+              center: Offset(size.width * 0.78, size.height * 0.10),
+              radius: size.width * 0.75,
+            ),
+          );
 
     canvas.drawRect(Offset.zero & size, glow);
   }
@@ -194,10 +188,7 @@ class _BrainHeader extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 7),
-        Text(
-          'Brain',
-          style: ReleafTypography.display.copyWith(fontSize: 34),
-        ),
+        Text('Brain', style: ReleafTypography.display.copyWith(fontSize: 34)),
         const SizedBox(height: 6),
         Text(
           'Short, focused challenges across memory, attention, reasoning and spatial skills.',
@@ -260,10 +251,7 @@ class _BrainHeader extends StatelessWidget {
 }
 
 class _SevenDayBadge extends StatelessWidget {
-  const _SevenDayBadge({
-    required this.sessions,
-    required this.compact,
-  });
+  const _SevenDayBadge({required this.sessions, required this.compact});
 
   final int sessions;
   final bool compact;
@@ -341,10 +329,7 @@ class _SevenDayBadge extends StatelessWidget {
 }
 
 class _DailyWorkoutPanel extends StatelessWidget {
-  const _DailyWorkoutPanel({
-    required this.games,
-    required this.training,
-  });
+  const _DailyWorkoutPanel({required this.games, required this.training});
 
   final List<BrainGameMeta> games;
   final BrainTrainingState training;
@@ -353,7 +338,9 @@ class _DailyWorkoutPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     if (games.isEmpty) return const SizedBox.shrink();
 
-    final completed = games.where((game) => training.playedToday(game.id)).length;
+    final completed = games
+        .where((game) => training.playedToday(game.id))
+        .length;
     final nextGame = games.firstWhere(
       (game) => !training.playedToday(game.id),
       orElse: () => games.first,
@@ -378,10 +365,7 @@ class _DailyWorkoutPanel extends StatelessWidget {
               gradient: const LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFF1A2034),
-                  Color(0xFF101B21),
-                ],
+                colors: [Color(0xFF1A2034), Color(0xFF101B21)],
               ),
               border: Border.all(
                 color: const Color(0xFF8EA2F1).withValues(alpha: 0.22),
@@ -396,11 +380,7 @@ class _DailyWorkoutPanel extends StatelessWidget {
             ),
             child: Stack(
               children: [
-                const Positioned(
-                  right: -30,
-                  top: -54,
-                  child: _WorkoutOrb(),
-                ),
+                const Positioned(right: -30, top: -54, child: _WorkoutOrb()),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -441,7 +421,9 @@ class _DailyWorkoutPanel extends StatelessWidget {
                             ? 'You can repeat a game or choose a different skill below.'
                             : 'A short sequence that favours skills you have used less recently.',
                         style: ReleafTypography.body.copyWith(
-                          color: ReleafColors.textPrimary.withValues(alpha: 0.70),
+                          color: ReleafColors.textPrimary.withValues(
+                            alpha: 0.70,
+                          ),
                         ),
                       ),
                     ),
@@ -460,9 +442,8 @@ class _DailyWorkoutPanel extends StatelessWidget {
                       width: compact ? double.infinity : null,
                       child: FilledButton.icon(
                         key: const Key('brain-start-workout'),
-                        onPressed: () => context.push(
-                          AppRoutes.brainGameFor(nextGame.id),
-                        ),
+                        onPressed: () =>
+                            context.push(AppRoutes.brainGameFor(nextGame.id)),
                         icon: Icon(
                           completeForToday
                               ? Icons.replay_rounded
@@ -472,8 +453,8 @@ class _DailyWorkoutPanel extends StatelessWidget {
                           completeForToday
                               ? 'Train again'
                               : completed == 0
-                                  ? 'Start workout'
-                                  : 'Continue workout',
+                              ? 'Start workout'
+                              : 'Continue workout',
                         ),
                         style: FilledButton.styleFrom(
                           backgroundColor: const Color(0xFFD4DBFF),
@@ -483,7 +464,9 @@ class _DailyWorkoutPanel extends StatelessWidget {
                             horizontal: ReleafSpacing.lg,
                           ),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(ReleafRadii.pill),
+                            borderRadius: BorderRadius.circular(
+                              ReleafRadii.pill,
+                            ),
                           ),
                         ),
                       ),
@@ -508,9 +491,7 @@ class _WorkoutOrb extends StatelessWidget {
       child: SizedBox(
         width: 190,
         height: 190,
-        child: CustomPaint(
-          painter: _WorkoutOrbPainter(),
-        ),
+        child: CustomPaint(painter: _WorkoutOrbPainter()),
       ),
     );
   }
@@ -529,9 +510,7 @@ class _WorkoutOrbPainter extends CustomPainter {
         center,
         radius,
         Paint()
-          ..color = const Color(0xFF9AAAF0).withValues(
-            alpha: 0.13 - i * 0.022,
-          )
+          ..color = const Color(0xFF9AAAF0).withValues(alpha: 0.13 - i * 0.022)
           ..style = PaintingStyle.stroke
           ..strokeWidth = 1.2,
       );
@@ -555,8 +534,7 @@ class _WorkoutOrbPainter extends CustomPainter {
       canvas.drawCircle(
         points[i],
         2.5,
-        Paint()
-          ..color = const Color(0xFFE2E6FF).withValues(alpha: 0.56),
+        Paint()..color = const Color(0xFFE2E6FF).withValues(alpha: 0.56),
       );
     }
   }
@@ -566,10 +544,7 @@ class _WorkoutOrbPainter extends CustomPainter {
 }
 
 class _ProgressBadge extends StatelessWidget {
-  const _ProgressBadge({
-    required this.completed,
-    required this.total,
-  });
+  const _ProgressBadge({required this.completed, required this.total});
 
   final int completed;
   final int total;
@@ -630,11 +605,7 @@ class _WorkoutStep extends StatelessWidget {
           ),
           alignment: Alignment.center,
           child: completed
-              ? Icon(
-                  Icons.check_rounded,
-                  size: 18,
-                  color: presentation.accent,
-                )
+              ? Icon(Icons.check_rounded, size: 18, color: presentation.accent)
               : Text(
                   '$index',
                   style: ReleafTypography.meta.copyWith(
@@ -729,11 +700,7 @@ class _WeeklyActivity extends StatelessWidget {
               if (compact) ...[
                 _ActivitySummary(training: training),
                 const SizedBox(height: ReleafSpacing.lg),
-                _ActivityBars(
-                  values: values,
-                  days: days,
-                  maxValue: maxValue,
-                ),
+                _ActivityBars(values: values, days: days, maxValue: maxValue),
               ] else
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
@@ -846,8 +813,9 @@ class _ActivityBars extends StatelessWidget {
                           ? null
                           : [
                               BoxShadow(
-                                color: const Color(0xFF7187E8)
-                                    .withValues(alpha: 0.20),
+                                color: const Color(
+                                  0xFF7187E8,
+                                ).withValues(alpha: 0.20),
                                 blurRadius: 12,
                               ),
                             ],
@@ -892,52 +860,41 @@ class _SkillGroupSection extends StatelessWidget {
 
     final (title, description) = switch (group) {
       BrainGameGroup.memory => (
-          'Memory',
-          'Hold, recall and reproduce information.',
-        ),
+        'Memory',
+        'Hold, recall and reproduce information.',
+      ),
       BrainGameGroup.attention => (
-          'Attention & control',
-          'Filter distractions, switch rules and stay selective.',
-        ),
+        'Attention & control',
+        'Filter distractions, switch rules and stay selective.',
+      ),
       BrainGameGroup.reasoning => (
-          'Logic & reasoning',
-          'Work with calculation, patterns and changing rules.',
-        ),
+        'Logic & reasoning',
+        'Work with calculation, patterns and changing rules.',
+      ),
       BrainGameGroup.spatial => (
-          'Spatial & visual',
-          'Plan routes and reconstruct visual information.',
-        ),
+        'Spatial & visual',
+        'Plan routes and reconstruct visual information.',
+      ),
     };
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          title,
-          style: ReleafTypography.cardTitle.copyWith(fontSize: 16),
-        ),
+        Text(title, style: ReleafTypography.cardTitle.copyWith(fontSize: 16)),
         const SizedBox(height: 3),
         Text(
           description,
-          style: ReleafTypography.meta.copyWith(
-            color: ReleafColors.textMuted,
-          ),
+          style: ReleafTypography.meta.copyWith(color: ReleafColors.textMuted),
         ),
         const SizedBox(height: ReleafSpacing.sm),
-        _SkillGameGrid(
-          games: games,
-          training: training,
-        ),
+        _SkillGameGrid(games: games, training: training),
       ],
     );
   }
 }
 
 class _SkillGameGrid extends StatelessWidget {
-  const _SkillGameGrid({
-    required this.games,
-    required this.training,
-  });
+  const _SkillGameGrid({required this.games, required this.training});
 
   final List<BrainGameMeta> games;
   final BrainTrainingState training;
@@ -968,9 +925,8 @@ class _SkillGameGrid extends StatelessWidget {
                   trainingLevel: usesProgressiveBrainLevel(game.id)
                       ? training.trainingLevelFor(game.id)
                       : null,
-                  onPressed: () => context.push(
-                    AppRoutes.brainGameFor(game.id),
-                  ),
+                  onPressed: () =>
+                      context.push(AppRoutes.brainGameFor(game.id)),
                 ),
               ),
           ],
@@ -1078,7 +1034,7 @@ class _SkillGameCardState extends State<_SkillGameCard> {
                               _SkillBadge(
                                 label: widget.game.hasDifficultyLevels
                                     ? 'L${widget.trainingLevel} · 3 MODES'
-                                    : 'LEVEL ${widget.trainingLevel}/$maxBrainTrainingLevel',
+                                    : 'LEVEL ${widget.trainingLevel}/${maxBrainTrainingLevelFor(widget.game.id)}',
                                 accent: widget.presentation.accent,
                               ),
                             ] else if (widget.game.hasDifficultyLevels) ...[
@@ -1157,10 +1113,7 @@ class _SkillGameCardState extends State<_SkillGameCard> {
 }
 
 class _SkillBadge extends StatelessWidget {
-  const _SkillBadge({
-    required this.label,
-    required this.accent,
-  });
+  const _SkillBadge({required this.label, required this.accent});
 
   final String label;
   final Color accent;
@@ -1243,108 +1196,108 @@ class _BrainGamePresentation {
 _BrainGamePresentation _presentationFor(String gameId) {
   return switch (gameId) {
     'memory' => const _BrainGamePresentation(
-        skill: 'MEMORY',
-        benefit: 'Recall positions and recognise visual patterns.',
-        artwork: ReleafBrainArtworkVariant.memory,
-        accent: Color(0xFF91A4EF),
-      ),
+      skill: 'MEMORY',
+      benefit: 'Recall positions and recognise visual patterns.',
+      artwork: ReleafBrainArtworkVariant.memory,
+      accent: Color(0xFF91A4EF),
+    ),
     'labyrinth' => const _BrainGamePresentation(
-        skill: 'SPATIAL PLANNING',
-        benefit: 'Navigate routes and keep spatial goals in mind.',
-        artwork: ReleafBrainArtworkVariant.labyrinth,
-        accent: Color(0xFF6DC8B8),
-      ),
+      skill: 'SPATIAL PLANNING',
+      benefit: 'Navigate routes and keep spatial goals in mind.',
+      artwork: ReleafBrainArtworkVariant.labyrinth,
+      accent: Color(0xFF6DC8B8),
+    ),
     'math_race' => const _BrainGamePresentation(
-        skill: 'CALCULATION',
-        benefit: 'Practise quick mental arithmetic under time pressure.',
-        artwork: ReleafBrainArtworkVariant.mathRace,
-        accent: Color(0xFFE3A66A),
-      ),
+      skill: 'CALCULATION',
+      benefit: 'Practise quick mental arithmetic under time pressure.',
+      artwork: ReleafBrainArtworkVariant.mathRace,
+      accent: Color(0xFFE3A66A),
+    ),
     'broken_mirror' => const _BrainGamePresentation(
-        skill: 'VISUAL RECONSTRUCTION',
-        benefit: 'Rebuild a fragmented image from visual information.',
-        artwork: ReleafBrainArtworkVariant.brokenMirror,
-        accent: Color(0xFFD490B9),
-      ),
+      skill: 'VISUAL RECONSTRUCTION',
+      benefit: 'Rebuild a fragmented image from visual information.',
+      artwork: ReleafBrainArtworkVariant.brokenMirror,
+      accent: Color(0xFFD490B9),
+    ),
     'rule_shift' => const _BrainGamePresentation(
-        skill: 'ATTENTION SWITCHING',
-        benefit:
-            'Switch simple rules and respond without carrying the last one forward.',
-        artwork: ReleafBrainArtworkVariant.ruleShift,
-        accent: Color(0xFFB59AF4),
-      ),
+      skill: 'ATTENTION SWITCHING',
+      benefit:
+          'Switch simple rules and respond without carrying the last one forward.',
+      artwork: ReleafBrainArtworkVariant.ruleShift,
+      accent: Color(0xFFB59AF4),
+    ),
     'sequence_echo' => const _BrainGamePresentation(
-        skill: 'WORKING MEMORY',
-        benefit: 'Hold and reproduce increasingly demanding visual sequences.',
-        artwork: ReleafBrainArtworkVariant.sequenceEcho,
-        accent: Color(0xFF8FA8E8),
-      ),
+      skill: 'WORKING MEMORY',
+      benefit: 'Hold and reproduce increasingly demanding visual sequences.',
+      artwork: ReleafBrainArtworkVariant.sequenceEcho,
+      accent: Color(0xFF8FA8E8),
+    ),
     'n_back' => const _BrainGamePresentation(
-        skill: 'WORKING MEMORY UPDATE',
-        benefit:
-            'Keep recent information active and update it as each new item arrives.',
-        artwork: ReleafBrainArtworkVariant.sequenceEcho,
-        accent: Color(0xFFB8A5FF),
-      ),
+      skill: 'WORKING MEMORY UPDATE',
+      benefit:
+          'Keep recent information active and update it as each new item arrives.',
+      artwork: ReleafBrainArtworkVariant.sequenceEcho,
+      accent: Color(0xFFB8A5FF),
+    ),
     'spatial_span' => const _BrainGamePresentation(
-        skill: 'VISUOSPATIAL MEMORY',
-        benefit:
-            'Hold a short path of locations in mind and reproduce it in order.',
-        artwork: ReleafBrainArtworkVariant.memory,
-        accent: Color(0xFF82C9E8),
-      ),
+      skill: 'VISUOSPATIAL MEMORY',
+      benefit:
+          'Hold a short path of locations in mind and reproduce it in order.',
+      artwork: ReleafBrainArtworkVariant.memory,
+      accent: Color(0xFF82C9E8),
+    ),
     'mental_rotation' => const _BrainGamePresentation(
-        skill: 'SPATIAL REASONING',
-        benefit:
-            'Compare shapes across rotations and distinguish them from mirror reflections.',
-        artwork: ReleafBrainArtworkVariant.brokenMirror,
-        accent: Color(0xFFE0A7D8),
-      ),
+      skill: 'SPATIAL REASONING',
+      benefit:
+          'Compare shapes across rotations and distinguish them from mirror reflections.',
+      artwork: ReleafBrainArtworkVariant.brokenMirror,
+      accent: Color(0xFFE0A7D8),
+    ),
     'trail_switch' => const _BrainGamePresentation(
-        skill: 'VISUAL SEARCH & SWITCHING',
-        benefit:
-            'Scan a field and follow an ordered sequence while switching between rule sets.',
-        artwork: ReleafBrainArtworkVariant.ruleShift,
-        accent: Color(0xFFF1BC73),
-      ),
+      skill: 'VISUAL SEARCH & SWITCHING',
+      benefit:
+          'Scan a field and follow an ordered sequence while switching between rule sets.',
+      artwork: ReleafBrainArtworkVariant.ruleShift,
+      accent: Color(0xFFF1BC73),
+    ),
     'tower_plan' => const _BrainGamePresentation(
-        skill: 'PLANNING & PROBLEM SOLVING',
-        benefit:
-            'Plan legal moves toward a goal while respecting changing constraints.',
-        artwork: ReleafBrainArtworkVariant.labyrinth,
-        accent: Color(0xFF78D0A8),
-      ),
+      skill: 'PLANNING & PROBLEM SOLVING',
+      benefit:
+          'Plan legal moves toward a goal while respecting changing constraints.',
+      artwork: ReleafBrainArtworkVariant.labyrinth,
+      accent: Color(0xFF78D0A8),
+    ),
     'symbol_code' => const _BrainGamePresentation(
-        skill: 'ASSOCIATIVE MAPPING',
-        benefit:
-            'Read a temporary symbol key and apply the mapping accurately across trials.',
-        artwork: ReleafBrainArtworkVariant.signalScan,
-        accent: Color(0xFF8CC8FF),
-      ),
+      skill: 'ASSOCIATIVE MAPPING',
+      benefit:
+          'Read a temporary symbol key and apply the mapping accurately across trials.',
+      artwork: ReleafBrainArtworkVariant.signalScan,
+      accent: Color(0xFF8CC8FF),
+    ),
     'color_conflict' => const _BrainGamePresentation(
-        skill: 'INHIBITORY CONTROL',
-        benefit: 'Ignore conflicting word information and respond to ink color.',
-        artwork: ReleafBrainArtworkVariant.colorConflict,
-        accent: Color(0xFFE099B5),
-      ),
+      skill: 'INHIBITORY CONTROL',
+      benefit: 'Ignore conflicting word information and respond to ink color.',
+      artwork: ReleafBrainArtworkVariant.colorConflict,
+      accent: Color(0xFFE099B5),
+    ),
     'pattern_logic' => const _BrainGamePresentation(
-        skill: 'PATTERN REASONING',
-        benefit: 'Detect repeating and interleaved rules in visual sequences.',
-        artwork: ReleafBrainArtworkVariant.patternLogic,
-        accent: Color(0xFFA9A0E8),
-      ),
+      skill: 'PATTERN REASONING',
+      benefit: 'Detect repeating and interleaved rules in visual sequences.',
+      artwork: ReleafBrainArtworkVariant.patternLogic,
+      accent: Color(0xFFA9A0E8),
+    ),
     'signal_scan' => const _BrainGamePresentation(
-        skill: 'SELECTIVE ATTENTION',
-        benefit: 'Find a target quickly among increasingly similar distractors.',
-        artwork: ReleafBrainArtworkVariant.signalScan,
-        accent: Color(0xFF69C1B8),
-      ),
+      skill: 'SELECTIVE ATTENTION',
+      benefit: 'Find a target quickly among increasingly similar distractors.',
+      artwork: ReleafBrainArtworkVariant.signalScan,
+      accent: Color(0xFF69C1B8),
+    ),
     _ => const _BrainGamePresentation(
-        skill: 'TRAINING',
-        benefit: 'A focused cognitive challenge.',
-        artwork: ReleafBrainArtworkVariant.hero,
-        accent: Color(0xFF91A4EF),
-      ),
+      skill: 'TRAINING',
+      benefit: 'A focused cognitive challenge.',
+      artwork: ReleafBrainArtworkVariant.hero,
+      accent: Color(0xFF91A4EF),
+    ),
   };
 }
 
