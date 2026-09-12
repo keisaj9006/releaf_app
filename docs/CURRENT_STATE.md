@@ -26,7 +26,14 @@ IDs and source assets; tests verify actual Flutter bundle inclusion. Full suite
 checks; final analysis and Android build passed. Runtime remains the installed
 five-tab checkpoint. See [manifest evidence](release/2026-09-12-meditation-production-manifest.md)
 and the [22-session matrix](product/meditation-session-matrix.md). Unguided silence
-by default is the next confirmed gap; missing approved recordings remain pending.
+by default is now implemented in the subsequent checkpoint below; missing approved recordings remain pending.
+
+Unguided silence checkpoint: **495/495 tests passed**, analyzer clean, Android
+debug build and Samsung `adb install -r` succeeded. Unguided 5 UI showed
+`Ambience off` on entry and `Ambience` only after explicit opt-in. Both timers and
+guided preference restoration are covered automatically. See
+[evidence](release/2026-09-12-unguided-silent-default.md). No owner listening gate
+is closed. Next: Reset blueprints and grounding progression.
 
 ## Key release status
 

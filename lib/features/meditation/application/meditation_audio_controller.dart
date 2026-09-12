@@ -170,6 +170,7 @@ class MeditationAudioController extends StateNotifier<MeditationAudioState> {
   final MeditationAudioDriver _driver;
 
   bool _sessionRunning = false;
+  bool _persistEnabledChanges = true;
   bool _hasStarted = false;
   String? _assetPath;
   double _sessionVolume = 0.20;
@@ -193,10 +194,12 @@ class MeditationAudioController extends StateNotifier<MeditationAudioState> {
     required String? soundId,
     required double volume,
     bool playImmediately = true,
+    bool silentByDefault = false,
   }) async {
     final request = ++_playbackRequest;
     _fadeRequest++;
     _sessionRunning = playImmediately;
+    _persistEnabledChanges = !silentByDefault;
     _sessionVolume = volume.clamp(0.0, 1.0).toDouble();
 
     final track = soundId == null ? null : _catalog.getById(soundId);
@@ -204,6 +207,7 @@ class MeditationAudioController extends StateNotifier<MeditationAudioState> {
     _hasStarted = false;
 
     state = state.copyWith(
+      enabled: !silentByDefault && (_prefs.getBool(_enabledKey) ?? true),
       trackId: track?.id,
       trackTitle: track?.title,
       clearTrack: track == null,
@@ -276,7 +280,9 @@ class MeditationAudioController extends StateNotifier<MeditationAudioState> {
         : _sessionRunning && _assetPath != null
         ? resumeForSession()
         : Future<void>.value();
-    await _prefs.setBool(_enabledKey, nextEnabled);
+    if (_persistEnabledChanges) {
+      await _prefs.setBool(_enabledKey, nextEnabled);
+    }
     await playback;
   }
 

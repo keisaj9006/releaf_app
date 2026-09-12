@@ -51,8 +51,10 @@ narration remains honestly labelled; do not substitute the narrator.
 The [22-session technical matrix](../product/meditation-session-matrix.md) is now
 recorded. The exporter validates step totals, IDs, recording sources and ambience;
 tests check real Flutter bundle inclusion. See [verification](../release/2026-09-12-meditation-production-manifest.md).
-Next confirmed implementation gap: unguided timers must start silently without
-overwriting the saved preference for guided-session ambience.
+Implemented: unguided timers start silently without overwriting the saved
+preference for guided-session ambience. Explicit opt-in and pause/resume are
+tested; 495 full-suite tests, clean analysis, build and Samsung update passed.
+See [evidence](../release/2026-09-12-unguided-silent-default.md).
 
 ## 4. Reset flagship
 

@@ -192,6 +192,72 @@ Future<void> _pumpRoute(
 }
 
 void main() {
+  for (final savedEnabled in [true, false]) {
+    test(
+      'unguided ambience stays local and restores guided preference $savedEnabled',
+      () async {
+        final preferences = await _preferences();
+        await preferences.setBool(
+          'meditation.ambient_sound_enabled',
+          savedEnabled,
+        );
+        final driver = _FakeMeditationAudioDriver();
+        final controller = MeditationAudioController(
+          const SoundCatalog(),
+          preferences,
+          driver,
+        );
+        addTearDown(controller.dispose);
+        await controller.start(
+          soundId: 'deep-drift',
+          volume: 0.18,
+          silentByDefault: true,
+        );
+        await controller.pauseForSession();
+        await controller.resumeForSession();
+        expect(driver.playCalls, 0);
+        expect(controller.state.enabled, isFalse);
+        await controller.toggleEnabled();
+        expect(driver.playCalls, 1);
+        await controller.toggleEnabled();
+        expect(
+          preferences.getBool('meditation.ambient_sound_enabled'),
+          savedEnabled,
+        );
+        await controller.start(soundId: 'deep-drift', volume: 0.18);
+        expect(controller.state.enabled, savedEnabled);
+        expect(driver.playCalls, savedEnabled ? 2 : 1);
+      },
+    );
+  }
+
+  for (final id in ['unguided-5', 'unguided-10']) {
+    testWidgets(
+      '$id starts silently without changing the saved ambience preference',
+      (tester) async {
+        final preferences = await _preferences();
+        await preferences.setBool('meditation.ambient_sound_enabled', true);
+        final driver = _FakeMeditationAudioDriver();
+        await _pumpRoute(
+          tester,
+          location: AppRoutes.meditationSessionFor(id),
+          preferences: preferences,
+          isPremium: true,
+          meditationAudioDriver: driver,
+        );
+        expect(driver.playCalls, 0);
+        expect(find.text('Ambience off'), findsOneWidget);
+        expect(preferences.getBool('meditation.ambient_sound_enabled'), isTrue);
+        await tester.tap(find.byKey(const Key('meditation-ambience-chip')));
+        await tester.pump(const Duration(milliseconds: 500));
+        expect(driver.playCalls, 1);
+        expect(find.text('Ambience'), findsWidgets);
+        expect(tester.takeException(), isNull);
+        await tester.pumpWidget(const SizedBox.shrink());
+      },
+    );
+  }
+
   test('Sound catalog exposes only real bundled sound spaces', () {
     const catalog = SoundCatalog();
     final tracks = catalog.getAll();

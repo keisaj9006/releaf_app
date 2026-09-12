@@ -127,6 +127,7 @@ class _MeditationPlayerScreenState
               soundId: item.backgroundSoundId,
               volume: item.backgroundSoundVolume,
               playImmediately: _running,
+              silentByDefault: item.unguided,
             ),
       );
 
