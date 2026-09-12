@@ -768,37 +768,71 @@ void main() {
     expect(find.text('Unlock Premium'), findsNothing);
   });
 
-  testWidgets('Emergency remains overflow-free on a narrow phone', (
-    WidgetTester tester,
-  ) async {
-    await tester.binding.setSurfaceSize(const Size(320, 640));
-    addTearDown(() => tester.binding.setSurfaceSize(null));
+  for (final textScale in [1.0, 2.0]) {
+    testWidgets(
+      'Emergency remains overflow-free on a narrow phone at $textScale text',
+      (WidgetTester tester) async {
+        await tester.binding.setSurfaceSize(const Size(320, 640));
+        addTearDown(() => tester.binding.setSurfaceSize(null));
 
-    final preferences = await _preferences();
-    final router = createAppRouter(
-      initialLocation: AppRoutes.reliefSessionFor(
-        ResetCatalog.emergencySessionId,
-      ),
-    );
-    addTearDown(router.dispose);
-
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          sharedPreferencesProvider.overrideWithValue(preferences),
-          subscriptionControllerProvider.overrideWith(
-            (ref) => throw StateError('Emergency must not read RevenueCat'),
+        final preferences = await _preferences();
+        final router = createAppRouter(
+          initialLocation: AppRoutes.reliefSessionFor(
+            ResetCatalog.emergencySessionId,
           ),
-        ],
-        child: MaterialApp.router(routerConfig: router),
-      ),
-    );
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 300));
+        );
+        addTearDown(router.dispose);
 
-    expect(find.byKey(const Key('emergency-calming-visual')), findsOneWidget);
-    expect(tester.takeException(), isNull);
-  });
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              sharedPreferencesProvider.overrideWithValue(preferences),
+              subscriptionControllerProvider.overrideWith(
+                (ref) => throw StateError('Emergency must not read RevenueCat'),
+              ),
+            ],
+            child: MaterialApp.router(
+              routerConfig: router,
+              builder: (context, child) => MediaQuery(
+                data: MediaQuery.of(
+                  context,
+                ).copyWith(textScaler: TextScaler.linear(textScale)),
+                child: child!,
+              ),
+            ),
+          ),
+        );
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 300));
+
+        expect(
+          find.byKey(const Key('emergency-calming-visual')),
+          findsOneWidget,
+        );
+        expect(tester.takeException(), isNull);
+        final exit = find.byTooltip('Exit Emergency Calm');
+        expect(exit.hitTestable(), findsOneWidget);
+        final phaseBefore = tester
+            .widget<Text>(find.byKey(const Key('emergency-phase-label')))
+            .data;
+        final advance = find.byKey(const Key('emergency-advance-action'));
+        await tester.ensureVisible(advance);
+        await tester.pump();
+        expect(advance.hitTestable(), findsOneWidget);
+        expect(exit.hitTestable(), findsOneWidget);
+        await tester.tap(advance);
+        await tester.pump(const Duration(milliseconds: 400));
+        expect(
+          tester
+              .widget<Text>(find.byKey(const Key('emergency-phase-label')))
+              .data,
+          isNot(phaseBefore),
+        );
+        expect(tester.takeException(), isNull);
+        expect(find.text('Unlock Premium'), findsNothing);
+      },
+    );
+  }
 
   testWidgets('Completing Emergency gives no Leaves', (
     WidgetTester tester,

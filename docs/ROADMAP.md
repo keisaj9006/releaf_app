@@ -2,6 +2,10 @@
 
 This roadmap converts the current repo + release gate + latest project decisions + Deep Research into execution order.
 
+[Emergency large-text layout](release/2026-09-12-emergency-large-text.md) is
+verified at 320x640 with 100%/200% text, visible advance and pinned exit controls.
+544 full tests and clean analysis; production-equivalent device review remains open.
+
 [Reset phase accessibility](release/2026-09-12-reset-live-phase.md) now has
 live phase semantics, without a live per-second countdown or duplicate text.
 543 full tests passed; TalkBack timing and owner comfort still require Samsung.

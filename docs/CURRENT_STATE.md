@@ -2,6 +2,10 @@
 
 Snapshot: **2026-09-12**
 
+[Emergency large-text layout](release/2026-09-12-emergency-large-text.md) fixes
+the reproduced 320x640 / 200% text overflow. Header controls remain pinned while
+enlarged content scrolls. 544 full tests passed; analysis clean. Samsung disconnected.
+
 Reset [accessible phase updates](release/2026-09-12-reset-live-phase.md) now
 expose one live phase label for guided paced breathing; no-words mode leaves
 automatic phase updates off. 543 full tests passed and analysis is clean.

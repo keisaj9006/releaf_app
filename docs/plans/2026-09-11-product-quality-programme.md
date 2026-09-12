@@ -1,5 +1,9 @@
 # Releaf product-quality programme
 
+[Emergency large text](../release/2026-09-12-emergency-large-text.md): 544 full
+tests, clean analysis and independent review. Enlarged content scrolls beneath
+pinned controls; Emergency access/privacy/rewards remain unchanged. Physical QA pending.
+
 [Accessible Reset phases](../release/2026-09-12-reset-live-phase.md): 543 full
 tests and clean analysis. Guided paced breathing exposes one live phase label;
 no-words mode disables automatic updates. Real TalkBack review remains pending.

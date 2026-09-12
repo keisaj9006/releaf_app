@@ -1385,10 +1385,68 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
             child: LayoutBuilder(
               builder: (context, constraints) {
                 final compactHeight = constraints.maxHeight < 620;
+                final largeText =
+                    MediaQuery.textScalerOf(context).scale(17) > 22;
                 final visualSize = math.min(
                   compactHeight ? 205.0 : 285.0,
                   math.max(178.0, constraints.maxWidth * 0.70),
                 );
+
+                final headerTitle = Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'EMERGENCY CALM',
+                      style: ReleafTypography.eyebrow.copyWith(
+                        color: ReleafFeatureAccents.emergency,
+                        letterSpacing: 1.9,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      'One thing at a time.',
+                      style: ReleafTypography.cardTitle.copyWith(fontSize: 17),
+                    ),
+                  ],
+                );
+                final visual = Center(
+                  child: SizedBox(
+                    width: visualSize,
+                    height: visualSize,
+                    child: ReleafEmergencyVisual(
+                      progress: progress,
+                      phaseLabel: phaseLabel,
+                      reducedMotion: reducedMotion,
+                    ),
+                  ),
+                );
+                Widget layout(List<Widget> children) {
+                  if (!largeText) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: children,
+                    );
+                  }
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      children.first,
+                      Expanded(
+                        child: SingleChildScrollView(
+                          key: const Key('emergency-large-text-scroll'),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              const SizedBox(height: ReleafSpacing.sm),
+                              headerTitle,
+                              ...children.skip(1),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                }
 
                 return Padding(
                   padding: const EdgeInsets.fromLTRB(
@@ -1397,215 +1455,182 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
                     ReleafSpacing.screen,
                     ReleafSpacing.md,
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Row(
-                        children: [
-                          ReleafRoundIconButton(
-                            icon: Icons.close_rounded,
-                            tooltip: 'Exit Emergency Calm',
-                            accentColor: ReleafFeatureAccents.emergency,
-                            onPressed: _abortSession,
-                          ),
-                          const SizedBox(width: ReleafSpacing.md),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'EMERGENCY CALM',
-                                  style: ReleafTypography.eyebrow.copyWith(
-                                    color: ReleafFeatureAccents.emergency,
-                                    letterSpacing: 1.9,
-                                  ),
-                                ),
-                                const SizedBox(height: 3),
-                                Text(
-                                  'One thing at a time.',
-                                  style: ReleafTypography.cardTitle.copyWith(
-                                    fontSize: 17,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          IconButton(
-                            key: const Key('reset-active-audio-button'),
-                            tooltip: 'Session audio',
-                            onPressed: _showSessionAudioSettings,
-                            icon: Icon(
-                              !_allAudioMuted
-                                  ? Icons.volume_up_rounded
-                                  : Icons.volume_off_rounded,
-                              color: ReleafColors.textSecondary,
-                            ),
-                          ),
-                          if (widget.launchOptions.showSessionTimer)
-                            DecoratedBox(
-                              decoration: BoxDecoration(
-                                color: const Color(
-                                  0xFF171815,
-                                ).withValues(alpha: 0.88),
-                                borderRadius: BorderRadius.circular(
-                                  ReleafRadii.pill,
-                                ),
-                                border: Border.all(
-                                  color: ReleafFeatureAccents.emergency
-                                      .withValues(alpha: 0.18),
-                                ),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 8,
-                                ),
-                                child: Text(
-                                  timeString,
-                                  key: const Key('reset-active-session-timer'),
-                                  style: ReleafTypography.meta.copyWith(
-                                    color: ReleafColors.textPrimary,
-                                    fontWeight: FontWeight.w700,
-                                    letterSpacing: 0.4,
-                                  ),
-                                ),
-                              ),
-                            )
-                          else
-                            Text(
-                              session.title,
-                              key: const Key('reset-active-session-title'),
-                              style: const TextStyle(
-                                fontSize: 0,
-                                color: Colors.transparent,
-                              ),
-                            ),
-                        ],
-                      ),
-                      SizedBox(
-                        height: compactHeight
-                            ? ReleafSpacing.sm
-                            : ReleafSpacing.lg,
-                      ),
-                      Expanded(
-                        child: Center(
-                          child: SizedBox(
-                            width: visualSize,
-                            height: visualSize,
-                            child: ReleafEmergencyVisual(
-                              progress: progress,
-                              phaseLabel: phaseLabel,
-                              reducedMotion: reducedMotion,
-                            ),
+                  child: layout([
+                    Row(
+                      children: [
+                        ReleafRoundIconButton(
+                          icon: Icons.close_rounded,
+                          tooltip: 'Exit Emergency Calm',
+                          accentColor: ReleafFeatureAccents.emergency,
+                          onPressed: _abortSession,
+                        ),
+                        const SizedBox(width: ReleafSpacing.md),
+                        if (largeText)
+                          const Spacer()
+                        else
+                          Expanded(child: headerTitle),
+                        IconButton(
+                          key: const Key('reset-active-audio-button'),
+                          tooltip: 'Session audio',
+                          onPressed: _showSessionAudioSettings,
+                          icon: Icon(
+                            !_allAudioMuted
+                                ? Icons.volume_up_rounded
+                                : Icons.volume_off_rounded,
+                            color: ReleafColors.textSecondary,
                           ),
                         ),
-                      ),
-                      SizedBox(
-                        height: compactHeight
-                            ? ReleafSpacing.xs
-                            : ReleafSpacing.md,
-                      ),
-                      Center(
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            color: ReleafFeatureAccents.emergency.withValues(
-                              alpha: 0.07,
-                            ),
-                            borderRadius: BorderRadius.circular(
-                              ReleafRadii.pill,
-                            ),
-                            border: Border.all(
-                              color: ReleafFeatureAccents.emergency.withValues(
-                                alpha: 0.19,
+                        if (widget.launchOptions.showSessionTimer)
+                          DecoratedBox(
+                            decoration: BoxDecoration(
+                              color: const Color(
+                                0xFF171815,
+                              ).withValues(alpha: 0.88),
+                              borderRadius: BorderRadius.circular(
+                                ReleafRadii.pill,
                               ),
-                            ),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 7,
-                            ),
-                            child: Text(
-                              steps.isEmpty
-                                  ? phaseLabel.toUpperCase()
-                                  : 'STEP ${stepIndex + 1} OF ${steps.length}  •  ${phaseLabel.toUpperCase()}',
-                              key: const Key('emergency-phase-label'),
-                              style: ReleafTypography.eyebrow.copyWith(
-                                fontSize: 9,
-                                color: ReleafFeatureAccents.emergency,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: ReleafSpacing.sm),
-                      if (widget.launchOptions.showGuidanceText)
-                        Semantics(
-                          key: const Key('reset-active-session-guidance'),
-                          liveRegion: true,
-                          label: guidance,
-                          child: AnimatedSwitcher(
-                            duration: reducedMotion
-                                ? Duration.zero
-                                : ReleafMotion.standard,
-                            child: Text(
-                              guidance,
-                              key: ValueKey('emergency-guidance-$phaseLabel'),
-                              textAlign: TextAlign.center,
-                              style: ReleafTypography.body.copyWith(
-                                color: ReleafColors.textPrimary.withValues(
-                                  alpha: 0.92,
-                                ),
-                                fontSize: compactHeight ? 15 : 17,
-                                height: 1.46,
-                              ),
-                            ),
-                          ),
-                        )
-                      else
-                        const SizedBox(
-                          key: Key('reset-active-session-guidance-hidden'),
-                          height: 1,
-                        ),
-                      if (widget.launchOptions.showGuidanceText &&
-                          advanceLabel != null) ...[
-                        const SizedBox(height: ReleafSpacing.sm),
-                        Center(
-                          child: OutlinedButton.icon(
-                            key: const Key('emergency-advance-action'),
-                            onPressed: _advanceGuidedStep,
-                            icon: const Icon(
-                              Icons.arrow_forward_rounded,
-                              size: 17,
-                            ),
-                            label: Text(advanceLabel),
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: ReleafColors.textPrimary,
-                              backgroundColor: ReleafFeatureAccents.emergency
-                                  .withValues(alpha: 0.06),
-                              side: BorderSide(
+                              border: Border.all(
                                 color: ReleafFeatureAccents.emergency
-                                    .withValues(alpha: 0.28),
+                                    .withValues(alpha: 0.18),
                               ),
+                            ),
+                            child: Padding(
                               padding: const EdgeInsets.symmetric(
-                                horizontal: ReleafSpacing.md,
-                                vertical: 10,
+                                horizontal: 12,
+                                vertical: 8,
                               ),
+                              child: Text(
+                                timeString,
+                                key: const Key('reset-active-session-timer'),
+                                style: ReleafTypography.meta.copyWith(
+                                  color: ReleafColors.textPrimary,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: 0.4,
+                                ),
+                              ),
+                            ),
+                          )
+                        else
+                          Text(
+                            session.title,
+                            key: const Key('reset-active-session-title'),
+                            style: const TextStyle(
+                              fontSize: 0,
+                              color: Colors.transparent,
+                            ),
+                          ),
+                      ],
+                    ),
+                    SizedBox(
+                      height: compactHeight
+                          ? ReleafSpacing.sm
+                          : ReleafSpacing.lg,
+                    ),
+                    if (largeText) visual else Expanded(child: visual),
+                    SizedBox(
+                      height: compactHeight
+                          ? ReleafSpacing.xs
+                          : ReleafSpacing.md,
+                    ),
+                    Center(
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: ReleafFeatureAccents.emergency.withValues(
+                            alpha: 0.07,
+                          ),
+                          borderRadius: BorderRadius.circular(ReleafRadii.pill),
+                          border: Border.all(
+                            color: ReleafFeatureAccents.emergency.withValues(
+                              alpha: 0.19,
                             ),
                           ),
                         ),
-                      ],
-                      const SizedBox(height: ReleafSpacing.xs),
-                      Text(
-                        'Go at your own pace. Stop at any time.',
-                        textAlign: TextAlign.center,
-                        style: ReleafTypography.meta.copyWith(
-                          color: ReleafColors.textMuted,
-                          fontSize: compactHeight ? 10 : 11,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 7,
+                          ),
+                          child: Text(
+                            steps.isEmpty
+                                ? phaseLabel.toUpperCase()
+                                : 'STEP ${stepIndex + 1} OF ${steps.length}  •  ${phaseLabel.toUpperCase()}',
+                            key: const Key('emergency-phase-label'),
+                            style: ReleafTypography.eyebrow.copyWith(
+                              fontSize: 9,
+                              color: ReleafFeatureAccents.emergency,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: ReleafSpacing.sm),
+                    if (widget.launchOptions.showGuidanceText)
+                      Semantics(
+                        key: const Key('reset-active-session-guidance'),
+                        liveRegion: true,
+                        label: guidance,
+                        child: AnimatedSwitcher(
+                          duration: reducedMotion
+                              ? Duration.zero
+                              : ReleafMotion.standard,
+                          child: Text(
+                            guidance,
+                            key: ValueKey('emergency-guidance-$phaseLabel'),
+                            textAlign: TextAlign.center,
+                            style: ReleafTypography.body.copyWith(
+                              color: ReleafColors.textPrimary.withValues(
+                                alpha: 0.92,
+                              ),
+                              fontSize: compactHeight ? 15 : 17,
+                              height: 1.46,
+                            ),
+                          ),
+                        ),
+                      )
+                    else
+                      const SizedBox(
+                        key: Key('reset-active-session-guidance-hidden'),
+                        height: 1,
+                      ),
+                    if (widget.launchOptions.showGuidanceText &&
+                        advanceLabel != null) ...[
+                      const SizedBox(height: ReleafSpacing.sm),
+                      Center(
+                        child: OutlinedButton.icon(
+                          key: const Key('emergency-advance-action'),
+                          onPressed: _advanceGuidedStep,
+                          icon: const Icon(
+                            Icons.arrow_forward_rounded,
+                            size: 17,
+                          ),
+                          label: Text(advanceLabel),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: ReleafColors.textPrimary,
+                            backgroundColor: ReleafFeatureAccents.emergency
+                                .withValues(alpha: 0.06),
+                            side: BorderSide(
+                              color: ReleafFeatureAccents.emergency.withValues(
+                                alpha: 0.28,
+                              ),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: ReleafSpacing.md,
+                              vertical: 10,
+                            ),
+                          ),
                         ),
                       ),
                     ],
-                  ),
+                    const SizedBox(height: ReleafSpacing.xs),
+                    Text(
+                      'Go at your own pace. Stop at any time.',
+                      textAlign: TextAlign.center,
+                      style: ReleafTypography.meta.copyWith(
+                        color: ReleafColors.textMuted,
+                        fontSize: compactHeight ? 10 : 11,
+                      ),
+                    ),
+                  ]),
                 );
               },
             ),
