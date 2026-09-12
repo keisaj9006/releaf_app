@@ -4,9 +4,9 @@ import '../../../core/providers.dart';
 import '../model/leaves_state.dart';
 
 final leavesNotifierProvider =
-StateNotifierProvider<LeavesNotifier, LeavesState>(
+    StateNotifierProvider<LeavesNotifier, LeavesState>(
       (ref) => LeavesNotifier(ref),
-);
+    );
 
 /// Zwracamy to do UI, żeby móc pokazać SnackBar / Haptic / “Perfect day”.
 class RewardResult {
@@ -32,15 +32,15 @@ class LeavesNotifier extends StateNotifier<LeavesState> {
   Future<void> _operationQueue = Future<void>.value();
 
   LeavesNotifier(this.ref)
-      : super(
-    LeavesState(
-      totalLeaves: 0,
-      todayKey: _currentDateString(),
-      reliefDone: false,
-      habitDone: false,
-      brainDone: false,
-    ),
-  ) {
+    : super(
+        LeavesState(
+          totalLeaves: 0,
+          todayKey: _currentDateString(),
+          reliefDone: false,
+          habitDone: false,
+          brainDone: false,
+        ),
+      ) {
     _ready = _load();
   }
 
@@ -70,7 +70,7 @@ class LeavesNotifier extends StateNotifier<LeavesState> {
 
   /// ✅ Normalizacja: dzisiejszy key zawsze jako NON-null String.
   String _todayKey() {
-    final fromProvider = ref.read(todayProvider);
+    final fromProvider = ref.refresh(todayProvider);
     if (fromProvider.isNotEmpty) return fromProvider;
     return _currentDateString();
   }
@@ -137,6 +137,8 @@ class LeavesNotifier extends StateNotifier<LeavesState> {
     await prefs.setInt(_kTotalLeaves, total);
   }
 
+  Future<void> refreshDay() => _runExclusive(_resetIfNewDay);
+
   Future<void> _persistFlag(String key, bool value) async {
     final prefs = ref.read(sharedPreferencesProvider);
     await prefs.setBool(key, value);
@@ -152,32 +154,38 @@ class LeavesNotifier extends StateNotifier<LeavesState> {
 
   /// Relief: raz dziennie +1 (i bonus jeśli to 3/3)
   Future<RewardResult?> markReliefDone() {
-    return _runExclusive(() => _complete(
-      baseReward: _reliefReward,
-      isDone: (current) => current.reliefDone,
-      markDone: (current) => current.copyWith(reliefDone: true),
-      flagKey: _kReliefDone,
-    ));
+    return _runExclusive(
+      () => _complete(
+        baseReward: _reliefReward,
+        isDone: (current) => current.reliefDone,
+        markDone: (current) => current.copyWith(reliefDone: true),
+        flagKey: _kReliefDone,
+      ),
+    );
   }
 
   /// Habits: raz dziennie +1 (i bonus jeśli to 3/3)
   Future<RewardResult?> markHabitDone() {
-    return _runExclusive(() => _complete(
-      baseReward: _habitReward,
-      isDone: (current) => current.habitDone,
-      markDone: (current) => current.copyWith(habitDone: true),
-      flagKey: _kHabitDone,
-    ));
+    return _runExclusive(
+      () => _complete(
+        baseReward: _habitReward,
+        isDone: (current) => current.habitDone,
+        markDone: (current) => current.copyWith(habitDone: true),
+        flagKey: _kHabitDone,
+      ),
+    );
   }
 
   /// Brain: raz dziennie +2 (i bonus jeśli to 3/3)
   Future<RewardResult?> markBrainDone() {
-    return _runExclusive(() => _complete(
-      baseReward: _brainReward,
-      isDone: (current) => current.brainDone,
-      markDone: (current) => current.copyWith(brainDone: true),
-      flagKey: _kBrainDone,
-    ));
+    return _runExclusive(
+      () => _complete(
+        baseReward: _brainReward,
+        isDone: (current) => current.brainDone,
+        markDone: (current) => current.copyWith(brainDone: true),
+        flagKey: _kBrainDone,
+      ),
+    );
   }
 
   Future<RewardResult?> _complete({

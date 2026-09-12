@@ -10,6 +10,7 @@ import 'package:releaf_app/core/subscription/subscription_state.dart';
 import 'package:releaf_app/features/home/daily_insight.dart';
 import 'package:releaf_app/features/home/home_personalization.dart';
 import 'package:releaf_app/features/home/home_screen.dart';
+import 'package:releaf_app/features/progress/data/leaves_repository.dart';
 import 'package:releaf_app/routing/app_router.dart';
 import 'package:releaf_app/routing/app_routes.dart';
 
@@ -24,6 +25,7 @@ Future<void> _pumpHome(
   int hour = 12,
   bool premium = false,
   DateTime Function()? clock,
+  String Function()? day,
 }) async {
   final router = createAppRouter(initialLocation: AppRoutes.home);
   addTearDown(router.dispose);
@@ -32,6 +34,7 @@ Future<void> _pumpHome(
     ProviderScope(
       overrides: [
         sharedPreferencesProvider.overrideWithValue(preferences),
+        if (day != null) todayProvider.overrideWith((ref) => day()),
         homeNowProvider.overrideWith(
           (ref) => clock?.call() ?? DateTime(2026, 9, 6, hour),
         ),
@@ -56,6 +59,35 @@ class _PremiumSubscription extends SubscriptionController {
 }
 
 void main() {
+  testWidgets(
+    'Home refreshes daily flags after midnight without losing Leaves',
+    (tester) async {
+      final preferences = await _preferences();
+      await preferences.setString('todayKey', '2026-09-03');
+      await preferences.setInt('totalLeaves', 6);
+      for (final key in ['reliefDone', 'habitDone', 'brainDone']) {
+        await preferences.setBool(key, true);
+      }
+      var day = '2026-09-03';
+      await _pumpHome(tester, preferences: preferences, day: () => day);
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(HomeScreen)),
+      );
+      expect(container.read(leavesNotifierProvider).reliefDone, isTrue);
+      day = '2026-09-04';
+      await tester.pump(const Duration(minutes: 1));
+      await tester.pump();
+      final state = container.read(leavesNotifierProvider);
+      expect(state.todayKey, day);
+      expect(state.totalLeaves, 6);
+      expect(state.reliefDone, isFalse);
+      expect(state.brainDone, isFalse);
+      expect(state.habitDone, isFalse);
+      expect(preferences.getInt('totalLeaves'), 6);
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
+
   testWidgets(
     'Home first frame does not restart the clock while backgrounded',
     (tester) async {

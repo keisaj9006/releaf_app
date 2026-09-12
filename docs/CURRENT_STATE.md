@@ -1,6 +1,13 @@
 # Releaf Current State
 
 Snapshot: **2026-09-12**
+
+Latest verification: **509/509 tests passed**, clean analysis and Android debug
+build for [daily progress rollover](release/2026-09-12-daily-progress-rollover.md).
+Samsung replacement installation succeeded. Home refreshes daily flags across
+date changes; accumulated Leaves and existing reward/bonus semantics are preserved.
+Overnight hardware QA remains pending.
+
 Repo: `keisaj9006/releaf_app`  
 Branch: **`releaf-development`**  
 Owner device-review checkpoint: **`16a0f2c`**;

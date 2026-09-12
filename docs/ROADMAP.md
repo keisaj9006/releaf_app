@@ -2,6 +2,11 @@
 
 This roadmap converts the current repo + release gate + latest project decisions + Deep Research into execution order.
 
+Latest completed internal fix: [daily progress rollover](release/2026-09-12-daily-progress-rollover.md),
+509 full-suite tests, clean analysis, Android debug build and Samsung replacement
+installation. Next: remaining backend/offline and release-quality requirements;
+content and physical review dependencies remain open.
+
 The canonical release gate remains:
 `docs/release/releaf_1_0_release_gate.md`
 

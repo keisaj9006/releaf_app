@@ -50,10 +50,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     _clockRefresh?.cancel();
     final lifecycle = WidgetsBinding.instance.lifecycleState;
     if (lifecycle != null && lifecycle != AppLifecycleState.resumed) return;
-    ref.invalidate(homeNowProvider);
+    _refreshDayContent();
     _clockRefresh = Timer.periodic(const Duration(minutes: 1), (_) {
-      ref.invalidate(homeNowProvider);
+      _refreshDayContent();
     });
+  }
+
+  void _refreshDayContent() {
+    ref.invalidate(homeNowProvider);
+    unawaited(ref.read(leavesNotifierProvider.notifier).refreshDay());
   }
 
   @override

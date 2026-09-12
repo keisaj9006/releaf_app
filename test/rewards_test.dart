@@ -22,6 +22,38 @@ Future<ProviderContainer> _createContainer([
 }
 
 void main() {
+  test(
+    'A running app awards the next day once without losing previous Leaves',
+    () async {
+      var today = '2026-09-03';
+      SharedPreferences.setMockInitialValues({'totalLeaves': 10});
+      final preferences = await SharedPreferences.getInstance();
+      final container = ProviderContainer(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(preferences),
+          todayProvider.overrideWith((ref) => today),
+        ],
+      );
+      addTearDown(container.dispose);
+      final notifier = container.read(leavesNotifierProvider.notifier);
+      expect((await notifier.markReliefDone())?.totalAdded, 1);
+      today = '2026-09-04';
+      final dayRefresh = notifier.refreshDay();
+      final results = await Future.wait(
+        List.generate(5, (_) => notifier.markReliefDone()),
+      );
+      await dayRefresh;
+      await notifier.refreshDay();
+      expect(results.where((result) => result != null), hasLength(1));
+      expect(container.read(leavesNotifierProvider).todayKey, today);
+      expect(container.read(leavesNotifierProvider).totalLeaves, 12);
+      today = '2026-09-08';
+      expect((await notifier.markReliefDone())?.totalAdded, 1);
+      expect(preferences.getInt('totalLeaves'), 13);
+      expect(preferences.getString('todayKey'), today);
+    },
+  );
+
   test('Relief completion is idempotent under overlapping calls', () async {
     final container = await _createContainer();
     addTearDown(container.dispose);

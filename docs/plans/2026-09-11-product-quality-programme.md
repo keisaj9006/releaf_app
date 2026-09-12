@@ -1,5 +1,11 @@
 # Releaf product-quality programme
 
+Latest progress checkpoint: [daily progress rollover](../release/2026-09-12-daily-progress-rollover.md).
+Cached dates no longer prevent new-day rewards; Home refreshes daily flags.
+509 full tests, clean analysis, Android debug build and Samsung replacement
+installation passed. Reward semantics remain unchanged. Next: backend/offline
+and release-quality requirements, with owner listening and overnight QA pending.
+
 Owner-approved on 11 September 2026 after the capability checkpoint. Work only
 in `C:\Users\joann\Releaf-Codex` on `releaf-development`. The canonical
 [release gate](../release/releaf_1_0_release_gate.md) remains authoritative.
