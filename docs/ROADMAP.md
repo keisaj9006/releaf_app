@@ -2,6 +2,11 @@
 
 This roadmap converts the current repo + release gate + latest project decisions + Deep Research into execution order.
 
+[Loop boundary evidence](release/2026-09-12-sound-loop-boundaries.md) covers all
+ten Sound sources. Atmosphere boundary dynamics and the Deep Drift join require
+listening/mastering review; native loop continuity still needs Samsung evidence.
+Removed the unverified seamless-loop badge claim without changing playback.
+
 [All ten Sound source levels](release/2026-09-12-sound-source-loudness.md) now
 have measured LUFS/true-peak evidence. New Atmosphere I headroom review and
 large source-level differences require mastering/listening decisions, not

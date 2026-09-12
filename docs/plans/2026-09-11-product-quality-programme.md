@@ -1,5 +1,9 @@
 # Releaf product-quality programme
 
+[Sound loop boundaries](../release/2026-09-12-sound-loop-boundaries.md) now have
+decoded-waveform evidence for all ten sources. This does not close native-loop
+or owner listening gates; active Atmosphere endings need particular review.
+
 [Sound source measurements](../release/2026-09-12-sound-source-loudness.md)
 complete the eight missing LUFS/true-peak scans without changing assets.
 All ten sources have measurements; final mastering/listening is still open.

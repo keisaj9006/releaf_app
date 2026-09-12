@@ -623,7 +623,7 @@ class _ContinuousLoopStatus extends StatelessWidget {
           const SizedBox(width: 7),
           Flexible(
             child: Text(
-              'Continuous seamless loop',
+              'Continuous loop',
               textAlign: TextAlign.center,
               style: ReleafTypography.meta.copyWith(
                 color: ReleafColors.textSecondary,

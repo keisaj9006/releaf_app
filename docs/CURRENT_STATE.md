@@ -2,6 +2,11 @@
 
 Snapshot: **2026-09-12**
 
+[Sound loop boundaries](release/2026-09-12-sound-loop-boundaries.md): ten decoded
+source scans complete, hashes unchanged. Atmosphere tracks have quiet boundaries;
+Atmosphere II ends with a silent second. Seamless mastering/listening is unproven.
+The player now says `Continuous loop`, without claiming verified seamless quality.
+
 [Sound source loudness](release/2026-09-12-sound-source-loudness.md): eight missing
 LUFS/true-peak scans completed, all source hashes unchanged. Together with prior
 Deep Drift/Atmosphere II evidence, all ten sources are measured. Atmosphere I

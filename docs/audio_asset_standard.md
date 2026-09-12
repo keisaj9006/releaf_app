@@ -2,6 +2,10 @@
 
 Last reviewed: 2026-09-12
 
+[Loop boundary measurements](release/2026-09-12-sound-loop-boundaries.md) now
+cover all ten sources. Quiet or numerically continuous boundaries do not prove
+perceptually seamless looping; Atmosphere endings and Deep Drift need join listening.
+
 Current [Sound source measurements](release/2026-09-12-sound-source-loudness.md)
 cover all ten bundled tracks. Atmosphere I (-0.8 dBTP) and Atmosphere II
 (+0.8 dBTP) need headroom review against the production reference; source-level
