@@ -169,4 +169,4 @@ Resumed milestone: [Reset audio handoff](release/2026-09-12-reset-audio-handoff.
 
 Reset ambience cancellation milestone passed 453 tests, clean analysis and Android build. Subsequent Memory Mirror 50-level progression is complete; bounded Sleep/Sound recheck found no additional demonstrable defect.
 
-Memory 50-level milestone implemented and verified: 462 full tests, clean analysis and Android APK. The subsequently identified subscription identity race is fixed; 467 full tests, clean analysis and Android build passed. Local web release smoke is the next verification task.
+Memory 50-level milestone implemented and verified: 462 full tests, clean analysis and Android APK. The subsequently identified subscription identity race is fixed; 467 full tests, clean analysis and Android build passed. Local web release build and all six resource assertions also passed; see release/2026-09-12-programme-verification.md. Owner/content and production-equivalent device/store gates remain open.

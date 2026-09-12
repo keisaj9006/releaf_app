@@ -341,3 +341,5 @@ Latest resumed milestone: [Reset audio handoff](release/2026-09-12-reset-audio-h
 Reset ambience lifecycle is now protected against delayed start after mute/background/exit; rapid return is tested. [Evidence](release/2026-09-12-reset-ambience-lifecycle.md): 453 full tests passed, analyzer clean, new APK built. Physical checks pending. Subsequent Memory milestone is complete below.
 
 Memory Mirror now has 50 tested profiles, hosted/standalone progression and browsable charts. [Evidence](release/2026-09-12-memory-fifty-levels.md): 462 full tests, clean analyzer, Android debug build passed. Subscription isolation was subsequently implemented. No physical verification added.
+
+[Consolidated resumed-programme evidence](release/2026-09-12-programme-verification.md): code checkpoint b4ca786, 467 tests, Android and web builds, web resource assertions, exact APK hash and remaining dependencies. No release-readiness claim.
