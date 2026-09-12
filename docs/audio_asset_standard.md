@@ -151,6 +151,11 @@ evidence blocks that asset's promotion, not independent engineering work.
 
 ## Current evidence and remaining dependencies
 
+The local [intake consistency checker](../tooling/audio/INTAKE.md) now checks
+submitted evidence structure and actual file hashes, with separate measurement
+and approval binding. It neither authenticates licences/consent nor grants
+approval, and does not replace the existing catalog exporters or listening.
+
 The [Meditation matrix](product/meditation-session-matrix.md),
 [Reset blueprints](product/reset-session-production-blueprints.md) and existing
 exporters record scripts/timelines and recording availability. They do not yet

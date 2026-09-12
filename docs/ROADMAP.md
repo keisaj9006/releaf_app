@@ -2,6 +2,10 @@
 
 This roadmap converts the current repo + release gate + latest project decisions + Deep Research into execution order.
 
+[Audio intake consistency tooling](../tooling/audio/INTAKE.md) is implemented
+with 12 tests. Real provenance, content authenticity, source supply, owner
+listening and runtime promotion remain separately reviewed requirements.
+
 [Reset reduced-motion transitions](release/2026-09-12-reset-reduced-transitions.md)
 passed 519 tests, analysis and Android build. Device update remains pending
 connection. Continue the unblocked audio provenance/intake validation requirement

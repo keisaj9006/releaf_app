@@ -2,6 +2,11 @@
 
 Snapshot: **2026-09-12**
 
+Local [audio intake validation](../tooling/audio/INTAKE.md) now checks submitted
+provenance/measurement/approval fields and actual file hashes. Twelve Python
+tests and clean Flutter analysis; no runtime assets or approval status changed.
+Actual licensed recordings and owner evidence remain required.
+
 Current verification: **519/519 tests**, clean analysis and Android debug build
 for [Reset reduced-motion transitions](release/2026-09-12-reset-reduced-transitions.md).
 System reduced motion now also removes shell and guidance crossfades. Default
