@@ -9,6 +9,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/session/session_deadline_clock.dart';
 import '../../meditation/application/meditation_voice_controller.dart';
+import '../../meditation/application/meditation_audio_controller.dart';
 import '../../progress/data/leaves_repository.dart';
 import '../../sound/application/sound_player_controller.dart';
 import '../../../routing/app_routes.dart';
@@ -35,6 +36,8 @@ import '../domain/models/reset_session_program.dart';
 import '../domain/reset_voice_guidance.dart';
 
 enum SessionPhase { running, feedback }
+
+final resetAmbientPlayerProvider = Provider<audio.AudioPlayer?>((ref) => null);
 
 class BreathingWidget extends ConsumerStatefulWidget {
   final String sessionId;
@@ -64,12 +67,13 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
   bool _pausedByLifecycle = false;
   final Map<int, int> _sensoryCompletedByStep = <int, int>{};
 
-  final audio.AudioPlayer _ambientPlayer = audio.AudioPlayer();
+  late final MeditationAudioDriver _ambientPlayer;
   final MeditationVoiceDriver _voiceDriver = FlutterMeditationVoiceDriver();
   late final ResetVoicePlayback _voicePlayback = ResetVoicePlayback(
     _voiceDriver,
   );
   bool _ambientStarted = false;
+  int _audioRequest = 0;
   late bool _voiceEnabled;
   late double _voiceVolume;
   late bool _ambientEnabled;
@@ -79,6 +83,9 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
   @override
   void initState() {
     super.initState();
+    _ambientPlayer = AudioplayersMeditationAudioDriver(
+      player: ref.read(resetAmbientPlayerProvider),
+    );
     WidgetsBinding.instance.addObserver(this);
 
     final audioPreferences = ref.read(resetAudioPreferencesProvider);
@@ -154,7 +161,8 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
   }
 
   Future<void> _startSessionAudio() async {
-    if (_pausedByLifecycle || _phase != SessionPhase.running) return;
+    if (!_canPlayAudio) return;
+    final request = ++_audioRequest;
 
     final soundState = ref.read(soundPlayerControllerProvider);
     if (soundState.isPlaying || soundState.isLoading) {
@@ -166,23 +174,43 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
       }
     }
 
-    if (_ambientEnabled) {
-      try {
-        await _ambientPlayer.setReleaseMode(audio.ReleaseMode.loop);
-        await _ambientPlayer.setVolume(_ambientVolume);
-        await _ambientPlayer.play(audio.AssetSource('sounds/deep_drift.mp3'));
-        _ambientStarted = true;
-      } catch (_) {
-        _ambientStarted = false;
-      }
-    }
-
+    if (!_canPlayAudio || request != _audioRequest) return;
+    await _startAmbience(request);
+    if (!_canPlayAudio || request != _audioRequest) return;
     await _syncSpokenGuidance(force: true);
+  }
+
+  bool get _canPlayAudio =>
+      mounted && !_pausedByLifecycle && _phase == SessionPhase.running;
+
+  Future<void> _startAmbience(int request) async {
+    if (!_canPlayAudio || !_ambientEnabled || request != _audioRequest) return;
+    try {
+      if (_ambientStarted) {
+        await _ambientPlayer.setVolume(_ambientVolume);
+        if (!_canPlayAudio || !_ambientEnabled || request != _audioRequest) {
+          return;
+        }
+        await _ambientPlayer.resume();
+      } else {
+        await _ambientPlayer.playAsset(
+          'sounds/deep_drift.mp3',
+          volume: _ambientVolume,
+        );
+        if (!_canPlayAudio || !_ambientEnabled || request != _audioRequest) {
+          return;
+        }
+        _ambientStarted = true;
+      }
+    } catch (_) {
+      if (request == _audioRequest) _ambientStarted = false;
+    }
   }
 
   Future<void> _syncSpokenGuidance({bool force = false}) async {
     final session = _session;
-    if (session == null ||
+    if (!mounted ||
+        session == null ||
         !_voiceEnabled ||
         _phase != SessionPhase.running ||
         _pausedByLifecycle) {
@@ -239,28 +267,15 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
   Future<void> _setAmbientEnabled(bool enabled) async {
     if (!mounted) return;
     setState(() => _ambientEnabled = enabled);
-    await ref
+    final request = ++_audioRequest;
+    // Invalidate native preparation before preference writes or voice shutdown.
+    final changing = enabled ? _startAmbience(request) : _ambientPlayer.pause();
+    final saving = ref
         .read(resetAudioPreferencesProvider.notifier)
         .setAmbientEnabled(enabled);
-
     try {
-      if (!enabled) {
-        if (_ambientStarted) await _ambientPlayer.pause();
-        return;
-      }
-
-      if (_ambientStarted) {
-        await _ambientPlayer.setVolume(_ambientVolume);
-        await _ambientPlayer.resume();
-      } else {
-        await _ambientPlayer.setReleaseMode(audio.ReleaseMode.loop);
-        await _ambientPlayer.setVolume(_ambientVolume);
-        await _ambientPlayer.play(audio.AssetSource('sounds/deep_drift.mp3'));
-        _ambientStarted = true;
-      }
-    } catch (_) {
-      // Keep the visual Reset usable if the audio layer is unavailable.
-    }
+      await Future.wait([changing, saving]);
+    } catch (_) {}
   }
 
   Future<void> _setAmbientVolume(double volume) async {
@@ -269,7 +284,6 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
     await ref
         .read(resetAudioPreferencesProvider.notifier)
         .setAmbientVolume(safe);
-    if (!_ambientStarted) return;
     try {
       await _ambientPlayer.setVolume(safe);
     } catch (_) {}
@@ -284,8 +298,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
 
   Future<void> _setAllAudioMuted(bool muted) async {
     if (muted) {
-      await _setVoiceEnabled(false);
-      await _setAmbientEnabled(false);
+      await Future.wait([_setVoiceEnabled(false), _setAmbientEnabled(false)]);
       return;
     }
 
@@ -294,12 +307,11 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
   }
 
   Future<void> _stopSessionAudio() async {
+    _audioRequest++;
+    final stoppingAmbience = _ambientPlayer.stop();
     _voicePlayback.cancelPending();
     try {
-      await _voiceDriver.stop();
-    } catch (_) {}
-    try {
-      await _ambientPlayer.stop();
+      await Future.wait([_voiceDriver.stop(), stoppingAmbience]);
     } catch (_) {}
     _ambientStarted = false;
   }
@@ -687,56 +699,27 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
   }
 
   Future<void> _pauseAudioForLifecycle() async {
+    _audioRequest++;
+    final pausingAmbience = _ambientPlayer.pause();
     _voicePlayback.cancelPending();
     try {
-      await _voiceDriver.stop();
-    } catch (_) {}
-
-    if (!_ambientStarted) return;
-    try {
-      await _ambientPlayer.pause();
+      await Future.wait([_voiceDriver.stop(), pausingAmbience]);
     } catch (_) {}
   }
 
   Future<void> _resumeAfterLifecyclePause() async {
-    if (!mounted || _phase != SessionPhase.running) return;
+    if (!_canPlayAudio) return;
 
     if (_remainingSeconds > 0) {
       _startTimer();
     }
 
-    final soundState = ref.read(soundPlayerControllerProvider);
-    if (soundState.isPlaying || soundState.isLoading) {
-      try {
-        await ref.read(soundPlayerControllerProvider.notifier).pause();
-      } catch (_) {
-        // Reset remains usable if the previous Sound Space cannot release
-        // audio focus cleanly.
-      }
-    }
-
-    if (_ambientEnabled) {
-      try {
-        await _ambientPlayer.setVolume(_ambientVolume);
-        if (_ambientStarted) {
-          await _ambientPlayer.resume();
-        } else {
-          await _ambientPlayer.setReleaseMode(audio.ReleaseMode.loop);
-          await _ambientPlayer.play(audio.AssetSource('sounds/deep_drift.mp3'));
-          _ambientStarted = true;
-        }
-      } catch (_) {
-        // Visual/timing layers remain authoritative when audio is unavailable.
-      }
-    }
-
-    if (_voiceEnabled) {
-      await _syncSpokenGuidance(force: true);
-    }
+    await _startSessionAudio();
   }
 
   @override
   void dispose() {
+    _audioRequest++;
     _voicePlayback.cancelPending();
     WidgetsBinding.instance.removeObserver(this);
     _timer?.cancel();

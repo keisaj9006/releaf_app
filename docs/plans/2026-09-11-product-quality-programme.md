@@ -70,6 +70,23 @@ bounded task; this batch only tracks source readiness needed for safe resume.
 
 ## Completed evidence
 
+### Next Brain milestone: Memory Mirror through level 50
+
+After Reset lifecycle verification, the bounded Sleep/Sound review found no
+additional demonstrable code defect. Continue the authorized Memory extension.
+Preserve exact levels 1–12, including existing Easy/Hard boundary behaviour.
+Use a Memory-only profile resolver: Medium 13–18 has 8 pairs and 45–40 seconds;
+19–26 has 9 pairs and 48–41 seconds; 27–34 has 10 pairs and 50–43 seconds;
+35–42 has 11 pairs and 52–45 seconds; 43–50 has 12 pairs and 54–47 seconds.
+Decrease one second per step within each band and allow extra time for a larger
+board. Above level 12, Easy/Hard keep the existing -2/+2 practice offset capped
+at 50. Other games retain their current caps.
+
+Verify profiles, hosted and standalone persistence, real board completion,
+pending-pair reset/timeout safety and largest-board layout. Keep score/reward
+formulas, preference keys and cumulative completion counts. Update the result
+and hub maximum labels to use the game's own cap. Hardware review remains open.
+
 ### Milestone 4 plan: visible Sound loading and recoverable failure
 
 The Sound player currently labels an unfinished start PAUSED and lets a current

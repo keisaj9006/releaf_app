@@ -166,3 +166,5 @@ Potential bets:
 Avoid building large speculative systems before retention data supports them.
 
 Resumed milestone: [Reset audio handoff](release/2026-09-12-reset-audio-handoff.md) cancels pending Sound on entry/return. Next: Reset ambience cancellation, then remaining programme tracks.
+
+Reset ambience cancellation milestone passed 453 tests, clean analysis and Android build. Next unblocked implementation: Memory Mirror 50-level progression; bounded Sleep/Sound recheck found no additional demonstrable defect.
