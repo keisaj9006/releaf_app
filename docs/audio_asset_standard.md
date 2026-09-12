@@ -2,6 +2,11 @@
 
 Last reviewed: 2026-09-12
 
+Current [Sound source measurements](release/2026-09-12-sound-source-loudness.md)
+cover all ten bundled tracks. Atmosphere I (-0.8 dBTP) and Atmosphere II
+(+0.8 dBTP) need headroom review against the production reference; source-level
+differences still need actual listening. Measurement is not owner approval.
+
 ## Scope
 
 This is the shared production standard for Reset breathing cues, recorded Releaf

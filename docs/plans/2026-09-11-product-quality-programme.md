@@ -1,5 +1,9 @@
 # Releaf product-quality programme
 
+[Sound source measurements](../release/2026-09-12-sound-source-loudness.md)
+complete the eight missing LUFS/true-peak scans without changing assets.
+All ten sources have measurements; final mastering/listening is still open.
+
 [Emergency large text](../release/2026-09-12-emergency-large-text.md): 544 full
 tests, clean analysis and independent review. Enlarged content scrolls beneath
 pinned controls; Emergency access/privacy/rewards remain unchanged. Physical QA pending.
@@ -105,8 +109,8 @@ generation, production deployment or store submission under this approval.
 | 2 | Reset / Emergency | COMPLETE: rejected breathing cues cannot reach runtime; silent/reduced-motion guidance and saved preferences are covered; audio settings are readable. Approved natural breathing cues remain an owner/content dependency. |
 | 3 | Sleep / Sound | COMPLETE: playback/volume intent, loading/error/retry and interruption recovery (447 full tests, clean analysis, APK and bounded Samsung smoke). Owner review is next; Atmosphere II candidate still awaits listening approval. |
 | 4 | Brain | IMPLEMENTED: Memory has 50 defined profiles, persisted progression and browsable all-level stats; legacy profiles and rewards preserved. Labyrinth 50-stage architecture preserved; physical game-quality review pending. |
-| 5 | Progress / personalisation / mascot | Home time-dependent content now refreshes while active/on resume; Sleep recommendations describe actual sound/timer behavior. Next: verify daily progress rollover. Saved focus, reward semantics and character identity remain unchanged. |
-| 6 | Backend / subscriptions / offline | Strengthen configured/missing-key SDK coverage and startup guarantees; preserve UUID identity, local-first behaviour and account isolation. |
+| 5 | Progress / personalisation / mascot | IMPLEMENTED: Home time-dependent content refreshes while active/on resume; daily rollover is fixed and tested (see daily-progress-rollover evidence). Saved focus, accumulated Leaves, reward semantics and character identity remain unchanged. |
+| 6 | Backend / subscriptions / offline | IMPLEMENTED: runtime public-key validation, single SDK initialization, unresolved-identity isolation and local-first behavior are covered. Production Play billing/distribution and purchase/restore remain external gates. |
 | 7 | Release / performance / security | Refresh evidence, asset provenance, measured budgets and store deliverables up to the explicit deployment/submission boundary. |
 
 ## Milestone 1: know the guidance before starting

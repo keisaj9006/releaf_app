@@ -2,6 +2,11 @@
 
 Snapshot: **2026-09-12**
 
+[Sound source loudness](release/2026-09-12-sound-source-loudness.md): eight missing
+LUFS/true-peak scans completed, all source hashes unchanged. Together with prior
+Deep Drift/Atmosphere II evidence, all ten sources are measured. Atmosphere I
+is -0.8 dBTP; mastering/level comparison and actual listening remain open.
+
 [Emergency large-text layout](release/2026-09-12-emergency-large-text.md) fixes
 the reproduced 320x640 / 200% text overflow. Header controls remain pinned while
 enlarged content scrolls. 544 full tests passed; analysis clean. Samsung disconnected.

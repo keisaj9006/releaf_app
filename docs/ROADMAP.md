@@ -2,6 +2,11 @@
 
 This roadmap converts the current repo + release gate + latest project decisions + Deep Research into execution order.
 
+[All ten Sound source levels](release/2026-09-12-sound-source-loudness.md) now
+have measured LUFS/true-peak evidence. New Atmosphere I headroom review and
+large source-level differences require mastering/listening decisions, not
+automatic runtime normalization. No asset or owner approval changed.
+
 [Emergency large-text layout](release/2026-09-12-emergency-large-text.md) is
 verified at 320x640 with 100%/200% text, visible advance and pinned exit controls.
 544 full tests and clean analysis; production-equivalent device review remains open.
