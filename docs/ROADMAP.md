@@ -2,6 +2,11 @@
 
 This roadmap converts the current repo + release gate + latest project decisions + Deep Research into execution order.
 
+[Breathing intake/catalog comparison](release/2026-09-12-audio-catalog-binding.md)
+is implemented and checked against all 10 existing methods. Source authenticity,
+licensed candidate delivery, owner selection/listening and runtime promotion
+remain separate pending gates. Continue independent player/release requirements.
+
 [Audio intake consistency tooling](../tooling/audio/INTAKE.md) is implemented
 with 12 tests. Real provenance, content authenticity, source supply, owner
 listening and runtime promotion remain separately reviewed requirements.

@@ -118,14 +118,49 @@ def validate(record, root):
     return errors
 
 
+def validate_catalog(record, manifest):
+    """Check a breathing variant against a freshly exported Reset manifest."""
+    if not isinstance(record, dict) or record.get('layer') != 'breathing':
+        return []
+    if not isinstance(manifest, dict) or not isinstance(manifest.get('sessions'), list):
+        return ['catalog:manifest-required']
+    rows = manifest['sessions']
+    if any(not isinstance(row, dict) for row in rows):
+        return ['catalog:invalid-sessions']
+    matching = [row for row in rows if row.get('id') == record.get('methodId')]
+    if len(matching) != 1:
+        return ['catalog:method-not-unique']
+    session = matching[0]
+    pattern = session.get('breathPattern')
+    if session.get('modality') != 'breathing' or not isinstance(pattern, dict):
+        return ['catalog:not-breathing']
+    phase = record.get('phase')
+    if phase not in ['inhale', 'exhale']:
+        return ['catalog:inhale-or-exhale-required']
+    expected = pattern.get(phase + 'Seconds')
+    if type(expected) is not int or expected <= 0:
+        return ['catalog:invalid-phase-duration']
+    if record.get('phaseDurationSeconds') != expected:
+        return ['catalog:phase-duration-mismatch']
+    return []
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('record', type=Path)
     parser.add_argument('--root', type=Path, required=True)
+    parser.add_argument('--reset-manifest', type=Path)
     args = parser.parse_args()
     try:
         record = json.loads(args.record.read_text(encoding='utf-8'))
         errors = validate(record, args.root)
+        if isinstance(record, dict) and record.get('layer') == 'breathing':
+            try:
+                manifest = (json.loads(args.reset_manifest.read_text(encoding='utf-8'))
+                            if args.reset_manifest else None)
+                errors.extend(validate_catalog(record, manifest))
+            except (OSError, UnicodeError, ValueError):
+                errors.append('catalog:unreadable-or-invalid-json')
     except (OSError, UnicodeError, ValueError):
         errors = ['record:unreadable-or-invalid-json']
     print(json.dumps({'errors': errors, 'approvalGranted': False,

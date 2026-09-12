@@ -7,7 +7,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from validate_intake import validate
+from validate_intake import validate, validate_catalog
 
 
 class IntakeTests(unittest.TestCase):
@@ -94,6 +94,43 @@ class IntakeTests(unittest.TestCase):
     def test_malformed_input_fails_closed(self):
         for value in [None, [], 'text', 3]:
             self.assertEqual(validate(value, self.root), ['record:object-required'])
+
+    def test_catalog_preserves_direction_and_duration(self):
+        manifest = {'sessions': [{'id': 'equal-rhythm', 'modality': 'breathing',
+                                 'breathPattern': {'inhaleSeconds': 5, 'exhaleSeconds': 5}}]}
+        self.assertEqual(validate_catalog(self.record, manifest), [])
+        manifest['sessions'][0]['breathPattern']['inhaleSeconds'] = 4
+        self.assertIn('catalog:phase-duration-mismatch', validate_catalog(self.record, manifest))
+
+    def test_catalog_rejects_unknown_duplicate_and_nonbreathing_method(self):
+        row = {'id': 'equal-rhythm', 'modality': 'breathing',
+               'breathPattern': {'inhaleSeconds': 5, 'exhaleSeconds': 5}}
+        self.assertIn('catalog:method-not-unique', validate_catalog(self.record, {'sessions': []}))
+        self.assertIn('catalog:method-not-unique', validate_catalog(self.record, {'sessions': [row, row]}))
+        row['modality'] = 'grounding'
+        self.assertIn('catalog:not-breathing', validate_catalog(self.record, {'sessions': [row]}))
+
+    def test_catalog_does_not_reverse_exhale(self):
+        self.record['phase'] = 'exhale'
+        manifest = {'sessions': [{'id': 'equal-rhythm', 'modality': 'breathing',
+                                 'breathPattern': {'inhaleSeconds': 5, 'exhaleSeconds': 6}}]}
+        self.assertIn('catalog:phase-duration-mismatch', validate_catalog(self.record, manifest))
+        self.record['phaseDurationSeconds'] = 6
+        self.assertEqual(validate_catalog(self.record, manifest), [])
+
+    def test_catalog_missing_or_malformed_fails_closed(self):
+        for manifest in [None, {}, [], {'sessions': [None]}]:
+            self.assertTrue(validate_catalog(self.record, manifest))
+
+    def test_cli_requires_catalog_for_breathing(self):
+        path = self.root / 'record.json'
+        path.write_text(json.dumps(self.record), encoding='utf-8')
+        result = subprocess.run(
+            [sys.executable, str(Path(__file__).with_name('validate_intake.py')),
+             str(path), '--root', str(self.root)], capture_output=True, text=True,
+        )
+        self.assertEqual(result.returncode, 1)
+        self.assertIn('catalog:manifest-required', json.loads(result.stdout)['errors'])
 
     def test_oversized_numbers_return_field_errors_without_traceback(self):
         self.record['measurements']['durationSeconds'] = 10 ** 400

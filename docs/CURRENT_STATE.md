@@ -2,6 +2,11 @@
 
 Snapshot: **2026-09-12**
 
+[Audio catalog binding](release/2026-09-12-audio-catalog-binding.md) now requires
+the current Reset manifest for breathing intake: 17 Python tests, 2 exporter
+tests and 40 assertions across all 10 methods passed; analysis clean. This
+validates submitted phase assignments, not audio authenticity or owner approval.
+
 Local [audio intake validation](../tooling/audio/INTAKE.md) now checks submitted
 provenance/measurement/approval fields and actual file hashes. Twelve Python
 tests and clean Flutter analysis; no runtime assets or approval status changed.
