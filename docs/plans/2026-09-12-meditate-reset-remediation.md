@@ -97,6 +97,14 @@ remain pending.
 
 ## Checkpoint acceptance
 
+The existing [shared audio standard](../audio_asset_standard.md) now covers
+Reset human cues, recorded Guide identity, separate layers, technical intake,
+measurement interpretation and owner promotion evidence. The canonical master
+references that actual file rather than the uncreated alternate path. This is a
+production contract, not new recordings, measurements or listening approval.
+Existing manifest tests pass (12); per-file provenance/measurement validation
+remains distinct from current timeline/availability checks.
+
 For each coherent change: reproduce with tests, implement, focused tests,
 formatting, clean analysis, complete suite, independent review and Android debug
 build with the ignored local Test Store config. Inspect the diff, update evidence,

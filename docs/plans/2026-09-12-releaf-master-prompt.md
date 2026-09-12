@@ -219,7 +219,7 @@ Create/update these living documents, using existing equivalents rather than dup
 - docs/product/breathing-method-evidence-matrix.md
 - docs/product/meditation-session-matrix.md
 - docs/product/reset-session-blueprints.md
-- docs/audio/releaf-audio-production-standard.md
+- docs/audio_asset_standard.md (existing shared production standard)
 - docs/plans/2026-09-12-meditate-reset-remediation.md
 
 PRIORITY 0 — PREMIUM ACCESS DEFECT

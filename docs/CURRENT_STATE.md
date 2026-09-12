@@ -2,6 +2,13 @@
 
 Snapshot: **2026-09-12**
 
+The [shared audio production standard](audio_asset_standard.md) now covers the
+owner's Reset/Guide requirements alongside Sound/Sleep. Canonical master points
+to this existing file. Twelve manifest tests passed and analysis was clean
+(28.5 seconds); no audio, breathing method,
+timing or approval status changed. New measurements and owner auditions remain
+pending; the existing exporters do not certify licensing or listening acceptance.
+
 Current [local release artifact checks](release/2026-09-12-local-release-artifact-checks.md)
 on code `6610634`: web release built, all six workflow artifact assertions passed,
 11 release/privacy contract tests passed, Android source checks passed and current
