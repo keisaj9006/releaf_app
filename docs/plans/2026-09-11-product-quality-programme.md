@@ -1,5 +1,11 @@
 # Releaf product-quality programme
 
+Reset accessibility checkpoint: [reduced-motion transitions](../release/2026-09-12-reset-reduced-transitions.md),
+519 full tests, clean analysis and Android debug build. Shell/guidance crossfades
+respect system reduced motion; no phase/timing changes. Device disconnected.
+Next independent requirement: audio intake evidence validation, which must not
+confuse valid metadata with licensing or owner approval.
+
 The [six original Reset direction studies](../design/2026-09-12-reset-directions.md)
 are prepared, independently source-reviewed and inspected in the browser.
 Owner selection is pending. No runtime visual or breathing audio is approved

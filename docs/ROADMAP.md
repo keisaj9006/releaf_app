@@ -2,6 +2,11 @@
 
 This roadmap converts the current repo + release gate + latest project decisions + Deep Research into execution order.
 
+[Reset reduced-motion transitions](release/2026-09-12-reset-reduced-transitions.md)
+passed 519 tests, analysis and Android build. Device update remains pending
+connection. Continue the unblocked audio provenance/intake validation requirement
+while owner visual selection and licensed recording supply remain pending.
+
 [Breathing visual lifecycle](release/2026-09-12-breathing-visual-lifecycle.md):
 518 tests, clean analysis and Android debug build passed. No connected device
 was available for replacement installation. Next: prepare the outstanding three

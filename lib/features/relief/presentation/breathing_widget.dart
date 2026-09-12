@@ -752,7 +752,9 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
         backgroundColor: ReleafColors.background,
         body: SafeArea(
           child: AnimatedSwitcher(
-            duration: ReleafMotion.slow,
+            duration: MediaQuery.disableAnimationsOf(context)
+                ? Duration.zero
+                : ReleafMotion.slow,
             switchInCurve: ReleafMotion.entranceCurve,
             switchOutCurve: Curves.easeInCubic,
             child: _session!.isEmergency
@@ -989,7 +991,9 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
                               ),
                               const SizedBox(height: ReleafSpacing.xs),
                               AnimatedSwitcher(
-                                duration: ReleafMotion.standard,
+                                duration: reducedMotion
+                                    ? Duration.zero
+                                    : ReleafMotion.standard,
                                 switchInCurve: ReleafMotion.entranceCurve,
                                 switchOutCurve: Curves.easeInCubic,
                                 child: Text(

@@ -2,7 +2,13 @@
 
 Snapshot: **2026-09-12**
 
-Latest internal verification: **518/518 tests**, clean analysis, Android debug
+Current verification: **519/519 tests**, clean analysis and Android debug build
+for [Reset reduced-motion transitions](release/2026-09-12-reset-reduced-transitions.md).
+System reduced motion now also removes shell and guidance crossfades. Default
+transitions and all breathing durations remain unchanged. Samsung was disconnected;
+new APK installation and physical review remain pending.
+
+Previous internal verification: **518/518 tests**, clean analysis, Android debug
 build for [breathing visual lifecycle](release/2026-09-12-breathing-visual-lifecycle.md).
 The animation now stops synchronously before background frames are suppressed,
 preserving its cycle on return. No breathing patterns or timings changed.

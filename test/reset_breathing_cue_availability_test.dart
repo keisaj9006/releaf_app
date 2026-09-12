@@ -33,6 +33,27 @@ Future<SharedPreferences> _pump(WidgetTester tester, Widget home) async {
 
 void main() {
   testWidgets(
+    'reduced motion removes active Reset text and shell transitions',
+    (tester) async {
+      await _pump(tester, const BreathingWidget(sessionId: 'equal-rhythm'));
+      final transitions = tester.widgetList<AnimatedSwitcher>(
+        find.descendant(
+          of: find.byType(BreathingWidget),
+          matching: find.byType(AnimatedSwitcher),
+        ),
+      );
+      expect(transitions.length, greaterThanOrEqualTo(2));
+      for (final transition in transitions) {
+        expect(transition.duration, Duration.zero);
+      }
+      expect(find.text('Breathe in'), findsOneWidget);
+      await tester.pump(const Duration(seconds: 5));
+      expect(find.text('Breathe out'), findsOneWidget);
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
+
+  testWidgets(
     'breathing preview discloses unavailable cues without changing preferences',
     (tester) async {
       final preferences = await _pump(
