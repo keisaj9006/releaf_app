@@ -3,7 +3,7 @@
 Snapshot: **2026-09-12**
 Repo: `keisaj9006/releaf_app`  
 Branch: **`releaf-development`**  
-Completed checkpoint: **`16a0f2c`**;
+Owner device-review checkpoint: **`16a0f2c`**;
 Sound recovery and Samsung review are recorded in
 [checkpoint evidence](release/2026-09-12-device-review-checkpoint.md).
 Owner resumed development after `16a0f2c`. Listening and long-duration device review remain pending and do not block independent work.
@@ -12,10 +12,12 @@ Subsequent internal quality work is tracked in
 [batch evidence](release/2026-09-11-internal-quality-batches.md), including
 recorded-audio cancellation during configuration and source loading, Sleep timer
 boundaries/ordering, all 30 browsable Daily Insights, large-text Home layouts and
-consistent difficulty controls across all 15 Brain games. Latest full suite:
+consistent difficulty controls across all 15 Brain games. Historical device-review suite:
 **447 tests passed** for the review checkpoint; analyzer clean and Android debug
 build passed. `adb install -r` succeeded on Samsung SM-S928B. Bounded physical UI
 smoke passed; owner visual/listening review and the production device gate remain open.
+
+Latest internal programme checkpoint: **467/467 tests passed**, analyzer clean and Android debug APK built. Reset handoff/ambience cancellation, Memory 50-level progression and subscription async identity isolation are implemented. See [subscription evidence](release/2026-09-12-subscription-identity-isolation.md). The latest APK has not been installed: ADB reports no device.
 
 This file is a working snapshot. The code and canonical release gate remain authoritative if the branch moves.
 
@@ -334,8 +336,8 @@ The owner has deliberately deferred repetitive manual phone testing during the e
 
 Continue automated engineering and batch device QA at RC. Hardware-only behavior must still be included in the final device matrix.
 
-Latest resumed milestone: [Reset audio handoff](release/2026-09-12-reset-audio-handoff.md), 449 full tests passed, analyzer clean and new debug APK built. Device unavailable; Reset ambience lifecycle cancellation is next.
+Latest resumed milestone: [Reset audio handoff](release/2026-09-12-reset-audio-handoff.md), 449 full tests passed, analyzer clean and new debug APK built. Device unavailable; subsequent ambience cancellation is complete below.
 
-Reset ambience lifecycle is now protected against delayed start after mute/background/exit; rapid return is tested. [Evidence](release/2026-09-12-reset-ambience-lifecycle.md): 453 full tests passed, analyzer clean, new APK built. Physical checks pending. Next: Memory Mirror 50-level progression.
+Reset ambience lifecycle is now protected against delayed start after mute/background/exit; rapid return is tested. [Evidence](release/2026-09-12-reset-ambience-lifecycle.md): 453 full tests passed, analyzer clean, new APK built. Physical checks pending. Subsequent Memory milestone is complete below.
 
-Memory Mirror now has 50 tested profiles, hosted/standalone progression and browsable charts. [Evidence](release/2026-09-12-memory-fifty-levels.md): 462 full tests, clean analyzer, Android debug build passed. Next: isolate stale subscription results across account changes. No physical verification added.
+Memory Mirror now has 50 tested profiles, hosted/standalone progression and browsable charts. [Evidence](release/2026-09-12-memory-fifty-levels.md): 462 full tests, clean analyzer, Android debug build passed. Subscription isolation was subsequently implemented. No physical verification added.

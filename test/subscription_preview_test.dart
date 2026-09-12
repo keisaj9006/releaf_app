@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
@@ -8,6 +9,75 @@ import 'package:releaf_app/core/subscription/revenuecat_service.dart';
 import 'package:releaf_app/core/subscription/subscription_controller.dart';
 
 void main() {
+  for (final operation in ['purchase', 'restore']) {
+    test(
+      'obsolete $operation result cannot cross an identity boundary (fake service)',
+      () async {
+        final service = _DelayedPremiumService();
+        final controller = SubscriptionController(service);
+        addTearDown(controller.dispose);
+        await controller.refresh();
+        final pending = operation == 'purchase'
+            ? controller.purchase(_TestPackage())
+            : controller.restore();
+        controller.beginIdentityChange();
+        service.billingGate.complete(_TestCustomerInfo());
+        expect(await pending, isFalse);
+        expect(controller.state.isPremium, isFalse);
+        expect(controller.state.customerInfo, isNull);
+      },
+    );
+  }
+
+  test('delayed refresh is harmless after disposal', () async {
+    final service = _DelayedPremiumService();
+    final controller = SubscriptionController(service);
+    await controller.refresh();
+    service.offeringsGate = Completer<Offerings?>();
+    final pending = controller.refresh();
+    await service.waiting.future;
+    controller.dispose();
+    service.offeringsGate!.complete(null);
+    await pending;
+  });
+
+  test(
+    'obsolete refresh failure cannot replace the new identity state',
+    () async {
+      final service = _DelayedPremiumService();
+      final controller = SubscriptionController(service);
+      addTearDown(controller.dispose);
+      await controller.refresh();
+      final oldGate = service.offeringsGate = Completer<Offerings?>();
+      final pending = controller.refresh();
+      await service.waiting.future;
+      controller.beginIdentityChange();
+      service.offeringsGate = null;
+      await controller.refresh();
+      oldGate.completeError(StateError('old request failed'));
+      await pending;
+      expect(controller.state.error, isNull);
+      expect(controller.state.isPremium, isTrue);
+    },
+  );
+
+  test('identity change rejects an older Premium refresh', () async {
+    final service = _DelayedPremiumService();
+    final controller = SubscriptionController(service);
+    addTearDown(controller.dispose);
+    await controller.refresh();
+    expect(controller.state.isPremium, isTrue);
+    service.offeringsGate = Completer<Offerings?>();
+    final oldRefresh = controller.refresh();
+    await service.waiting.future;
+    controller.beginIdentityChange();
+    expect(controller.state.isPremium, isFalse);
+    service.offeringsGate!.complete(null);
+    await oldRefresh;
+    expect(controller.state.isPremium, isFalse);
+    expect(controller.state.customerInfo, isNull);
+  });
+
   test('RevenueCat configuration reuses restored user identity at launch', () {
     final identified = RevenueCatService.buildConfiguration(
       apiKey: ' public-key ',
@@ -23,19 +93,22 @@ void main() {
     expect(anonymous.appUserID, isNull);
   });
 
-  test('subscription controller attaches and detaches RevenueCat updates', () async {
-    final service = _ListenerTrackingRevenueCatService();
-    final controller = SubscriptionController(service);
+  test(
+    'subscription controller attaches and detaches RevenueCat updates',
+    () async {
+      final service = _ListenerTrackingRevenueCatService();
+      final controller = SubscriptionController(service);
 
-    expect(service.addCalls, 1);
-    expect(service.listener, isNotNull);
+      expect(service.addCalls, 1);
+      expect(service.listener, isNotNull);
 
-    await controller.refresh();
-    controller.dispose();
+      await controller.refresh();
+      controller.dispose();
 
-    expect(service.removeCalls, 1);
-    expect(service.listener, isNull);
-  });
+      expect(service.removeCalls, 1);
+      expect(service.listener, isNull);
+    },
+  );
 
   test('standard build exposes missing RevenueCat configuration', () async {
     final controller = SubscriptionController(RevenueCatService());
@@ -50,21 +123,24 @@ void main() {
     );
   });
 
-  test('owner Premium preview keeps entitlement active without RevenueCat', () async {
-    final controller = SubscriptionController(
-      RevenueCatService(),
-      premiumPreview: true,
-    );
-    addTearDown(controller.dispose);
+  test(
+    'owner Premium preview keeps entitlement active without RevenueCat',
+    () async {
+      final controller = SubscriptionController(
+        RevenueCatService(),
+        premiumPreview: true,
+      );
+      addTearDown(controller.dispose);
 
-    expect(controller.state.isPremium, isTrue);
+      expect(controller.state.isPremium, isTrue);
 
-    await controller.refresh();
+      await controller.refresh();
 
-    expect(controller.state.isPremium, isTrue);
-    expect(controller.state.isLoading, isFalse);
-    expect(controller.state.error, isNull);
-  });
+      expect(controller.state.isPremium, isTrue);
+      expect(controller.state.isLoading, isFalse);
+      expect(controller.state.error, isNull);
+    },
+  );
 
   test('transient subscription read failure preserves last known state', () {
     expect(
@@ -141,32 +217,38 @@ void main() {
     );
   });
 
-  test('billing copy explains pending Google Play payment without failure wording', () {
-    expect(
-      revenueCatBillingMessage(
-        PurchasesErrorCode.paymentPendingError,
-        action: RevenueCatBillingAction.purchase,
-      ),
-      'Your payment is pending in Google Play. Premium will unlock automatically after the payment is confirmed.',
-    );
-  });
+  test(
+    'billing copy explains pending Google Play payment without failure wording',
+    () {
+      expect(
+        revenueCatBillingMessage(
+          PurchasesErrorCode.paymentPendingError,
+          action: RevenueCatBillingAction.purchase,
+        ),
+        'Your payment is pending in Google Play. Premium will unlock automatically after the payment is confirmed.',
+      );
+    },
+  );
 
-  test('billing copy maps connectivity and ownership errors to useful recovery', () {
-    expect(
-      revenueCatBillingMessage(
-        PurchasesErrorCode.networkError,
-        action: RevenueCatBillingAction.purchase,
-      ),
-      contains('Check your connection'),
-    );
-    expect(
-      revenueCatBillingMessage(
-        PurchasesErrorCode.productAlreadyPurchasedError,
-        action: RevenueCatBillingAction.purchase,
-      ),
-      contains('Restore purchases'),
-    );
-  });
+  test(
+    'billing copy maps connectivity and ownership errors to useful recovery',
+    () {
+      expect(
+        revenueCatBillingMessage(
+          PurchasesErrorCode.networkError,
+          action: RevenueCatBillingAction.purchase,
+        ),
+        contains('Check your connection'),
+      );
+      expect(
+        revenueCatBillingMessage(
+          PurchasesErrorCode.productAlreadyPurchasedError,
+          action: RevenueCatBillingAction.purchase,
+        ),
+        contains('Restore purchases'),
+      );
+    },
+  );
 
   test('billing copy never exposes raw configuration errors', () {
     expect(
@@ -180,16 +262,12 @@ void main() {
 
   test('Premium offer exposes only annual then monthly packages', () {
     expect(
-      orderedPremiumPackages<String>(
-        annual: 'annual',
-        monthly: 'monthly',
-      ),
+      orderedPremiumPackages<String>(annual: 'annual', monthly: 'monthly'),
       <String>['annual', 'monthly'],
     );
-    expect(
-      orderedPremiumPackages<String>(monthly: 'monthly'),
-      <String>['monthly'],
-    );
+    expect(orderedPremiumPackages<String>(monthly: 'monthly'), <String>[
+      'monthly',
+    ]);
   });
 
   test('Premium offer fails closed when supported packages are missing', () {
@@ -224,4 +302,35 @@ class _ListenerTrackingRevenueCatService extends RevenueCatService {
 
   @override
   Future<Offerings?> getOfferingsSafe() async => null;
+}
+
+class _TestCustomerInfo implements CustomerInfo {
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class _TestPackage implements Package {
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class _DelayedPremiumService extends _ListenerTrackingRevenueCatService {
+  final billingGate = Completer<CustomerInfo>();
+  @override
+  Future<CustomerInfo> purchasePackage(Package package) => billingGate.future;
+  @override
+  Future<CustomerInfo> restorePurchases() => billingGate.future;
+  Completer<Offerings?>? offeringsGate;
+  final waiting = Completer<void>();
+  @override
+  Future<CustomerInfo?> getCustomerInfoSafe() async => _TestCustomerInfo();
+  @override
+  bool hasPremium(CustomerInfo info) => true;
+  @override
+  Future<Offerings?> getOfferingsSafe() async {
+    final gate = offeringsGate;
+    if (gate == null) return null;
+    if (!waiting.isCompleted) waiting.complete();
+    return gate.future;
+  }
 }

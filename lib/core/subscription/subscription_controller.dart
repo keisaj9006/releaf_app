@@ -36,12 +36,15 @@ class SubscriptionController extends StateNotifier<SubscriptionState> {
   final RevenueCatService _service;
   final bool _premiumPreview;
   late final CustomerInfoUpdateListener _customerInfoListener;
+  int _identityVersion = 0;
+
+  bool _currentIdentity(int version) => mounted && version == _identityVersion;
 
   SubscriptionController(
     this._service, {
     bool premiumPreview = premiumPreviewFromBuild,
-  })  : _premiumPreview = premiumPreview,
-        super(SubscriptionState(isPremium: premiumPreview)) {
+  }) : _premiumPreview = premiumPreview,
+       super(SubscriptionState(isPremium: premiumPreview)) {
     _customerInfoListener = _handleCustomerInfoUpdate;
     _service.addCustomerInfoUpdateListener(_customerInfoListener);
     initAndRefresh();
@@ -58,10 +61,13 @@ class SubscriptionController extends StateNotifier<SubscriptionState> {
   /// CustomerInfo update or [refresh] restores the authoritative state.
   void beginIdentityChange() {
     if (_premiumPreview || !mounted) return;
+    _identityVersion++;
     state = const SubscriptionState(isLoading: true);
   }
 
   Future<void> refresh() async {
+    if (!mounted) return;
+    final identityVersion = _identityVersion;
     if (_premiumPreview) {
       state = const SubscriptionState(isPremium: true);
       return;
@@ -78,7 +84,9 @@ class SubscriptionController extends StateNotifier<SubscriptionState> {
     state = state.copyWith(isLoading: true, clearError: true);
     try {
       final customerInfo = await _service.getCustomerInfoSafe();
+      if (!_currentIdentity(identityVersion)) return;
       final offerings = await _service.getOfferingsSafe();
+      if (!_currentIdentity(identityVersion)) return;
       final fetchedIsPremium = customerInfo == null
           ? null
           : _service.hasPremium(customerInfo);
@@ -94,6 +102,7 @@ class SubscriptionController extends StateNotifier<SubscriptionState> {
         isPremium: isPremium,
       );
     } catch (_) {
+      if (!_currentIdentity(identityVersion)) return;
       state = state.copyWith(
         isLoading: false,
         error: 'Failed to sync subscriptions.',
@@ -112,14 +121,18 @@ class SubscriptionController extends StateNotifier<SubscriptionState> {
 
   @override
   void dispose() {
+    _identityVersion++;
     _service.removeCustomerInfoUpdateListener(_customerInfoListener);
     super.dispose();
   }
 
   Future<bool> purchase(Package package) async {
+    if (!mounted) return false;
+    final identityVersion = _identityVersion;
     state = state.copyWith(isLoading: true, clearError: true);
     try {
       final customerInfo = await _service.purchasePackage(package);
+      if (!_currentIdentity(identityVersion)) return false;
       final isPremium = _service.hasPremium(customerInfo);
       state = state.copyWith(
         isLoading: false,
@@ -128,6 +141,7 @@ class SubscriptionController extends StateNotifier<SubscriptionState> {
       );
       return isPremium;
     } on PlatformException catch (error) {
+      if (!_currentIdentity(identityVersion)) return false;
       final code = PurchasesErrorHelper.getErrorCode(error);
       final message = revenueCatBillingMessage(
         code,
@@ -140,6 +154,7 @@ class SubscriptionController extends StateNotifier<SubscriptionState> {
       );
       return false;
     } catch (_) {
+      if (!_currentIdentity(identityVersion)) return false;
       state = state.copyWith(
         isLoading: false,
         error: 'Unable to complete the purchase right now. Please try again.',
@@ -149,9 +164,12 @@ class SubscriptionController extends StateNotifier<SubscriptionState> {
   }
 
   Future<bool> restore() async {
+    if (!mounted) return false;
+    final identityVersion = _identityVersion;
     state = state.copyWith(isLoading: true, clearError: true);
     try {
       final customerInfo = await _service.restorePurchases();
+      if (!_currentIdentity(identityVersion)) return false;
       final isPremium = _service.hasPremium(customerInfo);
       state = state.copyWith(
         isLoading: false,
@@ -161,6 +179,7 @@ class SubscriptionController extends StateNotifier<SubscriptionState> {
       );
       return isPremium;
     } on PlatformException catch (error) {
+      if (!_currentIdentity(identityVersion)) return false;
       final code = PurchasesErrorHelper.getErrorCode(error);
       final message = revenueCatBillingMessage(
         code,
@@ -173,6 +192,7 @@ class SubscriptionController extends StateNotifier<SubscriptionState> {
       );
       return false;
     } catch (_) {
+      if (!_currentIdentity(identityVersion)) return false;
       state = state.copyWith(
         isLoading: false,
         error: 'Unable to restore purchases right now. Please try again.',
