@@ -13,7 +13,11 @@ excludes rejected tones and fixes audio-sheet readability, with 386 passing test
 The following Sound milestone protects delayed track starts, notification
 cancellation and timer/volume ordering. Its exact verification is in
 [Sound playback evidence](release/2026-09-11-sound-playback-intent.md).
-Next is visible Sound loading, safe retry and interruptions during startup.
+Sound loading, retry and interruption fixes have passed 447 full-suite tests and
+clean analysis. Further feature development is paused for the owner-requested
+[Samsung checkpoint](release/2026-09-12-device-review-checkpoint.md); the debug APK
+was installed non-destructively and bounded physical UI smoke passed. Owner
+visual/listening review and the full production-equivalent matrix remain open.
 Content approvals and production-equivalent device/release gates remain open.
 
 ## Phase 0 — Re-establish verified baseline

@@ -91,7 +91,8 @@ class SoundScreen extends ConsumerWidget {
                                 const ReleafSectionHeading(
                                   title: 'Recently Played',
                                   accentColor: ReleafFeatureAccents.sound,
-                                  description: 'Return to a space you used before.',
+                                  description:
+                                      'Return to a space you used before.',
                                 ),
                                 const SizedBox(height: ReleafSpacing.md),
                                 _SoundTrackRail(
@@ -252,10 +253,7 @@ class _SoundHeader extends StatelessWidget {
 }
 
 class _SoundDestinations extends StatelessWidget {
-  const _SoundDestinations({
-    required this.onMeditate,
-    required this.onSleep,
-  });
+  const _SoundDestinations({required this.onMeditate, required this.onSleep});
 
   final VoidCallback onMeditate;
   final VoidCallback onSleep;
@@ -463,8 +461,9 @@ class _FeaturedSound extends StatelessWidget {
                           maxLines: compact ? 3 : 2,
                           overflow: TextOverflow.ellipsis,
                           style: ReleafTypography.body.copyWith(
-                            color:
-                                ReleafColors.textPrimary.withValues(alpha: 0.76),
+                            color: ReleafColors.textPrimary.withValues(
+                              alpha: 0.76,
+                            ),
                             height: 1.45,
                           ),
                         ),
@@ -541,8 +540,7 @@ class _SoundTrackRail extends StatelessWidget {
             child: _SoundTrackTile(
               track: track,
               isCurrent: state.currentTrackId == track.id,
-              isPlaying:
-                  state.currentTrackId == track.id && state.isPlaying,
+              isPlaying: state.currentTrackId == track.id && state.isPlaying,
               isLocked: track.isPremium && !isPremium,
               onPressed: () => onOpen(track),
             ),
@@ -614,25 +612,16 @@ class _SoundTrackTile extends StatelessWidget {
               gradient: LinearGradient(
                 begin: Alignment.centerRight,
                 end: Alignment.centerLeft,
-                colors: [
-                  Color(0x3A000000),
-                  Color(0xDF000000),
-                ],
+                colors: [Color(0x3A000000), Color(0xDF000000)],
               ),
             ),
           ),
           if (isLocked)
             Positioned.fill(
-              child: ColoredBox(
-                color: Colors.black.withValues(alpha: 0.20),
-              ),
+              child: ColoredBox(color: Colors.black.withValues(alpha: 0.20)),
             ),
           if (isLocked)
-            const Positioned(
-              top: 10,
-              right: 10,
-              child: _PremiumTag(),
-            ),
+            const Positioned(top: 10, right: 10, child: _PremiumTag()),
           Padding(
             padding: const EdgeInsets.all(ReleafSpacing.md),
             child: Row(
@@ -786,10 +775,7 @@ class _SoundPremiumPreviewSheet extends StatelessWidget {
                           gradient: LinearGradient(
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
-                            colors: [
-                              Color(0x12000000),
-                              Color(0xD2080F12),
-                            ],
+                            colors: [Color(0x12000000), Color(0xD2080F12)],
                           ),
                         ),
                       ),
@@ -853,9 +839,7 @@ class _PremiumTag extends StatelessWidget {
       decoration: BoxDecoration(
         color: ReleafColors.premium.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(ReleafRadii.pill),
-        border: Border.all(
-          color: ReleafColors.premium.withValues(alpha: 0.26),
-        ),
+        border: Border.all(color: ReleafColors.premium.withValues(alpha: 0.26)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -939,7 +923,13 @@ class _InScreenMiniPlayer extends ConsumerWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      state.isPlaying ? 'Playing' : 'Paused',
+                      state.isLoading
+                          ? 'Loading'
+                          : state.hasPlaybackError
+                          ? 'Could not start'
+                          : state.isPlaying
+                          ? 'Playing'
+                          : 'Paused',
                       style: ReleafTypography.meta.copyWith(
                         color: ReleafColors.textSecondary,
                         fontSize: 10,
@@ -949,10 +939,20 @@ class _InScreenMiniPlayer extends ConsumerWidget {
                 ),
               ),
               IconButton(
-                tooltip: state.isPlaying ? 'Pause sound' : 'Resume sound',
+                tooltip: state.isLoading
+                    ? 'Cancel loading'
+                    : state.hasPlaybackError
+                    ? 'Retry sound'
+                    : state.isPlaying
+                    ? 'Pause sound'
+                    : 'Resume sound',
                 onPressed: controller.togglePlayPause,
                 icon: Icon(
-                  state.isPlaying
+                  state.isLoading
+                      ? Icons.close_rounded
+                      : state.hasPlaybackError
+                      ? Icons.refresh_rounded
+                      : state.isPlaying
                       ? Icons.pause_rounded
                       : Icons.play_arrow_rounded,
                   color: ReleafColors.textPrimary,
@@ -997,17 +997,13 @@ class _GlassTag extends StatelessWidget {
           children: [
             Icon(icon, size: 13, color: ReleafFeatureAccents.sound),
             const SizedBox(width: 6),
-            Text(
-              label,
-              style: ReleafTypography.eyebrow.copyWith(fontSize: 9),
-            ),
+            Text(label, style: ReleafTypography.eyebrow.copyWith(fontSize: 9)),
           ],
         ),
       ),
     );
   }
 }
-
 
 String _categoryLabel(SoundCategory category) {
   return switch (category) {

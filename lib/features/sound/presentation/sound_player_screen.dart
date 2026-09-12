@@ -16,10 +16,7 @@ import '../application/sound_player_controller.dart';
 import '../data/sound_catalog.dart';
 
 class SoundPlayerScreen extends ConsumerStatefulWidget {
-  const SoundPlayerScreen({
-    super.key,
-    required this.trackId,
-  });
+  const SoundPlayerScreen({super.key, required this.trackId});
 
   final String trackId;
 
@@ -32,7 +29,6 @@ class _SoundPlayerScreenState extends ConsumerState<SoundPlayerScreen>
   bool _started = false;
   StreamSubscription<AudioInterruptionEvent>? _interruptionSubscription;
   StreamSubscription<void>? _becomingNoisySubscription;
-  bool _resumeAfterInterruption = false;
 
   @override
   void initState() {
@@ -48,43 +44,18 @@ class _SoundPlayerScreenState extends ConsumerState<SoundPlayerScreen>
     _interruptionSubscription?.cancel();
     _becomingNoisySubscription?.cancel();
 
-    _interruptionSubscription =
-        session.interruptionEventStream.listen(_handleAudioInterruption);
-    _becomingNoisySubscription =
-        session.becomingNoisyEventStream.listen((_) {
-      _resumeAfterInterruption = false;
-      unawaited(ref.read(soundPlayerControllerProvider.notifier).pause());
+    _interruptionSubscription = session.interruptionEventStream.listen((event) {
+      unawaited(
+        ref
+            .read(soundPlayerControllerProvider.notifier)
+            .handleAudioInterruption(event),
+      );
     });
-  }
-
-  void _handleAudioInterruption(AudioInterruptionEvent event) {
-    final controller = ref.read(soundPlayerControllerProvider.notifier);
-
-    if (event.begin) {
-      if (!releafShouldPauseForInterruption(
-        ReleafAudioMode.sound,
-        event.type,
-      )) {
-        return;
-      }
-
-      final wasPlaying = ref.read(soundPlayerControllerProvider).isPlaying;
-      _resumeAfterInterruption = wasPlaying;
-      if (wasPlaying) {
-        unawaited(controller.pause());
-      }
-      return;
-    }
-
-    final shouldResume = _resumeAfterInterruption &&
-        releafShouldAutoResumeAfterInterruption(
-          ReleafAudioMode.sound,
-          event.type,
-        );
-    _resumeAfterInterruption = false;
-    if (shouldResume) {
-      unawaited(controller.resume());
-    }
+    _becomingNoisySubscription = session.becomingNoisyEventStream.listen((_) {
+      unawaited(
+        ref.read(soundPlayerControllerProvider.notifier).handleBecomingNoisy(),
+      );
+    });
   }
 
   @override
@@ -111,9 +82,10 @@ class _SoundPlayerScreenState extends ConsumerState<SoundPlayerScreen>
 
     final track = ref.read(soundCatalogProvider).getById(widget.trackId);
     if (track != null) {
-      Future<void>.microtask(
-        () => ref.read(soundPlayerControllerProvider.notifier).play(track),
-      );
+      Future<void>.microtask(() async {
+        if (!mounted) return;
+        await ref.read(soundPlayerControllerProvider.notifier).play(track);
+      });
     }
   }
 
@@ -137,6 +109,15 @@ class _SoundPlayerScreenState extends ConsumerState<SoundPlayerScreen>
 
     final isCurrent = state.currentTrackId == track.id;
     final isPlaying = isCurrent && state.isPlaying;
+    final isLoading = isCurrent && state.isLoading;
+    final hasError = isCurrent && state.hasPlaybackError;
+    final status = isLoading
+        ? 'LOADING'
+        : hasError
+        ? 'UNAVAILABLE'
+        : isPlaying
+        ? 'PLAYING'
+        : 'PAUSED';
     final duration = isCurrent ? state.duration : Duration.zero;
     final position = isCurrent ? state.position : Duration.zero;
     final favorite = state.favoriteIds.contains(track.id);
@@ -151,8 +132,8 @@ class _SoundPlayerScreenState extends ConsumerState<SoundPlayerScreen>
             SafeArea(
               child: LayoutBuilder(
                 builder: (context, viewport) {
-                  final compact = viewport.maxHeight < 760 ||
-                      viewport.maxWidth < 360;
+                  final compact =
+                      viewport.maxHeight < 760 || viewport.maxWidth < 360;
                   final artSize = math.min(
                     compact ? 190.0 : 320.0,
                     viewport.maxWidth * (compact ? 0.68 : 0.62),
@@ -186,11 +167,14 @@ class _SoundPlayerScreenState extends ConsumerState<SoundPlayerScreen>
                                   },
                                 ),
                                 const Spacer(),
-                                Text(
-                                  'SOUND SPACE',
-                                  style: ReleafTypography.eyebrow.copyWith(
-                                    color: ReleafFeatureAccents.sound,
-                                    letterSpacing: 1.8,
+                                Flexible(
+                                  child: Text(
+                                    'SOUND SPACE',
+                                    textAlign: TextAlign.center,
+                                    style: ReleafTypography.eyebrow.copyWith(
+                                      color: ReleafFeatureAccents.sound,
+                                      letterSpacing: 1.8,
+                                    ),
                                   ),
                                 ),
                                 const Spacer(),
@@ -217,10 +201,17 @@ class _SoundPlayerScreenState extends ConsumerState<SoundPlayerScreen>
                               height: artSize,
                               child: _SoundArtworkDisc(
                                 isPlaying: isPlaying,
+                                statusLabel: isLoading
+                                    ? 'Loading sound.'
+                                    : hasError
+                                    ? 'Sound unavailable.'
+                                    : null,
                                 progress: _progress(position, duration),
                                 variant: _artworkForTrack(track.id),
-                                reducedMotion: MediaQuery.maybeOf(context)
-                                        ?.disableAnimations ??
+                                reducedMotion:
+                                    MediaQuery.maybeOf(
+                                      context,
+                                    )?.disableAnimations ??
                                     false,
                               ),
                             ),
@@ -231,9 +222,12 @@ class _SoundPlayerScreenState extends ConsumerState<SoundPlayerScreen>
                             ),
                             DecoratedBox(
                               decoration: BoxDecoration(
-                                color: ReleafFeatureAccents.sound.withValues(alpha: 0.08),
-                                borderRadius:
-                                    BorderRadius.circular(ReleafRadii.pill),
+                                color: ReleafFeatureAccents.sound.withValues(
+                                  alpha: 0.08,
+                                ),
+                                borderRadius: BorderRadius.circular(
+                                  ReleafRadii.pill,
+                                ),
                                 border: Border.all(
                                   color: ReleafFeatureAccents.sound.withValues(
                                     alpha: 0.20,
@@ -245,12 +239,15 @@ class _SoundPlayerScreenState extends ConsumerState<SoundPlayerScreen>
                                   horizontal: 11,
                                   vertical: 6,
                                 ),
-                                child: Text(
-                                  isPlaying ? 'PLAYING' : 'PAUSED',
-                                  key: const Key('sound-player-state'),
-                                  style: ReleafTypography.eyebrow.copyWith(
-                                    fontSize: 9,
-                                    color: ReleafFeatureAccents.sound,
+                                child: Semantics(
+                                  liveRegion: true,
+                                  child: Text(
+                                    status,
+                                    key: const Key('sound-player-state'),
+                                    style: ReleafTypography.eyebrow.copyWith(
+                                      fontSize: 9,
+                                      color: ReleafFeatureAccents.sound,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -266,8 +263,7 @@ class _SoundPlayerScreenState extends ConsumerState<SoundPlayerScreen>
                             ),
                             const SizedBox(height: ReleafSpacing.xs),
                             ConstrainedBox(
-                              constraints:
-                                  const BoxConstraints(maxWidth: 460),
+                              constraints: const BoxConstraints(maxWidth: 460),
                               child: Text(
                                 track.subtitle,
                                 textAlign: TextAlign.center,
@@ -283,6 +279,16 @@ class _SoundPlayerScreenState extends ConsumerState<SoundPlayerScreen>
                                   : ReleafSpacing.xl,
                             ),
                             const _ContinuousLoopStatus(),
+                            if (hasError) ...[
+                              const SizedBox(height: ReleafSpacing.sm),
+                              Text(
+                                'Sound could not start. Try again.',
+                                textAlign: TextAlign.center,
+                                style: ReleafTypography.body.copyWith(
+                                  color: ReleafColors.textPrimary,
+                                ),
+                              ),
+                            ],
                             SizedBox(
                               height: compact
                                   ? ReleafSpacing.sm
@@ -290,6 +296,8 @@ class _SoundPlayerScreenState extends ConsumerState<SoundPlayerScreen>
                             ),
                             _PrimaryPlayButton(
                               isPlaying: isPlaying,
+                              isLoading: isLoading,
+                              hasError: hasError,
                               compact: compact,
                               onPressed: isCurrent
                                   ? controller.togglePlayPause
@@ -372,12 +380,14 @@ class _PlayerBackdrop extends StatelessWidget {
 class _SoundArtworkDisc extends StatefulWidget {
   const _SoundArtworkDisc({
     required this.isPlaying,
+    this.statusLabel,
     required this.progress,
     required this.variant,
     required this.reducedMotion,
   });
 
   final bool isPlaying;
+  final String? statusLabel;
   final double progress;
   final ReleafSoundArtworkVariant variant;
   final bool reducedMotion;
@@ -433,9 +443,11 @@ class _SoundArtworkDiscState extends State<_SoundArtworkDisc>
 
     return Semantics(
       container: true,
-      label: widget.isPlaying
-          ? 'Ambient sound is playing.'
-          : 'Ambient sound is paused.',
+      label:
+          widget.statusLabel ??
+          (widget.isPlaying
+              ? 'Ambient sound is playing.'
+              : 'Ambient sound is paused.'),
       child: AnimatedBuilder(
         animation: _controller,
         builder: (context, child) {
@@ -491,8 +503,9 @@ class _SoundArtworkDiscState extends State<_SoundArtworkDisc>
                 CircularProgressIndicator(
                   value: progress,
                   strokeWidth: 2.5,
-                  backgroundColor:
-                      ReleafColors.borderSoft.withValues(alpha: 0.42),
+                  backgroundColor: ReleafColors.borderSoft.withValues(
+                    alpha: 0.42,
+                  ),
                   valueColor: const AlwaysStoppedAnimation(
                     ReleafFeatureAccents.sound,
                   ),
@@ -509,8 +522,9 @@ class _SoundArtworkDiscState extends State<_SoundArtworkDisc>
                       child: DecoratedBox(
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color:
-                              ReleafColors.background.withValues(alpha: 0.62),
+                          color: ReleafColors.background.withValues(
+                            alpha: 0.62,
+                          ),
                           border: Border.all(
                             color: ReleafColors.textPrimary.withValues(
                               alpha: 0.16,
@@ -548,10 +562,7 @@ class _SoundArtworkDiscState extends State<_SoundArtworkDisc>
 }
 
 class _SoundPulsePainter extends CustomPainter {
-  const _SoundPulsePainter({
-    required this.t,
-    required this.active,
-  });
+  const _SoundPulsePainter({required this.t, required this.active});
 
   final double t;
   final bool active;
@@ -610,11 +621,14 @@ class _ContinuousLoopStatus extends StatelessWidget {
             color: ReleafFeatureAccents.sound,
           ),
           const SizedBox(width: 7),
-          Text(
-            'Continuous seamless loop',
-            style: ReleafTypography.meta.copyWith(
-              color: ReleafColors.textSecondary,
-              fontWeight: FontWeight.w600,
+          Flexible(
+            child: Text(
+              'Continuous seamless loop',
+              textAlign: TextAlign.center,
+              style: ReleafTypography.meta.copyWith(
+                color: ReleafColors.textSecondary,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ],
@@ -623,15 +637,18 @@ class _ContinuousLoopStatus extends StatelessWidget {
   }
 }
 
-
 class _PrimaryPlayButton extends StatelessWidget {
   const _PrimaryPlayButton({
     required this.isPlaying,
+    required this.isLoading,
+    required this.hasError,
     required this.onPressed,
     this.compact = false,
   });
 
   final bool isPlaying;
+  final bool isLoading;
+  final bool hasError;
   final VoidCallback onPressed;
   final bool compact;
 
@@ -640,41 +657,50 @@ class _PrimaryPlayButton extends StatelessWidget {
     return Semantics(
       key: const Key('sound-primary-play'),
       button: true,
-      label: isPlaying ? 'Pause sound' : 'Play sound',
+      label: isLoading
+          ? 'Cancel loading'
+          : hasError
+          ? 'Retry sound'
+          : isPlaying
+          ? 'Pause sound'
+          : 'Play sound',
       child: InkResponse(
         onTap: onPressed,
         radius: 42,
         child: Container(
           width: compact ? 66 : 76,
           height: compact ? 66 : 76,
-        decoration: const BoxDecoration(
-          shape: BoxShape.circle,
-          color: ReleafFeatureAccents.sound,
-          boxShadow: [
-            BoxShadow(
-              color: Color(0x334B95A2),
-              blurRadius: 26,
-              spreadRadius: 2,
-            ),
-          ],
+          decoration: const BoxDecoration(
+            shape: BoxShape.circle,
+            color: ReleafFeatureAccents.sound,
+            boxShadow: [
+              BoxShadow(
+                color: Color(0x334B95A2),
+                blurRadius: 26,
+                spreadRadius: 2,
+              ),
+            ],
+          ),
+          alignment: Alignment.center,
+          child: Icon(
+            isLoading
+                ? Icons.close_rounded
+                : hasError
+                ? Icons.refresh_rounded
+                : isPlaying
+                ? Icons.pause_rounded
+                : Icons.play_arrow_rounded,
+            size: compact ? 33 : 38,
+            color: ReleafColors.background,
+          ),
         ),
-        alignment: Alignment.center,
-        child: Icon(
-          isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
-          size: compact ? 33 : 38,
-          color: ReleafColors.background,
-        ),
-      ),
       ),
     );
   }
 }
 
 class _VolumeControl extends StatelessWidget {
-  const _VolumeControl({
-    required this.volume,
-    required this.onChanged,
-  });
+  const _VolumeControl({required this.volume, required this.onChanged});
 
   final double volume;
   final ValueChanged<double> onChanged;
@@ -689,10 +715,7 @@ class _VolumeControl extends StatelessWidget {
           color: ReleafColors.textSecondary,
         ),
         Expanded(
-          child: Slider(
-            value: volume,
-            onChanged: onChanged,
-          ),
+          child: Slider(value: volume, onChanged: onChanged),
         ),
         const Icon(
           Icons.volume_up_rounded,
@@ -730,15 +753,16 @@ class _SleepTimer extends StatelessWidget {
           remainingSeconds == null
               ? 'Sound will keep playing until you stop it.'
               : remainingSeconds! <= soundSleepTimerFadeSeconds
-                  ? 'Fading out · ${_formatTimerCountdown(remainingSeconds!)}'
-                  : 'Stops in ${_formatTimerCountdown(remainingSeconds!)}',
+              ? 'Fading out · ${_formatTimerCountdown(remainingSeconds!)}'
+              : 'Stops in ${_formatTimerCountdown(remainingSeconds!)}',
           key: const Key('sound-sleep-timer-status'),
           style: ReleafTypography.meta.copyWith(
             color: remainingSeconds == null
                 ? ReleafColors.textMuted
                 : ReleafColors.textPrimary,
-            fontWeight:
-                remainingSeconds == null ? FontWeight.w500 : FontWeight.w700,
+            fontWeight: remainingSeconds == null
+                ? FontWeight.w500
+                : FontWeight.w700,
           ),
         ),
         const SizedBox(height: ReleafSpacing.sm),
@@ -801,7 +825,6 @@ String _formatTimerCountdown(int totalSeconds) {
   final seconds = safe % 60;
   return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
 }
-
 
 ReleafSoundArtworkVariant _artworkForTrack(String id) {
   return id.endsWith('02')

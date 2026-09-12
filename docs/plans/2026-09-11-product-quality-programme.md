@@ -6,6 +6,12 @@ in `C:\Users\joann\Releaf-Codex` on `releaf-development`. The canonical
 
 ## Execution
 
+Owner checkpoint instruction, 12 September: pause further feature development
+and prepare the cumulative Meditation/Reset/Sound batch for Samsung review.
+Finish only batch defects and verification, update the existing app with
+`adb install -r`, and create/push a checkpoint after successful verification.
+See [checkpoint evidence](../release/2026-09-12-device-review-checkpoint.md).
+
 Implement small vertical milestones with TDD, focused verification, analysis,
 UI inspection, appropriate builds and conventional commits. Push only this
 branch. Use independent review for substantial changes. Continue unblocked work;
@@ -22,7 +28,7 @@ generation, production deployment or store submission under this approval.
 | --- | --- | --- |
 | 1 | Meditate, visual design, accessibility | COMPLETE: honest recording availability in library/preview/player, usable captions and large-text layouts. Approved remaining recordings and device QA remain open. |
 | 2 | Reset / Emergency | COMPLETE: rejected breathing cues cannot reach runtime; silent/reduced-motion guidance and saved preferences are covered; audio settings are readable. Approved natural breathing cues remain an owner/content dependency. |
-| 3 | Sleep / Sound | COMPLETE: latest playback/volume intent (425 full tests, clean analysis and debug APK). NEXT: loading/error/retry presentation and interruption during startup. Atmosphere II candidate awaits listening approval. |
+| 3 | Sleep / Sound | COMPLETE: playback/volume intent, loading/error/retry and interruption recovery (447 full tests, clean analysis, APK and bounded Samsung smoke). Owner review is next; Atmosphere II candidate still awaits listening approval. |
 | 4 | Brain | Memory currently caps gameplay at 12 while stats cover 50: implement defined, tested 50-level progression without changing rewards. Preserve existing Labyrinth 50-stage architecture; device review pending. |
 | 5 | Progress / personalisation / mascot | Improve useful continuation and understandable local progress; retain reward semantics and character identity. |
 | 6 | Backend / subscriptions / offline | Strengthen configured/missing-key SDK coverage and startup guarantees; preserve UUID identity, local-first behaviour and account isolation. |
@@ -99,3 +105,7 @@ full checkpoint and Android debug build. No asset replacement or new approval.
 - Milestone 3: [Sound playback evidence](../release/2026-09-11-sound-playback-intent.md).
   Focused tests 70/70; full suite 425/425; analyzer clean and Android debug build
   passed. No connected device, physical playback test or purchase performed.
+- Device checkpoint, 12 September: [Samsung review evidence](../release/2026-09-12-device-review-checkpoint.md).
+  447 full tests passed, analyzer clean, APK installed with `adb install -r`.
+  Bounded UI smoke passed; no purchase or deletion. Further development remains
+  paused for the owner's visual/listening review.

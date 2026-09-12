@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:audioplayers/audioplayers.dart';
+import 'package:audio_session/audio_session.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:releaf_app/features/sound/data/sound_catalog.dart';
@@ -123,6 +124,48 @@ class _StatefulDelayedPlayer extends _DelayedPlayer {
 }
 
 void main() {
+  for (final action in [
+    'none',
+    'manual pause',
+    'notification pause',
+    'notification stop',
+  ]) {
+    test(
+      'interruption end waits for native pause and respects $action',
+      () async {
+        SharedPreferences.setMockInitialValues({});
+        final player = _StatefulDelayedPlayer();
+        final driver = ReleafBackgroundSoundDriver(player: player);
+        final controller = SoundPlayerController(
+          const SoundCatalog(),
+          await SharedPreferences.getInstance(),
+          driver: driver,
+        );
+        addTearDown(controller.dispose);
+        await controller.playById('deep-drift');
+        final gate = Completer<void>();
+        player.nextPauseGate = gate;
+        final beginning = controller.handleAudioInterruption(
+          AudioInterruptionEvent(true, AudioInterruptionType.pause),
+        );
+        await player.pauseStarted.future;
+        final ending = controller.handleAudioInterruption(
+          AudioInterruptionEvent(false, AudioInterruptionType.pause),
+        );
+        await Future<void>.delayed(Duration.zero);
+        final newer = switch (action) {
+          'manual pause' => controller.pause(),
+          'notification pause' => driver.pause(),
+          'notification stop' => driver.stop(),
+          _ => Future<void>.value(),
+        };
+        gate.complete();
+        await Future.wait([beginning, ending, newer]);
+        expect(controller.state.isPlaying, action == 'none');
+        expect(player.played.length, action == 'none' ? 2 : 1);
+      },
+    );
+  }
   for (final stage in ['volume', 'pause']) {
     for (final action in ['pause', 'stop', 'play']) {
       test(

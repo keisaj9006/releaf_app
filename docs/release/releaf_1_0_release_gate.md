@@ -50,6 +50,10 @@ The following [Reset cue eligibility milestone](2026-09-11-reset-cue-eligibility
 passed 386 tests and clean analysis; no recording approval or physical QA is implied.
 The [Sound playback milestone](2026-09-11-sound-playback-intent.md) covers delayed
 loads and timer/notification races. DQA-04 still requires physical verification.
+The [12 September device-review checkpoint](2026-09-12-device-review-checkpoint.md)
+passed 447 tests and clean analysis; the debug/Test Store APK was installed with
+`adb install -r` on Samsung. Bounded UI smoke passed; this is not the
+production-equivalent release QA matrix or owner listening approval.
 The internal continuation through `3ddffee` passed 375 tests and clean analysis.
 It closes the identified player/collection/difficulty defects, not the remaining
 content approvals, credentials, production signing, public resources, store

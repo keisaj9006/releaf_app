@@ -1,10 +1,12 @@
 import 'dart:async';
 
 import 'package:audioplayers/audioplayers.dart' as audio;
+import 'package:audio_session/audio_session.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/providers.dart';
+import '../../../core/audio/releaf_audio_session.dart';
 import '../data/sound_catalog.dart';
 import '../domain/sound_content.dart';
 
@@ -158,6 +160,8 @@ class SoundPlayerState {
   const SoundPlayerState({
     this.currentTrackId,
     this.isPlaying = false,
+    this.isLoading = false,
+    this.hasPlaybackError = false,
     this.position = Duration.zero,
     this.duration = Duration.zero,
     this.volume = defaultSoundVolume,
@@ -169,6 +173,8 @@ class SoundPlayerState {
 
   final String? currentTrackId;
   final bool isPlaying;
+  final bool isLoading;
+  final bool hasPlaybackError;
   final Duration position;
   final Duration duration;
   final double volume;
@@ -188,6 +194,8 @@ class SoundPlayerState {
     String? currentTrackId,
     bool clearCurrentTrack = false,
     bool? isPlaying,
+    bool? isLoading,
+    bool? hasPlaybackError,
     Duration? position,
     Duration? duration,
     double? volume,
@@ -202,6 +210,8 @@ class SoundPlayerState {
           ? null
           : (currentTrackId ?? this.currentTrackId),
       isPlaying: isPlaying ?? this.isPlaying,
+      isLoading: isLoading ?? this.isLoading,
+      hasPlaybackError: hasPlaybackError ?? this.hasPlaybackError,
       position: position ?? this.position,
       duration: duration ?? this.duration,
       volume: volume ?? this.volume,
@@ -287,6 +297,57 @@ class SoundPlayerController extends StateNotifier<SoundPlayerState> {
   String? _readyTrackId;
   int _outputVolumeRequest = 0;
   double _desiredOutputVolume = defaultSoundVolume;
+  int? _interruptedPlaybackRequest;
+  int? _interruptedDriverIntent;
+  Future<void>? _interruptionPause;
+
+  Future<void> handleAudioInterruption(AudioInterruptionEvent event) async {
+    if (!mounted) return;
+    if (event.begin) {
+      if (!releafShouldPauseForInterruption(
+        ReleafAudioMode.sound,
+        event.type,
+      )) {
+        return;
+      }
+      final canAutoResume = releafShouldAutoResumeAfterInterruption(
+        ReleafAudioMode.sound,
+        event.type,
+      );
+      if (!canAutoResume) _interruptedPlaybackRequest = null;
+      if (state.isPlaying || state.isLoading) {
+        final pausing = pause();
+        _interruptionPause = pausing;
+        _interruptedPlaybackRequest = canAutoResume ? _playbackRequest : null;
+        _interruptedDriverIntent = _driverPlaybackIntent;
+        await pausing;
+      }
+      return;
+    }
+    if (!releafShouldAutoResumeAfterInterruption(
+      ReleafAudioMode.sound,
+      event.type,
+    )) {
+      _interruptedPlaybackRequest = null;
+      return;
+    }
+    final request = _interruptedPlaybackRequest;
+    final driverIntent = _interruptedDriverIntent;
+    if (request == null) return;
+    // A short interruption can end before native pause has reported its state.
+    // Wait for it, then recheck cancellation before requesting any resume.
+    await _interruptionPause;
+    if (!mounted || _interruptedPlaybackRequest != request) return;
+    final shouldResume =
+        request == _playbackRequest && driverIntent == _driverPlaybackIntent;
+    _interruptedPlaybackRequest = null;
+    if (shouldResume) await resume();
+  }
+
+  Future<void> handleBecomingNoisy() async {
+    _interruptedPlaybackRequest = null;
+    await pause();
+  }
 
   bool _currentPlaybackRequest(int request) =>
       mounted && request == _playbackRequest;
@@ -321,6 +382,14 @@ class SoundPlayerController extends StateNotifier<SoundPlayerState> {
         driverIntent == _driverPlaybackIntent;
     _startingRequest = request;
     final canResume = _readyTrackId == track.id;
+    state = state.copyWith(
+      currentTrackId: track.id,
+      isLoading: true,
+      hasPlaybackError: false,
+      isPlaying: canResume && state.isPlaying,
+      position: canResume ? state.position : Duration.zero,
+      duration: canResume ? state.duration : Duration.zero,
+    );
     try {
       if (!canResume) {
         _readyTrackId = null;
@@ -345,12 +414,6 @@ class SoundPlayerController extends StateNotifier<SoundPlayerState> {
         driverIntent = _driverPlaybackIntent;
         await resuming;
       } else {
-        state = state.copyWith(
-          currentTrackId: track.id,
-          position: Duration.zero,
-          duration: Duration.zero,
-          isPlaying: false,
-        );
         final playing = _driver.playAsset(
           track.assetPath,
           trackId: track.id,
@@ -363,9 +426,15 @@ class SoundPlayerController extends StateNotifier<SoundPlayerState> {
         await _markRecent(track.id);
       }
     } catch (_) {
-      if (current()) rethrow;
+      if (current()) {
+        _readyTrackId = null;
+        state = state.copyWith(isPlaying: false, hasPlaybackError: true);
+      }
     } finally {
-      if (_startingRequest == request) _startingRequest = null;
+      if (_startingRequest == request) {
+        _startingRequest = null;
+        if (mounted) state = state.copyWith(isLoading: false);
+      }
     }
   }
 
@@ -388,6 +457,7 @@ class SoundPlayerController extends StateNotifier<SoundPlayerState> {
     if (!mounted) return;
     final starting = _startingRequest == _playbackRequest;
     _playbackRequest++;
+    state = state.copyWith(isLoading: false);
     if (!starting && (state.currentTrackId == null || !state.isPlaying)) return;
     await _driver.pause();
   }
@@ -440,6 +510,8 @@ class SoundPlayerController extends StateNotifier<SoundPlayerState> {
     state = state.copyWith(
       clearCurrentTrack: true,
       clearSleepTimer: true,
+      isLoading: false,
+      hasPlaybackError: false,
       position: Duration.zero,
       duration: Duration.zero,
       isPlaying: false,

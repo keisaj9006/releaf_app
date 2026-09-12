@@ -1,18 +1,21 @@
 # Releaf Current State
 
-Snapshot: **2026-09-11**  
+Snapshot: **2026-09-12**
 Repo: `keisaj9006/releaf_app`  
 Branch: **`releaf-development`**  
-Latest committed baseline: **`cb64fcd`** (Reset cue eligibility); subsequent
-Sound work is recorded in [milestone evidence](release/2026-09-11-sound-playback-intent.md).
+Checkpoint base: **`9fdf3df`** (Sound playback intent); subsequent
+Sound recovery and Samsung review are recorded in
+[checkpoint evidence](release/2026-09-12-device-review-checkpoint.md).
+Further feature development is paused for owner device review.
 
 Subsequent internal quality work is tracked in
 [batch evidence](release/2026-09-11-internal-quality-batches.md), including
 recorded-audio cancellation during configuration and source loading, Sleep timer
 boundaries/ordering, all 30 browsable Daily Insights, large-text Home layouts and
 consistent difficulty controls across all 15 Brain games. Latest full suite:
-**425 tests passed** after the Sound playback milestone; analyzer clean and Android
-debug build passed. No production/device verification is implied.
+**447 tests passed** for the review checkpoint; analyzer clean and Android debug
+build passed. `adb install -r` succeeded on Samsung SM-S928B. Bounded physical UI
+smoke passed; owner visual/listening review and the production device gate remain open.
 
 This file is a working snapshot. The code and canonical release gate remain authoritative if the branch moves.
 
@@ -223,7 +226,8 @@ Delayed starts now preserve the latest track/pause/stop choice in the controller
 and both native drivers, including media-notification cancellation. Source
 readiness controls resume, and ordered output writes preserve the latest volume.
 Timer expiry cannot override a newer transport choice or leave the next Play
-muted. Loading/error presentation is the next bounded internal task.
+muted. Full player and mini-player now show loading/cancel and failure/retry;
+system interruption recovery preserves later user and notification decisions.
 
 Sleep must not contain narration.
 
