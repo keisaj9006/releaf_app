@@ -61,47 +61,51 @@ class ScaffoldWithNavBar extends ConsumerWidget {
               height: 82,
               backgroundColor: ReleafColors.backgroundRaised,
               indicatorColor: accent.withValues(alpha: 0.16),
-            surfaceTintColor: Colors.transparent,
-            labelTextStyle: WidgetStateProperty.resolveWith((states) {
-              final selected = states.contains(WidgetState.selected);
-              return TextStyle(
-                fontFamily: 'Poppins',
-                fontSize: 10,
-                fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                color: selected
-                    ? ReleafColors.textPrimary
-                    : ReleafColors.textMuted,
-              );
-            }),
-            iconTheme: WidgetStateProperty.resolveWith((states) {
-              final selected = states.contains(WidgetState.selected);
-              return IconThemeData(
-                color: selected ? accent : ReleafColors.textMuted,
-                size: 22,
-              );
-            }),
+              surfaceTintColor: Colors.transparent,
+              labelTextStyle: WidgetStateProperty.resolveWith((states) {
+                final selected = states.contains(WidgetState.selected);
+                return TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 10,
+                  fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                  color: selected
+                      ? ReleafColors.textPrimary
+                      : ReleafColors.textMuted,
+                );
+              }),
+              iconTheme: WidgetStateProperty.resolveWith((states) {
+                final selected = states.contains(WidgetState.selected);
+                return IconThemeData(
+                  color: selected ? accent : ReleafColors.textMuted,
+                  size: 22,
+                );
+              }),
+            ),
           ),
-        ),
-        child: NavigationBar(
-          selectedIndex: navigationShell.currentIndex,
-          onDestinationSelected: _onTap,
-          destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            label: 'Home',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.self_improvement_outlined),
-            label: 'Reset',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.extension_outlined),
-            label: 'Brain',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.graphic_eq_rounded),
-            label: 'Sound',
-          ),
+          child: NavigationBar(
+            selectedIndex: navigationShell.currentIndex,
+            onDestinationSelected: _onTap,
+            destinations: const [
+              NavigationDestination(
+                icon: Icon(Icons.home_outlined),
+                label: 'Home',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.self_improvement_outlined),
+                label: 'Reset',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.spa_outlined),
+                label: 'Meditate',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.nightlight_outlined),
+                label: 'Sleep',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.extension_outlined),
+                label: 'Brain',
+              ),
             ],
           ),
         ),
@@ -130,8 +134,9 @@ Color _accentForIndex(int index) {
   return switch (index) {
     0 => ReleafFeatureAccents.home,
     1 => ReleafFeatureAccents.reset,
-    2 => ReleafFeatureAccents.brain,
-    3 => ReleafFeatureAccents.sound,
+    2 => ReleafFeatureAccents.meditation,
+    3 => ReleafFeatureAccents.sleep,
+    4 => ReleafFeatureAccents.brain,
     _ => ReleafColors.sage,
   };
 }
@@ -186,11 +191,7 @@ class _ResumePill extends StatelessWidget {
                   color: accent.withValues(alpha: 0.12),
                 ),
                 alignment: Alignment.center,
-                child: Icon(
-                  Icons.play_arrow_rounded,
-                  size: 21,
-                  color: accent,
-                ),
+                child: Icon(Icons.play_arrow_rounded, size: 21, color: accent),
               ),
               const SizedBox(width: ReleafSpacing.sm),
               Expanded(

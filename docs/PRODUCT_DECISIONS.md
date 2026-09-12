@@ -218,13 +218,14 @@ Do not market this as AI.
 
 ### CURRENT
 Persistent nav is:
-**Home | Reset | Brain | Sound**
+**Home | Reset | Meditate | Sleep | Brain**
 
-### LOCKED — owner approval, 12 September 2026; implementation pending
+### LOCKED — owner approval, 12 September 2026
 The approved destination order is **Home / Reset / Meditate / Sleep / Brain**.
 This supersedes the previous four-tab target, not existing route compatibility.
 Emergency remains global, free and outside the tab destinations; Account stays
-behind the avatar. This documentation update does not claim the new tabs are live.
+behind the avatar. The five destinations now use the existing stateful shell;
+the Sound library remains reachable inside Sleep with legacy URLs preserved.
 See the [canonical master prompt](plans/2026-09-12-releaf-master-prompt.md).
 
 ## Monetization

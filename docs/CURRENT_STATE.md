@@ -17,8 +17,7 @@ consistent difficulty controls across all 15 Brain games. Historical device-revi
 build passed. `adb install -r` succeeded on Samsung SM-S928B. Bounded physical UI
 smoke passed; owner visual/listening review and the production device gate remain open.
 
-Latest internal programme checkpoint: **474/474 tests passed**, analyzer clean and Android debug APK built. Reset handoff/ambience cancellation, Memory 50-level progression, subscription async identity isolation and Premium refresh continuity are implemented. See [Premium refresh evidence](release/2026-09-12-premium-refresh-continuity.md). Samsung is now connected; the latest APK has not yet been installed because device interaction was deferred during an active phone call. Five-tab navigation is owner-approved and next in the [remediation plan](plans/2026-09-12-meditate-reset-remediation.md).
-
+Latest internal programme checkpoint: **482/482 tests passed**, analyzer clean and Android debug APK built and installed with `adb install -r` on Samsung SM-S928B. Five primary destinations, legacy Sound library access and narrow large-text layout fixes are implemented. All five screens passed bounded UI smoke; RevenueCat configuration, QA identity and current Offering were confirmed through boolean-only logs. See [five-tab evidence](release/2026-09-12-five-primary-destinations.md). Premium refresh continuity was committed as `f3a8795`; owner listening and production-equivalent QA remain pending. Next: Meditation contracts and Reset blueprints in the [remediation plan](plans/2026-09-12-meditate-reset-remediation.md).
 This file is a working snapshot. The code and canonical release gate remain authoritative if the branch moves.
 
 ## Key release status
@@ -250,12 +249,14 @@ This is a useful base for personalization but it is not yet the complete researc
 Current bottom nav:
 - Home
 - Reset
+- Meditate
+- Sleep
 - Brain
-- Sound
 
-Meditation and Sleep have routes but are not both persistent bottom tabs.
-
-This differs from the Deep Research five-tab recommendation. Do not silently change it; see `docs/DECISION_CONFLICTS.md`.
+The owner approved this exact order on 12 September. Existing screens now use the
+stateful shell. Sound remains a secondary library inside the Sleep branch; its
+URL, favourites, recents and player routes are preserved. Meditate and Sleep have
+direct Emergency/account shortcuts. See `docs/DECISION_CONFLICTS.md`.
 
 ## Leaves / progress
 

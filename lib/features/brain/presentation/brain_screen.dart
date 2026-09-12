@@ -966,6 +966,8 @@ class _SkillGameCardState extends State<_SkillGameCard> {
     final reducedMotion =
         MediaQuery.maybeOf(context)?.disableAnimations ?? false;
 
+    final largeText = MediaQuery.textScalerOf(context).scale(14) > 18;
+
     return Semantics(
       button: true,
       label:
@@ -981,7 +983,7 @@ class _SkillGameCardState extends State<_SkillGameCard> {
             onTap: widget.onPressed,
             onHighlightChanged: (value) => setState(() => _pressed = value),
             child: Ink(
-              height: 214,
+              height: largeText ? null : 214,
               decoration: BoxDecoration(
                 color: const Color(0xFF0F151D),
                 borderRadius: BorderRadius.circular(ReleafRadii.large),
@@ -990,7 +992,7 @@ class _SkillGameCardState extends State<_SkillGameCard> {
                 ),
               ),
               child: Stack(
-                fit: StackFit.expand,
+                fit: largeText ? StackFit.loose : StackFit.expand,
                 children: [
                   Positioned(
                     top: 0,
@@ -1002,32 +1004,35 @@ class _SkillGameCardState extends State<_SkillGameCard> {
                       intensity: 0.78,
                     ),
                   ),
-                  const DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.transparent,
-                          Color(0xBA0F151D),
-                          Color(0xFF0F151D),
-                        ],
-                        stops: [0.08, 0.45, 0.72],
+                  const Positioned.fill(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.transparent,
+                            Color(0xBA0F151D),
+                            Color(0xFF0F151D),
+                          ],
+                          stops: [0.08, 0.45, 0.72],
+                        ),
                       ),
                     ),
                   ),
                   Padding(
                     padding: const EdgeInsets.all(ReleafSpacing.md),
                     child: Column(
+                      mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
+                        Wrap(
+                          spacing: 6,
+                          runSpacing: 6,
                           children: [
-                            Flexible(
-                              child: _SkillBadge(
-                                label: widget.presentation.skill,
-                                accent: widget.presentation.accent,
-                              ),
+                            _SkillBadge(
+                              label: widget.presentation.skill,
+                              accent: widget.presentation.accent,
                             ),
                             if (widget.trainingLevel != null) ...[
                               const SizedBox(width: 6),
@@ -1046,7 +1051,10 @@ class _SkillGameCardState extends State<_SkillGameCard> {
                             ],
                           ],
                         ),
-                        const Spacer(),
+                        if (largeText)
+                          const SizedBox(height: 24)
+                        else
+                          const Spacer(),
                         Text(
                           widget.game.title,
                           maxLines: 1,
@@ -1066,7 +1074,9 @@ class _SkillGameCardState extends State<_SkillGameCard> {
                           ),
                         ),
                         const SizedBox(height: ReleafSpacing.sm),
-                        Row(
+                        Wrap(
+                          spacing: 6,
+                          runSpacing: 6,
                           children: [
                             if (widget.bestScore != null)
                               Text(
@@ -1091,7 +1101,7 @@ class _SkillGameCardState extends State<_SkillGameCard> {
                                   color: ReleafColors.textMuted,
                                 ),
                               ),
-                            const Spacer(),
+
                             Icon(
                               Icons.arrow_forward_rounded,
                               size: 18,

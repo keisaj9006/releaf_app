@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/providers.dart';
 import '../../../routing/app_routes.dart';
+import '../../../routing/primary_destination_actions.dart';
 import '../../../theme/app_theme.dart';
 import '../../../theme/releaf_design_tokens.dart';
 import '../../../theme/widgets/releaf_sleep_artwork.dart';
@@ -12,10 +13,7 @@ import '../../sound/data/sound_catalog.dart';
 import '../../sound/domain/sound_content.dart';
 
 class SleepScreen extends ConsumerWidget {
-  const SleepScreen({
-    super.key,
-    this.showBack = false,
-  });
+  const SleepScreen({super.key, this.showBack = false});
 
   final bool showBack;
 
@@ -73,12 +71,7 @@ class SleepScreen extends ConsumerWidget {
 
       if (unlock != true || !context.mounted) return;
 
-      await maybeShowPaywall(
-        context,
-        ref,
-        force: true,
-        softOffer: true,
-      );
+      await maybeShowPaywall(context, ref, force: true, softOffer: true);
       if (!context.mounted) return;
 
       final nowPremium = ref.read(subscriptionControllerProvider).isPremium;
@@ -125,14 +118,25 @@ class SleepScreen extends ConsumerWidget {
                                         context.go(AppRoutes.home);
                                       }
                                     },
-                                    icon: const Icon(
-                                      Icons.arrow_back_rounded,
-                                    ),
+                                    icon: const Icon(Icons.arrow_back_rounded),
                                   ),
                                 ),
                                 const SizedBox(height: ReleafSpacing.sm),
                               ],
                               const _Header(),
+                              const PrimaryDestinationActions(),
+                              Align(
+                                alignment: Alignment.centerLeft,
+                                child: TextButton.icon(
+                                  key: const Key('sleep-open-sound-library'),
+                                  onPressed: () =>
+                                      context.push(AppRoutes.sound),
+                                  icon: const Icon(
+                                    Icons.library_music_outlined,
+                                  ),
+                                  label: const Text('Your sound library'),
+                                ),
+                              ),
                               const SizedBox(height: ReleafSpacing.xl),
                               if (featured != null)
                                 _FeaturedSleepSound(
@@ -298,10 +302,7 @@ class _Header extends StatelessWidget {
 }
 
 class _FeaturedSleepSound extends StatelessWidget {
-  const _FeaturedSleepSound({
-    required this.track,
-    required this.onPressed,
-  });
+  const _FeaturedSleepSound({required this.track, required this.onPressed});
 
   final SoundContent track;
   final VoidCallback onPressed;
@@ -356,9 +357,7 @@ class _FeaturedSleepSound extends StatelessWidget {
               decoration: BoxDecoration(
                 color: Colors.black.withValues(alpha: 0.22),
                 borderRadius: BorderRadius.circular(ReleafRadii.pill),
-                border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.12),
-                ),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
               ),
               child: Text(
                 'TONIGHT · NO VOICE',
@@ -458,7 +457,12 @@ class _SoundRail extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       key: const Key('sleep-sound-rail'),
-      height: 220,
+      height:
+          220 +
+          ((MediaQuery.textScalerOf(context).scale(18) / 18 - 1) * 100).clamp(
+            0,
+            200,
+          ),
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
@@ -537,11 +541,7 @@ class _SoundCard extends StatelessWidget {
                 ),
               ),
               if (isLocked)
-                const Positioned(
-                  top: 10,
-                  right: 10,
-                  child: _SleepPremiumTag(),
-                ),
+                const Positioned(top: 10, right: 10, child: _SleepPremiumTag()),
               Padding(
                 padding: const EdgeInsets.all(ReleafSpacing.md),
                 child: Column(
@@ -580,14 +580,16 @@ class _SoundCard extends StatelessWidget {
                           color: Color(0xFFA9B8C4),
                         ),
                         const SizedBox(width: 5),
-                        Text(
-                          'Continuous loop',
-                          style: ReleafTypography.meta.copyWith(
-                            color: ReleafColors.textMuted,
-                            fontSize: 8.5,
+                        Expanded(
+                          child: Text(
+                            'Continuous loop',
+                            style: ReleafTypography.meta.copyWith(
+                              color: ReleafColors.textMuted,
+                              fontSize: 8.5,
+                            ),
                           ),
                         ),
-                        const Spacer(),
+                        const SizedBox(width: 5),
                         Icon(
                           isLocked
                               ? Icons.lock_outline_rounded
@@ -668,10 +670,7 @@ class _SleepPremiumSoundPreview extends StatelessWidget {
                           gradient: LinearGradient(
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
-                            colors: [
-                              Color(0x12000000),
-                              Color(0xD507090D),
-                            ],
+                            colors: [Color(0x12000000), Color(0xD507090D)],
                           ),
                         ),
                       ),
@@ -735,9 +734,7 @@ class _SleepPremiumTag extends StatelessWidget {
       decoration: BoxDecoration(
         color: ReleafColors.premium.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(ReleafRadii.pill),
-        border: Border.all(
-          color: ReleafColors.premium.withValues(alpha: 0.26),
-        ),
+        border: Border.all(color: ReleafColors.premium.withValues(alpha: 0.26)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

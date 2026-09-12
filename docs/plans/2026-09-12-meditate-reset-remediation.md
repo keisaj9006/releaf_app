@@ -4,7 +4,7 @@ Authority: [owner-corrected master prompt](2026-09-12-releaf-master-prompt.md),
 the canonical release gate and locked product decisions. Continue from current
 `releaf-development`; do not repeat the completed repository audit.
 
-## 1. Premium access propagation — verification in progress
+## 1. Premium access propagation — committed as `f3a8795`
 
 Already present: configured SDK, stable internal identity, exact `premium`
 entitlement lookup, annual/monthly offerings and purchase/restore calls.
@@ -21,7 +21,7 @@ clear access immediately. Tests must exercise real gates and async ordering.
 This does not establish the cause of the owner's reported transaction issue.
 No purchase, entitlement grant or store configuration mutation is authorized.
 
-## 2. Five primary destinations — next implementation milestone
+## 2. Five primary destinations — verified
 
 Exact order: Home / Reset / Meditate / Sleep / Brain. Reuse existing screen
 implementations in the indexed stateful shell. Preserve `/meditate`, `/sleep`,
@@ -32,6 +32,14 @@ Before implementation add route/UI tests for exact tab order, selected state,
 branch restoration, legacy links, back navigation, session resume and narrow
 200% text layouts. Preserve account and Emergency access. Use existing feature
 accents; do not create new visual identities or change session access rules.
+
+Implemented: eight route/restoration/large-text tests, retained Sound library,
+Emergency/account shortcuts, and targeted Sleep/Brain/Reset layout fixes exposed
+by 320px/2x tests. Linear and nonlinear scaling plus nonzero readability overlays
+are covered. Independent review findings were reproduced and corrected.
+Final verification: 482 tests, clean analysis, Android debug build and Samsung
+`adb install -r` passed; bounded five-screen smoke and SDK identity/Offering logs
+confirmed. See [checkpoint evidence](../release/2026-09-12-five-primary-destinations.md).
 
 ## 3. Meditation completeness
 

@@ -8,7 +8,7 @@ When a conflict below matters to the task, do not silently choose the research v
 
 | Topic | Current repo / release position | Deep Research recommendation | Working rule |
 |---|---|---|---|
-| Bottom navigation | Four-tab implementation remains until the approved migration | Five separate product destinations | **Owner resolved, 12 September 2026:** exact approved order is Home / Reset / Meditate / Sleep / Brain. Implement deliberately with legacy route compatibility and unchanged access/data semantics. See the [canonical master prompt](plans/2026-09-12-releaf-master-prompt.md). |
+| Bottom navigation | Five-tab implementation; Sound library retained inside Sleep | Five separate product destinations | **Owner resolved, 12 September 2026:** exact approved order is Home / Reset / Meditate / Sleep / Brain. Legacy routes and access/data semantics are preserved. See the [canonical master prompt](plans/2026-09-12-releaf-master-prompt.md). |
 | Brain portfolio | 15 registered games; Brain core DONE/QA | Launch six polished games | **Do not delete/rebuild.** Curate/polish existing analogues and daily rotation. Additional games are not a P0 release need. |
 | Emergency naming | Internal Emergency semantics are access/privacy critical and DONE | Remove “Emergency” consumer framing | Consumer copy can be redesigned, but **preserve internal free-access/privacy/sync exclusions**. Product choice before broad rename. |
 | Leaves reward loop | Accumulated total + daily per-pillar rewards + third-pillar bonus | Quiet accumulated progress; no multipliers/“perfect day” burden | No earned-progress loss. Bonus simplification is a product-polish candidate, not reason to destabilize release. |

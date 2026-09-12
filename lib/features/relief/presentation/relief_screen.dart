@@ -50,10 +50,7 @@ class _ReliefScreenState extends ConsumerState<ReliefScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final width = math.min(
-      MediaQuery.sizeOf(context).width,
-      _maxContentWidth,
-    );
+    final width = math.min(MediaQuery.sizeOf(context).width, _maxContentWidth);
     if (_configuredWidth == width) return;
 
     _configuredWidth = width;
@@ -148,8 +145,9 @@ class _ReliefScreenState extends ConsumerState<ReliefScreen> {
       return;
     }
 
-    final latestPremiumState =
-        ref.read(subscriptionControllerProvider).isPremium;
+    final latestPremiumState = ref
+        .read(subscriptionControllerProvider)
+        .isPremium;
     if (!accessPolicy.canAccess(
       session,
       hasPremiumEntitlement: latestPremiumState,
@@ -158,11 +156,7 @@ class _ReliefScreenState extends ConsumerState<ReliefScreen> {
       return;
     }
 
-    await _launchSession(
-      context,
-      session,
-      preview.options,
-    );
+    await _launchSession(context, session, preview.options);
   }
 
   Future<void> _launchSession(
@@ -183,11 +177,7 @@ class _ReliefScreenState extends ConsumerState<ReliefScreen> {
     await reliefCompleted(ref, helpedALot: helpedALot);
 
     if (context.mounted && helpedALot) {
-      await maybeShowPaywall(
-        context,
-        ref,
-        softOffer: true,
-      );
+      await maybeShowPaywall(context, ref, softOffer: true);
     }
   }
 
@@ -233,8 +223,8 @@ class _ReliefScreenState extends ConsumerState<ReliefScreen> {
     final quickSessions = _selectedCategory == null
         ? allQuickSessions
         : allQuickSessions
-            .where((session) => session.quickCategory == _selectedCategory)
-            .toList();
+              .where((session) => session.quickCategory == _selectedCategory)
+              .toList();
     final deepSessions = regularContent
         .where((session) => session.level == ResetLevel.deep)
         .toList();
@@ -362,16 +352,15 @@ class _ReliefScreenState extends ConsumerState<ReliefScreen> {
                                       ),
                                       label: const Text('Show all resets'),
                                       onPressed: _clearCategoryFilter,
-                                      backgroundColor:
-                                          ReleafColors.surfaceSoft,
+                                      backgroundColor: ReleafColors.surfaceSoft,
                                       side: const BorderSide(
                                         color: ReleafColors.borderSoft,
                                       ),
-                                      labelStyle:
-                                          ReleafTypography.meta.copyWith(
-                                        color: ReleafColors.textPrimary,
-                                        fontWeight: FontWeight.w600,
-                                      ),
+                                      labelStyle: ReleafTypography.meta
+                                          .copyWith(
+                                            color: ReleafColors.textPrimary,
+                                            fontWeight: FontWeight.w600,
+                                          ),
                                     ),
                                   ),
                                 ),
@@ -425,8 +414,7 @@ class _ReliefScreenState extends ConsumerState<ReliefScreen> {
                               ),
                               const SizedBox(height: ReleafSpacing.lg),
                               _EditorialRail(
-                                semanticsLabel:
-                                    'Deep Reset protocols carousel',
+                                semanticsLabel: 'Deep Reset protocols carousel',
                                 railKey: const Key('reset-deep-rail'),
                                 controller: _deep,
                                 height: 252,
@@ -517,8 +505,9 @@ class _ResetHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final largeText = MediaQuery.textScalerOf(context).scale(14) > 18;
     return SizedBox(
-      height: 116,
+      height: largeText ? null : 116,
       child: Stack(
         clipBehavior: Clip.none,
         children: [
@@ -530,14 +519,14 @@ class _ResetHeader extends StatelessWidget {
             child: IgnorePointer(
               child: Opacity(
                 opacity: 0.34,
-                child: ReleafLivingForm(
-                  variant: ReleafArtworkVariant.ambient,
-                ),
+                child: ReleafLivingForm(variant: ReleafArtworkVariant.ambient),
               ),
             ),
           ),
-          Positioned.fill(
+          Padding(
+            padding: EdgeInsets.zero,
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
@@ -556,7 +545,7 @@ class _ResetHeader extends StatelessWidget {
                     ),
                   ],
                 ),
-                const Spacer(),
+                const SizedBox(height: ReleafSpacing.md),
                 Text(
                   'What do you need right now?',
                   style: ReleafTypography.body.copyWith(
@@ -619,8 +608,12 @@ class _EditorialRail extends StatelessWidget {
         child: LayoutBuilder(
           builder: (context, constraints) {
             final width = math.min(constraints.maxWidth, maxWidth);
+            final textScale = MediaQuery.textScalerOf(context).scale(14) / 14;
             final responsiveHeight =
-                MediaQuery.sizeOf(context).width < 360 ? height + 40 : height;
+                (MediaQuery.sizeOf(context).width < 360
+                    ? height + 40
+                    : height) *
+                math.max(1.0, textScale);
             return Align(
               alignment: Alignment.centerLeft,
               child: SizedBox(
@@ -689,10 +682,7 @@ class _RailPageTransform extends StatelessWidget {
         return Transform.scale(
           alignment: Alignment.centerLeft,
           scale: 1 - (distance * 0.035),
-          child: Opacity(
-            opacity: 1 - (distance * 0.13),
-            child: child,
-          ),
+          child: Opacity(opacity: 1 - (distance * 0.13), child: child),
         );
       },
     );
@@ -712,8 +702,7 @@ class _RailProgress extends StatelessWidget {
       animation: controller,
       builder: (context, _) {
         var activePage = controller.initialPage;
-        if (controller.hasClients &&
-            controller.position.hasContentDimensions) {
+        if (controller.hasClients && controller.position.hasContentDimensions) {
           activePage = (controller.page ?? activePage).round();
         }
         return Row(
@@ -765,7 +754,8 @@ class _EditorialCategoryCard extends StatelessWidget {
       button: available,
       enabled: available,
       onTap: onPressed,
-      label: '${_categoryLabel(category)} category. '
+      label:
+          '${_categoryLabel(category)} category. '
           '${_categoryDescription(category)} $countLabel. '
           '${available ? 'Shows matching sessions.' : 'Not available yet.'}',
       child: ReleafPressableCard(
@@ -797,10 +787,7 @@ class _EditorialCategoryCard extends StatelessWidget {
                 children: [
                   Align(
                     alignment: Alignment.topRight,
-                    child: _GlassLabel(
-                      label: countLabel,
-                      isMuted: !available,
-                    ),
+                    child: _GlassLabel(label: countLabel, isMuted: !available),
                   ),
                   const Spacer(),
                   Text(
@@ -824,13 +811,15 @@ class _EditorialCategoryCard extends StatelessWidget {
                   const SizedBox(height: ReleafSpacing.md),
                   Row(
                     children: [
-                      Text(
-                        available ? 'Explore' : 'In development',
-                        style: ReleafTypography.meta.copyWith(
-                          color: available
-                              ? ReleafColors.textPrimary
-                              : ReleafColors.textSecondary,
-                          fontWeight: FontWeight.w700,
+                      Expanded(
+                        child: Text(
+                          available ? 'Explore' : 'In development',
+                          style: ReleafTypography.meta.copyWith(
+                            color: available
+                                ? ReleafColors.textPrimary
+                                : ReleafColors.textSecondary,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                       ),
                       if (available) ...[
@@ -856,12 +845,7 @@ class _EditorialCategoryCard extends StatelessWidget {
 class _BreathingMethodGuide extends StatelessWidget {
   const _BreathingMethodGuide();
 
-  static const _methods = <({
-    String ratio,
-    String title,
-    String detail,
-    String tag,
-  })>[
+  static const _methods = <({String ratio, String title, String detail, String tag})>[
     (
       ratio: '5–5 / 4–4',
       title: 'Balanced',
@@ -928,9 +912,7 @@ class _BreathingMethodGuide extends StatelessWidget {
         children: [
           Text(
             'BREATHING METHOD GUIDE',
-            style: ReleafTypography.eyebrow.copyWith(
-              color: ReleafColors.sage,
-            ),
+            style: ReleafTypography.eyebrow.copyWith(color: ReleafColors.sage),
           ),
           const SizedBox(height: ReleafSpacing.xs),
           Text(
@@ -1093,7 +1075,8 @@ class _QuickSessionCard extends StatelessWidget {
       button: true,
       enabled: true,
       onTap: onPressed,
-      label: '${session.title}. ${_sessionCardValue(session)} '
+      label:
+          '${session.title}. ${_sessionCardValue(session)} '
           '${_durationLabel(session.durationSeconds)}. '
           '${_sessionTypeLabel(session)}. '
           '${session.isPremium ? 'Premium, opens session preview.' : 'Free, opens session preview.'}',
@@ -1130,9 +1113,7 @@ class _QuickSessionCard extends StatelessWidget {
                       Expanded(
                         child: Align(
                           alignment: Alignment.centerLeft,
-                          child: _GlassLabel(
-                            label: _sessionTypeLabel(session),
-                          ),
+                          child: _GlassLabel(label: _sessionTypeLabel(session)),
                         ),
                       ),
                       const SizedBox(width: ReleafSpacing.xs),
@@ -1161,14 +1142,16 @@ class _QuickSessionCard extends StatelessWidget {
                   const SizedBox(height: ReleafSpacing.sm),
                   Row(
                     children: [
-                      Text(
-                        _durationLabel(session.durationSeconds),
-                        style: ReleafTypography.meta.copyWith(
-                          color: ReleafColors.textPrimary,
-                          fontWeight: FontWeight.w700,
+                      Expanded(
+                        child: Text(
+                          _durationLabel(session.durationSeconds),
+                          style: ReleafTypography.meta.copyWith(
+                            color: ReleafColors.textPrimary,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                       ),
-                      const Spacer(),
+                      const SizedBox(width: ReleafSpacing.sm),
                       _CircularAffordance(isLocked: isLocked),
                     ],
                   ),
@@ -1201,7 +1184,8 @@ class _DeepResetCard extends StatelessWidget {
       button: true,
       enabled: true,
       onTap: onPressed,
-      label: '${session.title}. ${_durationLabel(session.durationSeconds)} '
+      label:
+          '${session.title}. ${_durationLabel(session.durationSeconds)} '
           'Deep Reset protocol. Premium, opens session preview.',
       child: ReleafPressableCard(
         key: Key('reset-session-${session.id}'),
@@ -1230,18 +1214,11 @@ class _DeepResetCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Row(
+                  const Wrap(
+                    spacing: ReleafSpacing.xs,
+                    runSpacing: ReleafSpacing.xs,
                     children: [
-                      Expanded(
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: _GlassLabel(
-                            label: 'Deep Reset',
-                            isWarm: true,
-                          ),
-                        ),
-                      ),
-                      SizedBox(width: ReleafSpacing.xs),
+                      _GlassLabel(label: 'Deep Reset', isWarm: true),
                       ReleafPremiumBadge(),
                     ],
                   ),
@@ -1254,9 +1231,7 @@ class _DeepResetCard extends StatelessWidget {
                         height: 40,
                         decoration: BoxDecoration(
                           color: ReleafColors.premium,
-                          borderRadius: BorderRadius.circular(
-                            ReleafRadii.pill,
-                          ),
+                          borderRadius: BorderRadius.circular(ReleafRadii.pill),
                           boxShadow: const [
                             BoxShadow(
                               color: ReleafColors.glowPremium,
@@ -1335,24 +1310,27 @@ class _SoundGatewayCard extends StatelessWidget {
         child: LayoutBuilder(
           builder: (context, constraints) {
             final compact = constraints.maxWidth < 360;
+            final largeText = MediaQuery.textScalerOf(context).scale(14) > 18;
             return SizedBox(
-              height: compact ? 230 : 190,
+              height: largeText ? null : (compact ? 230 : 190),
               child: Stack(
-                fit: StackFit.expand,
+                fit: largeText ? StackFit.loose : StackFit.expand,
                 children: [
-                  const ReleafArtwork(
-                    variant: ReleafArtworkVariant.ambient,
+                  const Positioned.fill(
+                    child: ReleafArtwork(variant: ReleafArtworkVariant.ambient),
                   ),
-                  const DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topRight,
-                        end: Alignment.bottomLeft,
-                        colors: [
-                          Color(0x10000000),
-                          Color(0x52000000),
-                          Color(0xEE000000),
-                        ],
+                  const Positioned.fill(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topRight,
+                          end: Alignment.bottomLeft,
+                          colors: [
+                            Color(0x10000000),
+                            Color(0x52000000),
+                            Color(0xEE000000),
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -1362,13 +1340,17 @@ class _SoundGatewayCard extends StatelessWidget {
                       children: [
                         Expanded(
                           child: Column(
+                            mainAxisSize: MainAxisSize.min,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const _GlassLabel(
                                 label: 'AMBIENT AUDIO',
                                 isSage: true,
                               ),
-                              const Spacer(),
+                              if (largeText)
+                                const SizedBox(height: 24)
+                              else
+                                const Spacer(),
                               Text(
                                 'Sound Space',
                                 style: ReleafTypography.sectionTitle.copyWith(
@@ -1428,7 +1410,8 @@ class _ResetProgressCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Semantics(
       container: true,
-      label: 'Reset progress. '
+      label:
+          'Reset progress. '
           '${summary.sessionsLast7Days} sessions in the last 7 days, '
           '${summary.activeDaysLast7Days} active days, '
           '${summary.totalCompletions} sessions all time.',
@@ -1521,9 +1504,7 @@ class _ResetProgressMetric extends StatelessWidget {
           children: [
             Text(
               '$value',
-              style: ReleafTypography.sectionTitle.copyWith(
-                fontSize: 22,
-              ),
+              style: ReleafTypography.sectionTitle.copyWith(fontSize: 22),
             ),
             const SizedBox(height: ReleafSpacing.xxs),
             Text(
@@ -1723,36 +1704,59 @@ String _sessionCardValue(ResetContent session) {
 String _sessionPurpose(ResetContent session) {
   return switch (session.id) {
     '60s-grounding' => 'Return attention to your body.',
-    'back-to-room' => 'Ground attention through what you can see, feel and hear.',
+    'back-to-room' =>
+      'Ground attention through what you can see, feel and hear.',
     'jaw-shoulders' => 'Release tension held around the jaw and shoulders.',
     'name-the-thought' => 'Create a little distance from a looping thought.',
     'object-anchor' => 'Narrow attention to one real object in front of you.',
-    'sound-anchor' => 'Reconnect with the room through nearby and distant sounds.',
-    'press-release' => 'Use gentle pressure and release to notice a change in tension.',
-    'make-room' => 'Stop fighting the moment and create space around what is here.',
-    'one-small-next-step' => 'Turn overwhelm into one small, realistic next action.',
+    'sound-anchor' =>
+      'Reconnect with the room through nearby and distant sounds.',
+    'press-release' =>
+      'Use gentle pressure and release to notice a change in tension.',
+    'make-room' =>
+      'Stop fighting the moment and create space around what is here.',
+    'one-small-next-step' =>
+      'Turn overwhelm into one small, realistic next action.',
     'equal-rhythm' => 'Settle into a smooth, even five-count rhythm.',
-    'before-interview' => 'Reduce the mental load and keep only the first useful step.',
-    'before-presentation' => 'Release tension and narrow attention to how you begin.',
-    'after-conflict' => 'Create space between activation and your next response.',
+    'before-interview' =>
+      'Reduce the mental load and keep only the first useful step.',
+    'before-presentation' =>
+      'Release tension and narrow attention to how you begin.',
+    'after-conflict' =>
+      'Create space between activation and your next response.',
     'panic-spike' => 'Reconnect with the room through fast sensory grounding.',
-    'overthinking-night' => 'Step back from a looping thought without solving it tonight.',
-    'social-pressure' => 'Move attention away from self-monitoring and back to the room.',
-    'travel-stress' => 'Ground in what is stable and focus on the next travel step.',
-    'work-overwhelm' => 'Reduce the workload in your head to one visible next action.',
-    'wired-steady' => 'Move from wired energy toward a steadier breathing rhythm.',
-    'tension-body-scan' => 'Scan the body slowly and notice where effort can soften.',
-    'overwhelm-stability' => 'Separate the whole problem from the one action that matters now.',
-    'evening-unwind' => 'Set down the unfinished day without requiring perfect calm.',
-    'anger-release' => 'Give activation time to settle before choosing the next response.',
-    'overthinking-let-go' => 'Create distance from repetitive thinking and return to the present.',
+    'overthinking-night' =>
+      'Step back from a looping thought without solving it tonight.',
+    'social-pressure' =>
+      'Move attention away from self-monitoring and back to the room.',
+    'travel-stress' =>
+      'Ground in what is stable and focus on the next travel step.',
+    'work-overwhelm' =>
+      'Reduce the workload in your head to one visible next action.',
+    'wired-steady' =>
+      'Move from wired energy toward a steadier breathing rhythm.',
+    'tension-body-scan' =>
+      'Scan the body slowly and notice where effort can soften.',
+    'overwhelm-stability' =>
+      'Separate the whole problem from the one action that matters now.',
+    'evening-unwind' =>
+      'Set down the unfinished day without requiring perfect calm.',
+    'anger-release' =>
+      'Give activation time to settle before choosing the next response.',
+    'overthinking-let-go' =>
+      'Create distance from repetitive thinking and return to the present.',
     '90s-calm-down' => 'Settle into a gentle 4-in, 6-out rhythm.',
-    'longer-exhale' => 'Use a 3-in, 6-out pattern with a clear long-exhale emphasis.',
-    'box-breathing' => 'Use a structured 4–4–4–4 pattern with comfortable holds.',
-    'sleep-downshift' => 'Use a slow 4–7–8 bedtime rhythm when breath holds feel comfortable.',
-    'energy-up-breath' => 'Use a lighter 3–3 rhythm when you want a more active paced practice.',
+    'longer-exhale' =>
+      'Use a 3-in, 6-out pattern with a clear long-exhale emphasis.',
+    'box-breathing' =>
+      'Use a structured 4–4–4–4 pattern with comfortable holds.',
+    'sleep-downshift' =>
+      'Use a slow 4–7–8 bedtime rhythm when breath holds feel comfortable.',
+    'energy-up-breath' =>
+      'Use a lighter 3–3 rhythm when you want a more active paced practice.',
     'focus-breath' => 'Use a steady 4–4 count as one clear attentional anchor.',
-    'anxiety-slow-cycle' => 'Use a continuous 5–7 rhythm when you want a slower cycle without holds.',
+    'anxiety-slow-cycle' =>
+      'Use a continuous 5–7 rhythm when you want a slower cycle without holds.',
     '5min-focus' => 'Anchor attention through your senses.',
     _ => session.summary ?? 'A guided reset for the present moment.',
   };

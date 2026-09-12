@@ -428,7 +428,7 @@ void main() {
     restored.dispose();
   });
 
-  testWidgets('Meditate opens as a standalone Sound experience', (
+  testWidgets('Meditate opens as a primary destination', (
     WidgetTester tester,
   ) async {
     await _pumpRoute(
@@ -455,11 +455,11 @@ void main() {
     expect(find.byKey(const Key('meditation-sleep-course')), findsOneWidget);
     expect(find.text('QUICK PRACTICES'), findsOneWidget);
     expect(find.text('EXPLORE BY INTENTION'), findsOneWidget);
-    expect(find.byKey(const Key('meditation-back')), findsOneWidget);
-    expect(find.byType(NavigationBar), findsNothing);
+    expect(find.byKey(const Key('meditation-back')), findsNothing);
+    expect(find.byType(NavigationBar), findsOneWidget);
   });
 
-  testWidgets('Sleep opens as a standalone Sound experience', (
+  testWidgets('Sleep opens as a primary destination', (
     WidgetTester tester,
   ) async {
     await _pumpRoute(
@@ -476,11 +476,11 @@ void main() {
     expect(find.text('TONIGHT · NO VOICE'), findsOneWidget);
     expect(find.text('SLEEP MEDITATIONS'), findsNothing);
     expect(find.text('WIND DOWN'), findsNothing);
-    expect(find.byKey(const Key('sleep-back')), findsOneWidget);
-    expect(find.byType(NavigationBar), findsNothing);
+    expect(find.byKey(const Key('sleep-back')), findsNothing);
+    expect(find.byType(NavigationBar), findsOneWidget);
   });
 
-  testWidgets('Direct Meditation and Sleep back fall back to Home', (
+  testWidgets('Direct Meditation and Sleep can navigate Home', (
     WidgetTester tester,
   ) async {
     for (final target in <(String, Key)>[
@@ -493,7 +493,12 @@ void main() {
         preferences: await _preferences(),
       );
 
-      await tester.tap(find.byKey(target.$2));
+      await tester.tap(
+        find.descendant(
+          of: find.byType(NavigationBar),
+          matching: find.text('Home'),
+        ),
+      );
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
 
@@ -503,31 +508,7 @@ void main() {
     }
   });
 
-  testWidgets(
-    'Sound is the fourth primary destination and opens wellbeing spaces',
-    (WidgetTester tester) async {
-      await _pumpRoute(
-        tester,
-        location: AppRoutes.sound,
-        preferences: await _preferences(),
-      );
-
-      expect(find.text('Sound'), findsWidgets);
-      expect(find.byKey(const Key('sound-emergency-action')), findsOneWidget);
-      expect(find.byKey(const Key('sound-open-meditate')), findsOneWidget);
-      expect(find.byKey(const Key('sound-open-sleep')), findsOneWidget);
-
-      final navigation = tester.widget<NavigationBar>(
-        find.byType(NavigationBar),
-      );
-      expect(navigation.destinations, hasLength(4));
-      expect(navigation.selectedIndex, 3);
-      expect(find.text('Meditate'), findsOneWidget);
-      expect(find.text('Sleep'), findsOneWidget);
-    },
-  );
-
-  testWidgets('Sound shortcuts round-trip through Meditation and Sleep', (
+  testWidgets('Legacy Sound library remains in the Sleep branch', (
     WidgetTester tester,
   ) async {
     await _pumpRoute(
@@ -536,36 +517,39 @@ void main() {
       preferences: await _preferences(),
     );
 
-    await tester.tap(find.byKey(const Key('sound-open-meditate')));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 300));
-
-    expect(find.text('Meditate'), findsWidgets);
-    expect(find.byKey(const Key('meditation-back')), findsOneWidget);
-
-    await tester.tap(find.byKey(const Key('meditation-back')));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 300));
-
     expect(find.text('Sound'), findsWidgets);
+    expect(find.byKey(const Key('sound-emergency-action')), findsOneWidget);
+    expect(find.byKey(const Key('sound-open-meditate')), findsOneWidget);
     expect(find.byKey(const Key('sound-open-sleep')), findsOneWidget);
 
-    await tester.tap(find.byKey(const Key('sound-open-sleep')));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 300));
-
+    final navigation = tester.widget<NavigationBar>(find.byType(NavigationBar));
+    expect(navigation.destinations, hasLength(5));
+    expect(navigation.selectedIndex, 3);
+    expect(find.text('Meditate'), findsWidgets);
     expect(find.text('Sleep'), findsWidgets);
-    expect(find.byKey(const Key('sleep-back')), findsOneWidget);
+  });
 
-    await tester.tap(find.byKey(const Key('sleep-back')));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 300));
-
-    expect(find.text('Sound'), findsWidgets);
+  testWidgets('Sleep library preserves legacy Sound shortcuts', (tester) async {
+    await _pumpRoute(
+      tester,
+      location: AppRoutes.sleep,
+      preferences: await _preferences(),
+    );
+    await tester.tap(find.byKey(const Key('sleep-open-sound-library')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('sound-open-meditate')), findsOneWidget);
+    await tester.tap(find.byKey(const Key('sound-open-meditate')));
+    await tester.pumpAndSettle();
+    expect(find.text('MEDITATION'), findsOneWidget);
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('sound-open-sleep')), findsOneWidget);
+    await tester.tap(find.byKey(const Key('sound-open-sleep')));
+    await tester.pumpAndSettle();
+    expect(find.text('NIGHT'), findsOneWidget);
     expect(find.byType(NavigationBar), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
-
   testWidgets('Legacy Habits and Daily Loop routes resolve safely to Home', (
     WidgetTester tester,
   ) async {
@@ -870,7 +854,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
 
-    expect(find.byKey(const Key('meditation-back')), findsOneWidget);
+    expect(find.byKey(const Key('meditation-back')), findsNothing);
     expect(audioDriver.stopCalls, greaterThanOrEqualTo(1));
     expect(voiceDriver.stopCalls, greaterThanOrEqualTo(1));
 
@@ -906,7 +890,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
 
-    expect(find.byKey(const Key('meditation-back')), findsOneWidget);
+    expect(find.byKey(const Key('meditation-back')), findsNothing);
     expect(audioDriver.stopCalls, greaterThanOrEqualTo(1));
     expect(voiceDriver.stopCalls, greaterThanOrEqualTo(1));
     expect(tester.takeException(), isNull);

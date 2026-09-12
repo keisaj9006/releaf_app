@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/providers.dart';
 import '../../../routing/app_routes.dart';
+import '../../../routing/primary_destination_actions.dart';
 import '../../../theme/app_theme.dart';
 import '../../../theme/releaf_design_tokens.dart';
 import '../../../theme/widgets/releaf_meditation_artwork.dart';
@@ -158,6 +159,7 @@ class MeditationScreen extends ConsumerWidget {
                                 const SizedBox(height: ReleafSpacing.sm),
                               ],
                               const _Header(),
+                              const PrimaryDestinationActions(),
                               const SizedBox(height: ReleafSpacing.xl),
                               _FeaturedPractice(
                                 item: featured,

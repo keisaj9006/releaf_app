@@ -78,31 +78,33 @@ GoRouter createAppRouter({String initialLocation = AppRoutes.home}) => GoRouter(
         StatefulShellBranch(
           routes: [
             GoRoute(
-              path: AppRoutes.brain,
-              pageBuilder: (context, state) => _fadePage(const BrainScreen()),
+              path: AppRoutes.meditate,
+              pageBuilder: (context, state) =>
+                  _fadePage(const MeditationScreen()),
             ),
           ],
         ),
         StatefulShellBranch(
           routes: [
             GoRoute(
+              path: AppRoutes.sleep,
+              pageBuilder: (context, state) => _fadePage(const SleepScreen()),
+            ),
+            GoRoute(
               path: AppRoutes.sound,
               pageBuilder: (context, state) => _fadePage(const SoundScreen()),
             ),
           ],
         ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: AppRoutes.brain,
+              pageBuilder: (context, state) => _fadePage(const BrainScreen()),
+            ),
+          ],
+        ),
       ],
-    ),
-
-    GoRoute(
-      path: AppRoutes.meditate,
-      pageBuilder: (context, state) =>
-          _fadePage(const MeditationScreen(showBack: true)),
-    ),
-    GoRoute(
-      path: AppRoutes.sleep,
-      pageBuilder: (context, state) =>
-          _fadePage(const SleepScreen(showBack: true)),
     ),
 
     GoRoute(
@@ -115,8 +117,7 @@ GoRouter createAppRouter({String initialLocation = AppRoutes.home}) => GoRouter(
     ),
     GoRoute(
       path: AppRoutes.passwordReset,
-      pageBuilder: (context, state) =>
-          _fadePage(const PasswordResetScreen()),
+      pageBuilder: (context, state) => _fadePage(const PasswordResetScreen()),
     ),
 
     GoRoute(
@@ -127,13 +128,12 @@ GoRouter createAppRouter({String initialLocation = AppRoutes.home}) => GoRouter(
         final resumeState = extra is MeditationResumeState
             ? extra
             : extra is Map &&
-                    extra['type'] == 'meditation' &&
-                    extra['remainingSeconds'] is num
-                ? MeditationResumeState(
-                    remainingSeconds:
-                        (extra['remainingSeconds'] as num).toInt(),
-                  )
-                : null;
+                  extra['type'] == 'meditation' &&
+                  extra['remainingSeconds'] is num
+            ? MeditationResumeState(
+                remainingSeconds: (extra['remainingSeconds'] as num).toInt(),
+              )
+            : null;
         return _fadePage(
           MeditationSessionGate(
             meditationId: meditationId,
@@ -143,10 +143,7 @@ GoRouter createAppRouter({String initialLocation = AppRoutes.home}) => GoRouter(
       },
     ),
 
-    GoRoute(
-      path: AppRoutes.habits,
-      redirect: (_, _) => AppRoutes.home,
-    ),
+    GoRoute(path: AppRoutes.habits, redirect: (_, _) => AppRoutes.home),
 
     GoRoute(
       path: AppRoutes.soundPlayer,
@@ -164,10 +161,7 @@ GoRouter createAppRouter({String initialLocation = AppRoutes.home}) => GoRouter(
             ? state.extra! as ResetLaunchOptions
             : const ResetLaunchOptions();
         return _fadePage(
-          ReliefSessionGate(
-            sessionId: sessionId,
-            launchOptions: options,
-          ),
+          ReliefSessionGate(sessionId: sessionId, launchOptions: options),
         );
       },
     ),
@@ -194,19 +188,13 @@ GoRouter createAppRouter({String initialLocation = AppRoutes.home}) => GoRouter(
       },
     ),
 
-    GoRoute(
-      path: AppRoutes.dailyLoop,
-      redirect: (_, _) => AppRoutes.home,
-    ),
+    GoRoute(path: AppRoutes.dailyLoop, redirect: (_, _) => AppRoutes.home),
 
     GoRoute(
       path: AppRoutes.dashboardLegacy,
       redirect: (_, _) => AppRoutes.home,
     ),
-    GoRoute(
-      path: AppRoutes.gamesLegacy,
-      redirect: (_, _) => AppRoutes.brain,
-    ),
+    GoRoute(path: AppRoutes.gamesLegacy, redirect: (_, _) => AppRoutes.brain),
     GoRoute(
       path: AppRoutes.mathRaceLegacy,
       redirect: (_, _) => AppRoutes.brain,

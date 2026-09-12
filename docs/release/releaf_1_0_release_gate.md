@@ -65,6 +65,12 @@ passed; the final production-equivalent device matrix remains open.
 The same read-only audit returned zero Supabase security-advisor lints.
 Automated results do not close production-signing, content, external or device gates.
 
+Owner-approved [five-destination navigation](2026-09-12-five-primary-destinations.md)
+passed 482 tests, clean analysis, Android debug build and non-destructive Samsung
+installation with bounded UI smoke. Premium refresh continuity and large-text
+layout fixes improve reliability; production transaction QA, owner listening and
+the full release-device matrix remain open.
+
 ## Non-blocking after 1.0
 
 These must not delay public release unless a new defect makes them P0:

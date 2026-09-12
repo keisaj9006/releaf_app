@@ -26,8 +26,10 @@ Current owner-approved execution order is recorded in the
 [Meditate / Reset remediation plan](plans/2026-09-12-meditate-reset-remediation.md).
 Premium refresh continuity passed 474 tests, clean analysis and Android debug
 build; see [evidence](release/2026-09-12-premium-refresh-continuity.md).
-Next: Home / Reset / Meditate / Sleep / Brain navigation with legacy route
-compatibility. Approved human breathing recordings and owner listening remain
+Home / Reset / Meditate / Sleep / Brain navigation with legacy route compatibility
+is now implemented: 482 tests, clean analysis, Android build and non-destructive
+Samsung installation passed; see [five-tab evidence](release/2026-09-12-five-primary-destinations.md).
+Next: Meditation contracts and Reset blueprints. Approved human breathing recordings and owner listening remain
 dependencies, not permission to substitute synthetic cues or change protocols.
 
 **Priority: immediate**
