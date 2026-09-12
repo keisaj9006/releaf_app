@@ -71,6 +71,13 @@ and boolean SDK configuration/Offering logs passed; no owner listening approval
 is implied. See [handoff evidence](release/2026-09-12-meditation-sound-handoff.md).
 Continue Progress/personalisation and remaining backend/release-quality work.
 
+Home now refreshes time-dependent greetings/recommendations and Daily Insight
+once per minute while foregrounded and immediately on resume. Its first-frame
+startup respects background state. Sleep recommendation copy matches the actual
+sound-first destination. See [evidence](release/2026-09-12-home-continuity.md).
+Saved focus, recommendation priority, routes and reward logic are unchanged.
+Next: separately verify daily progress date rollover and account-local state.
+
 ## Key release status
 
 The current canonical source is:

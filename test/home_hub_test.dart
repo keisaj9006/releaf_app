@@ -4,6 +4,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:releaf_app/core/providers.dart';
+import 'package:releaf_app/core/subscription/revenuecat_service.dart';
+import 'package:releaf_app/core/subscription/subscription_controller.dart';
+import 'package:releaf_app/core/subscription/subscription_state.dart';
 import 'package:releaf_app/features/home/daily_insight.dart';
 import 'package:releaf_app/features/home/home_personalization.dart';
 import 'package:releaf_app/features/home/home_screen.dart';
@@ -18,6 +21,9 @@ Future<SharedPreferences> _preferences() async {
 Future<void> _pumpHome(
   WidgetTester tester, {
   required SharedPreferences preferences,
+  int hour = 12,
+  bool premium = false,
+  DateTime Function()? clock,
 }) async {
   final router = createAppRouter(initialLocation: AppRoutes.home);
   addTearDown(router.dispose);
@@ -26,7 +32,13 @@ Future<void> _pumpHome(
     ProviderScope(
       overrides: [
         sharedPreferencesProvider.overrideWithValue(preferences),
-        homeNowProvider.overrideWithValue(DateTime(2026, 9, 6, 12)),
+        homeNowProvider.overrideWith(
+          (ref) => clock?.call() ?? DateTime(2026, 9, 6, hour),
+        ),
+        if (premium)
+          subscriptionControllerProvider.overrideWith(
+            (ref) => _PremiumSubscription(),
+          ),
       ],
       child: MaterialApp.router(routerConfig: router),
     ),
@@ -35,7 +47,104 @@ Future<void> _pumpHome(
   await tester.pump(const Duration(milliseconds: 300));
 }
 
+class _PremiumSubscription extends SubscriptionController {
+  _PremiumSubscription() : super(RevenueCatService()) {
+    state = const SubscriptionState(isPremium: true);
+  }
+  @override
+  Future<void> initAndRefresh() async {}
+}
+
 void main() {
+  testWidgets(
+    'Home first frame does not restart the clock while backgrounded',
+    (tester) async {
+      var reads = 0;
+      tester.binding.addPostFrameCallback((_) {
+        tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+      });
+      await _pumpHome(
+        tester,
+        preferences: await _preferences(),
+        clock: () {
+          reads++;
+          return DateTime(2026, 9, 6, 12);
+        },
+      );
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(HomeScreen)),
+      );
+      container.read(homeNowProvider);
+      final before = reads;
+      await tester.pump(const Duration(minutes: 1));
+      container.read(homeNowProvider);
+      expect(reads, before);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pump();
+      expect(reads, greaterThan(before));
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
+
+  for (final resumed in [false, true]) {
+    testWidgets(
+      'Home refreshes time-dependent content after ${resumed ? 'resume' : 'a minute'}',
+      (tester) async {
+        var now = DateTime(2026, 9, 6, 12);
+        await _pumpHome(
+          tester,
+          preferences: await _preferences(),
+          clock: () => now,
+        );
+        expect(find.text('Good afternoon'), findsOneWidget);
+        if (resumed) {
+          tester.binding.handleAppLifecycleStateChanged(
+            AppLifecycleState.paused,
+          );
+          await tester.pump();
+        }
+        now = DateTime(2026, 9, 6, 21);
+        if (resumed) {
+          tester.binding.handleAppLifecycleStateChanged(
+            AppLifecycleState.resumed,
+          );
+          await tester.pump();
+        } else {
+          await tester.pump(const Duration(minutes: 1));
+        }
+        await tester.pump();
+        expect(find.text('Good evening'), findsOneWidget);
+        expect(find.text('Let the Day Go'), findsOneWidget);
+        await tester.pumpWidget(const SizedBox.shrink());
+      },
+    );
+  }
+
+  for (final hour in [18, 21]) {
+    testWidgets(
+      'Home describes the actual sound-first Sleep destination at $hour',
+      (tester) async {
+        final preferences = await _preferences();
+        await preferences.setBool('releaf.home.intro.dismissed.v1', true);
+        await preferences.setString(
+          'releaf.home.focus.v1',
+          HomeFocus.sleep.name,
+        );
+        await _pumpHome(
+          tester,
+          preferences: preferences,
+          hour: hour,
+          premium: true,
+        );
+        expect(find.text('Sleep • Sound • Timer'), findsOneWidget);
+        expect(find.textContaining('guided wind-down'), findsNothing);
+        expect(find.textContaining('8 min protocol'), findsNothing);
+        expect(find.text('Sleep • Guided • Sound'), findsNothing);
+        await tester.pumpWidget(const SizedBox.shrink());
+      },
+    );
+  }
+
   test('Daily insight rotation is deterministic and source-backed', () {
     final day = DateTime(2026, 9, 6);
     final first = DailyInsightCatalog.forDate(day);

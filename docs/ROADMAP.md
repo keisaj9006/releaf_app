@@ -60,6 +60,11 @@ Android build and Samsung update passed ([evidence](release/2026-09-12-meditatio
 Continue Progress/personalisation and remaining backend/release-quality tracks;
 content/listening and production-equivalent hardware gates remain open.
 
+Home time/recommendation continuity is implemented with foreground/resume clock
+refresh and honest Sleep sound/timer copy ([evidence](release/2026-09-12-home-continuity.md)).
+Next: daily progress rollover without loss or changes to reward semantics, then
+remaining backend/release-quality tasks.
+
 **Priority: immediate**
 
 1. Confirm `releaf-development`, clean/known working tree and HEAD.

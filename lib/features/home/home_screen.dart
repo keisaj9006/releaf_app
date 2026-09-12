@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -30,8 +32,45 @@ class HomeScreen extends ConsumerStatefulWidget {
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends ConsumerState<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen>
+    with WidgetsBindingObserver {
   _HomeNeed? _selectedNeed;
+  Timer? _clockRefresh;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _startClockRefresh();
+    });
+  }
+
+  void _startClockRefresh() {
+    _clockRefresh?.cancel();
+    final lifecycle = WidgetsBinding.instance.lifecycleState;
+    if (lifecycle != null && lifecycle != AppLifecycleState.resumed) return;
+    ref.invalidate(homeNowProvider);
+    _clockRefresh = Timer.periodic(const Duration(minutes: 1), (_) {
+      ref.invalidate(homeNowProvider);
+    });
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _startClockRefresh();
+    } else {
+      _clockRefresh?.cancel();
+    }
+  }
+
+  @override
+  void dispose() {
+    _clockRefresh?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -732,11 +771,11 @@ _HomeRecommendation _recommendationFor({
 
     return const _HomeRecommendation(
       eyebrow: 'SUGGESTED NOW',
-      title: 'Evening Unwind',
+      title: 'Sleep sounds',
       description:
-          'Set down the unfinished day and make the next part of the evening simpler.',
+          'Choose a quiet soundscape and set a timer for your evening.',
       reason: 'Suggested from the time of day.',
-      meta: 'Sleep • 8 min protocol',
+      meta: 'Sleep • Sound • Timer',
       route: AppRoutes.sleep,
       artwork: ReleafArtworkVariant.ambient,
       icon: Icons.bedtime_outlined,
@@ -786,9 +825,9 @@ _HomeRecommendation _recommendationFor({
         eyebrow: 'SUGGESTED FOR YOUR FOCUS',
         title: 'Tonight',
         description:
-            'Move into the full Sleep space with guided wind-down, meditation and long-form sound.',
+            'Choose a quiet soundscape, adjust the volume and set a timer. No voice or instructions.',
         reason: 'Matches your focus: Sleep easier.',
-        meta: 'Sleep • Guided • Sound',
+        meta: 'Sleep • Sound • Timer',
         route: AppRoutes.sleep,
         artwork: ReleafArtworkVariant.ambient,
         icon: Icons.bedtime_outlined,
