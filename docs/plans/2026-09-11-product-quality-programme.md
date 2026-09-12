@@ -1,9 +1,9 @@
 # Releaf product-quality programme
 
-Reset phase-time display: [countdown evidence](../release/2026-09-12-reset-phase-countdown.md),
-526 tests, clean analysis and Android build. No device connected. Next implement
-the [shared breathing clock](2026-09-12-shared-breathing-clock.md); the display
-alone does not establish phase/motion synchronization or select new artwork.
+Reset phase/motion synchronization: [shared-clock evidence](../release/2026-09-12-shared-breathing-clock.md),
+540 tests, clean analysis and Android build. One elapsed clock preserves fractional
+lifecycle progress, exact methods and completion duration. No device connected;
+Samsung review and owner artwork/audio approval remain pending.
 
 Sleep recovery checkpoint: [pause fallback](../release/2026-09-12-sleep-pause-fallback.md),
 525 full tests, clean analysis, Android build and follow-up independent review.

@@ -54,7 +54,8 @@ class BreathingWidget extends ConsumerStatefulWidget {
 }
 
 class _BreathingWidgetState extends ConsumerState<BreathingWidget>
-    with WidgetsBindingObserver {
+    with WidgetsBindingObserver, SingleTickerProviderStateMixin {
+  late final AnimationController _breathingClock;
   ResetContent? _session;
   int _remainingSeconds = 0;
   int _activeDurationSeconds = 0;
@@ -83,6 +84,10 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
   @override
   void initState() {
     super.initState();
+    _breathingClock = AnimationController.unbounded(
+      vsync: this,
+      animationBehavior: AnimationBehavior.preserve,
+    )..addListener(_onBreathingClock);
     _ambientPlayer = AudioplayersMeditationAudioDriver(
       player: ref.read(resetAmbientPlayerProvider),
     );
@@ -118,6 +123,20 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
     });
   }
 
+  void _onBreathingClock() {
+    if (!mounted || _phase != SessionPhase.running || _pausedByLifecycle) {
+      return;
+    }
+    final remaining = (_activeDurationSeconds - _breathingClock.value)
+        .ceil()
+        .clamp(0, _activeDurationSeconds);
+    if (remaining != _remainingSeconds) {
+      setState(() => _remainingSeconds = remaining);
+      unawaited(_syncSpokenGuidance());
+    }
+    if (remaining == 0) unawaited(_triggerFeedbackPhase());
+  }
+
   void _startTimer() {
     _timer?.cancel();
     _timer = null;
@@ -125,6 +144,19 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
         _phase != SessionPhase.running ||
         _pausedByLifecycle) {
       _deadline = null;
+      return;
+    }
+
+    if (_session?.program?.type == ResetProgramType.pacedBreathing) {
+      _deadline = null;
+      final remaining = _activeDurationSeconds - _breathingClock.value;
+      _breathingClock.animateTo(
+        _activeDurationSeconds.toDouble(),
+        duration: Duration(
+          microseconds: (remaining * Duration.microsecondsPerSecond).round(),
+        ),
+        curve: Curves.linear,
+      );
       return;
     }
 
@@ -525,6 +557,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
 
   Future<void> _triggerFeedbackPhase() async {
     if (!mounted) return;
+    _breathingClock.stop();
 
     _deadline = null;
     HapticFeedback.mediumImpact();
@@ -571,6 +604,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
   }
 
   void _abortSession() {
+    _breathingClock.stop();
     _timer?.cancel();
     _deadline = null;
     unawaited(_stopSessionAudio());
@@ -686,6 +720,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
         state == AppLifecycleState.hidden ||
         state == AppLifecycleState.detached) {
       if (!_pausedByLifecycle && _phase == SessionPhase.running) {
+        _breathingClock.stop();
         setState(() => _pausedByLifecycle = true);
         _timer?.cancel();
         _timer = null;
@@ -716,6 +751,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
 
   @override
   void dispose() {
+    _breathingClock.dispose();
     _audioRequest++;
     _voicePlayback.cancelPending();
     WidgetsBinding.instance.removeObserver(this);
@@ -949,6 +985,9 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
                                         paused: _pausedByLifecycle,
                                         progress: progress,
                                         breathing: isPacedBreathing,
+                                        elapsedSeconds: isPacedBreathing
+                                            ? _breathingClock
+                                            : null,
                                         phaseLabel: phaseLabel,
                                         inhaleSeconds:
                                             breathPattern?.inhaleSeconds ?? 4,

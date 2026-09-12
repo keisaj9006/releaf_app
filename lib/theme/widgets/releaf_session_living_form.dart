@@ -23,6 +23,7 @@ class ReleafSessionLivingForm extends StatefulWidget {
     this.showBreathPath = false,
     this.reducedMotion = false,
     this.paused = false,
+    this.elapsedSeconds,
   });
 
   final ReleafArtworkVariant variant;
@@ -36,6 +37,7 @@ class ReleafSessionLivingForm extends StatefulWidget {
   final bool showBreathPath;
   final bool reducedMotion;
   final bool paused;
+  final Animation<double>? elapsedSeconds;
 
   @override
   State<ReleafSessionLivingForm> createState() =>
@@ -79,6 +81,7 @@ class _ReleafSessionLivingFormState extends State<ReleafSessionLivingForm>
       _controller.duration = Duration(seconds: _cycleSecondsFor(widget));
     }
     if (oldWidget.reducedMotion != widget.reducedMotion ||
+        oldWidget.elapsedSeconds != widget.elapsedSeconds ||
         oldWidget.paused != widget.paused ||
         oldWidget.breathing != widget.breathing ||
         oldWidget.inhaleSeconds != widget.inhaleSeconds ||
@@ -90,7 +93,7 @@ class _ReleafSessionLivingFormState extends State<ReleafSessionLivingForm>
   }
 
   void _syncAnimation() {
-    if (widget.paused || _lifecyclePaused) {
+    if (widget.elapsedSeconds != null || widget.paused || _lifecyclePaused) {
       _controller.stop();
     } else if (widget.reducedMotion) {
       _controller.stop();
@@ -128,9 +131,15 @@ class _ReleafSessionLivingFormState extends State<ReleafSessionLivingForm>
           );
         },
         child: AnimatedBuilder(
-          animation: _controller,
+          animation: Listenable.merge([_controller, widget.elapsedSeconds]),
           builder: (context, child) {
-            final motion = _motionValue(_controller.value);
+            final cycleValue = widget.elapsedSeconds == null
+                ? _controller.value
+                : (widget.elapsedSeconds!.value % _cycleSecondsFor(widget)) /
+                      _cycleSecondsFor(widget);
+            final motion = _motionValue(
+              widget.reducedMotion ? 0.42 : cycleValue,
+            );
             final breathingScale = widget.breathing
                 ? 0.84 + (motion * 0.34)
                 : 0.955 + (motion * 0.075);
@@ -197,7 +206,7 @@ class _ReleafSessionLivingFormState extends State<ReleafSessionLivingForm>
                       child: CustomPaint(
                         key: const Key('reset-breath-path'),
                         painter: _BreathOrbitPainter(
-                          cycleValue: _controller.value,
+                          cycleValue: cycleValue,
                           inhaleSeconds: widget.inhaleSeconds,
                           holdAfterInhaleSeconds: widget.holdAfterInhaleSeconds,
                           exhaleSeconds: widget.exhaleSeconds,

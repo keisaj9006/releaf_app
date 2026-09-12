@@ -1,5 +1,10 @@
 # Shared paced-breathing clock
 
+Implementation and automated verification complete: see
+[release evidence](../release/2026-09-12-shared-breathing-clock.md).
+540 full tests, clean analysis and configured Android build passed. Device
+installation/physical review remain pending because Samsung is disconnected.
+
 This follows the approved canonical master's actual-phase visual requirement.
 It does not select botanical art or authorize audio. The existing countdown-only
 checkpoint does not satisfy shared timing.

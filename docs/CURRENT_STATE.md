@@ -2,11 +2,17 @@
 
 Snapshot: **2026-09-12**
 
-Latest: [Reset phase countdown](release/2026-09-12-reset-phase-countdown.md),
+Latest: [shared breathing clock](release/2026-09-12-shared-breathing-clock.md),
+540 full tests, clean analysis and configured Android debug build. Session time,
+phase text/countdown and Living Form now share elapsed time, including fractional
+lifecycle pause/resume. All ten methods and exact durations remain unchanged.
+Samsung disconnected; installation and physical review remain pending.
+
+Previous: [Reset phase countdown](release/2026-09-12-reset-phase-countdown.md),
 526 full tests, clean analysis and Android build. Guided breathing shows seconds
 remaining in the actual phase; no-words mode omits it. Methods/timings unchanged.
-Device disconnected. The animation's independent clock remains open work under
-the [shared-clock plan](plans/2026-09-12-shared-breathing-clock.md).
+Device disconnected. Its independent animation clock was subsequently replaced
+under the [shared-clock plan](plans/2026-09-12-shared-breathing-clock.md).
 
 [Sound recovery copy](release/2026-09-12-sound-recovery-copy.md) now describes
 playback problems generally, including timer/transport errors. 59 focused tests,

@@ -381,7 +381,7 @@ LUNGS VISUAL SYSTEM
 
 RESET AUDIO — AUTHENTIC HUMAN BREATHING
 
-1. Preserve every existing breathing method, name, stable ID, order and exact phase timing, including 5–5, 6–4 and all other currently implemented methods. Never change, reverse, merge or remove a pattern. Verify the actual repository before describing which methods exist; a missing or mismatched label must be reported, not silently added or corrected.
+1. Preserve every existing breathing method, name, stable ID, order and exact phase timing. Never change, reverse, merge or remove a pattern. The owner mentioned 5–5 and 6–4; the verified ten-method repository catalogue contains 5–5 and 4–6, with no 6–4 method. Preserve the implemented 4–6 exactly; do not reverse, relabel or add a method to reconcile that discrepancy. The canonical inventory is docs/product/breathing-method-evidence-matrix.md.
 
 2. Use authentic, professionally recorded human breathing: a calm, natural nasal inhale and a slow, natural exhale. Synchronize each recording precisely with the actual inhale/exhale phases and their programmed durations. A slow exhale must not extend or otherwise alter an existing programmed phase.
 
