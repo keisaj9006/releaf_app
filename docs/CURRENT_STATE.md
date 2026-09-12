@@ -17,7 +17,7 @@ consistent difficulty controls across all 15 Brain games. Historical device-revi
 build passed. `adb install -r` succeeded on Samsung SM-S928B. Bounded physical UI
 smoke passed; owner visual/listening review and the production device gate remain open.
 
-Latest internal programme checkpoint: **467/467 tests passed**, analyzer clean and Android debug APK built. Reset handoff/ambience cancellation, Memory 50-level progression and subscription async identity isolation are implemented. See [subscription evidence](release/2026-09-12-subscription-identity-isolation.md). The latest APK has not been installed: ADB reports no device.
+Latest internal programme checkpoint: **474/474 tests passed**, analyzer clean and Android debug APK built. Reset handoff/ambience cancellation, Memory 50-level progression, subscription async identity isolation and Premium refresh continuity are implemented. See [Premium refresh evidence](release/2026-09-12-premium-refresh-continuity.md). Samsung is now connected; the latest APK has not yet been installed because device interaction was deferred during an active phone call. Five-tab navigation is owner-approved and next in the [remediation plan](plans/2026-09-12-meditate-reset-remediation.md).
 
 This file is a working snapshot. The code and canonical release gate remain authoritative if the branch moves.
 

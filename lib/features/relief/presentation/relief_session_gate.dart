@@ -32,8 +32,7 @@ class ReliefSessionGate extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<ReliefSessionGate> createState() =>
-      _ReliefSessionGateState();
+  ConsumerState<ReliefSessionGate> createState() => _ReliefSessionGateState();
 }
 
 class _ReliefSessionGateState extends ConsumerState<ReliefSessionGate> {
@@ -59,7 +58,9 @@ class _ReliefSessionGateState extends ConsumerState<ReliefSessionGate> {
     }
 
     final subscription = ref.watch(subscriptionControllerProvider);
-    if (subscription.isLoading) return const _LoadingSession();
+    if (subscription.isLoading && !subscription.isPremium) {
+      return const _LoadingSession();
+    }
 
     if (accessPolicy.canAccess(
       session,
@@ -105,9 +106,7 @@ class _LoadingSession extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Scaffold(
       backgroundColor: Color(0xFF121417),
-      body: Center(
-        child: CircularProgressIndicator(color: Color(0xFF6B9080)),
-      ),
+      body: Center(child: CircularProgressIndicator(color: Color(0xFF6B9080))),
     );
   }
 }

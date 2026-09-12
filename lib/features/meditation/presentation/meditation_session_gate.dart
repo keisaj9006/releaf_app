@@ -32,15 +32,15 @@ class MeditationSessionGate extends ConsumerStatefulWidget {
       _MeditationSessionGateState();
 }
 
-class _MeditationSessionGateState
-    extends ConsumerState<MeditationSessionGate> {
+class _MeditationSessionGateState extends ConsumerState<MeditationSessionGate> {
   bool _handlingDeniedAccess = false;
   bool _handlingUnknownSession = false;
 
   @override
   Widget build(BuildContext context) {
-    final item =
-        ref.watch(meditationCatalogProvider).getById(widget.meditationId);
+    final item = ref
+        .watch(meditationCatalogProvider)
+        .getById(widget.meditationId);
 
     if (item == null) {
       _returnUnknownSessionToMeditate();
@@ -56,7 +56,9 @@ class _MeditationSessionGateState
     }
 
     final subscription = ref.watch(subscriptionControllerProvider);
-    if (subscription.isLoading) return const _LoadingMeditation();
+    if (subscription.isLoading && !subscription.isPremium) {
+      return const _LoadingMeditation();
+    }
 
     if (canAccessMeditationSession(
       item,
@@ -103,11 +105,7 @@ class _LoadingMeditation extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Scaffold(
       backgroundColor: Color(0xFF0A0D0B),
-      body: Center(
-        child: CircularProgressIndicator(
-          color: Color(0xFFB9AFC4),
-        ),
-      ),
+      body: Center(child: CircularProgressIndicator(color: Color(0xFFB9AFC4))),
     );
   }
 }

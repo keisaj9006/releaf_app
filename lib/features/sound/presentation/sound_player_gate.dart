@@ -9,18 +9,12 @@ import '../data/sound_catalog.dart';
 import '../domain/sound_content.dart';
 import 'sound_player_screen.dart';
 
-bool canAccessSoundTrack(
-  SoundContent track, {
-  required bool isPremiumUser,
-}) {
+bool canAccessSoundTrack(SoundContent track, {required bool isPremiumUser}) {
   return !track.isPremium || isPremiumUser;
 }
 
 class SoundPlayerGate extends ConsumerStatefulWidget {
-  const SoundPlayerGate({
-    super.key,
-    required this.trackId,
-  });
+  const SoundPlayerGate({super.key, required this.trackId});
 
   final String trackId;
 
@@ -46,12 +40,11 @@ class _SoundPlayerGateState extends ConsumerState<SoundPlayerGate> {
     }
 
     final subscription = ref.watch(subscriptionControllerProvider);
-    if (subscription.isLoading) return const _LoadingSound();
+    if (subscription.isLoading && !subscription.isPremium) {
+      return const _LoadingSound();
+    }
 
-    if (canAccessSoundTrack(
-      track,
-      isPremiumUser: subscription.isPremium,
-    )) {
+    if (canAccessSoundTrack(track, isPremiumUser: subscription.isPremium)) {
       return SoundPlayerScreen(trackId: track.id);
     }
 
@@ -90,11 +83,7 @@ class _LoadingSound extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Scaffold(
       backgroundColor: Color(0xFF071013),
-      body: Center(
-        child: CircularProgressIndicator(
-          color: Color(0xFFBFDDE2),
-        ),
-      ),
+      body: Center(child: CircularProgressIndicator(color: Color(0xFFBFDDE2))),
     );
   }
 }

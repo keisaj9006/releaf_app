@@ -37,6 +37,8 @@ class SubscriptionController extends StateNotifier<SubscriptionState> {
   final bool _premiumPreview;
   late final CustomerInfoUpdateListener _customerInfoListener;
   int _identityVersion = 0;
+  int _customerInfoVersion = 0;
+  int _refreshVersion = 0;
 
   bool _currentIdentity(int version) => mounted && version == _identityVersion;
 
@@ -68,6 +70,8 @@ class SubscriptionController extends StateNotifier<SubscriptionState> {
   Future<void> refresh() async {
     if (!mounted) return;
     final identityVersion = _identityVersion;
+    final refreshVersion = ++_refreshVersion;
+    final customerInfoVersion = ++_customerInfoVersion;
     if (_premiumPreview) {
       state = const SubscriptionState(isPremium: true);
       return;
@@ -85,24 +89,23 @@ class SubscriptionController extends StateNotifier<SubscriptionState> {
     try {
       final customerInfo = await _service.getCustomerInfoSafe();
       if (!_currentIdentity(identityVersion)) return;
+      // Access must not wait for store merchandise. A newer listener/billing
+      // result is authoritative over the snapshot requested by this refresh.
+      if (customerInfo != null && customerInfoVersion == _customerInfoVersion) {
+        _handleCustomerInfoUpdate(customerInfo);
+      }
       final offerings = await _service.getOfferingsSafe();
-      if (!_currentIdentity(identityVersion)) return;
-      final fetchedIsPremium = customerInfo == null
-          ? null
-          : _service.hasPremium(customerInfo);
-      final isPremium = resolvePremiumAfterRefresh(
-        currentIsPremium: state.isPremium,
-        fetchedIsPremium: fetchedIsPremium,
-      );
+      if (!_currentIdentity(identityVersion) ||
+          refreshVersion != _refreshVersion) {
+        return;
+      }
 
-      state = state.copyWith(
-        isLoading: false,
-        customerInfo: customerInfo,
-        offerings: offerings,
-        isPremium: isPremium,
-      );
+      state = state.copyWith(isLoading: false, offerings: offerings);
     } catch (_) {
-      if (!_currentIdentity(identityVersion)) return;
+      if (!_currentIdentity(identityVersion) ||
+          refreshVersion != _refreshVersion) {
+        return;
+      }
       state = state.copyWith(
         isLoading: false,
         error: 'Failed to sync subscriptions.',
@@ -112,6 +115,7 @@ class SubscriptionController extends StateNotifier<SubscriptionState> {
 
   void _handleCustomerInfoUpdate(CustomerInfo customerInfo) {
     if (_premiumPreview || !mounted) return;
+    _customerInfoVersion++;
     state = state.copyWith(
       customerInfo: customerInfo,
       isPremium: _service.hasPremium(customerInfo),
@@ -133,6 +137,7 @@ class SubscriptionController extends StateNotifier<SubscriptionState> {
     try {
       final customerInfo = await _service.purchasePackage(package);
       if (!_currentIdentity(identityVersion)) return false;
+      _customerInfoVersion++;
       final isPremium = _service.hasPremium(customerInfo);
       state = state.copyWith(
         isLoading: false,
@@ -170,6 +175,7 @@ class SubscriptionController extends StateNotifier<SubscriptionState> {
     try {
       final customerInfo = await _service.restorePurchases();
       if (!_currentIdentity(identityVersion)) return false;
+      _customerInfoVersion++;
       final isPremium = _service.hasPremium(customerInfo);
       state = state.copyWith(
         isLoading: false,

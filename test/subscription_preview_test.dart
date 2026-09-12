@@ -9,6 +9,51 @@ import 'package:releaf_app/core/subscription/revenuecat_service.dart';
 import 'package:releaf_app/core/subscription/subscription_controller.dart';
 
 void main() {
+  for (final latestPremium in [true, false]) {
+    test(
+      'delayed snapshot cannot replace listener Premium=$latestPremium',
+      () async {
+        final service = _DelayedPremiumService();
+        final controller = SubscriptionController(service);
+        addTearDown(controller.dispose);
+        await controller.refresh();
+        final snapshot = service.customerInfoGate = Completer<CustomerInfo?>();
+        final refresh = controller.refresh();
+        service.listener!(_TestCustomerInfo(premium: latestPremium));
+        snapshot.complete(_TestCustomerInfo(premium: !latestPremium));
+        await refresh;
+        expect(controller.state.isPremium, latestPremium);
+        expect(controller.state.isLoading, isFalse);
+      },
+    );
+  }
+
+  test('valid Premium refresh propagates before offerings finish', () async {
+    final service = _DelayedPremiumService()
+      ..offeringsGate = Completer<Offerings?>();
+    final controller = SubscriptionController(service);
+    addTearDown(controller.dispose);
+    await service.waiting.future;
+    expect(controller.state.isPremium, isTrue);
+    service.offeringsGate!.complete(null);
+    await Future<void>.delayed(Duration.zero);
+  });
+
+  test('older refresh cannot overwrite a newer CustomerInfo event', () async {
+    final service = _DelayedPremiumService();
+    final controller = SubscriptionController(service);
+    addTearDown(controller.dispose);
+    await controller.refresh();
+    service.offeringsGate = Completer<Offerings?>();
+    final refresh = controller.refresh();
+    await service.waiting.future;
+    service.listener!(_TestCustomerInfo(premium: false));
+    expect(controller.state.isPremium, isFalse);
+    service.offeringsGate!.complete(null);
+    await refresh;
+    expect(controller.state.isPremium, isFalse);
+  });
+
   for (final operation in ['purchase', 'restore']) {
     test(
       'obsolete $operation result cannot cross an identity boundary (fake service)',
@@ -305,6 +350,8 @@ class _ListenerTrackingRevenueCatService extends RevenueCatService {
 }
 
 class _TestCustomerInfo implements CustomerInfo {
+  _TestCustomerInfo({this.premium = true});
+  final bool premium;
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
@@ -315,6 +362,7 @@ class _TestPackage implements Package {
 }
 
 class _DelayedPremiumService extends _ListenerTrackingRevenueCatService {
+  Completer<CustomerInfo?>? customerInfoGate;
   final billingGate = Completer<CustomerInfo>();
   @override
   Future<CustomerInfo> purchasePackage(Package package) => billingGate.future;
@@ -323,9 +371,11 @@ class _DelayedPremiumService extends _ListenerTrackingRevenueCatService {
   Completer<Offerings?>? offeringsGate;
   final waiting = Completer<void>();
   @override
-  Future<CustomerInfo?> getCustomerInfoSafe() async => _TestCustomerInfo();
+  Future<CustomerInfo?> getCustomerInfoSafe() async => customerInfoGate == null
+      ? _TestCustomerInfo()
+      : await customerInfoGate!.future;
   @override
-  bool hasPremium(CustomerInfo info) => true;
+  bool hasPremium(CustomerInfo info) => (info as _TestCustomerInfo).premium;
   @override
   Future<Offerings?> getOfferingsSafe() async {
     final gate = offeringsGate;
