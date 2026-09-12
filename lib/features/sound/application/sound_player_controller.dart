@@ -588,11 +588,12 @@ class SoundPlayerController extends StateNotifier<SoundPlayerState> {
       state = state.copyWith(sleepTimerRemainingSeconds: remaining);
 
       if (state.currentTrackId != null) {
-        await _writeOutputVolume(
+        await _writeSleepTimerVolume(
           soundOutputVolumeForSleepTimer(
             baseVolume: state.volume,
             remainingSeconds: remaining,
           ),
+          request,
         );
       }
       return;
@@ -612,7 +613,7 @@ class SoundPlayerController extends StateNotifier<SoundPlayerState> {
     // Expiry is already reached; a later Play must start at the normal volume.
     state = state.copyWith(clearSleepTimer: true);
     if (state.currentTrackId != null) {
-      await _writeOutputVolume(0);
+      await _writeSleepTimerVolume(0, request);
     }
     if (!_currentSleepTimerRequest(request) || !playbackCurrent()) {
       await _restoreExpiredTimerVolume(request);
@@ -635,7 +636,7 @@ class SoundPlayerController extends StateNotifier<SoundPlayerState> {
       return;
     }
     if (state.currentTrackId != null) {
-      await _writeOutputVolume(state.volume);
+      await _writeSleepTimerVolume(state.volume, request);
     }
 
     if (!_currentSleepTimerRequest(request) || !playbackCurrent()) {
@@ -648,7 +649,30 @@ class SoundPlayerController extends StateNotifier<SoundPlayerState> {
     if (_currentSleepTimerRequest(request) && state.sleepTimerMinutes == null) {
       // A notification can cancel expiry after its mute without replacing the
       // timer. Restore output only; preserve that newer transport decision.
-      await _writeOutputVolume(state.volume);
+      await _writeSleepTimerVolume(state.volume, request);
+    }
+  }
+
+  Future<void> _writeSleepTimerVolume(double volume, int request) async {
+    final playbackRequest = _playbackRequest;
+    final driverIntent = _driverPlaybackIntent;
+    try {
+      final writing = _writeOutputVolume(volume);
+      final volumeRequest = _outputVolumeRequest;
+      try {
+        await writing;
+      } catch (_) {
+        if (volumeRequest != _outputVolumeRequest) return;
+        rethrow;
+      }
+    } catch (_) {
+      // Native volume failure must not prevent the expiry pause or escape
+      // from a periodic timer callback. Preserve newer timer decisions.
+      if (_currentSleepTimerRequest(request) &&
+          _currentPlaybackRequest(playbackRequest) &&
+          driverIntent == _driverPlaybackIntent) {
+        state = state.copyWith(hasPlaybackError: true);
+      }
     }
   }
 

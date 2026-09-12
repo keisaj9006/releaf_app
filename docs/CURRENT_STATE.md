@@ -2,6 +2,11 @@
 
 Snapshot: **2026-09-12**
 
+Latest runtime checkpoint: [Sleep expiry volume failure](release/2026-09-12-sleep-expiry-volume-failure.md).
+Native volume errors no longer prevent the expiry pause. Stale failures cannot
+label a newer playback request failed. **521/521 tests**, clean analysis and
+Android debug build passed; Samsung disconnected, installation/review pending.
+
 [Audio catalog binding](release/2026-09-12-audio-catalog-binding.md) now requires
 the current Reset manifest for breathing intake: 17 Python tests, 2 exporter
 tests and 40 assertions across all 10 methods passed; analysis clean. This
@@ -12,7 +17,7 @@ provenance/measurement/approval fields and actual file hashes. Twelve Python
 tests and clean Flutter analysis; no runtime assets or approval status changed.
 Actual licensed recordings and owner evidence remain required.
 
-Current verification: **519/519 tests**, clean analysis and Android debug build
+Previous verification: **519/519 tests**, clean analysis and Android debug build
 for [Reset reduced-motion transitions](release/2026-09-12-reset-reduced-transitions.md).
 System reduced motion now also removes shell and guidance crossfades. Default
 transitions and all breathing durations remain unchanged. Samsung was disconnected;

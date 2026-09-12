@@ -26,6 +26,8 @@ class _LoadingDriver
   final loading = Completer<void>();
   bool fail = false;
   bool failConfiguration = false;
+  bool failVolume = false;
+  Completer<void>? volumeGate;
   int loads = 0;
   int resumes = 0;
   int pauses = 0;
@@ -47,7 +49,13 @@ class _LoadingDriver
   }
 
   @override
-  Future<void> setVolume(double volume) async {}
+  Future<void> setVolume(double volume) async {
+    final failThisWrite = failVolume;
+    final gate = volumeGate;
+    if (gate != null) await gate.future;
+    if (failThisWrite) throw StateError('private/native/volume/details');
+  }
+
   @override
   Future<void> playAsset(String path, {String? trackId, String? title}) async {
     final request = ++version;
@@ -128,6 +136,58 @@ Future<void> _pumpPlayer(
 }
 
 void main() {
+  test(
+    'old timer volume failure does not label newer playback as failed',
+    () async {
+      var now = DateTime(2026, 9, 12);
+      final driver = _LoadingDriver();
+      final controller = SoundPlayerController(
+        const SoundCatalog(),
+        await _preferences(),
+        driver: driver,
+        now: () => now,
+      );
+      addTearDown(controller.dispose);
+      await controller.playById('deep-drift');
+      await controller.setSleepTimer(1);
+      final gate = Completer<void>();
+      driver.volumeGate = gate;
+      driver.failVolume = true;
+      now = now.add(const Duration(minutes: 1));
+      final expiry = controller.syncSleepTimerNow();
+      await Future<void>.delayed(Duration.zero);
+      driver.volumeGate = null;
+      driver.failVolume = false;
+      await controller.playById('deep-drift');
+      gate.complete();
+      await expiry;
+      expect(controller.state.isPlaying, isTrue);
+      expect(controller.state.hasPlaybackError, isFalse);
+      expect(driver.pauses, 0);
+    },
+  );
+
+  test('sleep timer still pauses when native volume writes fail', () async {
+    var now = DateTime(2026, 9, 12);
+    final driver = _LoadingDriver();
+    final controller = SoundPlayerController(
+      const SoundCatalog(),
+      await _preferences(),
+      driver: driver,
+      now: () => now,
+    );
+    addTearDown(controller.dispose);
+    await controller.playById('deep-drift');
+    await controller.setSleepTimer(1);
+    driver.failVolume = true;
+    now = now.add(const Duration(minutes: 1));
+    await controller.syncSleepTimerNow();
+    expect(driver.pauses, 1);
+    expect(controller.state.isPlaying, isFalse);
+    expect(controller.state.sleepTimerRemainingSeconds, isNull);
+    expect(controller.state.hasPlaybackError, isTrue);
+  });
+
   testWidgets('returning to Reset cancels a pending Sound load', (
     tester,
   ) async {

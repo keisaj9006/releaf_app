@@ -2,6 +2,11 @@
 
 This roadmap converts the current repo + release gate + latest project decisions + Deep Research into execution order.
 
+[Sleep expiry after volume failure](release/2026-09-12-sleep-expiry-volume-failure.md)
+is fixed: 521 tests, analysis and Android build passed. Device update and
+long-duration/physical interruption QA remain pending. Continue remaining player
+error recovery and release gates without repeating completed Brain progression.
+
 [Breathing intake/catalog comparison](release/2026-09-12-audio-catalog-binding.md)
 is implemented and checked against all 10 existing methods. Source authenticity,
 licensed candidate delivery, owner selection/listening and runtime promotion

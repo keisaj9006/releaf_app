@@ -1,5 +1,10 @@
 # Releaf product-quality programme
 
+Sleep reliability checkpoint: [expiry volume failure](../release/2026-09-12-sleep-expiry-volume-failure.md),
+521 full tests, clean analysis, Android debug build and follow-up independent
+review. A failed native mute no longer prevents expiry pause; stale errors are
+scoped to their original intent. Samsung disconnected; physical checks pending.
+
 Reset accessibility checkpoint: [reduced-motion transitions](../release/2026-09-12-reset-reduced-transitions.md),
 519 full tests, clean analysis and Android debug build. Shell/guidance crossfades
 respect system reduced motion; no phase/timing changes. Device disconnected.
