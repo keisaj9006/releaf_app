@@ -159,9 +159,12 @@ certify per-file licensing, measured loudness or owner listening acceptance.
 The [Atmosphere II comparison](../audio-candidates/2026-09-11/README.md) already
 records active source -9.0 LUFS / +0.8 dBTP and candidate -12.3 LUFS / -2.5 dBTP.
 The candidate remains outside runtime and unapproved; do not recreate or promote
-it merely because it has headroom. No new measurement was performed for this
-standard update. Local FFmpeg/ffprobe was unavailable in the checked PATH and
-bundled runtime, so missing measurements remain explicitly pending.
+it merely because it has headroom. The subsequent
+[approved narration measurements](release/2026-09-12-approved-narration-measurements.md)
+record all four Basics source files and separate Deep Drift ambience. Existing
+FFmpeg was recovered from ignored local QA dependencies. These source measurements
+do not replace rendered-mix or phone listening. The approved narration sources
+are 24 kHz and remain unchanged.
 
 Three licensed/original human breathing candidates, their duration variants,
 the approved narrator identity recovery, missing recordings and actual owner

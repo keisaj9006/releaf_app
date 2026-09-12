@@ -2,6 +2,11 @@
 
 This roadmap converts the current repo + release gate + latest project decisions + Deep Research into execution order.
 
+[Basics narration and ambience source measurements](release/2026-09-12-approved-narration-measurements.md)
+are recorded with unchanged hashes. Remaining rendered-mix, licensing/provenance,
+new human breathing candidates and owner listening require separate evidence;
+do not normalize or replace approved recordings automatically.
+
 The [shared audio standard](audio_asset_standard.md) completes the unblocked
 cross-layer production contract. Candidate/source provenance and measurement
 records still need actual evidence; approved narrator recovery, human breathing

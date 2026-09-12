@@ -2,6 +2,12 @@
 
 Snapshot: **2026-09-12**
 
+[Approved Basics source measurements](release/2026-09-12-approved-narration-measurements.md)
+now record its four narration files: 24 kHz, -24.4 to -24.9 LUFS, -5.7 to -7.8
+dBTP. Separate Deep Drift measures -29.2 LUFS / -21.4 dBTP. Five scans exited 0
+and all source hashes remained unchanged. This does not approve a new mix, voice,
+candidate or device-listening result; no assets/runtime changed.
+
 The [shared audio production standard](audio_asset_standard.md) now covers the
 owner's Reset/Guide requirements alongside Sound/Sleep. Canonical master points
 to this existing file. Twelve manifest tests passed and analysis was clean
