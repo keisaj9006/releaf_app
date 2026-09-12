@@ -49,6 +49,16 @@ Rename consumer-facing “Emergency” terminology to a less medical/crisis-impl
 
 ## Breathing
 
+### LOCKED — owner correction, 12 September 2026
+Preserve all implemented method names, IDs, order and phase durations. Use authentic,
+professionally recorded nasal inhale/slow exhale cues, never synthetic airflow or
+nature sounds as substitutes. Prepare at least three licensed/original candidates
+outside runtime assets for owner listening on Samsung speaker and headphones.
+No cue may ship without explicit listening approval. Breathing cues, narration and
+optional ambience have independent controls; fully silent use remains available.
+Hold/rest phases have no breathing cue; synthetic hold sounds require separate
+owner approval. See the exact [canonical master audio contract](plans/2026-09-12-releaf-master-prompt.md).
+
 ### LOCKED
 Use comfortable, slow-paced breathing as the mainstream relaxation direction.
 
@@ -210,12 +220,12 @@ Do not market this as AI.
 Persistent nav is:
 **Home | Reset | Brain | Sound**
 
-### RESEARCH TARGET
-Potential future/rebaselined IA:
-**Home | Reset | Brain | Meditate | Sleep**
-with Profile behind an avatar.
-
-This is a product-scope decision, not an automatic Codex migration.
+### LOCKED — owner approval, 12 September 2026; implementation pending
+The approved destination order is **Home / Reset / Meditate / Sleep / Brain**.
+This supersedes the previous four-tab target, not existing route compatibility.
+Emergency remains global, free and outside the tab destinations; Account stays
+behind the avatar. This documentation update does not claim the new tabs are live.
+See the [canonical master prompt](plans/2026-09-12-releaf-master-prompt.md).
 
 ## Monetization
 
