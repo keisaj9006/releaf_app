@@ -25,7 +25,9 @@ Future<SharedPreferences> _preferences() async {
 }
 
 class _TrackingSoundPlaybackDriver implements SoundPlaybackDriver {
-  final _playerStates = StreamController<audio.PlayerState>.broadcast(sync: true);
+  final _playerStates = StreamController<audio.PlayerState>.broadcast(
+    sync: true,
+  );
   int pauseCalls = 0;
 
   @override
@@ -97,18 +99,12 @@ void main() {
   )!;
 
   test('Relief access policy allows free and entitled sessions', () {
-    expect(
-      canAccessReliefSession(freeSession, isPremiumUser: false),
-      isTrue,
-    );
+    expect(canAccessReliefSession(freeSession, isPremiumUser: false), isTrue);
     expect(
       canAccessReliefSession(premiumSession, isPremiumUser: false),
       isFalse,
     );
-    expect(
-      canAccessReliefSession(premiumSession, isPremiumUser: true),
-      isTrue,
-    );
+    expect(canAccessReliefSession(premiumSession, isPremiumUser: true), isTrue);
     expect(
       canAccessReliefSession(emergencySession, isPremiumUser: false),
       isTrue,
@@ -126,9 +122,7 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          sharedPreferencesProvider.overrideWithValue(preferences),
-        ],
+        overrides: [sharedPreferencesProvider.overrideWithValue(preferences)],
         child: MaterialApp.router(routerConfig: router),
       ),
     );
@@ -184,19 +178,14 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          sharedPreferencesProvider.overrideWithValue(preferences),
-        ],
+        overrides: [sharedPreferencesProvider.overrideWithValue(preferences)],
         child: MaterialApp.router(routerConfig: router),
       ),
     );
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
 
-    expect(
-      find.byKey(const Key('reset-living-form')),
-      findsOneWidget,
-    );
+    expect(find.byKey(const Key('reset-living-form')), findsOneWidget);
     expect(find.byKey(const Key('reset-breath-path')), findsOneWidget);
     expect(find.text('Breathe in'), findsOneWidget);
   });
@@ -212,19 +201,14 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          sharedPreferencesProvider.overrideWithValue(preferences),
-        ],
+        overrides: [sharedPreferencesProvider.overrideWithValue(preferences)],
         child: MaterialApp.router(routerConfig: router),
       ),
     );
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
 
-    expect(
-      find.byKey(const Key('reset-living-form')),
-      findsOneWidget,
-    );
+    expect(find.byKey(const Key('reset-living-form')), findsOneWidget);
     expect(find.byKey(const Key('reset-breath-path')), findsOneWidget);
     expect(find.text('Breathe in'), findsOneWidget);
   });
@@ -240,9 +224,7 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          sharedPreferencesProvider.overrideWithValue(preferences),
-        ],
+        overrides: [sharedPreferencesProvider.overrideWithValue(preferences)],
         child: MaterialApp.router(routerConfig: router),
       ),
     );
@@ -268,9 +250,7 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          sharedPreferencesProvider.overrideWithValue(preferences),
-        ],
+        overrides: [sharedPreferencesProvider.overrideWithValue(preferences)],
         child: MaterialApp.router(routerConfig: router),
       ),
     );
@@ -305,7 +285,43 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
 
     expect(find.text('FEEL'), findsOneWidget);
-    expect(find.text('Notice two things you can physically feel.'), findsOneWidget);
+    expect(
+      find.text('Notice two things you can physically feel.'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('Sensory completion advances immediately without a queued skip', (
+    WidgetTester tester,
+  ) async {
+    final preferences = await _preferences();
+    final router = createAppRouter(
+      initialLocation: AppRoutes.reliefSessionFor('back-to-room'),
+    );
+    addTearDown(router.dispose);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [sharedPreferencesProvider.overrideWithValue(preferences)],
+        child: MaterialApp.router(routerConfig: router),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 16));
+    await tester.pump(const Duration(milliseconds: 300));
+    for (var i = 0; i < 5; i++) {
+      await tester.tap(find.byKey(const Key('reset-sensory-halo')));
+      await tester.pump();
+    }
+    expect(find.text('FEEL'), findsOneWidget);
+    for (var i = 0; i < 4; i++) {
+      await tester.tap(find.byKey(const Key('reset-sensory-halo')));
+      await tester.pump();
+    }
+    expect(find.text('HEAR'), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.text('HEAR'), findsOneWidget);
+    expect(find.text('SMELL'), findsNothing);
+    await tester.pumpWidget(const SizedBox.shrink());
   });
 
   testWidgets('Jaw and Shoulders uses the distinct Body Reset visual', (
@@ -319,9 +335,7 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          sharedPreferencesProvider.overrideWithValue(preferences),
-        ],
+        overrides: [sharedPreferencesProvider.overrideWithValue(preferences)],
         child: MaterialApp.router(routerConfig: router),
       ),
     );
@@ -345,16 +359,17 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          sharedPreferencesProvider.overrideWithValue(preferences),
-        ],
+        overrides: [sharedPreferencesProvider.overrideWithValue(preferences)],
         child: MaterialApp.router(routerConfig: router),
       ),
     );
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
 
-    expect(find.byKey(const Key('reset-thought-unhook-visual')), findsOneWidget);
+    expect(
+      find.byKey(const Key('reset-thought-unhook-visual')),
+      findsOneWidget,
+    );
     expect(find.byKey(const Key('reset-living-form')), findsNothing);
     expect(find.text('NOTICE'), findsOneWidget);
     expect(find.text('02:00'), findsOneWidget);
@@ -380,17 +395,14 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          sharedPreferencesProvider.overrideWithValue(preferences),
-        ],
+        overrides: [sharedPreferencesProvider.overrideWithValue(preferences)],
         child: MaterialApp.router(routerConfig: router),
       ),
     );
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 250));
 
-    final premiumHubCard =
-        find.byKey(const Key('reset-session-wired-steady'));
+    final premiumHubCard = find.byKey(const Key('reset-session-wired-steady'));
     await tester.ensureVisible(premiumHubCard);
     await tester.pump();
     await tester.tap(premiumHubCard);
@@ -423,9 +435,7 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          sharedPreferencesProvider.overrideWithValue(preferences),
-        ],
+        overrides: [sharedPreferencesProvider.overrideWithValue(preferences)],
         child: MaterialApp.router(routerConfig: router),
       ),
     );
@@ -502,9 +512,7 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          sharedPreferencesProvider.overrideWithValue(preferences),
-        ],
+        overrides: [sharedPreferencesProvider.overrideWithValue(preferences)],
         child: MaterialApp.router(routerConfig: router),
       ),
     );
@@ -618,9 +626,7 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          sharedPreferencesProvider.overrideWithValue(preferences),
-        ],
+        overrides: [sharedPreferencesProvider.overrideWithValue(preferences)],
         child: MaterialApp.router(routerConfig: router),
       ),
     );
@@ -648,9 +654,7 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          sharedPreferencesProvider.overrideWithValue(preferences),
-        ],
+        overrides: [sharedPreferencesProvider.overrideWithValue(preferences)],
         child: MaterialApp.router(routerConfig: router),
       ),
     );
@@ -675,57 +679,58 @@ void main() {
     );
   });
 
-  testWidgets('Completing 60s Grounding awards Relief once and shows feedback', (
-    WidgetTester tester,
-  ) async {
-    final preferences = await _preferences();
-    final container = ProviderContainer(
-      overrides: [
-        sharedPreferencesProvider.overrideWithValue(preferences),
-        todayProvider.overrideWithValue('2026-09-04'),
-      ],
-    );
-    addTearDown(container.dispose);
-    final router = createAppRouter(initialLocation: AppRoutes.relief);
-    addTearDown(router.dispose);
+  testWidgets(
+    'Completing 60s Grounding awards Relief once and shows feedback',
+    (WidgetTester tester) async {
+      final preferences = await _preferences();
+      final container = ProviderContainer(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(preferences),
+          todayProvider.overrideWithValue('2026-09-04'),
+        ],
+      );
+      addTearDown(container.dispose);
+      final router = createAppRouter(initialLocation: AppRoutes.relief);
+      addTearDown(router.dispose);
 
-    await tester.pumpWidget(
-      UncontrolledProviderScope(
-        container: container,
-        child: MaterialApp.router(routerConfig: router),
-      ),
-    );
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 250));
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp.router(routerConfig: router),
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 250));
 
-    await tester.ensureVisible(find.text(freeSession.title));
-    await tester.pump();
-    await tester.tap(find.text(freeSession.title));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 250));
-    expect(
-      find.byKey(const Key('reset-session-preview-sheet')),
-      findsOneWidget,
-    );
+      await tester.ensureVisible(find.text(freeSession.title));
+      await tester.pump();
+      await tester.tap(find.text(freeSession.title));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 250));
+      expect(
+        find.byKey(const Key('reset-session-preview-sheet')),
+        findsOneWidget,
+      );
 
-    await tester.tap(find.byKey(const Key('reset-preview-start')));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 250));
-    expect(
-      find.byKey(const Key('reset-grounding-body-visual')),
-      findsOneWidget,
-    );
-    await tester.pump(const Duration(seconds: 60));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
+      await tester.tap(find.byKey(const Key('reset-preview-start')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 250));
+      expect(
+        find.byKey(const Key('reset-grounding-body-visual')),
+        findsOneWidget,
+      );
+      await tester.pump(const Duration(seconds: 60));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
 
-    expect(find.text('Did this help settle your nerves?'), findsOneWidget);
-    expect(container.read(leavesNotifierProvider).reliefDone, isTrue);
-    expect(container.read(leavesNotifierProvider).totalLeaves, 1);
+      expect(find.text('Did this help settle your nerves?'), findsOneWidget);
+      expect(container.read(leavesNotifierProvider).reliefDone, isTrue);
+      expect(container.read(leavesNotifierProvider).totalLeaves, 1);
 
-    await container.read(leavesNotifierProvider.notifier).markReliefDone();
-    expect(container.read(leavesNotifierProvider).totalLeaves, 1);
-  });
+      await container.read(leavesNotifierProvider.notifier).markReliefDone();
+      expect(container.read(leavesNotifierProvider).totalLeaves, 1);
+    },
+  );
 
   testWidgets('Emergency uses the dedicated calm visual without premium UI', (
     WidgetTester tester,
@@ -756,10 +761,7 @@ void main() {
     expect(find.text('One thing at a time.'), findsOneWidget);
     expect(find.byKey(const Key('emergency-calming-visual')), findsOneWidget);
     expect(find.byKey(const Key('emergency-anchor-field')), findsOneWidget);
-    expect(
-      find.byKey(const Key('emergency-trainer-silhouette')),
-      findsNothing,
-    );
+    expect(find.byKey(const Key('emergency-trainer-silhouette')), findsNothing);
     expect(find.byKey(const Key('emergency-phase-label')), findsOneWidget);
     expect(find.textContaining('ARRIVE'), findsOneWidget);
     expect(find.byKey(const Key('emergency-advance-action')), findsOneWidget);
@@ -797,7 +799,6 @@ void main() {
     expect(find.byKey(const Key('emergency-calming-visual')), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
-
 
   testWidgets('Completing Emergency gives no Leaves', (
     WidgetTester tester,

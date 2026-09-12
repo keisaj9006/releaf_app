@@ -36,6 +36,11 @@ clean analysis, Android build and non-destructive Samsung update passed; see
 contracts and Reset blueprints. Approved human breathing recordings and owner listening remain
 dependencies, not permission to substitute synthetic cues or change protocols.
 
+Reset sensory count completion now advances immediately (496 tests, clean
+analysis, Android build; [evidence](release/2026-09-12-reset-immediate-progression.md)).
+Device check remains pending after disconnection. Continue with labelled
+skip/ready controls from the [session blueprint](product/reset-back-to-room-blueprint.md).
+
 **Priority: immediate**
 
 1. Confirm `releaf-development`, clean/known working tree and HEAD.

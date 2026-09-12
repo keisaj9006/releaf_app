@@ -35,6 +35,13 @@ guided preference restoration are covered automatically. See
 [evidence](release/2026-09-12-unguided-silent-default.md). No owner listening gate
 is closed. Next: Reset blueprints and grounding progression.
 
+Reset sensory progression now advances immediately after the target count,
+without a delayed callback. **496/496 tests passed**, analysis and Android debug
+build passed; independent review found no actionable issues. Samsung installation
+could not run because the device was disconnected. See [evidence](release/2026-09-12-reset-immediate-progression.md)
+and [Back to the Room blueprint](product/reset-back-to-room-blueprint.md).
+Next confirmed gap: explicit labelled skip/ready controls in that session.
+
 ## Key release status
 
 The current canonical source is:

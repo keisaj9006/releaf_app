@@ -65,6 +65,12 @@ grounding progression, clarity, silent/reduced-motion modes and lifecycle safety
 Natural breathing candidates require documented provenance and owner listening;
 hold/rest contain no breathing cue. No synthetic substitute is permitted.
 
+First [session blueprint](../product/reset-back-to-room-blueprint.md) records
+Back to the Room timings and its missing explicit skip controls. Sensory count
+completion now advances immediately, with no delayed stale transition; 496 tests,
+analysis and build passed. Device update was blocked by disconnection. Continue
+with labelled ready/skip controls and their accessible, silent-mode behaviour.
+
 ## Checkpoint acceptance
 
 For each coherent change: reproduce with tests, implement, focused tests,

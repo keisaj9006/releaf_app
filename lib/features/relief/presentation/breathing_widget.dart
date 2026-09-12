@@ -628,10 +628,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
     });
 
     if (nextCompleted >= target) {
-      Future<void>.delayed(const Duration(milliseconds: 420), () {
-        if (!mounted || _phase != SessionPhase.running) return;
-        _advanceGuidedStep();
-      });
+      _advanceGuidedStep();
     }
   }
 
