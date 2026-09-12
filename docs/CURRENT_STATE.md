@@ -49,6 +49,14 @@ No breathing phases, catalogue durations or reward logic changed. Device review
 is pending while Samsung is disconnected. Continue remaining Reset blueprints
 and interruption coverage.
 
+Sensory interruption coverage now verifies both paths preserve notices/time
+through inactive/hidden/paused and resume. All 30 focused Reset contracts passed,
+including two new tests; analysis is clean. Runtime is unchanged from `0a43fdf`.
+The [ten-method timing matrix](product/breathing-method-evidence-matrix.md) matches
+the fresh manifest, explicitly preserving actual 4–6 rather than inventing 6–4.
+See [evidence](release/2026-09-12-reset-contract-coverage.md). Per-session production
+blueprints and owner/hardware/content dependencies remain open.
+
 ## Key release status
 
 The current canonical source is:

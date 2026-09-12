@@ -77,6 +77,11 @@ The [checkpoint evidence](../release/2026-09-12-reset-sensory-skip.md) separates
 automated verification from disconnected-device review. Remaining Reset
 blueprints and interrupted progression coverage are next.
 
+Interrupted full/simplified sensory progression now passes explicit state/count/
+timer preservation tests. The [breathing matrix](../product/breathing-method-evidence-matrix.md)
+matches every actual method and documents the 6–4/4–6 wording discrepancy without
+changing the app. Complete remaining per-session production blueprints next.
+
 ## Checkpoint acceptance
 
 For each coherent change: reproduce with tests, implement, focused tests,

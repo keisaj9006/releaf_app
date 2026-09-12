@@ -45,6 +45,11 @@ Those controls are now implemented, including no-words accessibility and a
 scrollable large-text sensory layout; see [evidence](release/2026-09-12-reset-sensory-skip.md).
 Next: remaining Reset session blueprints and interrupted progression coverage.
 
+Full/simplified sensory interruption is now covered without a runtime change.
+The [breathing matrix](product/breathing-method-evidence-matrix.md) lists all ten
+unchanged methods; see [contract evidence](release/2026-09-12-reset-contract-coverage.md).
+Continue the remaining per-session production blueprints and unblocked tracks.
+
 **Priority: immediate**
 
 1. Confirm `releaf-development`, clean/known working tree and HEAD.
