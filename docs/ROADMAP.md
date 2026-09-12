@@ -41,6 +41,10 @@ analysis, Android build; [evidence](release/2026-09-12-reset-immediate-progressi
 Device check remains pending after disconnection. Continue with labelled
 skip/ready controls from the [session blueprint](product/reset-back-to-room-blueprint.md).
 
+Those controls are now implemented, including no-words accessibility and a
+scrollable large-text sensory layout; see [evidence](release/2026-09-12-reset-sensory-skip.md).
+Next: remaining Reset session blueprints and interrupted progression coverage.
+
 **Priority: immediate**
 
 1. Confirm `releaf-development`, clean/known working tree and HEAD.

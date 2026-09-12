@@ -71,6 +71,12 @@ completion now advances immediately, with no delayed stale transition; 496 tests
 analysis and build passed. Device update was blocked by disconnection. Continue
 with labelled ready/skip controls and their accessible, silent-mode behaviour.
 
+Ready/skip controls are now implemented in both sensory paths. No-words mode
+retains an accessible arrow, and the sensory layout scrolls at large text.
+The [checkpoint evidence](../release/2026-09-12-reset-sensory-skip.md) separates
+automated verification from disconnected-device review. Remaining Reset
+blueprints and interrupted progression coverage are next.
+
 ## Checkpoint acceptance
 
 For each coherent change: reproduce with tests, implement, focused tests,

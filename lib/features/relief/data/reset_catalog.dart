@@ -46,8 +46,7 @@ class ResetCatalog {
           ),
           ResetSessionStep(
             label: 'Feel',
-            guidance:
-                'Notice four things you can physically feel around you.',
+            guidance: 'Notice four things you can physically feel around you.',
             durationSeconds: 24,
             advanceActionLabel: 'I can feel them',
           ),
@@ -150,37 +149,44 @@ class ResetCatalog {
         steps: [
           ResetSessionStep(
             label: 'Arrive',
+            advanceActionLabel: 'Ready to begin',
             guidance: 'Look around the space you are in.',
             durationSeconds: 15,
           ),
           ResetSessionStep(
             label: 'See',
+            advanceActionLabel: 'Skip this sense',
             guidance: 'Notice five things you can see.',
             durationSeconds: 45,
           ),
           ResetSessionStep(
             label: 'Feel',
+            advanceActionLabel: 'Skip this sense',
             guidance: 'Notice four things you can physically feel.',
             durationSeconds: 40,
           ),
           ResetSessionStep(
             label: 'Hear',
+            advanceActionLabel: 'Skip this sense',
             guidance: 'Listen for three different sounds.',
             durationSeconds: 30,
           ),
           ResetSessionStep(
             label: 'Smell',
+            advanceActionLabel: 'Skip this sense',
             guidance:
                 'Notice two things you can smell, or imagine two familiar scents.',
             durationSeconds: 25,
           ),
           ResetSessionStep(
             label: 'Taste',
+            advanceActionLabel: 'Skip this sense',
             guidance: 'Notice one taste, or imagine a familiar taste.',
             durationSeconds: 15,
           ),
           ResetSessionStep(
             label: 'Return',
+            advanceActionLabel: 'Finish practice',
             guidance: 'Notice the room around you again.',
             durationSeconds: 10,
           ),
@@ -188,16 +194,19 @@ class ResetCatalog {
         simplifiedSteps: [
           ResetSessionStep(
             label: 'See',
+            advanceActionLabel: 'Skip this sense',
             guidance: 'Notice three things you can see.',
             durationSeconds: 20,
           ),
           ResetSessionStep(
             label: 'Feel',
+            advanceActionLabel: 'Skip this sense',
             guidance: 'Notice two things you can physically feel.',
             durationSeconds: 20,
           ),
           ResetSessionStep(
             label: 'Hear',
+            advanceActionLabel: 'Skip this sense',
             guidance: 'Notice one sound you can hear.',
             durationSeconds: 20,
           ),
@@ -241,8 +250,7 @@ class ResetCatalog {
           ),
           ResetSessionStep(
             label: 'Jaw',
-            guidance:
-                'Let your teeth separate slightly. Let the tongue rest.',
+            guidance: 'Let your teeth separate slightly. Let the tongue rest.',
             durationSeconds: 15,
           ),
           ResetSessionStep(
@@ -621,8 +629,7 @@ class ResetCatalog {
           ),
           ResetSessionStep(
             label: 'Orient',
-            guidance:
-                'Look around and name three ordinary things in the room.',
+            guidance: 'Look around and name three ordinary things in the room.',
             durationSeconds: 20,
           ),
           ResetSessionStep(
@@ -726,8 +733,7 @@ class ResetCatalog {
           ),
           ResetSessionStep(
             label: 'Release',
-            guidance:
-                'Let them drop and notice the contrast.',
+            guidance: 'Let them drop and notice the contrast.',
             durationSeconds: 15,
           ),
           ResetSessionStep(
@@ -819,8 +825,7 @@ class ResetCatalog {
         steps: [
           ResetSessionStep(
             label: 'Hands',
-            guidance:
-                'Loosen the fingers and gently shake out the hands.',
+            guidance: 'Loosen the fingers and gently shake out the hands.',
             durationSeconds: 20,
           ),
           ResetSessionStep(
@@ -837,8 +842,7 @@ class ResetCatalog {
           ),
           ResetSessionStep(
             label: 'Still',
-            guidance:
-                'Become still again and notice what feels different.',
+            guidance: 'Become still again and notice what feels different.',
             durationSeconds: 20,
           ),
           ResetSessionStep(
@@ -895,8 +899,7 @@ class ResetCatalog {
           ),
           ResetSessionStep(
             label: 'Listen',
-            guidance:
-                'Notice one nearby sound and one more distant sound.',
+            guidance: 'Notice one nearby sound and one more distant sound.',
             durationSeconds: 20,
           ),
           ResetSessionStep(
@@ -1111,8 +1114,7 @@ class ResetCatalog {
         steps: [
           ResetSessionStep(
             label: 'Ground',
-            guidance:
-                'Feel both feet or your seat against something stable.',
+            guidance: 'Feel both feet or your seat against something stable.',
             durationSeconds: 15,
           ),
           ResetSessionStep(
@@ -1123,8 +1125,7 @@ class ResetCatalog {
           ),
           ResetSessionStep(
             label: 'Release',
-            guidance:
-                'Unclench the hands and soften the jaw.',
+            guidance: 'Unclench the hands and soften the jaw.',
             durationSeconds: 15,
           ),
           ResetSessionStep(
@@ -1175,8 +1176,7 @@ class ResetCatalog {
           ),
           ResetSessionStep(
             label: 'Choose',
-            guidance:
-                'Define one outcome for this block in a single sentence.',
+            guidance: 'Define one outcome for this block in a single sentence.',
             durationSeconds: 30,
           ),
           ResetSessionStep(
@@ -1227,8 +1227,7 @@ class ResetCatalog {
         steps: [
           ResetSessionStep(
             label: 'Name',
-            guidance:
-                'Use one simple word for the strongest feeling here.',
+            guidance: 'Use one simple word for the strongest feeling here.',
             durationSeconds: 30,
           ),
           ResetSessionStep(
@@ -1251,8 +1250,7 @@ class ResetCatalog {
           ),
           ResetSessionStep(
             label: 'Next',
-            guidance:
-                'Take only the next deliberate step.',
+            guidance: 'Take only the next deliberate step.',
             durationSeconds: 30,
           ),
         ],
@@ -1285,20 +1283,17 @@ class ResetCatalog {
         steps: [
           ResetSessionStep(
             label: 'Dim',
-            guidance:
-                'Reduce one source of stimulation around you.',
+            guidance: 'Reduce one source of stimulation around you.',
             durationSeconds: 30,
           ),
           ResetSessionStep(
             label: 'Jaw',
-            guidance:
-                'Let the teeth separate and soften the tongue and jaw.',
+            guidance: 'Let the teeth separate and soften the tongue and jaw.',
             durationSeconds: 30,
           ),
           ResetSessionStep(
             label: 'Shoulders',
-            guidance:
-                'Let the shoulders drop only as far as feels natural.',
+            guidance: 'Let the shoulders drop only as far as feels natural.',
             durationSeconds: 30,
           ),
           ResetSessionStep(
@@ -1331,8 +1326,7 @@ class ResetCatalog {
           'Low-momentum moments when sitting and thinking harder is not helping.',
       whyItMayHelp:
           'The routine changes a few controllable inputs—movement, light, sensory context and one small action—without promising an instant emotional transformation.',
-      safetyNote:
-          'Choose movement that is safe and comfortable for your body.',
+      safetyNote: 'Choose movement that is safe and comfortable for your body.',
       visualType: ResetVisualType.nextStep,
       instructions: [
         'Change one physical input.',
@@ -1395,8 +1389,7 @@ class ResetCatalog {
         steps: [
           ResetSessionStep(
             label: 'Support',
-            guidance:
-                'Notice how your feet, legs or seat are being supported.',
+            guidance: 'Notice how your feet, legs or seat are being supported.',
             durationSeconds: 25,
           ),
           ResetSessionStep(
@@ -1413,8 +1406,7 @@ class ResetCatalog {
           ),
           ResetSessionStep(
             label: 'Hands',
-            guidance:
-                'Unclench the hands and let the fingers rest.',
+            guidance: 'Unclench the hands and let the fingers rest.',
             durationSeconds: 25,
           ),
           ResetSessionStep(
@@ -2028,8 +2020,7 @@ class ResetCatalog {
         steps: [
           ResetSessionStep(
             label: 'Pause',
-            guidance:
-                'Stop trying to hold the whole workload in your head.',
+            guidance: 'Stop trying to hold the whole workload in your head.',
             durationSeconds: 20,
           ),
           ResetSessionStep(
@@ -2098,8 +2089,7 @@ class ResetCatalog {
           ),
           ResetSessionStep(
             label: 'Release',
-            guidance:
-                'Let go of the count and return to your natural rhythm.',
+            guidance: 'Let go of the count and return to your natural rhythm.',
             durationSeconds: 15,
           ),
         ],
@@ -2114,7 +2104,8 @@ class ResetCatalog {
       modality: ResetModality.breathing,
       accessTier: ResetAccessTier.free,
       methodLabel: '4–6 extended-exhale breathing',
-      bestFor: 'Stress, nervous energy, and a breathing pace that feels too fast.',
+      bestFor:
+          'Stress, nervous energy, and a breathing pace that feels too fast.',
       whyItMayHelp:
           'The 10-second cycle slows breathing to 6 breaths per minute and lengthens the exhale without adding a breath hold.',
       safetyNote:
@@ -2162,7 +2153,8 @@ class ResetCatalog {
       modality: ResetModality.breathing,
       accessTier: ResetAccessTier.free,
       methodLabel: '3–6 long-exhale breathing',
-      bestFor: 'A stronger downshift when equal breathing still feels too busy.',
+      bestFor:
+          'A stronger downshift when equal breathing still feels too busy.',
       whyItMayHelp:
           'This 1:2 inhale-to-exhale pattern emphasises a slow exhale. Research supports slow breathing overall, while the ideal inhale-to-exhale ratio is not settled.',
       safetyNote:
@@ -2210,7 +2202,8 @@ class ResetCatalog {
       modality: ResetModality.breathing,
       accessTier: ResetAccessTier.premium,
       methodLabel: '4–4–4–4 box breathing',
-      bestFor: 'Structured focus, composure, and people who find counting helpful.',
+      bestFor:
+          'Structured focus, composure, and people who find counting helpful.',
       whyItMayHelp:
           'Equal inhale, hold, exhale and hold phases create a highly structured attentional rhythm. The holds make it a different experience from continuous slow breathing.',
       safetyNote:
@@ -2260,7 +2253,8 @@ class ResetCatalog {
       modality: ResetModality.breathing,
       accessTier: ResetAccessTier.premium,
       methodLabel: '4–7–8 breathing',
-      bestFor: 'Bedtime wind-down when you are comfortable with a longer breath hold.',
+      bestFor:
+          'Bedtime wind-down when you are comfortable with a longer breath hold.',
       whyItMayHelp:
           'The method combines a deliberately slow pace, counting and a prolonged exhale. The exact 4–7–8 numbers should be treated as a pacing method, not a magic formula.',
       safetyNote:
@@ -2668,8 +2662,7 @@ class ResetCatalog {
         steps: [
           ResetSessionStep(
             label: 'Arrive',
-            guidance:
-                'Notice what your mind is still carrying from the day.',
+            guidance: 'Notice what your mind is still carrying from the day.',
             durationSeconds: 80,
           ),
           ResetSessionStep(
@@ -2818,14 +2811,12 @@ class ResetCatalog {
           ),
           ResetSessionStep(
             label: 'Space',
-            guidance:
-                'Let the thought remain without following every branch.',
+            guidance: 'Let the thought remain without following every branch.',
             durationSeconds: 80,
           ),
           ResetSessionStep(
             label: 'Return',
-            guidance:
-                'Return attention to one real thing you want to do next.',
+            guidance: 'Return attention to one real thing you want to do next.',
             durationSeconds: 80,
           ),
         ],
@@ -2861,8 +2852,7 @@ class ResetCatalog {
           ),
           ResetSessionStep(
             label: 'Rhythm',
-            guidance:
-                'Follow the four-part rhythm without forcing any phase.',
+            guidance: 'Follow the four-part rhythm without forcing any phase.',
             durationSeconds: 140,
           ),
           ResetSessionStep(

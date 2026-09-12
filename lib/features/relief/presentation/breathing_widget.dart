@@ -820,7 +820,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
                   ),
                 );
 
-                return Padding(
+                final content = Padding(
                   padding: const EdgeInsets.fromLTRB(
                     ReleafSpacing.screen,
                     ReleafSpacing.sm,
@@ -1030,7 +1030,9 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
                           key: Key('reset-active-session-guidance-hidden'),
                           height: 1,
                         ),
-                      if (widget.launchOptions.showGuidanceText &&
+                      if ((widget.launchOptions.showGuidanceText ||
+                              session.visualType ==
+                                  ResetVisualType.sensoryHalo) &&
                           _currentAdvanceActionLabel(session) != null) ...[
                         const SizedBox(height: ReleafSpacing.sm),
                         Center(
@@ -1042,7 +1044,12 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
                               size: 17,
                             ),
                             label: Text(
-                              _currentAdvanceActionLabel(session)!,
+                              widget.launchOptions.showGuidanceText
+                                  ? _currentAdvanceActionLabel(session)!
+                                  : '',
+                              semanticsLabel: _currentAdvanceActionLabel(
+                                session,
+                              ),
                               style: ReleafTypography.meta.copyWith(
                                 color: ReleafColors.textPrimary,
                                 fontWeight: FontWeight.w600,
@@ -1128,6 +1135,17 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
                     ],
                   ),
                 );
+                if (session.visualType == ResetVisualType.sensoryHalo) {
+                  return SingleChildScrollView(
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        minHeight: constraints.maxHeight,
+                      ),
+                      child: IntrinsicHeight(child: content),
+                    ),
+                  );
+                }
+                return content;
               },
             ),
           ),

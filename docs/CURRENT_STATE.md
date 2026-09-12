@@ -42,6 +42,13 @@ could not run because the device was disconnected. See [evidence](release/2026-0
 and [Back to the Room blueprint](product/reset-back-to-room-blueprint.md).
 Next confirmed gap: explicit labelled skip/ready controls in that session.
 
+Subsequent sensory-control work adds ready/skip/finish actions to Back to the
+Room, including an accessible arrow in no-words mode. Its large-text layout now
+scrolls so controls remain reachable. See [verification](release/2026-09-12-reset-sensory-skip.md).
+No breathing phases, catalogue durations or reward logic changed. Device review
+is pending while Samsung is disconnected. Continue remaining Reset blueprints
+and interruption coverage.
+
 ## Key release status
 
 The current canonical source is:
