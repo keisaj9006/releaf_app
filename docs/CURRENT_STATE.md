@@ -2,6 +2,13 @@
 
 Snapshot: **2026-09-12**
 
+Latest internal verification: **518/518 tests**, clean analysis, Android debug
+build for [breathing visual lifecycle](release/2026-09-12-breathing-visual-lifecycle.md).
+The animation now stops synchronously before background frames are suppressed,
+preserving its cycle on return. No breathing patterns or timings changed.
+ADB reported no connected device; installation and physical review remain pending.
+Botanical lungs and Grounding visual-direction candidates remain unfinished.
+
 [Approved Basics source measurements](release/2026-09-12-approved-narration-measurements.md)
 now record its four narration files: 24 kHz, -24.4 to -24.9 LUFS, -5.7 to -7.8
 dBTP. Separate Deep Drift measures -29.2 LUFS / -21.4 dBTP. Five scans exited 0
@@ -21,7 +28,7 @@ on code `6610634`: web release built, all six workflow artifact assertions passe
 debug APK hash recorded. No deployment or new device installation; production
 packaging/distribution and owner/hardware gates remain open.
 
-Latest verification: **517/517 tests passed**, clean analysis and Android debug
+Previous verification: **517/517 tests passed**, clean analysis and Android debug
 build for [single SDK initialization](release/2026-09-12-sdk-single-initialization.md).
 Overlapping configuration calls share one operation; failed configuration can be
 retried. Last installed Samsung checkpoint remains `abb98f7`; this internal change

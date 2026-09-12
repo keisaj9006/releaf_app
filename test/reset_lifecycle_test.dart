@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:releaf_app/core/providers.dart';
 import 'package:releaf_app/features/relief/presentation/breathing_widget.dart';
 import 'package:releaf_app/theme/widgets/releaf_sensory_halo.dart';
+import 'package:releaf_app/theme/widgets/releaf_session_living_form.dart';
 
 Future<void> _pumpResetSession(
   WidgetTester tester, {
@@ -32,6 +33,36 @@ String _timerText(WidgetTester tester) {
 }
 
 void main() {
+  testWidgets('breathing visual stops when no background frame is drawn', (
+    tester,
+  ) async {
+    await _pumpResetSession(tester);
+    await tester.pump(const Duration(seconds: 2));
+    double scale() {
+      final transforms = tester.widgetList<Transform>(
+        find.descendant(
+          of: find.byType(ReleafSessionLivingForm),
+          matching: find.byType(Transform),
+        ),
+      );
+      return transforms
+          .map((widget) => widget.transform.entry(0, 0))
+          .firstWhere((value) => value != 1);
+    }
+
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+    final pausedScale = scale();
+    (tester.binding as AutomatedTestWidgetsFlutterBinding).elapseBlocking(
+      const Duration(seconds: 3),
+    );
+    expect(scale(), closeTo(pausedScale, 0.000001));
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 1));
+    expect(scale(), closeTo(pausedScale, 0.001));
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
   for (final simplified in [false, true]) {
     testWidgets(
       'sensory notices survive lifecycle pause, simplified $simplified',

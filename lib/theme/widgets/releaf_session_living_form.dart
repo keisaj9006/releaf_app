@@ -22,6 +22,7 @@ class ReleafSessionLivingForm extends StatefulWidget {
     this.holdAfterExhaleSeconds = 0,
     this.showBreathPath = false,
     this.reducedMotion = false,
+    this.paused = false,
   });
 
   final ReleafArtworkVariant variant;
@@ -34,6 +35,7 @@ class ReleafSessionLivingForm extends StatefulWidget {
   final int holdAfterExhaleSeconds;
   final bool showBreathPath;
   final bool reducedMotion;
+  final bool paused;
 
   @override
   State<ReleafSessionLivingForm> createState() =>
@@ -41,8 +43,9 @@ class ReleafSessionLivingForm extends StatefulWidget {
 }
 
 class _ReleafSessionLivingFormState extends State<ReleafSessionLivingForm>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   late final AnimationController _controller;
+  bool _lifecyclePaused = false;
 
   @override
   void initState() {
@@ -51,6 +54,17 @@ class _ReleafSessionLivingFormState extends State<ReleafSessionLivingForm>
       vsync: this,
       duration: Duration(seconds: _cycleSecondsFor(widget)),
     );
+    WidgetsBinding.instance.addObserver(this);
+    final lifecycle = WidgetsBinding.instance.lifecycleState;
+    _lifecyclePaused =
+        lifecycle != null && lifecycle != AppLifecycleState.resumed;
+    _syncAnimation();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    _lifecyclePaused = state != AppLifecycleState.resumed;
+    // Stop synchronously: backgrounding may prevent the parent's next rebuild.
     _syncAnimation();
   }
 
@@ -65,6 +79,7 @@ class _ReleafSessionLivingFormState extends State<ReleafSessionLivingForm>
       _controller.duration = Duration(seconds: _cycleSecondsFor(widget));
     }
     if (oldWidget.reducedMotion != widget.reducedMotion ||
+        oldWidget.paused != widget.paused ||
         oldWidget.breathing != widget.breathing ||
         oldWidget.inhaleSeconds != widget.inhaleSeconds ||
         oldWidget.holdAfterInhaleSeconds != widget.holdAfterInhaleSeconds ||
@@ -75,7 +90,9 @@ class _ReleafSessionLivingFormState extends State<ReleafSessionLivingForm>
   }
 
   void _syncAnimation() {
-    if (widget.reducedMotion) {
+    if (widget.paused || _lifecyclePaused) {
+      _controller.stop();
+    } else if (widget.reducedMotion) {
       _controller.stop();
       _controller.value = 0.42;
     } else if (!_controller.isAnimating) {
@@ -85,6 +102,7 @@ class _ReleafSessionLivingFormState extends State<ReleafSessionLivingForm>
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _controller.dispose();
     super.dispose();
   }
@@ -105,9 +123,7 @@ class _ReleafSessionLivingFormState extends State<ReleafSessionLivingForm>
         builder: (context, animatedProgress, child) {
           return CustomPaint(
             key: const Key('reset-living-form'),
-            painter: _SessionProgressPainter(
-              progress: animatedProgress,
-            ),
+            painter: _SessionProgressPainter(progress: animatedProgress),
             child: child,
           );
         },
@@ -121,12 +137,15 @@ class _ReleafSessionLivingFormState extends State<ReleafSessionLivingForm>
             final glowOpacity = widget.breathing
                 ? 0.10 + (motion * 0.30)
                 : 0.12 + (motion * 0.13);
-            final driftX =
-                widget.breathing ? 0.0 : math.sin(_controller.value * math.pi * 2) * 5;
-            final driftY =
-                widget.breathing ? 0.0 : math.cos(_controller.value * math.pi * 2) * 3;
-            final rotation =
-                widget.breathing ? 0.0 : math.sin(_controller.value * math.pi * 2) * 0.018;
+            final driftX = widget.breathing
+                ? 0.0
+                : math.sin(_controller.value * math.pi * 2) * 5;
+            final driftY = widget.breathing
+                ? 0.0
+                : math.cos(_controller.value * math.pi * 2) * 3;
+            final rotation = widget.breathing
+                ? 0.0
+                : math.sin(_controller.value * math.pi * 2) * 0.018;
 
             return AspectRatio(
               aspectRatio: 1,
@@ -180,11 +199,9 @@ class _ReleafSessionLivingFormState extends State<ReleafSessionLivingForm>
                         painter: _BreathOrbitPainter(
                           cycleValue: _controller.value,
                           inhaleSeconds: widget.inhaleSeconds,
-                          holdAfterInhaleSeconds:
-                              widget.holdAfterInhaleSeconds,
+                          holdAfterInhaleSeconds: widget.holdAfterInhaleSeconds,
                           exhaleSeconds: widget.exhaleSeconds,
-                          holdAfterExhaleSeconds:
-                              widget.holdAfterExhaleSeconds,
+                          holdAfterExhaleSeconds: widget.holdAfterExhaleSeconds,
                         ),
                       ),
                     ),
@@ -305,7 +322,6 @@ class _SessionProgressPainter extends CustomPainter {
   }
 }
 
-
 class _BreathOrbitPainter extends CustomPainter {
   const _BreathOrbitPainter({
     required this.cycleValue,
@@ -325,13 +341,15 @@ class _BreathOrbitPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     if (size.isEmpty) return;
 
-    final total = math.max(
-      1,
-      inhaleSeconds +
-          holdAfterInhaleSeconds +
-          exhaleSeconds +
-          holdAfterExhaleSeconds,
-    ).toDouble();
+    final total = math
+        .max(
+          1,
+          inhaleSeconds +
+              holdAfterInhaleSeconds +
+              exhaleSeconds +
+              holdAfterExhaleSeconds,
+        )
+        .toDouble();
     final elapsed = cycleValue * total;
 
     final center = Offset(size.width / 2, size.height / 2);
@@ -368,7 +386,9 @@ class _BreathOrbitPainter extends CustomPainter {
         cursor = holdInEnd;
         final exhaleEnd = cursor + exhaleSeconds;
         if (elapsed < exhaleEnd) {
-          final p = exhaleSeconds == 0 ? 1.0 : (elapsed - cursor) / exhaleSeconds;
+          final p = exhaleSeconds == 0
+              ? 1.0
+              : (elapsed - cursor) / exhaleSeconds;
           angle = (3 * math.pi / 2) + (math.pi * p.clamp(0.0, 1.0));
           accent = ReleafColors.sageStrong;
         } else {

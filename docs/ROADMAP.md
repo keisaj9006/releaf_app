@@ -2,6 +2,12 @@
 
 This roadmap converts the current repo + release gate + latest project decisions + Deep Research into execution order.
 
+[Breathing visual lifecycle](release/2026-09-12-breathing-visual-lifecycle.md):
+518 tests, clean analysis and Android debug build passed. No connected device
+was available for replacement installation. Next: prepare the outstanding three
+botanical lungs and three Grounding directions for concrete owner review.
+This lifecycle fix does not fulfill or approve those visual requirements.
+
 [Basics narration and ambience source measurements](release/2026-09-12-approved-narration-measurements.md)
 are recorded with unchanged hashes. Remaining rendered-mix, licensing/provenance,
 new human breathing candidates and owner listening require separate evidence;

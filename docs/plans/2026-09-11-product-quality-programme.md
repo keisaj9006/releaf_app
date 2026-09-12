@@ -1,5 +1,12 @@
 # Releaf product-quality programme
 
+Reset checkpoint: [breathing visual lifecycle](../release/2026-09-12-breathing-visual-lifecycle.md),
+518 full tests, clean analysis and fresh Android debug build. Synchronous
+animation suspension prevents a jump on the first resumed frame. No method or
+timing changes. Samsung was disconnected; device installation/review remains
+pending. Next unblocked deliverable: three lungs and three Grounding visual
+directions/contact sheet, without enabling unapproved breathing recordings.
+
 Release-track [artifact verification](../release/2026-09-12-local-release-artifact-checks.md)
 on `6610634`: web release and six workflow assertions passed; 11 existing release/
 privacy tests and Android source checks passed. No runtime changes, deployment

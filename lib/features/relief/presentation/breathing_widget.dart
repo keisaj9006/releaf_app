@@ -675,7 +675,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       if (_pausedByLifecycle) {
-        _pausedByLifecycle = false;
+        setState(() => _pausedByLifecycle = false);
         unawaited(_resumeAfterLifecyclePause());
       }
       return;
@@ -686,7 +686,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
         state == AppLifecycleState.hidden ||
         state == AppLifecycleState.detached) {
       if (!_pausedByLifecycle && _phase == SessionPhase.running) {
-        _pausedByLifecycle = true;
+        setState(() => _pausedByLifecycle = true);
         _timer?.cancel();
         _timer = null;
         _deadline = null;
@@ -944,6 +944,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
                                     ResetVisualType.livingForm =>
                                       ReleafSessionLivingForm(
                                         variant: artwork,
+                                        paused: _pausedByLifecycle,
                                         progress: progress,
                                         breathing: isPacedBreathing,
                                         phaseLabel: phaseLabel,
