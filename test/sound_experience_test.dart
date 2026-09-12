@@ -8,6 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:releaf_app/core/providers.dart';
+import 'package:releaf_app/features/meditation/presentation/meditation_player_screen.dart';
 import 'package:releaf_app/features/sound/application/sound_player_controller.dart';
 import 'package:releaf_app/features/sound/data/sound_catalog.dart';
 import 'package:releaf_app/features/sound/presentation/sound_player_gate.dart';
@@ -139,6 +140,44 @@ class _StatefulSoundDriver extends _FakeSoundPlaybackDriver {
 }
 
 void main() {
+  testWidgets('Meditation cancels Sound that is still preparing', (
+    tester,
+  ) async {
+    final preferences = await _preferences();
+    final gate = Completer<void>();
+    final started = Completer<void>();
+    final driver = _FakeSoundPlaybackDriver()
+      ..nextVolumeGate = gate
+      ..volumeStarted = started;
+    final container = ProviderContainer(
+      overrides: [
+        sharedPreferencesProvider.overrideWithValue(preferences),
+        soundPlaybackDriverProvider.overrideWithValue(driver),
+      ],
+    );
+    addTearDown(container.dispose);
+    final controller = container.read(soundPlayerControllerProvider.notifier);
+    final loading = controller.playById('deep-drift');
+    await started.future;
+    expect(container.read(soundPlayerControllerProvider).isLoading, isTrue);
+    expect(container.read(soundPlayerControllerProvider).isPlaying, isFalse);
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const MaterialApp(
+          home: MeditationPlayerScreen(meditationId: 'unguided-5'),
+        ),
+      ),
+    );
+    await tester.pump();
+    gate.complete();
+    await loading;
+    await tester.pump();
+    expect(driver.playedTrackIds, isEmpty);
+    expect(container.read(soundPlayerControllerProvider).isLoading, isFalse);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
   test('an expired Sleep timer cannot pause a newer track start', () async {
     final driver = _StatefulSoundDriver();
     var now = DateTime(2026, 9, 11, 22);

@@ -55,6 +55,11 @@ derived from tested metadata and timelines. Production measurements, research
 appraisal, narrator assets and owner acceptance remain explicitly incomplete.
 Continue independent audio handoff/reliability work; see [export evidence](release/2026-09-12-reset-production-blueprints.md).
 
+Meditation now cancels pending Sound starts on entry: 502 tests, clean analysis,
+Android build and Samsung update passed ([evidence](release/2026-09-12-meditation-sound-handoff.md)).
+Continue Progress/personalisation and remaining backend/release-quality tracks;
+content/listening and production-equivalent hardware gates remain open.
+
 **Priority: immediate**
 
 1. Confirm `releaf-development`, clean/known working tree and HEAD.

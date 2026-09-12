@@ -105,7 +105,7 @@ class _MeditationPlayerScreenState
       if (!mounted || item == null) return;
 
       final soundState = ref.read(soundPlayerControllerProvider);
-      if (soundState.isPlaying) {
+      if (soundState.isPlaying || soundState.isLoading) {
         await ref.read(soundPlayerControllerProvider.notifier).pause();
         if (!mounted) return;
       }

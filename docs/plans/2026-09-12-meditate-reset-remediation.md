@@ -88,6 +88,13 @@ automated catalogue/interval checks. Production measurements, research appraisal
 and owner content acceptance remain pending; technical inventory is not final
 production approval. Continue unblocked audio handoff/reliability checks.
 
+The confirmed pending Sound-to-Meditation start race is fixed and tested: loading
+requests now enter the existing cancellation path before Meditation audio starts.
+502 full-suite tests, analysis, build and Samsung update passed; see
+[evidence](../release/2026-09-12-meditation-sound-handoff.md). Continue the approved
+Progress/personalisation, backend and release-quality tracks while content gates
+remain pending.
+
 ## Checkpoint acceptance
 
 For each coherent change: reproduce with tests, implement, focused tests,

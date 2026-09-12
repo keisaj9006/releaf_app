@@ -64,6 +64,13 @@ narration steps are declared and 217 guided steps await the approved voice.
 See [evidence](release/2026-09-12-reset-production-blueprints.md). This does not
 close content approval. Continue independent audio handoff/reliability checks.
 
+Latest runtime checkpoint: Meditation entry cancels both playing and still-loading
+Sound requests, closing a reproduced delayed-start race. **502/502 tests passed**,
+analysis clean, Android build and Samsung `adb install -r` succeeded. Home startup
+and boolean SDK configuration/Offering logs passed; no owner listening approval
+is implied. See [handoff evidence](release/2026-09-12-meditation-sound-handoff.md).
+Continue Progress/personalisation and remaining backend/release-quality work.
+
 ## Key release status
 
 The current canonical source is:
