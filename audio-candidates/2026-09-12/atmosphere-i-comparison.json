@@ -1,0 +1,21 @@
+{
+  "approval": "unapproved listening candidate; outside runtime",
+  "processing": "FFmpeg 7.1 volume=-1dB; libmp3lame 192k; no dynamics or loop editing",
+  "sourceUnchanged": true,
+  "files": [
+    {
+      "path": "assets/sounds/relief_01.mp3",
+      "integratedLufs": -12.7,
+      "truePeakDbtp": -0.8,
+      "bytes": 3318994,
+      "sha256": "bc4ad5ebfb6c5277919e47c906e0481de5484439afac2ee0b6db53ad0f853581"
+    },
+    {
+      "path": "audio-candidates/2026-09-12/atmosphere-i-minus-1db.mp3",
+      "integratedLufs": -13.9,
+      "truePeakDbtp": -1.8,
+      "bytes": 4676574,
+      "sha256": "0b157759ff0c95046f3a01871f7b1b77fcc54cda116072f0369ca69c243205da"
+    }
+  ]
+}

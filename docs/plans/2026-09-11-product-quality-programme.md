@@ -1,5 +1,9 @@
 # Releaf product-quality programme
 
+[Atmosphere I headroom candidate](../release/2026-09-12-atmosphere-i-candidate.md)
+is available for later owner review, outside active assets. Measured improvement
+is not listening approval, loop acceptance or a source licence.
+
 [Sound loop boundaries](../release/2026-09-12-sound-loop-boundaries.md) now have
 decoded-waveform evidence for all ten sources. This does not close native-loop
 or owner listening gates; active Atmosphere endings need particular review.

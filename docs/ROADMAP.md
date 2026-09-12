@@ -2,6 +2,11 @@
 
 This roadmap converts the current repo + release gate + latest project decisions + Deep Research into execution order.
 
+[Atmosphere I candidate](release/2026-09-12-atmosphere-i-candidate.md) provides
+measured headroom outside runtime, alongside the existing Atmosphere II candidate.
+Both require owner listening and source rights evidence before any promotion.
+Neither headroom-only variant resolves quiet source loop boundaries.
+
 [Loop boundary evidence](release/2026-09-12-sound-loop-boundaries.md) covers all
 ten Sound sources. Atmosphere boundary dynamics and the Deep Drift join require
 listening/mastering review; native loop continuity still needs Samsung evidence.

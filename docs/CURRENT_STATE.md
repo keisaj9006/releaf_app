@@ -2,6 +2,10 @@
 
 Snapshot: **2026-09-12**
 
+[Atmosphere I headroom candidate](release/2026-09-12-atmosphere-i-candidate.md)
+is prepared outside runtime: -1.8 dBTP / -13.9 LUFS. Source unchanged. Owner
+listening, rights evidence and loop-compatible mastering remain open; not approved.
+
 [Sound loop boundaries](release/2026-09-12-sound-loop-boundaries.md): ten decoded
 source scans complete, hashes unchanged. Atmosphere tracks have quiet boundaries;
 Atmosphere II ends with a silent second. Seamless mastering/listening is unproven.
