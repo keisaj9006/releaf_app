@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../../core/providers.dart';
 import '../../../routing/app_routes.dart';
 import '../../../theme/app_theme.dart';
 import '../../../theme/releaf_design_tokens.dart';
@@ -56,15 +55,8 @@ class _PasswordResetScreenState extends ConsumerState<PasswordResetScreen> {
     try {
       await ref.read(accountRecoveryServiceProvider).updatePassword(password);
 
-      try {
-        final user = Supabase.instance.client.auth.currentUser;
-        if (user != null) {
-          await ref.read(revenueCatServiceProvider).identifyUser(user.id);
-          await ref.read(subscriptionControllerProvider.notifier).refresh();
-        }
-      } catch (_) {
-        // Password recovery is complete even if optional entitlement sync fails.
-      }
+      // Auth changes and billing retries belong to the app-scoped identity
+      // coordinator. A second direct SDK login could race that serialized flow.
 
       if (!mounted) return;
       setState(() => _done = true);
@@ -122,8 +114,9 @@ class _PasswordResetScreenState extends ConsumerState<PasswordResetScreen> {
                               shape: BoxShape.circle,
                               color: ReleafColors.sage.withValues(alpha: 0.10),
                               border: Border.all(
-                                color:
-                                    ReleafColors.sage.withValues(alpha: 0.22),
+                                color: ReleafColors.sage.withValues(
+                                  alpha: 0.22,
+                                ),
                               ),
                             ),
                             child: const Icon(
@@ -158,7 +151,9 @@ class _PasswordResetScreenState extends ConsumerState<PasswordResetScreen> {
                             decoration: InputDecoration(
                               labelText: 'New password',
                               helperText: 'At least 8 characters',
-                              prefixIcon: const Icon(Icons.lock_outline_rounded),
+                              prefixIcon: const Icon(
+                                Icons.lock_outline_rounded,
+                              ),
                               suffixIcon: IconButton(
                                 tooltip: _obscurePassword
                                     ? 'Show password'
@@ -166,9 +161,9 @@ class _PasswordResetScreenState extends ConsumerState<PasswordResetScreen> {
                                 onPressed: _working
                                     ? null
                                     : () => setState(
-                                          () => _obscurePassword =
-                                              !_obscurePassword,
-                                        ),
+                                        () => _obscurePassword =
+                                            !_obscurePassword,
+                                      ),
                                 icon: Icon(
                                   _obscurePassword
                                       ? Icons.visibility_outlined
@@ -197,13 +192,16 @@ class _PasswordResetScreenState extends ConsumerState<PasswordResetScreen> {
                               key: const Key('password-reset-error'),
                               padding: const EdgeInsets.all(ReleafSpacing.md),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF5B2929)
-                                    .withValues(alpha: 0.24),
-                                borderRadius:
-                                    BorderRadius.circular(ReleafRadii.medium),
+                                color: const Color(
+                                  0xFF5B2929,
+                                ).withValues(alpha: 0.24),
+                                borderRadius: BorderRadius.circular(
+                                  ReleafRadii.medium,
+                                ),
                                 border: Border.all(
-                                  color: const Color(0xFFE39A9A)
-                                      .withValues(alpha: 0.24),
+                                  color: const Color(
+                                    0xFFE39A9A,
+                                  ).withValues(alpha: 0.24),
                                 ),
                               ),
                               child: Text(
@@ -258,9 +256,7 @@ class _PasswordUpdatedCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: ReleafColors.backgroundRaised,
         borderRadius: BorderRadius.circular(ReleafRadii.extraLarge),
-        border: Border.all(
-          color: ReleafColors.sage.withValues(alpha: 0.22),
-        ),
+        border: Border.all(color: ReleafColors.sage.withValues(alpha: 0.22)),
       ),
       child: Column(
         children: [
@@ -270,10 +266,7 @@ class _PasswordUpdatedCard extends StatelessWidget {
             size: 44,
           ),
           const SizedBox(height: ReleafSpacing.md),
-          Text(
-            'Password updated',
-            style: ReleafTypography.sectionTitle,
-          ),
+          Text('Password updated', style: ReleafTypography.sectionTitle),
           const SizedBox(height: ReleafSpacing.xs),
           Text(
             'Your Releaf account is ready to use with the new password.',

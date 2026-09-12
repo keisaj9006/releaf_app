@@ -4,11 +4,65 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 
 import 'package:releaf_app/core/subscription/revenuecat_error_message.dart';
+import 'package:releaf_app/core/subscription/revenuecat_auth_identity_coordinator.dart';
 import 'package:releaf_app/core/subscription/revenuecat_lifecycle_policy.dart';
 import 'package:releaf_app/core/subscription/revenuecat_service.dart';
 import 'package:releaf_app/core/subscription/subscription_controller.dart';
 
 void main() {
+  test(
+    'unresolved identity rejects fresh reads and listener entitlements',
+    () async {
+      final service = _DelayedPremiumService();
+      final controller = SubscriptionController(service);
+      addTearDown(controller.dispose);
+      await controller.refresh();
+      expect(controller.state.isPremium, isTrue);
+      controller.beginIdentityChange();
+      await controller.refresh();
+      service.listener!(_TestCustomerInfo());
+      expect(controller.state.isPremium, isFalse);
+      expect(controller.state.customerInfo, isNull);
+      expect(await controller.purchase(_TestPackage()), isFalse);
+      expect(await controller.restore(), isFalse);
+      controller.completeIdentityChange();
+      await controller.refresh();
+      expect(controller.state.isPremium, isTrue);
+    },
+  );
+
+  test(
+    'failed identity switch stays closed until a successful retry',
+    () async {
+      final service = _DelayedPremiumService();
+      final controller = SubscriptionController(service);
+      addTearDown(controller.dispose);
+      await controller.refresh();
+      var succeeds = false;
+      final coordinator = RevenueCatAuthIdentityCoordinator(
+        identifyUser: (_) async => succeeds,
+        clearUser: () async => succeeds,
+        initialUserId: 'account-a',
+        beginIdentityChange: controller.beginIdentityChange,
+        completeIdentityChange: controller.completeIdentityChange,
+        failIdentityChange: controller.failIdentityChange,
+        refreshSubscriptions: controller.refresh,
+      );
+      expect(await coordinator.syncUser('account-b'), isFalse);
+      expect(controller.state.isLoading, isFalse);
+      expect(controller.state.error, contains('Account sync is pending'));
+      await controller.refresh();
+      service.listener!(_TestCustomerInfo());
+      expect(controller.state.isPremium, isFalse);
+      succeeds = true;
+      service.customerInfoGate = Completer<CustomerInfo?>()
+        ..complete(_TestCustomerInfo(premium: false));
+      expect(await coordinator.syncUser('account-b'), isTrue);
+      expect(controller.state.isPremium, isFalse);
+      expect(coordinator.activeUserId, 'account-b');
+    },
+  );
+
   for (final latestPremium in [true, false]) {
     test(
       'delayed snapshot cannot replace listener Premium=$latestPremium',
@@ -98,6 +152,7 @@ void main() {
       await service.waiting.future;
       controller.beginIdentityChange();
       service.offeringsGate = null;
+      controller.completeIdentityChange();
       await controller.refresh();
       oldGate.completeError(StateError('old request failed'));
       await pending;

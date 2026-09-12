@@ -2,13 +2,13 @@
 
 Backend checkpoint: [runtime SDK key validation](../release/2026-09-12-runtime-sdk-key-validation.md),
 510 tests, clean analysis, Android build and Samsung replacement passed.
-Next independently confirmed defect: a failed RevenueCat identity transition can
-refresh old-account entitlements. Add a regression with the real controller and
-fake service; keep an unresolved-identity gate closed for refresh/listeners and
-billing actions until the latest requested auth identity succeeds. Route retries
-through the app coordinator, preserve same-account offline entitlement recovery,
-and cover overlapping transitions and password-recovery callers. No real account
-switch, purchase or deletion is needed to reproduce this in tests.
+The subsequent [unresolved billing identity milestone](../release/2026-09-12-unresolved-billing-identity.md)
+is implemented: 514 full tests, clean analysis, Android build and Samsung replacement.
+An explicit pending gate blocks stale reads/listeners and billing; only the latest
+successful transition resolves it. Resume retries the coordinator; password recovery
+uses app-scoped synchronization. Independent review passed. Next: remaining
+startup/offline reliability and release-quality requirements; no real account
+switch, purchase or deletion was performed.
 
 Latest progress checkpoint: [daily progress rollover](../release/2026-09-12-daily-progress-rollover.md).
 Cached dates no longer prevent new-day rewards; Home refreshes daily flags.

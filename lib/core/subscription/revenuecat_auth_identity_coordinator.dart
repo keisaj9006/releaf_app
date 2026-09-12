@@ -17,26 +17,33 @@ class RevenueCatAuthIdentityCoordinator {
     required RevenueCatClearUser clearUser,
     required RevenueCatSubscriptionRefresh refreshSubscriptions,
     RevenueCatIdentityBoundary? beginIdentityChange,
+    RevenueCatIdentityBoundary? completeIdentityChange,
+    RevenueCatIdentityBoundary? failIdentityChange,
     String? initialUserId,
-  })  : _identifyUser = identifyUser,
-        _clearUser = clearUser,
-        _refreshSubscriptions = refreshSubscriptions,
-        _beginIdentityChange = beginIdentityChange ?? _noop,
-        _activeUserId = _normalizeUserId(initialUserId);
+  }) : _identifyUser = identifyUser,
+       _clearUser = clearUser,
+       _refreshSubscriptions = refreshSubscriptions,
+       _beginIdentityChange = beginIdentityChange ?? _noop,
+       _completeIdentityChange = completeIdentityChange ?? _noop,
+       _failIdentityChange = failIdentityChange ?? _noop,
+       _activeUserId = _normalizeUserId(initialUserId);
 
   factory RevenueCatAuthIdentityCoordinator.forService({
     required RevenueCatService service,
     required RevenueCatSubscriptionRefresh refreshSubscriptions,
     RevenueCatIdentityBoundary? beginIdentityChange,
+    RevenueCatIdentityBoundary? completeIdentityChange,
+    RevenueCatIdentityBoundary? failIdentityChange,
     String? initialUserId,
   }) {
     return RevenueCatAuthIdentityCoordinator(
       identifyUser: (userId) async =>
           await service.identifyUser(userId) != null,
-      clearUser: () async =>
-          await service.clearUserIdentity() != null,
+      clearUser: () async => await service.clearUserIdentity() != null,
       refreshSubscriptions: refreshSubscriptions,
       beginIdentityChange: beginIdentityChange,
+      completeIdentityChange: completeIdentityChange,
+      failIdentityChange: failIdentityChange,
       initialUserId: initialUserId,
     );
   }
@@ -45,6 +52,10 @@ class RevenueCatAuthIdentityCoordinator {
   final RevenueCatClearUser _clearUser;
   final RevenueCatSubscriptionRefresh _refreshSubscriptions;
   final RevenueCatIdentityBoundary _beginIdentityChange;
+  final RevenueCatIdentityBoundary _completeIdentityChange;
+  final RevenueCatIdentityBoundary _failIdentityChange;
+  int _requestVersion = 0;
+  bool _pending = false;
 
   String? _activeUserId;
   Future<void> _queue = Future<void>.value();
@@ -53,37 +64,39 @@ class RevenueCatAuthIdentityCoordinator {
 
   Future<bool> syncUser(String? userId) {
     final normalized = _normalizeUserId(userId);
-    final result = _queue.then<bool>((_) => _sync(normalized));
-    _queue = result.then<void>(
-      (_) {},
-      onError: (Object _, StackTrace _) {},
-    );
+    if (normalized == _activeUserId && !_pending) return Future.value(true);
+    final version = ++_requestVersion;
+    _pending = true;
+    // Close access immediately, even while an older mutation is awaiting the SDK.
+    _beginIdentityChange();
+    final result = _queue.then<bool>((_) => _sync(normalized, version));
+    _queue = result.then<void>((_) {}, onError: (Object _, StackTrace _) {});
     return result;
   }
 
-  Future<bool> _sync(String? nextUserId) async {
-    if (nextUserId == _activeUserId) return true;
-
-    // Fail closed before mutating the store identity. Without this boundary a
-    // transient CustomerInfo refresh failure could leave the previous user's
-    // Premium entitlement visible after a Supabase account switch.
-    _beginIdentityChange();
-
-    final changed = nextUserId == null
-        ? await _clearUser()
-        : await _identifyUser(nextUserId);
+  Future<bool> _sync(String? nextUserId, int version) async {
+    if (version != _requestVersion) return false;
+    bool changed;
+    try {
+      changed =
+          nextUserId == _activeUserId ||
+          (nextUserId == null
+              ? await _clearUser()
+              : await _identifyUser(nextUserId));
+    } catch (_) {
+      changed = false;
+    }
 
     if (!changed) {
-      // Try to recover the authoritative entitlement for whichever RevenueCat
-      // identity is still active. If this also fails, the boundary remains
-      // safely non-Premium and a later lifecycle refresh can recover it.
-      try {
-        await _refreshSubscriptions();
-      } catch (_) {}
+      // The SDK may still hold the previous account. Never refresh its access.
+      if (version == _requestVersion) _failIdentityChange();
       return false;
     }
 
     _activeUserId = nextUserId;
+    if (version != _requestVersion) return false;
+    _pending = false;
+    _completeIdentityChange();
 
     try {
       await _refreshSubscriptions();

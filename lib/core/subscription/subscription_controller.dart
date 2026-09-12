@@ -39,6 +39,7 @@ class SubscriptionController extends StateNotifier<SubscriptionState> {
   int _identityVersion = 0;
   int _customerInfoVersion = 0;
   int _refreshVersion = 0;
+  bool _identityPending = false;
 
   bool _currentIdentity(int version) => mounted && version == _identityVersion;
 
@@ -64,11 +65,29 @@ class SubscriptionController extends StateNotifier<SubscriptionState> {
   void beginIdentityChange() {
     if (_premiumPreview || !mounted) return;
     _identityVersion++;
+    _identityPending = true;
     state = const SubscriptionState(isLoading: true);
+  }
+
+  /// Called only after the latest requested store identity has been confirmed.
+  void completeIdentityChange() {
+    if (!mounted) return;
+    _identityPending = false;
+  }
+
+  void failIdentityChange() {
+    if (!mounted || !_identityPending) return;
+    state = const SubscriptionState(
+      error: 'Account sync is pending. Reopen Releaf to retry.',
+    );
   }
 
   Future<void> refresh() async {
     if (!mounted) return;
+    if (_identityPending) {
+      failIdentityChange();
+      return;
+    }
     final identityVersion = _identityVersion;
     final refreshVersion = ++_refreshVersion;
     final customerInfoVersion = ++_customerInfoVersion;
@@ -114,7 +133,7 @@ class SubscriptionController extends StateNotifier<SubscriptionState> {
   }
 
   void _handleCustomerInfoUpdate(CustomerInfo customerInfo) {
-    if (_premiumPreview || !mounted) return;
+    if (_premiumPreview || !mounted || _identityPending) return;
     _customerInfoVersion++;
     state = state.copyWith(
       customerInfo: customerInfo,
@@ -131,7 +150,7 @@ class SubscriptionController extends StateNotifier<SubscriptionState> {
   }
 
   Future<bool> purchase(Package package) async {
-    if (!mounted) return false;
+    if (!mounted || _identityPending) return false;
     final identityVersion = _identityVersion;
     state = state.copyWith(isLoading: true, clearError: true);
     try {
@@ -169,7 +188,7 @@ class SubscriptionController extends StateNotifier<SubscriptionState> {
   }
 
   Future<bool> restore() async {
-    if (!mounted) return false;
+    if (!mounted || _identityPending) return false;
     final identityVersion = _identityVersion;
     state = state.copyWith(isLoading: true, clearError: true);
     try {

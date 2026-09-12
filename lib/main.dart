@@ -35,13 +35,13 @@ Future<void> main() async {
   try {
     backgroundSoundDriver =
         await AudioService.init<ReleafBackgroundSoundDriver>(
-      builder: ReleafBackgroundSoundDriver.new,
-      config: const AudioServiceConfig(
-        androidNotificationChannelId: 'app.releaf.mobile.audio',
-        androidNotificationChannelName: 'Releaf audio',
-        androidNotificationOngoing: true,
-      ),
-    );
+          builder: ReleafBackgroundSoundDriver.new,
+          config: const AudioServiceConfig(
+            androidNotificationChannelId: 'app.releaf.mobile.audio',
+            androidNotificationChannelName: 'Releaf audio',
+            androidNotificationOngoing: true,
+          ),
+        );
   } catch (error, stackTrace) {
     debugPrint(
       'Background audio service unavailable; using foreground playback. '
@@ -49,17 +49,17 @@ Future<void> main() async {
     );
   }
 
-  await SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-  ]);
+  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
-  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-    statusBarColor: Colors.transparent,
-    statusBarIconBrightness: Brightness.light,
-    statusBarBrightness: Brightness.dark,
-    systemNavigationBarColor: Colors.transparent,
-    systemNavigationBarIconBrightness: Brightness.light,
-  ));
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.light,
+      statusBarBrightness: Brightness.dark,
+      systemNavigationBarColor: Colors.transparent,
+      systemNavigationBarIconBrightness: Brightness.light,
+    ),
+  );
 
   await Supabase.initialize(
     url: _releafSupabaseUrl,
@@ -74,9 +74,7 @@ Future<void> main() async {
       soundPlaybackDriverProvider.overrideWithValue(backgroundSoundDriver),
   ];
 
-  final container = ProviderContainer(
-    overrides: overrides,
-  );
+  final container = ProviderContainer(overrides: overrides);
 
   final revenueCatApiKey = _revenueCatApiKeyForCurrentPlatform();
   final revenueCat = container.read(revenueCatServiceProvider);
@@ -88,10 +86,7 @@ Future<void> main() async {
   );
 
   runApp(
-    UncontrolledProviderScope(
-      container: container,
-      child: const ReleafApp(),
-    ),
+    UncontrolledProviderScope(container: container, child: const ReleafApp()),
   );
 }
 
@@ -118,6 +113,7 @@ class ReleafApp extends ConsumerStatefulWidget {
 class _ReleafAppState extends ConsumerState<ReleafApp>
     with WidgetsBindingObserver {
   StreamSubscription<AuthState>? _authSubscription;
+  RevenueCatAuthIdentityCoordinator? _premiumIdentity;
 
   @override
   void initState() {
@@ -126,24 +122,40 @@ class _ReleafAppState extends ConsumerState<ReleafApp>
 
     try {
       final auth = Supabase.instance.client.auth;
-      final premiumIdentity =
-          RevenueCatAuthIdentityCoordinator.forService(
+      final premiumIdentity = RevenueCatAuthIdentityCoordinator.forService(
         service: ref.read(revenueCatServiceProvider),
-        beginIdentityChange: () =>
-            ref.read(subscriptionControllerProvider.notifier).beginIdentityChange(),
-        refreshSubscriptions: () =>
-            ref.read(subscriptionControllerProvider.notifier).refresh(),
+        beginIdentityChange: () {
+          if (!mounted) return;
+          ref
+              .read(subscriptionControllerProvider.notifier)
+              .beginIdentityChange();
+        },
+        completeIdentityChange: () {
+          if (!mounted) return;
+          ref
+              .read(subscriptionControllerProvider.notifier)
+              .completeIdentityChange();
+        },
+        failIdentityChange: () {
+          if (!mounted) return;
+          ref
+              .read(subscriptionControllerProvider.notifier)
+              .failIdentityChange();
+        },
+        refreshSubscriptions: () async {
+          if (!mounted) return;
+          await ref.read(subscriptionControllerProvider.notifier).refresh();
+        },
         initialUserId: auth.currentUser?.id,
       );
+      _premiumIdentity = premiumIdentity;
 
       _authSubscription = auth.onAuthStateChange.listen((state) {
         if (state.event == AuthChangeEvent.passwordRecovery) {
           appRouter.go(AppRoutes.passwordReset);
         }
 
-        unawaited(
-          premiumIdentity.syncUser(state.session?.user.id),
-        );
+        unawaited(premiumIdentity.syncUser(state.session?.user.id));
       });
     } catch (_) {
       // Widget tests may intentionally build the app without Supabase.initialize.
@@ -160,9 +172,20 @@ class _ReleafAppState extends ConsumerState<ReleafApp>
       return;
     }
 
-    unawaited(
-      ref.read(subscriptionControllerProvider.notifier).refresh(),
-    );
+    unawaited(_refreshIdentityAndSubscriptions());
+  }
+
+  Future<void> _refreshIdentityAndSubscriptions() async {
+    final coordinator = _premiumIdentity;
+    if (coordinator != null) {
+      final synchronized = await coordinator.syncUser(
+        Supabase.instance.client.auth.currentUser?.id,
+      );
+      if (!synchronized || !mounted) return;
+    }
+    if (mounted) {
+      await ref.read(subscriptionControllerProvider.notifier).refresh();
+    }
   }
 
   @override
@@ -195,10 +218,7 @@ class _AppBackground extends StatelessWidget {
     return Stack(
       children: [
         Positioned.fill(
-          child: Image.asset(
-            'assets/ui/background.png',
-            fit: BoxFit.cover,
-          ),
+          child: Image.asset('assets/ui/background.png', fit: BoxFit.cover),
         ),
         Positioned.fill(
           child: DecoratedBox(

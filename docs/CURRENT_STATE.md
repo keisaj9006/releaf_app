@@ -2,13 +2,20 @@
 
 Snapshot: **2026-09-12**
 
+Latest checkpoint verification: **514/514 tests passed**, clean analysis and
+Android debug build for [unresolved billing identity isolation](release/2026-09-12-unresolved-billing-identity.md).
+Failed identity transitions cannot refresh old-account access; pending callbacks
+and billing are blocked until the latest identity succeeds. Resume retries the
+coordinator; password recovery no longer races a separate SDK login. Samsung
+replacement installation passed. Production-equivalent billing QA remains open.
+
 Subsequent verification: **510/510 tests passed**, clean analysis and Android
 debug build for [runtime SDK key validation](release/2026-09-12-runtime-sdk-key-validation.md).
 Runtime rejects secret/unknown key shapes while preserving public Test Store,
-Google and Apple SDK configuration. Next confirmed gap: unresolved RevenueCat
-identity must remain fail-closed after an unsuccessful account transition.
+Google and Apple SDK configuration. The subsequent unresolved-identity gap is
+corrected in the checkpoint above.
 
-Latest verification: **509/509 tests passed**, clean analysis and Android debug
+Earlier verification: **509/509 tests passed**, clean analysis and Android debug
 build for [daily progress rollover](release/2026-09-12-daily-progress-rollover.md).
 Samsung replacement installation succeeded. Home refreshes daily flags across
 date changes; accumulated Leaves and existing reward/bonus semantics are preserved.
