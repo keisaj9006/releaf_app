@@ -570,7 +570,10 @@ void main() {
       final driver = _LoadingDriver()..fail = true;
       await _pumpPlayer(tester, driver);
       expect(tester.takeException(), isNull);
-      expect(find.text('Sound could not start. Try again.'), findsOneWidget);
+      expect(
+        find.text('There was a playback problem. Try again.'),
+        findsOneWidget,
+      );
       expect(find.textContaining('private/native'), findsNothing);
       driver.fail = false;
       final retry = find.bySemanticsLabel('Retry sound');
@@ -578,7 +581,10 @@ void main() {
       await tester.tap(retry);
       await tester.pump();
       expect(find.text('PLAYING'), findsOneWidget);
-      expect(find.text('Sound could not start. Try again.'), findsNothing);
+      expect(
+        find.text('There was a playback problem. Try again.'),
+        findsNothing,
+      );
       expect(driver.loads, 2);
       expect(tester.takeException(), isNull);
     },

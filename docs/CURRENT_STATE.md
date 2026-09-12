@@ -2,6 +2,11 @@
 
 Snapshot: **2026-09-12**
 
+[Sound recovery copy](release/2026-09-12-sound-recovery-copy.md) now describes
+playback problems generally, including timer/transport errors. 59 focused tests,
+analysis and fresh debug APK passed; device disconnected. Last full suite remains
+525 tests from the immediately preceding controller checkpoint.
+
 Latest runtime verification: [Sleep pause fallback](release/2026-09-12-sleep-pause-fallback.md),
 **525/525 tests**, clean analysis and Android debug build. Expiry attempts stop
 if pause fails, retains honest state if stop also fails, and supports retry and

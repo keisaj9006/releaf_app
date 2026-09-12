@@ -282,7 +282,7 @@ class _SoundPlayerScreenState extends ConsumerState<SoundPlayerScreen>
                             if (hasError) ...[
                               const SizedBox(height: ReleafSpacing.sm),
                               Text(
-                                'Sound could not start. Try again.',
+                                'There was a playback problem. Try again.',
                                 textAlign: TextAlign.center,
                                 style: ReleafTypography.body.copyWith(
                                   color: ReleafColors.textPrimary,
