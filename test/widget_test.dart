@@ -33,6 +33,25 @@ void main() {
     );
   });
 
+  test('RevenueCat runtime accepts only supported public SDK key shapes', () {
+    for (final prefix in ['test_', 'goog_', 'appl_']) {
+      expect(
+        RevenueCatService.hasConfiguredApiKey(' ${prefix}abcdefghijklmnop '),
+        isTrue,
+      );
+    }
+    for (final invalid in [
+      'sk_abcdefghijklmnop',
+      'arbitrary_configuration',
+      'test_',
+      'goog_short',
+      'appl_abc defghijklmnop',
+      'test_abcdefghijklmnop\nextra',
+    ]) {
+      expect(RevenueCatService.hasConfiguredApiKey(invalid), isFalse);
+    }
+  });
+
   testWidgets('App boots with required provider overrides', (
     WidgetTester tester,
   ) async {

@@ -14,7 +14,12 @@ class RevenueCatService {
   /// production Google key policy.
   static bool hasConfiguredApiKey(String apiKey) {
     final trimmedKey = apiKey.trim();
-    return trimmedKey.isNotEmpty && !trimmedKey.startsWith('REVENUECAT_');
+    if (RegExp(r'\s').hasMatch(trimmedKey)) return false;
+    return ['test_', 'goog_', 'appl_'].any(
+      (prefix) =>
+          trimmedKey.startsWith(prefix) &&
+          trimmedKey.length > prefix.length + 8,
+    );
   }
 
   Future<void> init({

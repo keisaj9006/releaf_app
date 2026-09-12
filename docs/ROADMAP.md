@@ -2,6 +2,11 @@
 
 This roadmap converts the current repo + release gate + latest project decisions + Deep Research into execution order.
 
+[Runtime SDK key validation](release/2026-09-12-runtime-sdk-key-validation.md)
+passed 510 tests, clean analysis and Android debug build. Next confirmed backend
+gap: block stale entitlements while RevenueCat identity synchronization is unresolved,
+including failed transitions, callbacks and retry on resume.
+
 Latest completed internal fix: [daily progress rollover](release/2026-09-12-daily-progress-rollover.md),
 509 full-suite tests, clean analysis, Android debug build and Samsung replacement
 installation. Next: remaining backend/offline and release-quality requirements;

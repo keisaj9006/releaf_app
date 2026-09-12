@@ -2,6 +2,12 @@
 
 Snapshot: **2026-09-12**
 
+Subsequent verification: **510/510 tests passed**, clean analysis and Android
+debug build for [runtime SDK key validation](release/2026-09-12-runtime-sdk-key-validation.md).
+Runtime rejects secret/unknown key shapes while preserving public Test Store,
+Google and Apple SDK configuration. Next confirmed gap: unresolved RevenueCat
+identity must remain fail-closed after an unsuccessful account transition.
+
 Latest verification: **509/509 tests passed**, clean analysis and Android debug
 build for [daily progress rollover](release/2026-09-12-daily-progress-rollover.md).
 Samsung replacement installation succeeded. Home refreshes daily flags across
