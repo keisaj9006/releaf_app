@@ -7,7 +7,9 @@ build for [breathing visual lifecycle](release/2026-09-12-breathing-visual-lifec
 The animation now stops synchronously before background frames are suppressed,
 preserving its cycle on return. No breathing patterns or timings changed.
 ADB reported no connected device; installation and physical review remain pending.
-Botanical lungs and Grounding visual-direction candidates remain unfinished.
+Six [lungs/Grounding direction studies](design/2026-09-12-reset-directions.md)
+are now prepared and browser-reviewed. Owner selection and native implementation
+remain pending; these static proposals are outside runtime assets.
 
 [Approved Basics source measurements](release/2026-09-12-approved-narration-measurements.md)
 now record its four narration files: 24 kHz, -24.4 to -24.9 LUFS, -5.7 to -7.8

@@ -6,6 +6,8 @@ This roadmap converts the current repo + release gate + latest project decisions
 518 tests, clean analysis and Android debug build passed. No connected device
 was available for replacement installation. Next: prepare the outstanding three
 botanical lungs and three Grounding directions for concrete owner review.
+The [six-direction contact sheet](design/2026-09-12-reset-directions.md) is now
+prepared; owner selection, native motion and hardware review remain open.
 This lifecycle fix does not fulfill or approve those visual requirements.
 
 [Basics narration and ambience source measurements](release/2026-09-12-approved-narration-measurements.md)

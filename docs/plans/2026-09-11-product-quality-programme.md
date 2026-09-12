@@ -1,5 +1,10 @@
 # Releaf product-quality programme
 
+The [six original Reset direction studies](../design/2026-09-12-reset-directions.md)
+are prepared, independently source-reviewed and inspected in the browser.
+Owner selection is pending. No runtime visual or breathing audio is approved
+by this artifact; proceed with independent engineering while feedback is pending.
+
 Reset checkpoint: [breathing visual lifecycle](../release/2026-09-12-breathing-visual-lifecycle.md),
 518 full tests, clean analysis and fresh Android debug build. Synchronous
 animation suspension prevents a jump on the first resumed frame. No method or
