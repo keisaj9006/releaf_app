@@ -2,9 +2,13 @@
 
 This roadmap converts the current repo + release gate + latest project decisions + Deep Research into execution order.
 
+[CI e2952b7](release/2026-09-12-ci-e2952b7.md) passed through AAB smoke and release
+APK 16 KB validation. Keep final production signing/distribution and device QA
+separate; existing audio/visual/legal owner dependencies remain open.
+
 [CI full audio decoding](release/2026-09-12-ci-full-audio-decode.md) closes the
 metadata-only validation gap. Local valid/corrupt checks and shell syntax pass;
-the next Actions run must establish remote execution evidence independently.
+the completed e2952b7 Actions run also passed the decoder step.
 
 [Atmosphere I candidate](release/2026-09-12-atmosphere-i-candidate.md) provides
 measured headroom outside runtime, alongside the existing Atmosphere II candidate.

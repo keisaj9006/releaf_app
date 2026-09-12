@@ -2,9 +2,14 @@
 
 Snapshot: **2026-09-12**
 
+[Full Ubuntu CI at e2952b7](release/2026-09-12-ci-e2952b7.md) completed successfully:
+analysis, full tests, audio decoding, both debug APKs, test-signed AAB and release
+APK ZIP/ELF 16 KB checks. Six artifacts available. This does not close production
+signing, content approval, Play billing/distribution or physical-device QA gates.
+
 [CI audio decoding](release/2026-09-12-ci-full-audio-decode.md) now performs a
 full ffmpeg decoder pass in addition to metadata probing. Ten valid tracks pass;
-a deliberately corrupted local fixture is rejected. Remote CI still requires separate verification.
+a deliberately corrupted local fixture is rejected. The above Ubuntu CI run now verifies this step remotely.
 
 [Atmosphere I headroom candidate](release/2026-09-12-atmosphere-i-candidate.md)
 is prepared outside runtime: -1.8 dBTP / -13.9 LUFS. Source unchanged. Owner

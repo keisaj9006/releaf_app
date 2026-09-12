@@ -17,6 +17,11 @@ When that state is reached, explicitly report:
 
 ## Current gates
 
+Latest complete automated artifact evidence:
+[Ubuntu CI for e2952b7](2026-09-12-ci-e2952b7.md), including full tests, test-signed
+AAB and release APK ZIP/ELF 16 KB checks. This refreshes internal CI evidence;
+it does not close production signing, content, external or physical-device gates.
+
 | Gate | Status | Notes |
 | --- | --- | --- |
 | RESET core | DONE / CONTENT | Canonical Reset model, completion history, lifecycle and access tests are in CI. Rejected breathing tones are excluded from runtime playback; cue controls disclose unavailable audio while silent/reduced-motion phase guidance remains usable. Natural gentle human inhale/longer exhale recordings require owner approval before runtime integration. Hold/rest remain silent. |
