@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:releaf_app/core/providers.dart';
 import 'package:releaf_app/features/relief/data/reset_catalog.dart';
+import 'package:releaf_app/features/relief/domain/models/reset_launch_options.dart';
 import 'package:releaf_app/features/relief/presentation/breathing_widget.dart';
 import 'package:releaf_app/features/relief/presentation/reset_session_preview_sheet.dart';
 
@@ -32,6 +33,20 @@ Future<SharedPreferences> _pump(WidgetTester tester, Widget home) async {
 }
 
 void main() {
+  testWidgets('no words mode omits the added breathing phase countdown', (
+    tester,
+  ) async {
+    await _pump(
+      tester,
+      const BreathingWidget(
+        sessionId: 'equal-rhythm',
+        launchOptions: ResetLaunchOptions(showGuidanceText: false),
+      ),
+    );
+    expect(find.byKey(const Key('reset-breath-phase-remaining')), findsNothing);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
   testWidgets(
     'reduced motion removes active Reset text and shell transitions',
     (tester) async {
@@ -47,8 +62,12 @@ void main() {
         expect(transition.duration, Duration.zero);
       }
       expect(find.text('Breathe in'), findsOneWidget);
-      await tester.pump(const Duration(seconds: 5));
+      expect(find.text('5 s left in this phase'), findsOneWidget);
+      await tester.pump(const Duration(seconds: 1));
+      expect(find.text('4 s left in this phase'), findsOneWidget);
+      await tester.pump(const Duration(seconds: 4));
       expect(find.text('Breathe out'), findsOneWidget);
+      expect(find.text('5 s left in this phase'), findsOneWidget);
       await tester.pumpWidget(const SizedBox.shrink());
     },
   );

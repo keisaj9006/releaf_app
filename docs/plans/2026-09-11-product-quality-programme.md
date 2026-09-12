@@ -1,5 +1,10 @@
 # Releaf product-quality programme
 
+Reset phase-time display: [countdown evidence](../release/2026-09-12-reset-phase-countdown.md),
+526 tests, clean analysis and Android build. No device connected. Next implement
+the [shared breathing clock](2026-09-12-shared-breathing-clock.md); the display
+alone does not establish phase/motion synchronization or select new artwork.
+
 Sleep recovery checkpoint: [pause fallback](../release/2026-09-12-sleep-pause-fallback.md),
 525 full tests, clean analysis, Android build and follow-up independent review.
 Pause failure attempts stop, retry can recover both failures, and newer timers

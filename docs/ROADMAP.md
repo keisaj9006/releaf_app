@@ -2,6 +2,11 @@
 
 This roadmap converts the current repo + release gate + latest project decisions + Deep Research into execution order.
 
+[Canonical Reset phase countdown](release/2026-09-12-reset-phase-countdown.md)
+passed 526 tests, analysis and Android build. Next unblocked implementation:
+[shared paced-breathing clock](plans/2026-09-12-shared-breathing-clock.md), preserving
+fractional lifecycle progress and exact methods independently of artwork choice.
+
 [Sound recovery messaging](release/2026-09-12-sound-recovery-copy.md) matches the
 expanded timer/transport error state; focused tests, analysis and APK passed.
 Device review remains pending alongside owner visuals/audio selection.

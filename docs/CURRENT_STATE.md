@@ -2,6 +2,12 @@
 
 Snapshot: **2026-09-12**
 
+Latest: [Reset phase countdown](release/2026-09-12-reset-phase-countdown.md),
+526 full tests, clean analysis and Android build. Guided breathing shows seconds
+remaining in the actual phase; no-words mode omits it. Methods/timings unchanged.
+Device disconnected. The animation's independent clock remains open work under
+the [shared-clock plan](plans/2026-09-12-shared-breathing-clock.md).
+
 [Sound recovery copy](release/2026-09-12-sound-recovery-copy.md) now describes
 playback problems generally, including timer/transport errors. 59 focused tests,
 analysis and fresh debug APK passed; device disconnected. Last full suite remains

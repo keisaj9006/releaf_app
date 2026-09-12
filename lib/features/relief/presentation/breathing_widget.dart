@@ -980,6 +980,19 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
                           ),
                           child: Column(
                             children: [
+                              if (isPacedBreathing) ...[
+                                Text(
+                                  '${breathPattern.frameAtElapsedSeconds(_elapsedSeconds(session)).phaseRemainingSeconds} s left in this phase',
+                                  key: const Key(
+                                    'reset-breath-phase-remaining',
+                                  ),
+                                  textAlign: TextAlign.center,
+                                  style: ReleafTypography.meta.copyWith(
+                                    color: ReleafColors.textSecondary,
+                                  ),
+                                ),
+                                const SizedBox(height: ReleafSpacing.xs),
+                              ],
                               Text(
                                 _guidanceTitle(session),
                                 textAlign: TextAlign.center,
