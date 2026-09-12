@@ -20,6 +20,14 @@ smoke passed; owner visual/listening review and the production device gate remai
 Latest internal programme checkpoint: **482/482 tests passed**, analyzer clean and Android debug APK built and installed with `adb install -r` on Samsung SM-S928B. Five primary destinations, legacy Sound library access and narrow large-text layout fixes are implemented. All five screens passed bounded UI smoke; RevenueCat configuration, QA identity and current Offering were confirmed through boolean-only logs. See [five-tab evidence](release/2026-09-12-five-primary-destinations.md). Premium refresh continuity was committed as `f3a8795`; owner listening and production-equivalent QA remain pending. Next: Meditation contracts and Reset blueprints in the [remediation plan](plans/2026-09-12-meditate-reset-remediation.md).
 This file is a working snapshot. The code and canonical release gate remain authoritative if the branch moves.
 
+Subsequent tooling checkpoint: Meditation production export now validates timings,
+IDs and source assets; tests verify actual Flutter bundle inclusion. Full suite
+489/489 passed, followed by 13/13 focused tests including two additional review
+checks; final analysis and Android build passed. Runtime remains the installed
+five-tab checkpoint. See [manifest evidence](release/2026-09-12-meditation-production-manifest.md)
+and the [22-session matrix](product/meditation-session-matrix.md). Unguided silence
+by default is the next confirmed gap; missing approved recordings remain pending.
+
 ## Key release status
 
 The current canonical source is:

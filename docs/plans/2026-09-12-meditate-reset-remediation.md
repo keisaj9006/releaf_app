@@ -48,6 +48,12 @@ recording manifests, preview metadata and player controls. Extend existing
 availability/caption tests rather than duplicating them. Missing approved
 narration remains honestly labelled; do not substitute the narrator.
 
+The [22-session technical matrix](../product/meditation-session-matrix.md) is now
+recorded. The exporter validates step totals, IDs, recording sources and ambience;
+tests check real Flutter bundle inclusion. See [verification](../release/2026-09-12-meditation-production-manifest.md).
+Next confirmed implementation gap: unguided timers must start silently without
+overwriting the saved preference for guided-session ambience.
+
 ## 4. Reset flagship
 
 Create the breathing-method evidence matrix and per-session blueprints from the

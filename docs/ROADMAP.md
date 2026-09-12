@@ -29,7 +29,9 @@ build; see [evidence](release/2026-09-12-premium-refresh-continuity.md).
 Home / Reset / Meditate / Sleep / Brain navigation with legacy route compatibility
 is now implemented: 482 tests, clean analysis, Android build and non-destructive
 Samsung installation passed; see [five-tab evidence](release/2026-09-12-five-primary-destinations.md).
-Next: Meditation contracts and Reset blueprints. Approved human breathing recordings and owner listening remain
+The [Meditation matrix and production-manifest checks](release/2026-09-12-meditation-production-manifest.md)
+are implemented. Next: unguided silence by default, then remaining Meditation
+contracts and Reset blueprints. Approved human breathing recordings and owner listening remain
 dependencies, not permission to substitute synthetic cues or change protocols.
 
 **Priority: immediate**
