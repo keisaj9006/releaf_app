@@ -2,6 +2,12 @@
 
 Snapshot: **2026-09-12**
 
+Current [local release artifact checks](release/2026-09-12-local-release-artifact-checks.md)
+on code `6610634`: web release built, all six workflow artifact assertions passed,
+11 release/privacy contract tests passed, Android source checks passed and current
+debug APK hash recorded. No deployment or new device installation; production
+packaging/distribution and owner/hardware gates remain open.
+
 Latest verification: **517/517 tests passed**, clean analysis and Android debug
 build for [single SDK initialization](release/2026-09-12-sdk-single-initialization.md).
 Overlapping configuration calls share one operation; failed configuration can be

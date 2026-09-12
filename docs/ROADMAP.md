@@ -2,6 +2,11 @@
 
 This roadmap converts the current repo + release gate + latest project decisions + Deep Research into execution order.
 
+Current [local release artifact checks](release/2026-09-12-local-release-artifact-checks.md)
+passed: web release, six generated-resource assertions, 11 release/privacy tests
+and existing Android source checks. This adds artifact evidence without closing
+private signing, public URL deployment, owner listening or physical release QA.
+
 [Single SDK initialization](release/2026-09-12-sdk-single-initialization.md)
 closes overlapping native configuration: 517 tests, clean analysis and Android
 debug build. Device installation is batched with the next device-review milestone.

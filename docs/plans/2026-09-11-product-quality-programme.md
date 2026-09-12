@@ -1,5 +1,11 @@
 # Releaf product-quality programme
 
+Release-track [artifact verification](../release/2026-09-12-local-release-artifact-checks.md)
+on `6610634`: web release and six workflow assertions passed; 11 existing release/
+privacy tests and Android source checks passed. No runtime changes, deployment
+or repeated installation. Remaining production artifacts, content acceptance and
+physical QA require their own evidence; local checks cannot close them.
+
 Latest backend checkpoint: [single SDK initialization](../release/2026-09-12-sdk-single-initialization.md),
 517 full tests, clean analysis and Android build. Native configuration is shared
 by overlapping callers and retryable after failure. Device update is batched;
