@@ -51,6 +51,7 @@ List<Map<String, Object?>> _serializeSteps(
   required bool spokenGuidanceEnabled,
 }) {
   final payload = <Map<String, Object?>>[];
+  var elapsedSeconds = 0;
 
   for (var index = 0; index < steps.length; index++) {
     final step = steps[index];
@@ -79,6 +80,8 @@ List<Map<String, Object?>> _serializeSteps(
       'screenGuidance': step.guidance,
       'spokenGuidance': spoken,
       'durationSeconds': step.durationSeconds,
+      'startSeconds': elapsedSeconds,
+      'endSeconds': elapsedSeconds + step.durationSeconds,
       'wordCount': spoken == null ? 0 : _wordCount(spoken),
       'advanceActionLabel': step.advanceActionLabel,
       'targetAssetPath': target,
@@ -86,6 +89,7 @@ List<Map<String, Object?>> _serializeSteps(
       'renderRequired':
           spokenGuidanceEnabled && (recorded == null || recorded.isEmpty),
     });
+    elapsedSeconds += step.durationSeconds;
   }
 
   return payload;
@@ -150,6 +154,14 @@ Map<String, Object?> buildResetNarrationManifest() {
     sessionPayload.add(<String, Object?>{
       'id': session.id,
       'title': session.title,
+      'summary': session.summary,
+      'methodLabel': session.methodLabel,
+      'bestFor': session.bestFor,
+      'whyItMayHelp': session.whyItMayHelp,
+      'safetyNote': session.safetyNote,
+      'instructions': session.instructions,
+      'visualType': session.visualType.name,
+      'demoRequirement': session.demoRequirement.name,
       'level': session.level.name,
       'modality': session.modality.name,
       'accessTier': session.accessTier.name,

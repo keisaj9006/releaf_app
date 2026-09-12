@@ -50,6 +50,11 @@ The [breathing matrix](product/breathing-method-evidence-matrix.md) lists all te
 unchanged methods; see [contract evidence](release/2026-09-12-reset-contract-coverage.md).
 Continue the remaining per-session production blueprints and unblocked tracks.
 
+All 50 Reset sessions now have [technical working blueprints](product/reset-session-production-blueprints.md)
+derived from tested metadata and timelines. Production measurements, research
+appraisal, narrator assets and owner acceptance remain explicitly incomplete.
+Continue independent audio handoff/reliability work; see [export evidence](release/2026-09-12-reset-production-blueprints.md).
+
 **Priority: immediate**
 
 1. Confirm `releaf-development`, clean/known working tree and HEAD.

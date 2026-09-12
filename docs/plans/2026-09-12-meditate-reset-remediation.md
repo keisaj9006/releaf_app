@@ -82,6 +82,12 @@ timer preservation tests. The [breathing matrix](../product/breathing-method-evi
 matches every actual method and documents the 6–4/4–6 wording discrepancy without
 changing the app. Complete remaining per-session production blueprints next.
 
+The [50-session working blueprints](../product/reset-session-production-blueprints.md)
+now cover repository metadata, scripts and exact timelines. The export has
+automated catalogue/interval checks. Production measurements, research appraisal
+and owner content acceptance remain pending; technical inventory is not final
+production approval. Continue unblocked audio handoff/reliability checks.
+
 ## Checkpoint acceptance
 
 For each coherent change: reproduce with tests, implement, focused tests,

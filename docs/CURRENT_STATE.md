@@ -57,6 +57,13 @@ the fresh manifest, explicitly preserving actual 4â€“6 rather than inventing 6â€
 See [evidence](release/2026-09-12-reset-contract-coverage.md). Per-session production
 blueprints and owner/hardware/content dependencies remain open.
 
+The Reset exporter now supplies metadata and contiguous timelines for all 50
+sessions. [Working production blueprints](product/reset-session-production-blueprints.md)
+record the actual scripts and open approval/measurement fields; zero recorded
+narration steps are declared and 217 guided steps await the approved voice.
+See [evidence](release/2026-09-12-reset-production-blueprints.md). This does not
+close content approval. Continue independent audio handoff/reliability checks.
+
 ## Key release status
 
 The current canonical source is:

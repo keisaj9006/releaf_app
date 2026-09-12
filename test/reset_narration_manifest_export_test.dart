@@ -1,10 +1,40 @@
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:releaf_app/features/relief/data/reset_catalog.dart';
 
 import '../tooling/reset/export_narration_manifest.dart';
 
 void main() {
+  test('Reset production blueprints preserve metadata and exact timelines', () {
+    final manifest = buildResetNarrationManifest();
+    final sessions = (manifest['sessions']! as List<Object?>)
+        .cast<Map<String, Object?>>();
+    for (final session in sessions) {
+      final source = const ResetCatalog().getById(session['id']! as String)!;
+      expect(session['instructions'], source.instructions);
+      expect(session['safetyNote'], source.safetyNote);
+      expect(session['methodLabel'], source.methodLabel);
+      expect(session['bestFor'], source.bestFor);
+      expect(session['visualType'], source.visualType.name);
+      for (final path in ['steps', 'simplifiedSteps']) {
+        final steps = (session[path]! as List<Object?>)
+            .cast<Map<String, Object?>>();
+        var elapsed = 0;
+        for (final step in steps) {
+          expect(step['startSeconds'], elapsed);
+          elapsed += step['durationSeconds']! as int;
+          expect(step['endSeconds'], elapsed);
+        }
+        if (path == 'steps') {
+          expect(elapsed, source.durationSeconds);
+        } else {
+          expect(elapsed, source.program!.simplifiedDurationSeconds);
+        }
+      }
+    }
+  });
+
   test(
     'Reset Releaf Guide manifest covers every active Reset session',
     () async {
