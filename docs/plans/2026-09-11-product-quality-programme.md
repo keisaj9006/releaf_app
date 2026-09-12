@@ -1,5 +1,9 @@
 # Releaf product-quality programme
 
+[Accessible Reset phases](../release/2026-09-12-reset-live-phase.md): 543 full
+tests and clean analysis. Guided paced breathing exposes one live phase label;
+no-words mode disables automatic updates. Real TalkBack review remains pending.
+
 Reduced-motion follow-up: [static breathing path](../release/2026-09-12-reset-static-breath-path.md).
 The orbit marker no longer moves under reduced motion; phase text and timing
 remain active. Physical accessibility review is still required.

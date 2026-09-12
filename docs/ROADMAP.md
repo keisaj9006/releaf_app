@@ -2,6 +2,10 @@
 
 This roadmap converts the current repo + release gate + latest project decisions + Deep Research into execution order.
 
+[Reset phase accessibility](release/2026-09-12-reset-live-phase.md) now has
+live phase semantics, without a live per-second countdown or duplicate text.
+543 full tests passed; TalkBack timing and owner comfort still require Samsung.
+
 [Reduced-motion path](release/2026-09-12-reset-static-breath-path.md) now retains
 a static outline and advancing phase text. Continue phase-announcement
 accessibility verification; physical TalkBack and rendering QA remain pending.

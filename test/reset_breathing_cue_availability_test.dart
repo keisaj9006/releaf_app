@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -34,6 +35,49 @@ Future<SharedPreferences> _pump(WidgetTester tester, Widget home) async {
 }
 
 void main() {
+  testWidgets('guided breathing exposes one live phase, not a live countdown', (
+    tester,
+  ) async {
+    final semantics = tester.ensureSemantics();
+    await _pump(tester, const BreathingWidget(sessionId: 'equal-rhythm'));
+    SemanticsData phase() => tester
+        .getSemantics(
+          find.bySemanticsLabel(RegExp(r'Releaf calming visual\. Breathe')),
+        )
+        .getSemanticsData();
+    final inhale = phase();
+    expect(inhale.flagsCollection.isLiveRegion, isTrue);
+    expect(inhale.label, 'Releaf calming visual. Breathe in');
+    await tester.pump(const Duration(seconds: 1));
+    expect(phase().label, inhale.label);
+    await tester.pump(const Duration(seconds: 4));
+    expect(phase().label, 'Releaf calming visual. Breathe out');
+    expect(phase().flagsCollection.isLiveRegion, isTrue);
+    await tester.pumpWidget(const SizedBox.shrink());
+    semantics.dispose();
+  });
+
+  testWidgets('no words breathing does not enable live phase announcements', (
+    tester,
+  ) async {
+    final semantics = tester.ensureSemantics();
+    await _pump(
+      tester,
+      const BreathingWidget(
+        sessionId: 'equal-rhythm',
+        launchOptions: ResetLaunchOptions(showGuidanceText: false),
+      ),
+    );
+    final phase = tester
+        .getSemantics(
+          find.bySemanticsLabel(RegExp(r'Releaf calming visual\. Breathe')),
+        )
+        .getSemanticsData();
+    expect(phase.flagsCollection.isLiveRegion, isFalse);
+    await tester.pumpWidget(const SizedBox.shrink());
+    semantics.dispose();
+  });
+
   testWidgets('reduced motion keeps unequal breathing path stationary', (
     tester,
   ) async {

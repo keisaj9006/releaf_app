@@ -24,6 +24,7 @@ class ReleafSessionLivingForm extends StatefulWidget {
     this.reducedMotion = false,
     this.paused = false,
     this.elapsedSeconds,
+    this.announcePhase = false,
   });
 
   final ReleafArtworkVariant variant;
@@ -38,6 +39,7 @@ class ReleafSessionLivingForm extends StatefulWidget {
   final bool reducedMotion;
   final bool paused;
   final Animation<double>? elapsedSeconds;
+  final bool announcePhase;
 
   @override
   State<ReleafSessionLivingForm> createState() =>
@@ -116,6 +118,8 @@ class _ReleafSessionLivingFormState extends State<ReleafSessionLivingForm>
 
     return Semantics(
       container: true,
+      liveRegion: widget.announcePhase && widget.phaseLabel != null,
+      excludeSemantics: true,
       label: widget.phaseLabel == null
           ? 'Releaf calming visual'
           : 'Releaf calming visual. ${widget.phaseLabel}',

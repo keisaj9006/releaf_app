@@ -2,6 +2,11 @@
 
 Snapshot: **2026-09-12**
 
+Reset [accessible phase updates](release/2026-09-12-reset-live-phase.md) now
+expose one live phase label for guided paced breathing; no-words mode leaves
+automatic phase updates off. 543 full tests passed and analysis is clean.
+Physical TalkBack behavior remains unverified; no narration substitute added.
+
 Reduced-motion follow-up: [static breathing path](release/2026-09-12-reset-static-breath-path.md)
 retains the outline and current captions without a moving marker or interpolated
 progress. 23 focused tests passed; analysis clean. Device review remains pending.

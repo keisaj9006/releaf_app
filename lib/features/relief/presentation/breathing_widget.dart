@@ -991,6 +991,12 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
                                         phaseLabel: phaseLabel,
                                         inhaleSeconds:
                                             breathPattern?.inhaleSeconds ?? 4,
+                                        announcePhase:
+                                            isPacedBreathing &&
+                                            widget
+                                                .launchOptions
+                                                .showGuidanceText &&
+                                            !_pausedByLifecycle,
                                         holdAfterInhaleSeconds:
                                             breathPattern
                                                 ?.holdAfterInhaleSeconds ??
