@@ -8,6 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:releaf_app/core/providers.dart';
+import 'package:releaf_app/features/relief/presentation/breathing_widget.dart';
 import 'package:releaf_app/features/sound/application/sound_player_controller.dart';
 import 'package:releaf_app/features/sound/data/sound_catalog.dart';
 import 'package:releaf_app/features/sound/presentation/sound_player_screen.dart';
@@ -127,6 +128,76 @@ Future<void> _pumpPlayer(
 }
 
 void main() {
+  testWidgets('returning to Reset cancels a pending Sound load', (
+    tester,
+  ) async {
+    final prefs = await _preferences();
+    final gate = Completer<void>();
+    final driver = _LoadingDriver()..loadGate = gate;
+    final controller = SoundPlayerController(
+      const SoundCatalog(),
+      prefs,
+      driver: driver,
+    );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(prefs),
+          soundPlayerControllerProvider.overrideWith((ref) => controller),
+        ],
+        child: const MaterialApp(
+          home: BreathingWidget(sessionId: 'equal-rhythm'),
+        ),
+      ),
+    );
+    await tester.pump();
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+    await tester.pump();
+    final starting = controller.playById('deep-drift');
+    await driver.loading.future;
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pump();
+    gate.complete();
+    await starting;
+    await tester.pump();
+    expect(controller.state.isPlaying, isFalse);
+    expect(controller.state.isLoading, isFalse);
+    expect(driver.pauses, greaterThan(0));
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('entering Reset cancels a pending Sound load', (tester) async {
+    final prefs = await _preferences();
+    final gate = Completer<void>();
+    final driver = _LoadingDriver()..loadGate = gate;
+    final controller = SoundPlayerController(
+      const SoundCatalog(),
+      prefs,
+      driver: driver,
+    );
+    final starting = controller.playById('deep-drift');
+    await driver.loading.future;
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(prefs),
+          soundPlayerControllerProvider.overrideWith((ref) => controller),
+        ],
+        child: const MaterialApp(
+          home: BreathingWidget(sessionId: 'equal-rhythm'),
+        ),
+      ),
+    );
+    await tester.pump();
+    gate.complete();
+    await starting;
+    await tester.pump();
+    expect(controller.state.isPlaying, isFalse);
+    expect(controller.state.isLoading, isFalse);
+    expect(driver.pauses, greaterThan(0));
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
   test(
     'Sound relative seek uses exact ten seconds and clamps at track ends',
     () async {

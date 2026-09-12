@@ -6,11 +6,13 @@ in `C:\Users\joann\Releaf-Codex` on `releaf-development`. The canonical
 
 ## Execution
 
-Owner checkpoint instruction, 12 September: pause further feature development
+Completed owner checkpoint instruction, 12 September: pause further feature development
 and prepare the cumulative Meditation/Reset/Sound batch for Samsung review.
 Finish only batch defects and verification, update the existing app with
 `adb install -r`, and create/push a checkpoint after successful verification.
 See [checkpoint evidence](../release/2026-09-12-device-review-checkpoint.md).
+
+The owner subsequently resumed the programme from committed/pushed `16a0f2c`. Continue Reset audio lifecycle work, then the remaining tracks. Listening, approved missing narration and long-duration hardware checks remain pending.
 
 Implement small vertical milestones with TDD, focused verification, analysis,
 UI inspection, appropriate builds and conventional commits. Push only this
@@ -107,5 +109,5 @@ full checkpoint and Android debug build. No asset replacement or new approval.
   passed. No connected device, physical playback test or purchase performed.
 - Device checkpoint, 12 September: [Samsung review evidence](../release/2026-09-12-device-review-checkpoint.md).
   447 full tests passed, analyzer clean, APK installed with `adb install -r`.
-  Bounded UI smoke passed; no purchase or deletion. Further development remains
-  paused for the owner's visual/listening review.
+  Bounded UI smoke passed; no purchase or deletion. Checkpoint
+  completed as `16a0f2c`; independent development has resumed while owner review remains pending.

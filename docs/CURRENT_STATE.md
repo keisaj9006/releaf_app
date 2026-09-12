@@ -3,10 +3,10 @@
 Snapshot: **2026-09-12**
 Repo: `keisaj9006/releaf_app`  
 Branch: **`releaf-development`**  
-Checkpoint base: **`9fdf3df`** (Sound playback intent); subsequent
+Completed checkpoint: **`16a0f2c`**;
 Sound recovery and Samsung review are recorded in
 [checkpoint evidence](release/2026-09-12-device-review-checkpoint.md).
-Further feature development is paused for owner device review.
+Owner resumed development after `16a0f2c`. Listening and long-duration device review remain pending and do not block independent work.
 
 Subsequent internal quality work is tracked in
 [batch evidence](release/2026-09-11-internal-quality-batches.md), including
@@ -333,3 +333,5 @@ the active source has not been replaced.
 The owner has deliberately deferred repetitive manual phone testing during the engineering build phase.
 
 Continue automated engineering and batch device QA at RC. Hardware-only behavior must still be included in the final device matrix.
+
+Latest resumed milestone: [Reset audio handoff](release/2026-09-12-reset-audio-handoff.md), 449 full tests passed, analyzer clean and new debug APK built. Device unavailable; Reset ambience lifecycle cancellation is next.

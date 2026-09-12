@@ -157,7 +157,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
     if (_pausedByLifecycle || _phase != SessionPhase.running) return;
 
     final soundState = ref.read(soundPlayerControllerProvider);
-    if (soundState.isPlaying) {
+    if (soundState.isPlaying || soundState.isLoading) {
       try {
         await ref.read(soundPlayerControllerProvider.notifier).pause();
       } catch (_) {
@@ -706,7 +706,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
     }
 
     final soundState = ref.read(soundPlayerControllerProvider);
-    if (soundState.isPlaying) {
+    if (soundState.isPlaying || soundState.isLoading) {
       try {
         await ref.read(soundPlayerControllerProvider.notifier).pause();
       } catch (_) {

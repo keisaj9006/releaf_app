@@ -14,7 +14,7 @@ The following Sound milestone protects delayed track starts, notification
 cancellation and timer/volume ordering. Its exact verification is in
 [Sound playback evidence](release/2026-09-11-sound-playback-intent.md).
 Sound loading, retry and interruption fixes have passed 447 full-suite tests and
-clean analysis. Further feature development is paused for the owner-requested
+clean analysis. Development resumed after `16a0f2c`, the owner-requested
 [Samsung checkpoint](release/2026-09-12-device-review-checkpoint.md); the debug APK
 was installed non-destructively and bounded physical UI smoke passed. Owner
 visual/listening review and the full production-equivalent matrix remain open.
@@ -164,3 +164,5 @@ Potential bets:
 - product efficacy research.
 
 Avoid building large speculative systems before retention data supports them.
+
+Resumed milestone: [Reset audio handoff](release/2026-09-12-reset-audio-handoff.md) cancels pending Sound on entry/return. Next: Reset ambience cancellation, then remaining programme tracks.
