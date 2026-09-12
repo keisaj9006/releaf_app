@@ -2,6 +2,11 @@
 
 This roadmap converts the current repo + release gate + latest project decisions + Deep Research into execution order.
 
+[Sleep pause fallback and retry](release/2026-09-12-sleep-pause-fallback.md)
+passed 525 tests, analysis and Android build. Failed native pause/stop remains
+honest and recoverable; superseding timers retain guarded playback recovery.
+Samsung installation, long-duration and production-equivalent QA remain pending.
+
 [Sleep expiry after volume failure](release/2026-09-12-sleep-expiry-volume-failure.md)
 is fixed: 521 tests, analysis and Android build passed. Device update and
 long-duration/physical interruption QA remain pending. Continue remaining player

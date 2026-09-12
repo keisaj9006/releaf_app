@@ -1,5 +1,10 @@
 # Releaf product-quality programme
 
+Sleep recovery checkpoint: [pause fallback](../release/2026-09-12-sleep-pause-fallback.md),
+525 full tests, clean analysis, Android build and follow-up independent review.
+Pause failure attempts stop, retry can recover both failures, and newer timers
+retain recovery after delayed stop. No device connection; physical QA pending.
+
 Sleep reliability checkpoint: [expiry volume failure](../release/2026-09-12-sleep-expiry-volume-failure.md),
 521 full tests, clean analysis, Android debug build and follow-up independent
 review. A failed native mute no longer prevents expiry pause; stale errors are

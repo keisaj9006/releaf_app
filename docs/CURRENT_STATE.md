@@ -2,7 +2,12 @@
 
 Snapshot: **2026-09-12**
 
-Latest runtime checkpoint: [Sleep expiry volume failure](release/2026-09-12-sleep-expiry-volume-failure.md).
+Latest runtime verification: [Sleep pause fallback](release/2026-09-12-sleep-pause-fallback.md),
+**525/525 tests**, clean analysis and Android debug build. Expiry attempts stop
+if pause fails, retains honest state if stop also fails, and supports retry and
+superseding timer recovery. No connected Samsung; installation/review pending.
+
+Previous runtime checkpoint: [Sleep expiry volume failure](release/2026-09-12-sleep-expiry-volume-failure.md).
 Native volume errors no longer prevent the expiry pause. Stale failures cannot
 label a newer playback request failed. **521/521 tests**, clean analysis and
 Android debug build passed; Samsung disconnected, installation/review pending.

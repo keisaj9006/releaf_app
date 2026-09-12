@@ -27,6 +27,10 @@ class _LoadingDriver
   bool fail = false;
   bool failConfiguration = false;
   bool failVolume = false;
+  bool failPause = false;
+  bool failStop = false;
+  int stops = 0;
+  Completer<void>? stopGate;
   Completer<void>? volumeGate;
   int loads = 0;
   int resumes = 0;
@@ -79,12 +83,16 @@ class _LoadingDriver
   Future<void> pause() async {
     version++;
     pauses++;
+    if (failPause) throw StateError('private/native/pause/details');
     events.add(audio.PlayerState.paused);
   }
 
   @override
   Future<void> stop() async {
     version++;
+    stops++;
+    if (failStop) throw StateError('private/native/stop/details');
+    if (stopGate != null) await stopGate!.future;
     events.add(audio.PlayerState.stopped);
   }
 
@@ -136,6 +144,68 @@ Future<void> _pumpPlayer(
 }
 
 void main() {
+  for (final minutes in <int?>[30, null]) {
+    test('new timer $minutes survives delayed fallback stop', () async {
+      var now = DateTime(2026, 9, 12);
+      final driver = _LoadingDriver();
+      final controller = SoundPlayerController(
+        const SoundCatalog(),
+        await _preferences(),
+        driver: driver,
+        now: () => now,
+      );
+      addTearDown(controller.dispose);
+      await controller.playById('deep-drift');
+      await controller.setSleepTimer(1);
+      final gate = Completer<void>();
+      driver.failPause = true;
+      driver.stopGate = gate;
+      now = now.add(const Duration(minutes: 1));
+      final expiry = controller.syncSleepTimerNow();
+      await Future<void>.delayed(Duration.zero);
+      await controller.setSleepTimer(minutes);
+      driver.stopGate = null;
+      gate.complete();
+      await expiry;
+      expect(controller.state.isPlaying, isTrue);
+      expect(controller.state.sleepTimerMinutes, minutes);
+      expect(driver.loads, 2);
+    });
+  }
+
+  for (final stopFails in [false, true]) {
+    test(
+      'expiry pause failure falls back to stop, stop failure $stopFails',
+      () async {
+        var now = DateTime(2026, 9, 12);
+        final driver = _LoadingDriver();
+        final controller = SoundPlayerController(
+          const SoundCatalog(),
+          await _preferences(),
+          driver: driver,
+          now: () => now,
+        );
+        addTearDown(controller.dispose);
+        await controller.playById('deep-drift');
+        await controller.setSleepTimer(1);
+        final initialStops = driver.stops;
+        driver.failPause = true;
+        driver.failStop = stopFails;
+        now = now.add(const Duration(minutes: 1));
+        await controller.syncSleepTimerNow();
+        expect(driver.stops, initialStops + 1);
+        expect(controller.state.isPlaying, stopFails);
+        expect(controller.state.hasPlaybackError, isTrue);
+        expect(controller.state.sleepTimerRemainingSeconds, isNull);
+        driver.failPause = false;
+        driver.failStop = false;
+        await controller.togglePlayPause();
+        expect(driver.loads, 2);
+        expect(controller.state.hasPlaybackError, isFalse);
+      },
+    );
+  }
+
   test(
     'old timer volume failure does not label newer playback as failed',
     () async {

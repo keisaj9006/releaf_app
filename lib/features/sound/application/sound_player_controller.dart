@@ -446,6 +446,10 @@ class SoundPlayerController extends StateNotifier<SoundPlayerState> {
 
   Future<void> togglePlayPause() async {
     if (!mounted) return;
+    if (state.hasPlaybackError && state.currentTrackId != null) {
+      await playById(state.currentTrackId!);
+      return;
+    }
     if (state.isPlaying || _startingRequest == _playbackRequest) {
       await pause();
     } else {
@@ -621,7 +625,35 @@ class SoundPlayerController extends StateNotifier<SoundPlayerState> {
     }
     final pausing = _driver.pause();
     driverIntent = _driverPlaybackIntent;
-    await pausing;
+    try {
+      await pausing;
+    } catch (_) {
+      if (!_currentSleepTimerRequest(request) || !playbackCurrent()) return;
+      state = state.copyWith(hasPlaybackError: true);
+      _readyTrackId = null;
+      // A rejected pause must not leave expiry without a stop attempt. Keep
+      // the expiry mute; never report stopped unless native stop succeeds.
+      try {
+        final stopping = _driver.stop();
+        driverIntent = _driverPlaybackIntent;
+        await stopping;
+        if (!_currentSleepTimerRequest(request) &&
+            mounted &&
+            wasPlaying &&
+            playbackCurrent() &&
+            trackId == state.currentTrackId &&
+            trackId != null) {
+          await playById(trackId);
+          return;
+        }
+        if (_currentSleepTimerRequest(request) && playbackCurrent()) {
+          state = state.copyWith(isPlaying: false);
+        }
+      } catch (_) {
+        // Retain the last observed transport state and the recoverable error.
+      }
+      return;
+    }
     if (!_currentSleepTimerRequest(request)) {
       if (mounted &&
           wasPlaying &&
