@@ -2,7 +2,13 @@
 
 Snapshot: **2026-09-12**
 
-Latest checkpoint verification: **514/514 tests passed**, clean analysis and
+Latest verification: **517/517 tests passed**, clean analysis and Android debug
+build for [single SDK initialization](release/2026-09-12-sdk-single-initialization.md).
+Overlapping configuration calls share one operation; failed configuration can be
+retried. Last installed Samsung checkpoint remains `abb98f7`; this internal change
+will be included with the next device review batch.
+
+Previous checkpoint verification: **514/514 tests passed**, clean analysis and
 Android debug build for [unresolved billing identity isolation](release/2026-09-12-unresolved-billing-identity.md).
 Failed identity transitions cannot refresh old-account access; pending callbacks
 and billing are blocked until the latest identity succeeds. Resume retries the

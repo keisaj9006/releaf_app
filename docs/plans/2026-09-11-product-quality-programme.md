@@ -1,5 +1,11 @@
 # Releaf product-quality programme
 
+Latest backend checkpoint: [single SDK initialization](../release/2026-09-12-sdk-single-initialization.md),
+517 full tests, clean analysis and Android build. Native configuration is shared
+by overlapping callers and retryable after failure. Device update is batched;
+last installed milestone is `abb98f7`. Continue remaining release reliability
+without repeating completed identity, key-validation or reward work.
+
 Backend checkpoint: [runtime SDK key validation](../release/2026-09-12-runtime-sdk-key-validation.md),
 510 tests, clean analysis, Android build and Samsung replacement passed.
 The subsequent [unresolved billing identity milestone](../release/2026-09-12-unresolved-billing-identity.md)

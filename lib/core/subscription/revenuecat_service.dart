@@ -7,6 +7,7 @@ class RevenueCatService {
 
   bool _initialized = false;
   bool _debugLogging = false;
+  Future<void>? _initialization;
   bool get isInitialized => _initialized;
 
   /// Build-time SDK keys must be supplied outside source control. This accepts
@@ -27,11 +28,13 @@ class RevenueCatService {
     required bool debug,
     String? appUserId,
   }) async {
-    _debugLogging = debug;
+    final pending = _initialization;
+    if (pending != null) return pending;
     if (_initialized) {
       _debugLog('Initialization skipped; Purchases is already configured.');
       return;
     }
+    _debugLogging = debug;
 
     final trimmedKey = apiKey.trim();
     _debugLog(
@@ -45,10 +48,28 @@ class RevenueCatService {
       return;
     }
 
+    final initialization = _configure(
+      apiKey: trimmedKey,
+      debug: debug,
+      appUserId: appUserId,
+    );
+    _initialization = initialization;
+    try {
+      await initialization;
+    } finally {
+      _initialization = null;
+    }
+  }
+
+  Future<void> _configure({
+    required String apiKey,
+    required bool debug,
+    String? appUserId,
+  }) async {
     try {
       await Purchases.setLogLevel(debug ? LogLevel.debug : LogLevel.info);
       await Purchases.configure(
-        buildConfiguration(apiKey: trimmedKey, appUserId: appUserId),
+        buildConfiguration(apiKey: apiKey, appUserId: appUserId),
       );
       _initialized = true;
       _debugLog('Purchases.configure completed.');

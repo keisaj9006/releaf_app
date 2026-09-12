@@ -2,6 +2,11 @@
 
 This roadmap converts the current repo + release gate + latest project decisions + Deep Research into execution order.
 
+[Single SDK initialization](release/2026-09-12-sdk-single-initialization.md)
+closes overlapping native configuration: 517 tests, clean analysis and Android
+debug build. Device installation is batched with the next device-review milestone.
+Continue remaining startup/offline and release-quality requirements.
+
 [Runtime SDK key validation](release/2026-09-12-runtime-sdk-key-validation.md)
 passed 510 tests, clean analysis and Android debug build. The subsequent
 [unresolved billing identity fix](release/2026-09-12-unresolved-billing-identity.md)
