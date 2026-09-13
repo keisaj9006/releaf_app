@@ -22,16 +22,24 @@ Latest complete automated artifact evidence:
 including clean analysis, 572 full-suite tests, targeted Brain/Reset gates,
 production manifests, standard and Premium Preview debug APKs, release AAB,
 Android 16 KB compatibility, web release smoke and the external account-deletion
-resource contract. This is the current automated code/build checkpoint; it does
-not close production signing, owner-listening, public-hosting, Play Console,
-actual store-asset creation or physical-device gates.
+resource contract. This remains the latest fully completed artifact checkpoint
+until the current RC-hardening CI chain completes. It does not close production
+signing, owner-listening, public-hosting, Play Console, actual store-asset creation
+or physical-device gates.
+
+RC hardening after that checkpoint has frozen the release version at
+`1.0.0+20260913`, parked Meditate outside the active 1.0 discovery/marketing
+surface, aligned Home/Account/Premium copy with the active Reset / Brain / Sleep
+pillars, and aligned the canonical Google Play listing to the same scope. The
+Meditate module and direct route are preserved; this scope decision does not
+certify unfinished meditation recordings.
 
 | Gate | Status | Notes |
 | --- | --- | --- |
 | RESET core | DONE / CONTENT + DEVICE QA | Canonical Reset model, completion history, lifecycle and access tests are in CI. V01 dedicated lungs are protected across all ten preserved paced-breathing methods while each canonical BreathPattern remains intact. Shoulder Drop and the eight-stage Full Body Scan are implemented with reduced-motion and narrow/large-text coverage. Rejected breathing tones are excluded from runtime playback; cue controls disclose unavailable audio while silent/reduced-motion phase guidance remains usable. Final human audio/content approval and DQA-23 remain open. |
 | BRAIN core | DONE / QA | Canonical Brain flow is implemented. Memory and Labyrinth both support progression through level 50; Labyrinth higher levels increase maze complexity/precision rather than raw movement speed. Current/max level labels and personal-best persistence/label behaviour are protected by tests. Continue release/device QA; do not add games merely to increase scope. |
 | Sleep player/timer | DONE / CONTENT | Player/timer behaviour is tested, including delayed-start cancellation, media-notification intent and volume restoration after interrupted expiry. The ten bundled sound assets are covered by the repository audio audit and documented engineering measurements. Final owner listening/sound selection and physical background/interruption QA remain open. Sleep must not contain narration. |
-| Meditation player | DONE / CONTENT | Player and scripted content exist. Library/preview/player disclose recording availability; incomplete narration has accessible caption controls and large-text coverage. Playback/seek/back/lifecycle contracts are automated. Final approved Releaf Guide recordings and owner audio review remain content dependencies; do not silently substitute a new narrator identity. |
+| Meditate module | PARKED / NON-BLOCKING FOR ACTIVE 1.0 SURFACE | Player, route and scripted content remain in the codebase, but Meditate is not an active Releaf 1.0 pillar and must not be auto-discovered from Home or promoted through Premium/Store Listing while its content remains incomplete. An explicitly started/active session may still resume. Final narration/content work is deferred from the critical 1.0 release path unless this scope decision is intentionally reopened. |
 | Account auth | DONE / QA | Sign-up, sign-in, confirmation resend, password recovery, profile update and sign-out are implemented. Final production-equivalent device QA remains open. |
 | Account deletion | DONE / E2E VERIFIED | Hardened `delete-account` version 4 is ACTIVE with JWT verification. A Samsung SM-S928B Test Store debug run authenticated a dedicated disposable account, identified the same UUID in RevenueCat, completed in-app deletion, then verified zero target Auth/profile/progress/Storage records and `Customer not found` in RevenueCat. A protected primary QA account was explicitly excluded. See [deployment evidence](2026-09-11-delete-account-deployment.md). Repeat DQA-18 on the production-equivalent RC as part of the full device matrix. |
 | Emergency privacy/access | DONE | No Premium gate; excluded from standard progress sync and DB-enforced exclusion is present. |
@@ -44,10 +52,10 @@ actual store-asset creation or physical-device gates.
 | Privacy policy | BLOCKED | In-app data disclosures and the health-safety notice are present. Final controller/contact details, retention, final legal review and a public HTTPS privacy-policy URL are still required. |
 | Web account-deletion URL | CODE READY / PUBLIC DEPLOY REQUIRED | `web/delete-account.html` provides a Releaf-branded external deletion resource and routes users into the secure browser account flow, which uses the existing authenticated deletion path. The `3186cb1` web release smoke verifies the resource contract. Final closure requires deployment at a stable public HTTPS URL, live end-to-end verification and entry of that URL in the Play Console Data safety form. Do not reuse the unrelated SecondPart Vercel project. |
 | Google Play health declaration | CONTENT READY / PLAY CONSOLE SUBMISSION REQUIRED | Release mapping is documented in `docs/release/google_play_health_declaration.md`: Sleep Management; Stress Management, Relaxation, Mental Acuity; and Mental and Behavioral Health. In-app health-safety copy is protected by tests. Closure still requires completing and submitting the declaration in Play Console and keeping the final Store Listing aligned. |
-| Store listing | COPY READY / ASSETS + PLAY ENTRY REQUIRED | Canonical UK-English copy, category, compliance lock and asset specification are documented in `docs/release/google_play_store_listing.md`. `tool/release/play_store_asset_policy.dart` is contract-tested, and `tool/build_play_release.ps1` now enforces the `--strong-listing` asset gate before a production Play build can continue. The real `store/google-play/` pack is still absent. Final closure requires real support/contact fields, current release screenshots, final app icon/feature graphic, owner review and Play Console entry/preview. |
+| Store listing | COPY ALIGNED / ASSETS + PLAY ENTRY REQUIRED | Canonical UK-English copy now markets only the active Reset / Brain / Sleep 1.0 surface, with Emergency Calm and local-first progress described accurately. `tool/release/play_store_asset_policy.dart` is contract-tested, and `tool/build_play_release.ps1` enforces the `--strong-listing` asset gate before a production Play build can continue. The real `store/google-play/` pack is still absent. Final closure requires real support/contact fields, current release screenshots, final app icon/feature graphic, owner review and Play Console entry/preview. |
 | Google Play Data safety | CONTENT READY / VERIFY + PLAY SUBMISSION REQUIRED | Canonical release mapping is documented and contract-tested in `docs/release/google_play_data_safety.md`. Local-only progress/Emergency/sensor data are excluded from collection; Supabase account data and RevenueCat user ID/purchase history are mapped. Before submission, verify RevenueCat dashboard integrations/provider terms, production transport behaviour and final deletion/public-policy URLs, then enter the answers in Play Console. |
-| Versioning | OPEN | Keep pre-release version during development; set final `1.0.0+<build>` only for release candidate. |
-| Device release QA | AUTOMATION READY / PHYSICAL DEVICE RUN REQUIRED | CI protects core lifecycle, audio, auth/deep-link, billing identity, deletion, policy, Brain personal-best and Reset pilot contracts. The production-equivalent physical-device matrix is defined in `docs/release/android_device_release_qa.md`; DQA-23 consolidates V01 lungs, Shoulder Drop, eight-stage Full Body Scan, reduced motion and enlarged-text verification into the final device pass. Closure requires the exact RC build to pass every mandatory row with evidence, including Play-distributed purchase/restore and deployed account-deletion flows. |
+| Versioning | FROZEN / RC | Releaf 1.0 is frozen at `1.0.0+20260913` for the current release candidate. If another RC is required, increase only the build number/versionCode while keeping marketing version `1.0.0`, unless an intentional product-version decision is made. |
+| Device release QA | AUTOMATION READY / FINAL PHYSICAL RUN REQUIRED | CI protects core lifecycle, audio, auth/deep-link, billing identity, deletion, policy, Brain personal-best and Reset pilot contracts. The production-equivalent physical-device matrix is defined in `docs/release/android_device_release_qa.md`; DQA-23 consolidates V01 lungs, Shoulder Drop, eight-stage Full Body Scan, reduced motion and enlarged-text verification into the final device pass. By release-plan decision, this is one consolidated final phone run after signing, billing, public legal URLs and the production-equivalent candidate are ready; do not fragment it into earlier ad-hoc device passes. Closure requires the exact RC build to pass every mandatory row with evidence, including Play-distributed purchase/restore and deployed account-deletion flows. |
 | Play closed testing | PLAN READY / ACCOUNT CHECK + PLAY RUN REQUIRED | Account-specific requirements and the test/feedback/Production-access process are defined in `docs/release/google_play_closed_testing.md`. Verify the Play Console account type/creation date and Dashboard requirement; if the current Google rule applies, satisfy its continuous tester/duration criterion before applying for Production access. The final run must use a production-equivalent candidate and feed the Device Release QA evidence. |
 
 Latest audit evidence: [11 September 2026 repository audit](2026-09-11-repository-audit.md).
@@ -89,6 +97,8 @@ preserving the historical milestones above.
 
 These must not delay public release unless a new defect makes them P0:
 
+- activating Meditate as a first-class navigation/marketing pillar and completing
+  its final narration/content production;
 - runtime bidirectional cloud progress sync;
 - additional Brain games beyond the current validated set;
 - Leaves cloud sync (requires an immutable reward ledger first);
@@ -107,4 +117,6 @@ These must not delay public release unless a new defect makes them P0:
 8. Emergency remains available without Premium and outside normal sync/history.
 9. Keep health/store claims aligned with the declared release surface and do not
    make unsupported diagnosis, treatment, cure or prevention claims.
-10. A P0 regression reopens the corresponding gate even if it was previously DONE.
+10. Do not reintroduce parked Meditate into Home, Premium or Store Listing for 1.0
+    unless the release scope is intentionally reopened and its content gate is closed.
+11. A P0 regression reopens the corresponding gate even if it was previously DONE.
