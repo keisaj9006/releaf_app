@@ -95,10 +95,6 @@ class ScaffoldWithNavBar extends ConsumerWidget {
                 label: 'Reset',
               ),
               NavigationDestination(
-                icon: Icon(Icons.spa_outlined),
-                label: 'Meditate',
-              ),
-              NavigationDestination(
                 icon: Icon(Icons.nightlight_outlined),
                 label: 'Sleep',
               ),
@@ -134,9 +130,8 @@ Color _accentForIndex(int index) {
   return switch (index) {
     0 => ReleafFeatureAccents.home,
     1 => ReleafFeatureAccents.reset,
-    2 => ReleafFeatureAccents.meditation,
-    3 => ReleafFeatureAccents.sleep,
-    4 => ReleafFeatureAccents.brain,
+    2 => ReleafFeatureAccents.sleep,
+    3 => ReleafFeatureAccents.brain,
     _ => ReleafColors.sage,
   };
 }
