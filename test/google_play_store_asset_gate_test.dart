@@ -133,4 +133,12 @@ void main() {
       contains('at least 4 portrait phone screenshots'),
     );
   });
+
+  test('production Play release script enforces the strong asset gate', () {
+    final source = File('tool/build_play_release.ps1').readAsStringSync();
+
+    expect(source, contains('play_store_asset_policy.dart'));
+    expect(source, contains('--strong-listing'));
+    expect(source, contains('Google Play listing asset gate failed'));
+  });
 }
