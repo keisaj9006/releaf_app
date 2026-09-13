@@ -7,7 +7,7 @@ import 'package:releaf_app/core/legal/releaf_legal_config.dart';
 import 'package:releaf_app/features/legal/privacy.dart';
 
 void main() {
-  test('legal config requires complete production HTTPS metadata', () {
+  test('legal config requires complete production public metadata', () {
     const incomplete = ReleafLegalConfig(
       dataControllerName: '',
       privacyContactEmail: 'not-an-email',
@@ -20,11 +20,11 @@ void main() {
     expect(incomplete.missingProductionFields, hasLength(5));
 
     const ready = ReleafLegalConfig(
-      dataControllerName: 'Releaf Example Ltd',
-      privacyContactEmail: 'privacy@example.com',
-      privacyPolicyUrl: 'https://example.com/privacy',
-      accountDeletionUrl: 'https://example.com/delete-account',
-      privacyLastUpdated: '9 September 2026',
+      dataControllerName: 'Releaf Wellness Ltd',
+      privacyContactEmail: 'privacy@releafwellness.co.uk',
+      privacyPolicyUrl: 'https://releafwellness.co.uk/privacy',
+      accountDeletionUrl: 'https://releafwellness.co.uk/delete-account',
+      privacyLastUpdated: '2026-09-13',
     );
 
     expect(ready.isProductionReady, isTrue);
