@@ -18,6 +18,6 @@ Subsequent code may retain version `1.0.0` while increasing the build number if 
 
 ## Current verification candidate
 
-Home discovery was tightened after the version freeze so the parked Meditate surface is no longer suggested automatically from Home while its direct route and explicit active-session resume path remain available. Sound discovery is aligned with the same release boundary: Sound links to the active Sleep pillar but no longer advertises or routes users into parked Meditate. The Meditate module and direct route remain intact.
+Home discovery was tightened after the version freeze so the parked Meditate surface is no longer suggested automatically from Home while its direct route and explicit active-session resume path remain available. Sound discovery is aligned with the same release boundary: Sound links to the active Sleep pillar but no longer advertises or routes users into parked Meditate. Premium copy is now aligned to the same 1.0 product truth: it promotes Reset, Brain, Sound and Sleep rather than the parked Meditate surface. The Meditate module and direct route remain intact.
 
-Current candidate code/test checkpoint: `3ac8bba29b73916880015d4837af2bffb4912c59`. Stale legacy Sound tests have been aligned with the approved parked-Meditate boundary. This note records the candidate only; the Home + Sound parking boundary is not considered fully verified until the fresh branch P0 and web smoke workflows complete successfully.
+Current candidate runtime checkpoint: `b5243589064877e0066935cd977fcd4c90b9a4b7`. This note records the candidate only; the Home + Sound + Premium parked-Meditate boundary is not considered fully verified until the fresh branch P0 and web smoke workflows complete successfully.
