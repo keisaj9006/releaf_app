@@ -1,197 +1,88 @@
 from pathlib import Path
 import subprocess
 
-path = Path('lib/games/labyrinth/labyrinth_game_screen.dart')
-text = path.read_text(encoding='utf-8')
+# This helper is intentionally self-retiring. The L50 gameplay migration has
+# already been validated and committed; this final run removes the temporary
+# CI machinery while preserving the permanent L50 regression test in P0.
+game_path = Path('lib/games/labyrinth/labyrinth_game_screen.dart')
+game_text = game_path.read_text(encoding='utf-8')
 
-gameplay_already_present = (
-    'rawTrainingLevel.clamp(1, 50)' in text
-    and 'static const int _maxTrainingLevel = 50;' in text
-    and 'final level = rawLevel.clamp(1, 50).toInt();' in text
+required_markers = (
+    'rawTrainingLevel.clamp(1, 50)',
+    'static const int _maxTrainingLevel = 50;',
+    'final level = rawLevel.clamp(1, 50).toInt();',
 )
+if not all(marker in game_text for marker in required_markers):
+    raise SystemExit('Refusing CI cleanup: validated Labyrinth L50 gameplay is not present.')
 
+p0_path = Path('.github/workflows/flutter_p0.yml')
+p0 = p0_path.read_text(encoding='utf-8')
 
-def replace_once(old: str, new: str, label: str) -> None:
-    global text
-    count = text.count(old)
+permissions_block = """permissions:
+  contents: write
+
+"""
+apply_block = """      - name: Apply pending Labyrinth L50 gameplay patch
+        if: github.event_name == 'push'
+        run: |
+          python tool/patch_labyrinth_l50.py
+          dart format lib/games/labyrinth/labyrinth_game_screen.dart
+
+"""
+commit_block = """      - name: Commit validated Labyrinth L50 gameplay patch
+        if: github.event_name == 'push'
+        run: |
+          if git diff --quiet -- lib/games/labyrinth/labyrinth_game_screen.dart; then
+            echo \"Labyrinth L50 gameplay patch already committed.\"
+            exit 0
+          fi
+          git config user.name \"Releaf CI\"
+          git config user.email \"actions@users.noreply.github.com\"
+          git add lib/games/labyrinth/labyrinth_game_screen.dart
+          git diff --cached --check
+          git commit -m \"feat: scale Labyrinth gameplay through level 50\"
+          git push origin HEAD:releaf-development
+"""
+
+for label, block in (
+    ('temporary contents permission', permissions_block),
+    ('temporary apply step', apply_block),
+    ('temporary commit step', commit_block),
+):
+    count = p0.count(block)
     if count != 1:
-        raise SystemExit(f'{label}: expected exactly one match, got {count}')
-    text = text.replace(old, new, 1)
+        raise SystemExit(f'Refusing CI cleanup: {label} expected once, found {count}.')
+    p0 = p0.replace(block, '', 1)
 
+if 'test/labyrinth_level_50_progression_test.dart' not in p0:
+    raise SystemExit('Refusing CI cleanup: permanent Labyrinth L50 P0 test is missing.')
 
-if not gameplay_already_present:
-    replace_once(
-        """/// Keeps the persistent Brain level as the medium baseline while allowing a
-/// player to choose a calmer or more demanding maze before the timer starts.
-/// The public progression model remains unchanged.
-@visibleForTesting
-int labyrinthProfileLevelForDifficulty(
-  int rawTrainingLevel,
-  BrainDifficulty difficulty,
-) {
-  final trainingLevel = rawTrainingLevel.clamp(1, 12).toInt();
-  final offset = switch (difficulty) {
-    BrainDifficulty.easy => -2,
-    BrainDifficulty.medium => 0,
-    BrainDifficulty.hard => 2,
-  };
-  return (trainingLevel + offset).clamp(1, 12).toInt();
-}
-""",
-        """/// Keeps the persistent Brain level as the medium baseline while allowing a
-/// player to choose a calmer or more demanding maze before the timer starts.
-/// Legacy L1-L12 difficulty stays exact; the extended path continues to L50.
-@visibleForTesting
-int labyrinthProfileLevelForDifficulty(
-  int rawTrainingLevel,
-  BrainDifficulty difficulty,
-) {
-  final trainingLevel = rawTrainingLevel.clamp(1, 50).toInt();
-  final offset = switch (difficulty) {
-    BrainDifficulty.easy => -2,
-    BrainDifficulty.medium => 0,
-    BrainDifficulty.hard => 2,
-  };
+p0_path.write_text(p0, encoding='utf-8')
 
-  if (trainingLevel <= 12) {
-    return (trainingLevel + offset).clamp(1, 12).toInt();
-  }
-  return (trainingLevel + offset).clamp(1, 50).toInt();
-}
-""",
-        'difficulty resolver',
-    )
+for temporary_path in (
+    Path('.github/workflows/labyrinth_l50_once.yml'),
+    Path('tool/labyrinth_l50_trigger.txt'),
+    Path('tool/patch_labyrinth_l50.py'),
+):
+    if temporary_path.exists():
+        temporary_path.unlink()
 
-    replace_once(
-        """@visibleForTesting
-double labyrinthBallRadiusForLevel(int rawLevel) {
-  final level = rawLevel.clamp(1, 12).toInt();
-  final progress = (level - 1) / 11.0;
-  return 0.19 - (0.05 * progress);
-}
-""",
-        """@visibleForTesting
-double labyrinthBallRadiusForLevel(int rawLevel) {
-  final level = rawLevel.clamp(1, 50).toInt();
-  if (level <= 12) {
-    final progress = (level - 1) / 11.0;
-    return 0.19 - (0.05 * progress);
-  }
+subprocess.run(['git', 'config', 'user.name', 'Releaf CI'], check=True)
+subprocess.run(['git', 'config', 'user.email', 'actions@users.noreply.github.com'], check=True)
+subprocess.run(['git', 'add', '-A'], check=True)
+subprocess.run(['git', 'diff', '--cached', '--check'], check=True)
 
-  final extendedProgress = (level - 12) / 38.0;
-  return 0.14 - (0.04 * extendedProgress);
-}
-""",
-        'ball radius',
-    )
+staged = subprocess.run(
+    ['git', 'diff', '--cached', '--quiet'],
+    check=False,
+).returncode
+if staged == 0:
+    print('Labyrinth L50 migration tooling is already clean.')
+    raise SystemExit(0)
 
-    replace_once(
-        '  static const int _maxTrainingLevel = 12;',
-        '  static const int _maxTrainingLevel = 50;',
-        'screen max level',
-    )
-
-    replace_once(
-        """    final level = rawLevel.clamp(1, 12).toInt();
-    final stage = mazeStage.clamp(1, maxLabyrinthMazeStages).toInt();
-    final columns = (5 + ((level - 1) ~/ 2)).clamp(5, 10).toInt();
-    final rows = (7 + ((level - 1) ~/ 2)).clamp(7, 12).toInt();
-""",
-        """    final level = rawLevel.clamp(1, 50).toInt();
-    final stage = mazeStage.clamp(1, maxLabyrinthMazeStages).toInt();
-    final int columns;
-    final int rows;
-    if (level <= 12) {
-      columns = (5 + ((level - 1) ~/ 2)).clamp(5, 10).toInt();
-      rows = (7 + ((level - 1) ~/ 2)).clamp(7, 12).toInt();
-    } else {
-      final expansionBand = 1 + ((level - 13) ~/ 10);
-      columns = (10 + expansionBand).clamp(11, 14).toInt();
-      rows = (12 + expansionBand).clamp(13, 16).toInt();
-    }
-""",
-        'maze dimensions',
-    )
-
-    replace_once(
-        """    final cellCount = columns * rows;
-    final targetRatio = 0.22 + (((level - 1) / 11.0) * 0.26);
-    final targetPathMoves =
-        (cellCount * targetRatio).round().clamp(6, cellCount - 1).toInt();
-    final targetTurns = (2 + (level * 0.65)).round();
-
-    _MazeCandidate? best;
-    var bestScore = double.infinity;
-
-    for (var candidateIndex = 0; candidateIndex < 72; candidateIndex++) {
-""",
-        """    final cellCount = columns * rows;
-    final targetRatio = level <= 12
-        ? 0.22 + (((level - 1) / 11.0) * 0.26)
-        : 0.48 + (((level - 12) / 38.0) * 0.10);
-    final targetPathMoves =
-        (cellCount * targetRatio).round().clamp(6, cellCount - 1).toInt();
-    final targetTurns = level <= 12
-        ? (2 + (level * 0.65)).round()
-        : 10 + (((level - 12) / 38.0) * 7).round();
-
-    _MazeCandidate? best;
-    var bestScore = double.infinity;
-    final candidateCount = level <= 12 ? 72 : 96;
-
-    for (var candidateIndex = 0;
-        candidateIndex < candidateCount;
-        candidateIndex++) {
-""",
-        'route complexity',
-    )
-
-    replace_once(
-        """    final selected = best!;
-    final secondsPerMove = 2.9 - ((level - 1) * 0.035);
-    final timeLimitSeconds =
-        (28 + (selected.metrics.moves * secondsPerMove))
-            .round()
-            .clamp(50, 150)
-            .toInt();
-""",
-        """    final selected = best!;
-    final secondsPerMove = level <= 12
-        ? 2.9 - ((level - 1) * 0.035)
-        : 2.515 - (((level - 12) / 38.0) * 0.515);
-    final rawTimeLimit =
-        (28 + (selected.metrics.moves * secondsPerMove)).round();
-    final timeLimitSeconds = level <= 12
-        ? rawTimeLimit.clamp(50, 150).toInt()
-        : rawTimeLimit.clamp(55, 180).toInt();
-""",
-        'timer scaling',
-    )
-
-    path.write_text(text, encoding='utf-8')
-    print('Applied Labyrinth L50 gameplay patch.')
-else:
-    print('Labyrinth L50 gameplay patch is already present.')
-
-# Update the one legacy assertion whose intent is cumulative-progress
-# preservation, not the old global L12 cap. This remains narrow and data-driven.
-test_path = Path('test/brain_flow_test.dart')
-test_text = test_path.read_text(encoding='utf-8')
-old_assertion = "expect(restored.state.trainingLevelFor('labyrinth'), maxBrainTrainingLevel);"
-new_assertion = """expect(
-      restored.state.trainingLevelFor('labyrinth'),
-      (1 +
-              restored.state.completionCountFor('labyrinth') ~/
-                  brainSessionsPerTrainingLevel)
-          .clamp(1, maxBrainTrainingLevelFor('labyrinth')),
-    );"""
-
-if old_assertion in test_text:
-    test_text = test_text.replace(old_assertion, new_assertion, 1)
-    test_path.write_text(test_text, encoding='utf-8')
-    subprocess.run(['git', 'add', str(test_path)], check=True)
-    print('Updated the cumulative-progress Labyrinth assertion for the L50 cap.')
-elif new_assertion in test_text:
-    print('Labyrinth cumulative-progress assertion already uses the game-specific cap.')
-else:
-    raise SystemExit('legacy Labyrinth cumulative-progress assertion was not found')
+subprocess.run(
+    ['git', 'commit', '-m', 'chore: clean Labyrinth L50 migration tooling'],
+    check=True,
+)
+subprocess.run(['git', 'push', 'origin', 'HEAD:releaf-development'], check=True)
+print('Committed and pushed Labyrinth L50 CI cleanup.')
