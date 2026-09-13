@@ -110,19 +110,20 @@ PlayStoreAssetAudit auditPlayStoreAssets(
   final screenshotsDirectory = Directory(
     '${storeRoot.path}/screenshots/phone',
   );
-  final screenshots = screenshotsDirectory.existsSync()
-      ? screenshotsDirectory
-          .listSync(followLinks: false)
-          .whereType<File>()
-          .where((file) {
-            final extension = _extension(file.path);
-            return extension == 'png' ||
-                extension == 'jpg' ||
-                extension == 'jpeg';
-          })
-          .toList()
-        ..sort((a, b) => a.path.compareTo(b.path))
-      : <File>[];
+  var screenshots = <File>[];
+  if (screenshotsDirectory.existsSync()) {
+    screenshots = screenshotsDirectory
+        .listSync(followLinks: false)
+        .whereType<File>()
+        .where((file) {
+          final extension = _extension(file.path);
+          return extension == 'png' ||
+              extension == 'jpg' ||
+              extension == 'jpeg';
+        })
+        .toList()
+      ..sort((a, b) => a.path.compareTo(b.path));
+  }
 
   final minimumScreenshots = strongListing ? 4 : 2;
   if (screenshots.length < minimumScreenshots) {
