@@ -4,35 +4,38 @@
 
 This checklist is an execution view, not a replacement gate.
 
+**Latest complete automated code/build checkpoint:** `7fb186a9551c2fbb8fd6149fba540a9d23519c47` — see `docs/release/2026-09-13-ci-7fb186a.md`.
+
 ## A. Engineering baseline
 
-- [ ] Confirm `releaf-development`.
-- [ ] Confirm working tree state.
-- [ ] Run `flutter pub get`.
-- [ ] Run `flutter analyze`.
-- [ ] Run full `flutter test`.
-- [ ] Run relevant existing release/tooling checks.
-- [ ] Verify latest Reset movement commit has not introduced regression.
-- [ ] Record exact baseline results.
+- [x] Confirm `releaf-development`.
+- [ ] Confirm local working tree state immediately before the final RC build.
+- [x] Run `flutter pub get`.
+- [x] Run `flutter analyze`.
+- [x] Run full `flutter test`.
+- [x] Run relevant existing release/tooling checks.
+- [x] Verify latest Reset movement/visual changes have not introduced regression.
+- [x] Record exact baseline results and artifact digests.
 
 ## B. Core product — preserve / QA
 
 ### RESET
 - [x] Canonical Reset core implemented per release gate.
-- [ ] Verify latest movement visuals.
-- [ ] Verify natural breath guidance/audio assets.
-- [ ] Verify reduced-motion behavior.
-- [ ] Verify basic urgent content remains unblocked.
-- [ ] Keep internal Emergency access/privacy semantics intact.
+- [x] Verify latest movement visuals: V01 lungs, Shoulder Drop and eight-stage Full Body Scan.
+- [ ] Final owner approval of natural breath guidance/audio assets.
+- [x] Verify reduced-motion behavior in automated coverage.
+- [x] Verify basic urgent content remains unblocked before Premium.
+- [x] Keep internal Emergency access/privacy semantics intact.
+- [ ] Complete DQA-23 on the final production-equivalent Android candidate.
 
 ### BRAIN
 - [x] Canonical Brain core implemented.
 - [x] 15 registered games present.
-- [ ] Complete release QA of game set.
-- [ ] Verify Labyrinth lifecycle/difficulty/50-stage path.
-- [ ] Verify Memory progression/stats behavior.
-- [ ] Verify daily training/results/personal-best flow.
-- [ ] Do not add games only to increase count.
+- [ ] Complete production-equivalent physical release QA of the game set.
+- [x] Verify Labyrinth lifecycle/difficulty and level-50 training path.
+- [x] Verify Memory level-50 progression/stats behavior.
+- [x] Verify daily training/results/personal-best flow.
+- [x] Keep 1.0 scope frozen rather than adding games only to increase count.
 
 ### MEDITATE
 - [x] Player engineering path exists.
@@ -40,32 +43,33 @@ This checklist is an execution view, not a replacement gate.
 - [x] Releaf Guide contract is 0.82×.
 - [ ] Audit which sessions have final approved narration.
 - [ ] Resolve missing approved narrator provider ID / production rendering dependency without guessing.
-- [ ] Verify pause/resume/seek/back/background behavior.
-- [ ] Final content/audio QA.
+- [x] Verify pause/resume/seek/back/background behavior in automated coverage.
+- [ ] Final content/audio owner QA.
 
 ### SLEEP / SOUND
 - [x] Player/timer engineering release gate marked DONE/CONTENT.
 - [x] Core Sleep policy = no narration.
 - [x] 10 canonical real sound tracks currently registered.
-- [ ] Asset/loop/metadata QA.
-- [ ] Final owner-approved sound selection/content.
-- [ ] Background/interruption/device QA.
-- [ ] Treat full mixer as separate deliberate scope unless release gate changes.
+- [x] Automated asset decode/duration/metadata and engineering loop/loudness measurements captured for the current catalog.
+- [ ] Final owner listening, perceptual loop check and approved sound selection/content.
+- [ ] Background/interruption physical-device QA.
+- [x] Treat full mixer as separate deliberate post-1.0 scope unless release gate changes.
 
 ## C. Account / backend / privacy
 
 - [x] Account auth code implemented.
-- [ ] Final auth/device QA.
-- [x] Account deletion code path prepared.
-- [ ] Configure server-only RevenueCat secret in Supabase environment.
-- [ ] Deploy hardened delete-account Edge function.
-- [ ] Verify deletion end-to-end.
+- [ ] Final auth/device QA on the production-equivalent RC.
+- [x] Account deletion code path implemented.
+- [x] Server-only RevenueCat erasure secret configured in the tested Supabase deletion environment.
+- [x] Hardened `delete-account` Edge Function version 4 deployed and verified.
+- [x] Disposable-account in-app deletion E2E verified against Supabase and RevenueCat.
+- [ ] Repeat DQA-18 on the final production-equivalent RC.
 - [x] RLS/security release gate currently DONE/MONITOR.
 - [ ] Final privacy controller/contact/retention details.
 - [ ] Final legal review as required.
 - [ ] Publish stable HTTPS privacy-policy URL.
-- [ ] Deploy stable external account-deletion URL.
-- [ ] Verify public deletion URL.
+- [ ] Deploy stable external account-deletion URL on Releaf-specific hosting.
+- [ ] Verify the public deletion URL end-to-end in a normal browser.
 
 ## D. Subscription / Google Play
 
@@ -75,17 +79,18 @@ This checklist is an execution view, not a replacement gate.
 - [ ] Verify current RevenueCat Offering/packages.
 - [ ] Purchase verification from Play-distributed build.
 - [ ] Restore verification from Play-distributed build.
-- [ ] Subscription management flow verification.
+- [ ] Subscription management flow verification on the final candidate.
 
 ## E. Android release
 
 - [x] Android API target/release tooling prepared per gate.
 - [ ] Configure private production upload keystore outside repo.
 - [ ] Produce final production-signed candidate.
-- [ ] Verify 16 KB compatibility/release checks.
+- [x] Verify automated release AAB and 16 KB compatibility checks.
 - [ ] Set final `1.0.0+<build>` only at RC.
-- [ ] Execute physical-device release matrix.
-- [ ] Capture release evidence.
+- [ ] Execute physical-device release matrix DQA-01…DQA-23.
+- [x] Capture current automated release evidence and artifact digests for `7fb186a`.
+- [ ] Capture final production-equivalent device/store evidence after external gates are available.
 
 ## F. Google Play Console
 
