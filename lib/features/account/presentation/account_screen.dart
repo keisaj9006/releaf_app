@@ -412,7 +412,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                               ],
                               const SizedBox(height: ReleafSpacing.lg),
                               Text(
-                                'Your account keeps identity and Premium access consistent across devices. Brain, Reset and meditation progress currently stays on this device and is not a cloud backup. Emergency support remains available without a paywall.',
+                                'Your account keeps identity and Premium access consistent across devices. Brain and Reset progress currently stays on this device and is not a cloud backup. Emergency support remains available without a paywall.',
                                 textAlign: TextAlign.center,
                                 style: ReleafTypography.meta.copyWith(
                                   color: ReleafColors.textMuted,
@@ -579,7 +579,7 @@ class _PremiumAccountCard extends StatelessWidget {
                 ? 'This debug build unlocks Premium content for owner testing. It does not represent a store purchase.'
                 : isPremium
                     ? 'Your entitlement applies across supported Premium content.'
-                    : 'See deeper Reset protocols, meditation and Sound content before deciding.',
+                    : 'See deeper Reset protocols, Brain training and expanded Sound & Sleep content before deciding.',
             style: ReleafTypography.body.copyWith(
               color: ReleafColors.textSecondary,
             ),
