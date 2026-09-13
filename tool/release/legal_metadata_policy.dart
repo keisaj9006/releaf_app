@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import '../../lib/core/legal/releaf_legal_config.dart';
+import 'package:releaf_app/core/legal/releaf_legal_config.dart';
 
 void main() {
   final env = Platform.environment;
