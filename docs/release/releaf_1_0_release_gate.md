@@ -18,12 +18,13 @@ When that state is reached, explicitly report:
 ## Current gates
 
 Latest complete automated artifact evidence:
-[13 September 2026 CI checkpoint for `7fb186a`](2026-09-13-ci-7fb186a.md), including
-clean analysis, targeted Brain/Reset gates, the full Flutter suite, production
-manifests, standard and Premium Preview debug APKs, release AAB, Android 16 KB
-compatibility, web release smoke and the external account-deletion resource
-contract. This is the current automated code/build checkpoint; it does not close
-production signing, owner-listening, public-hosting, Play Console or physical-device gates.
+[13 September 2026 Play asset-gate checkpoint for `3186cb1`](2026-09-13-play-asset-gate.md),
+including clean analysis, 572 full-suite tests, targeted Brain/Reset gates,
+production manifests, standard and Premium Preview debug APKs, release AAB,
+Android 16 KB compatibility, web release smoke and the external account-deletion
+resource contract. This is the current automated code/build checkpoint; it does
+not close production signing, owner-listening, public-hosting, Play Console,
+actual store-asset creation or physical-device gates.
 
 | Gate | Status | Notes |
 | --- | --- | --- |
@@ -38,12 +39,12 @@ production signing, owner-listening, public-hosting, Play Console or physical-de
 | Supabase security | DONE / MONITOR | RLS is enabled on product tables and current Supabase security advisor reports no lints. |
 | Android API level | DONE | Release baseline explicitly targets Android 16 / API 36 and has passed release-AAB CI smoke validation. |
 | Android release signing | PREPARED / SECRET REQUIRED | Debug signing is forbidden for release. Production upload keystore must remain private and be configured before store upload. |
-| Release AAB | CI DONE / PROD SIGNING REQUIRED | `7fb186a` builds and validates the release AAB and passes the 16 KB compatibility gate. Final Play artifact still requires the private production upload key. |
+| Release AAB | CI DONE / PROD SIGNING REQUIRED | `3186cb1` builds and validates the release AAB and passes the 16 KB compatibility gate. Final Play artifact still requires the private production upload key. |
 | RevenueCat / Google Play Billing | CODE READY / EXTERNAL CONFIG REQUIRED | Runtime billing hardening covers entitlement refresh, account-switch isolation, normalized store failures, annual/monthly package gating, restore and subscription management. Release tooling rejects missing, Test Store, secret, Apple, wrong-prefix, whitespace and implausibly short RevenueCat keys. Final closure requires the real `goog_` SDK key, active Play products/current RevenueCat Offering and purchase + restore verification from a Play-distributed test build. |
 | Privacy policy | BLOCKED | In-app data disclosures and the health-safety notice are present. Final controller/contact details, retention, final legal review and a public HTTPS privacy-policy URL are still required. |
-| Web account-deletion URL | CODE READY / PUBLIC DEPLOY REQUIRED | `web/delete-account.html` provides a Releaf-branded external deletion resource and routes users into the secure browser account flow, which uses the existing authenticated deletion path. The `7fb186a` web release smoke verifies the resource contract. Final closure requires deployment at a stable public HTTPS URL, live end-to-end verification and entry of that URL in the Play Console Data safety form. Do not reuse the unrelated SecondPart Vercel project. |
+| Web account-deletion URL | CODE READY / PUBLIC DEPLOY REQUIRED | `web/delete-account.html` provides a Releaf-branded external deletion resource and routes users into the secure browser account flow, which uses the existing authenticated deletion path. The `3186cb1` web release smoke verifies the resource contract. Final closure requires deployment at a stable public HTTPS URL, live end-to-end verification and entry of that URL in the Play Console Data safety form. Do not reuse the unrelated SecondPart Vercel project. |
 | Google Play health declaration | CONTENT READY / PLAY CONSOLE SUBMISSION REQUIRED | Release mapping is documented in `docs/release/google_play_health_declaration.md`: Sleep Management; Stress Management, Relaxation, Mental Acuity; and Mental and Behavioral Health. In-app health-safety copy is protected by tests. Closure still requires completing and submitting the declaration in Play Console and keeping the final Store Listing aligned. |
-| Store listing | COPY READY / ASSETS + PLAY ENTRY REQUIRED | Canonical UK-English title, short/full description, Health & Fitness category, compliance lock and screenshot/graphic specification are documented and contract-tested in `docs/release/google_play_store_listing.md`. Final closure requires real support/contact fields, current release screenshots, app icon/feature graphic and entry/preview in Play Console. |
+| Store listing | COPY READY / ASSETS + PLAY ENTRY REQUIRED | Canonical UK-English copy, category, compliance lock and asset specification are documented in `docs/release/google_play_store_listing.md`. `tool/release/play_store_asset_policy.dart` is contract-tested, and `tool/build_play_release.ps1` now enforces the `--strong-listing` asset gate before a production Play build can continue. The real `store/google-play/` pack is still absent. Final closure requires real support/contact fields, current release screenshots, final app icon/feature graphic, owner review and Play Console entry/preview. |
 | Google Play Data safety | CONTENT READY / VERIFY + PLAY SUBMISSION REQUIRED | Canonical release mapping is documented and contract-tested in `docs/release/google_play_data_safety.md`. Local-only progress/Emergency/sensor data are excluded from collection; Supabase account data and RevenueCat user ID/purchase history are mapped. Before submission, verify RevenueCat dashboard integrations/provider terms, production transport behaviour and final deletion/public-policy URLs, then enter the answers in Play Console. |
 | Versioning | OPEN | Keep pre-release version during development; set final `1.0.0+<build>` only for release candidate. |
 | Device release QA | AUTOMATION READY / PHYSICAL DEVICE RUN REQUIRED | CI protects core lifecycle, audio, auth/deep-link, billing identity, deletion, policy, Brain personal-best and Reset pilot contracts. The production-equivalent physical-device matrix is defined in `docs/release/android_device_release_qa.md`; DQA-23 consolidates V01 lungs, Shoulder Drop, eight-stage Full Body Scan, reduced motion and enlarged-text verification into the final device pass. Closure requires the exact RC build to pass every mandatory row with evidence, including Play-distributed purchase/restore and deployed account-deletion flows. |
@@ -80,9 +81,9 @@ layout fixes improve reliability; production transaction QA, owner listening and
 the full release-device matrix remain open.
 
 The latest complete automated release evidence is now
-[the 13 September `7fb186a` checkpoint](2026-09-13-ci-7fb186a.md). It supersedes
-older CI artifact checkpoints for the current code/build state while preserving
-the historical milestones above.
+[the 13 September Play asset-gate checkpoint](2026-09-13-play-asset-gate.md). It
+supersedes older CI artifact checkpoints for the current code/build state while
+preserving the historical milestones above.
 
 ## Non-blocking after 1.0
 

@@ -78,6 +78,33 @@ Do not invent these values. They must be supplied before store submission:
 
 ## Graphic asset pack
 
+### Repository contract and automated gate
+
+Final Google Play assets belong at these canonical repository paths:
+
+- `store/google-play/app-icon.png`;
+- exactly one of `store/google-play/feature-graphic.png`, `.jpg` or `.jpeg`;
+- `store/google-play/screenshots/phone/` for current phone screenshots.
+
+Validate the final pack locally with:
+
+```bash
+dart run tool/release/play_store_asset_policy.dart --root . --strong-listing
+```
+
+`tool/build_play_release.ps1` runs the same `--strong-listing` policy before a
+production Play build proceeds. The release script therefore fails closed when
+required store assets are absent or structurally invalid; normal development and
+P0 CI do not require the real store pack to exist.
+
+The automated policy verifies file presence, supported formats, dimensions,
+required icon alpha and the strong-listing screenshot count/orientation. It does
+**not** certify creative quality, owner approval, rights/provenance, screenshot
+freshness, truthful visual content or successful Play Console entry. At the
+`3186cb1` checkpoint the real `store/google-play/` pack is still absent, so the
+Store listing release gate remains open. Do not add placeholder graphics merely
+to make the validator pass.
+
 ### App icon
 
 Required Play asset:
@@ -154,16 +181,18 @@ Before entering this copy in Play Console:
 
 ## Play Console closure checklist
 
-1. Enter the approved app name, short description and full description.
-2. Set category to Health & Fitness and select only clearly relevant available tags.
-3. Supply the real support email and, preferably, support website.
-4. Supply the live public Privacy Policy and Account Deletion URLs.
-5. Upload final 512 × 512 app icon and 1,024 × 500 feature graphic.
-6. Upload at least four current portrait phone screenshots for the strongest listing
+1. Run the strong asset policy against the final `store/google-play/` pack and fix
+   every reported structural error.
+2. Enter the approved app name, short description and full description.
+3. Set category to Health & Fitness and select only clearly relevant available tags.
+4. Supply the real support email and, preferably, support website.
+5. Supply the live public Privacy Policy and Account Deletion URLs.
+6. Upload final 512 × 512 app icon and 1,024 × 500 feature graphic.
+7. Upload at least four current portrait phone screenshots for the strongest listing
    (minimum two are required to publish the store listing).
-7. Add accurate alt text to graphics/screenshots where Play Console offers it.
-8. Cross-check the final text against the submitted Health apps declaration.
-9. Preview the listing on phone form factor before release.
+8. Add accurate alt text to graphics/screenshots where Play Console offers it.
+9. Cross-check the final text against the submitted Health apps declaration.
+10. Preview the listing on phone form factor before release.
 
 ## Current Google Play sources
 
