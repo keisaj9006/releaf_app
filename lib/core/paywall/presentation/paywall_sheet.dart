@@ -176,10 +176,10 @@ class PaywallSheet extends ConsumerWidget {
                           ),
                           SizedBox(height: ReleafSpacing.md),
                           _PremiumBenefit(
-                            icon: Icons.spa_outlined,
-                            title: 'Premium meditation sessions',
+                            icon: Icons.extension_outlined,
+                            title: 'Advanced Brain training',
                             description:
-                                'Continue beyond the free foundations into the wider meditation library.',
+                                'Unlock deeper progressive cognitive training across Releaf Brain.',
                           ),
                           SizedBox(height: ReleafSpacing.md),
                           _PremiumBenefit(
