@@ -118,23 +118,17 @@ sound_path.write_text(sound, encoding='utf-8')
 
 test_path = Path('test/five_primary_destinations_test.dart')
 test = test_path.read_text(encoding='utf-8')
-
-test = replace_once(
-    test,
-    "      expect(find.byKey(const Key('sound-open-meditate')), findsOneWidget);\n",
+old_assertion = "      expect(find.byKey(const Key('sound-open-meditate')), findsOneWidget);\n"
+new_assertion = (
     "      expect(find.byKey(const Key('sound-open-meditate')), findsNothing);\n"
-    "      expect(find.byKey(const Key('sound-open-sleep')), findsOneWidget);\n",
-    'update initial Sound destination expectation',
+    "      expect(find.byKey(const Key('sound-open-sleep')), findsOneWidget);\n"
 )
-
-test = replace_once(
-    test,
-    "      expect(find.byKey(const Key('sound-open-meditate')), findsOneWidget);\n",
-    "      expect(find.byKey(const Key('sound-open-meditate')), findsNothing);\n"
-    "      expect(find.byKey(const Key('sound-open-sleep')), findsOneWidget);\n",
-    'update restored Sound destination expectation',
-)
-
+count = test.count(old_assertion)
+if count != 2:
+    raise SystemExit(
+        f'update Sound destination expectations: expected exactly two matches, found {count}'
+    )
+test = test.replace(old_assertion, new_assertion)
 test_path.write_text(test, encoding='utf-8')
 
 print('Sound no longer discovers parked Meditate; direct Meditate route remains untouched.')
