@@ -5,7 +5,45 @@ import 'package:go_router/go_router.dart';
 
 import '../releaf_design_tokens.dart';
 
+const List<String> _fullBodyScanStages = [
+  'Face',
+  'Shoulders',
+  'Arms',
+  'Chest',
+  'Center',
+  'Legs',
+  'Feet',
+  'Whole Body',
+];
+
 enum _BodyVisualMode { generic, fullBodyScan, shoulderDrop }
+
+int _fullBodyScanStageIndex(String phaseLabel, double progress) {
+  final normalized = phaseLabel.trim().toLowerCase();
+  final exact = _fullBodyScanStages.indexWhere(
+    (stage) => stage.toLowerCase() == normalized,
+  );
+  if (exact >= 0) return exact;
+
+  final clamped = progress.clamp(0.0, 1.0).toDouble();
+  return math.min(
+    _fullBodyScanStages.length - 1,
+    (clamped * _fullBodyScanStages.length).floor(),
+  );
+}
+
+String _shoulderMovementCue(String phaseLabel) {
+  final label = phaseLabel.trim().toLowerCase();
+  if (label.contains('lift')) return 'LIFT GENTLY';
+  if (label.contains('release') ||
+      label.contains('drop') ||
+      label.contains('let go')) {
+    return 'LET THEM DROP';
+  }
+  if (label.contains('settle')) return 'SETTLE HERE';
+  if (label.contains('notice')) return 'NOTICE YOUR SHOULDERS';
+  return 'MOVE GENTLY';
+}
 
 /// Body-focused Reset visual that mirrors gentle tension and release without
 /// implying a breathing rhythm.
@@ -90,9 +128,9 @@ class _ReleafBodyReleaseVisualState extends State<ReleafBodyReleaseVisual>
   String _semanticsLabel(_BodyVisualMode mode) {
     return switch (mode) {
       _BodyVisualMode.fullBodyScan =>
-        'Illustrated whole-body attention map. ${widget.phaseLabel} is highlighted as the current area of attention.',
+        'Full Body Scan. Stage ${_fullBodyScanStageIndex(widget.phaseLabel, widget.progress) + 1} of ${_fullBodyScanStages.length}. ${widget.phaseLabel} is the current area of attention.${widget.reducedMotion ? ' Motion reduced.' : ''}',
       _BodyVisualMode.shoulderDrop =>
-        'Illustrated shoulder movement guide. ${widget.phaseLabel}. Follow only a small comfortable shoulder movement.',
+        'Shoulder Drop. ${_shoulderMovementCue(widget.phaseLabel).toLowerCase()}. Use only a small comfortable movement.',
       _BodyVisualMode.generic =>
         'Illustrated upper-body guide. ${widget.phaseLabel}. The active jaw or shoulder area is highlighted.',
     };
@@ -125,6 +163,18 @@ class _ReleafBodyReleaseVisualState extends State<ReleafBodyReleaseVisual>
     };
   }
 
+  Widget _pilotOverlay(_BodyVisualMode mode) {
+    return switch (mode) {
+      _BodyVisualMode.fullBodyScan => _BodyScanStageIndicator(
+        stageIndex: _fullBodyScanStageIndex(widget.phaseLabel, widget.progress),
+      ),
+      _BodyVisualMode.shoulderDrop => _ShoulderMovementCue(
+        cue: _shoulderMovementCue(widget.phaseLabel),
+      ),
+      _BodyVisualMode.generic => const SizedBox.shrink(),
+    };
+  }
+
   @override
   void dispose() {
     _controller.dispose();
@@ -135,6 +185,57 @@ class _ReleafBodyReleaseVisualState extends State<ReleafBodyReleaseVisual>
   Widget build(BuildContext context) {
     final progress = widget.progress.clamp(0.0, 1.0).toDouble();
     final mode = _visualMode(context);
+
+    Widget visual = AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return CustomPaint(
+          key: _visualKey(mode),
+          painter: _visualPainter(mode, _controller.value),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              if (mode != _BodyVisualMode.generic)
+                Positioned(
+                  top: 22,
+                  left: 24,
+                  right: 24,
+                  child: _pilotOverlay(mode),
+                ),
+              Positioned(
+                left: 24,
+                right: 24,
+                bottom: 28,
+                child: Center(
+                  child: AnimatedSwitcher(
+                    duration: ReleafMotion.standard,
+                    child: FittedBox(
+                      key: ValueKey(widget.phaseLabel),
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        widget.phaseLabel.toUpperCase(),
+                        maxLines: 1,
+                        style: ReleafTypography.eyebrow.copyWith(
+                          color: ReleafColors.sage,
+                          letterSpacing: 1.3,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+
+    if (widget.reducedMotion) {
+      visual = KeyedSubtree(
+        key: const Key('reset-body-motion-static'),
+        child: visual,
+      );
+    }
 
     return Semantics(
       container: true,
@@ -151,31 +252,110 @@ class _ReleafBodyReleaseVisualState extends State<ReleafBodyReleaseVisual>
             child: child,
           );
         },
-        child: AnimatedBuilder(
-          animation: _controller,
-          builder: (context, child) {
-            return CustomPaint(
-              key: _visualKey(mode),
-              painter: _visualPainter(mode, _controller.value),
-              child: Align(
-                alignment: Alignment.bottomCenter,
-                child: AnimatedSwitcher(
-                  duration: ReleafMotion.standard,
-                  child: Padding(
-                    key: ValueKey(widget.phaseLabel),
-                    padding: const EdgeInsets.only(bottom: 30),
-                    child: Text(
-                      widget.phaseLabel.toUpperCase(),
-                      style: ReleafTypography.eyebrow.copyWith(
-                        color: ReleafColors.sage,
-                        letterSpacing: 1.3,
+        child: visual,
+      ),
+    );
+  }
+}
+
+class _BodyScanStageIndicator extends StatelessWidget {
+  const _BodyScanStageIndicator({required this.stageIndex});
+
+  final int stageIndex;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      key: const Key('reset-body-scan-stage-indicator'),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+      decoration: BoxDecoration(
+        color: ReleafColors.surface.withValues(alpha: 0.60),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: ReleafColors.sage.withValues(alpha: 0.16),
+        ),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Row(
+              children: [
+                for (var index = 0; index < _fullBodyScanStages.length; index++)
+                  Expanded(
+                    child: Container(
+                      height: index == stageIndex ? 4 : 3,
+                      margin: EdgeInsets.only(
+                        right: index == _fullBodyScanStages.length - 1 ? 0 : 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: index == stageIndex
+                            ? ReleafColors.sage
+                            : index < stageIndex
+                            ? ReleafColors.sage.withValues(alpha: 0.38)
+                            : ReleafColors.textPrimary.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(99),
+                        boxShadow: index == stageIndex
+                            ? [
+                                BoxShadow(
+                                  color: ReleafColors.sage.withValues(alpha: 0.24),
+                                  blurRadius: 7,
+                                ),
+                              ]
+                            : null,
                       ),
                     ),
                   ),
-                ),
-              ),
-            );
-          },
+              ],
+            ),
+          ),
+          const SizedBox(width: 10),
+          Text(
+            '${stageIndex + 1} OF ${_fullBodyScanStages.length}',
+            maxLines: 1,
+            textScaler: TextScaler.noScaling,
+            style: ReleafTypography.meta.copyWith(
+              color: ReleafColors.textSecondary,
+              fontSize: 9,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.8,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ShoulderMovementCue extends StatelessWidget {
+  const _ShoulderMovementCue({required this.cue});
+
+  final String cue;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Container(
+        key: const Key('reset-shoulder-movement-cue'),
+        constraints: const BoxConstraints(maxWidth: 230),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+        decoration: BoxDecoration(
+          color: ReleafColors.surface.withValues(alpha: 0.62),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: ReleafColors.sage.withValues(alpha: 0.18),
+          ),
+        ),
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            cue,
+            maxLines: 1,
+            style: ReleafTypography.eyebrow.copyWith(
+              color: ReleafColors.textPrimary.withValues(alpha: 0.82),
+              fontSize: 10,
+              letterSpacing: 1.15,
+            ),
+          ),
         ),
       ),
     );
@@ -192,38 +372,54 @@ class _FullBodyScanPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     if (size.isEmpty) return;
 
-    final center = Offset(size.width / 2, size.height / 2 - 4);
+    final center = Offset(size.width / 2, size.height / 2 + 8);
     final base = size.shortestSide;
     final pulse = 0.5 + 0.5 * math.sin(t * math.pi * 2);
     final label = phaseLabel.toLowerCase();
 
+    final ambientPaint = Paint()
+      ..color = ReleafColors.sage.withValues(alpha: 0.045 + pulse * 0.02)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 28);
+    canvas.drawOval(
+      Rect.fromCenter(
+        center: Offset(center.dx, center.dy - base * 0.015),
+        width: base * 0.52,
+        height: base * 0.73,
+      ),
+      ambientPaint,
+    );
+
+    final softBodyPaint = Paint()
+      ..style = PaintingStyle.fill
+      ..color = ReleafColors.textPrimary.withValues(alpha: 0.025);
+    canvas.drawOval(
+      Rect.fromCenter(
+        center: Offset(center.dx, center.dy - base * 0.035),
+        width: base * 0.19,
+        height: base * 0.39,
+      ),
+      softBodyPaint,
+    );
+
     final figurePaint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = math.max(3.0, base * 0.0105)
+      ..strokeWidth = math.max(2.6, base * 0.0095)
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round
-      ..color = ReleafColors.textPrimary.withValues(alpha: 0.58);
+      ..color = ReleafColors.textPrimary.withValues(alpha: 0.48);
     final accentPaint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = math.max(4.0, base * 0.015)
+      ..strokeWidth = math.max(4.0, base * 0.0145)
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round
-      ..color = ReleafColors.sage.withValues(alpha: 0.92);
+      ..color = ReleafColors.sage.withValues(alpha: 0.90);
     final glowPaint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = math.max(10.0, base * 0.034)
+      ..strokeWidth = math.max(10.0, base * 0.032)
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round
-      ..color = ReleafColors.sage.withValues(alpha: 0.18 + pulse * 0.12)
+      ..color = ReleafColors.sage.withValues(alpha: 0.14 + pulse * 0.11)
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 16);
-
-    canvas.drawCircle(
-      center,
-      base * (0.33 + pulse * 0.005),
-      Paint()
-        ..color = ReleafColors.sage.withValues(alpha: 0.055 + pulse * 0.025)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 30),
-    );
 
     final head = Offset(center.dx, center.dy - base * 0.265);
     final headRadius = base * 0.052;
@@ -296,6 +492,17 @@ class _FullBodyScanPainter extends CustomPainter {
     canvas.drawPath(armsPath, figurePaint);
     canvas.drawPath(legsPath, figurePaint);
     canvas.drawPath(feetPath, figurePaint);
+
+    final railPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = math.max(1.0, base * 0.004)
+      ..strokeCap = StrokeCap.round
+      ..color = ReleafColors.sage.withValues(alpha: 0.13);
+    canvas.drawLine(
+      Offset(center.dx, head.dy - base * 0.035),
+      Offset(center.dx, rightFoot.dy + base * 0.03),
+      railPaint,
+    );
 
     void highlightPath(Path path) {
       canvas.drawPath(path, glowPaint);
@@ -384,51 +591,66 @@ class _ShoulderDropPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     if (size.isEmpty) return;
 
-    final center = Offset(size.width / 2, size.height / 2);
+    final center = Offset(size.width / 2, size.height / 2 + 5);
     final base = size.shortestSide;
     final label = phaseLabel.toLowerCase();
     final pulse = 0.5 + 0.5 * math.sin(t * math.pi * 2);
     final lifting = label.contains('lift');
-    final releasing = label.contains('release') || label.contains('drop');
+    final releasing =
+        label.contains('release') || label.contains('drop') || label.contains('let go');
     final settling = label.contains('settle');
     final verticalShift = lifting
-        ? -base * (0.022 + pulse * 0.012)
+        ? -base * (0.025 + pulse * 0.010)
         : releasing
-        ? base * (0.018 + pulse * 0.006)
+        ? base * (0.020 + pulse * 0.005)
         : settling
-        ? base * 0.012
+        ? base * 0.011
         : 0.0;
 
-    canvas.drawCircle(
-      Offset(center.dx, center.dy - base * 0.04),
-      base * (0.29 + pulse * 0.005),
+    canvas.drawOval(
+      Rect.fromCenter(
+        center: Offset(center.dx, center.dy - base * 0.035),
+        width: base * 0.54,
+        height: base * 0.48,
+      ),
       Paint()
-        ..color = ReleafColors.sage.withValues(alpha: 0.065 + pulse * 0.03)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 30),
+        ..color = ReleafColors.sage.withValues(alpha: 0.045 + pulse * 0.025)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 28),
     );
 
     final figurePaint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = math.max(3.5, base * 0.013)
+      ..strokeWidth = math.max(3.1, base * 0.0115)
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round
-      ..color = ReleafColors.textPrimary.withValues(alpha: 0.68);
+      ..color = ReleafColors.textPrimary.withValues(alpha: 0.56);
+    final ghostPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = math.max(2.2, base * 0.008)
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round
+      ..color = ReleafColors.textPrimary.withValues(alpha: 0.16);
     final accentPaint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = math.max(4.8, base * 0.018)
+      ..strokeWidth = math.max(4.5, base * 0.0165)
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round
-      ..color = ReleafColors.sage.withValues(alpha: 0.92);
+      ..color = ReleafColors.sage.withValues(alpha: 0.90);
     final glowPaint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = math.max(10.0, base * 0.038)
+      ..strokeWidth = math.max(10.0, base * 0.036)
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round
-      ..color = ReleafColors.sage.withValues(alpha: 0.20 + pulse * 0.10)
+      ..color = ReleafColors.sage.withValues(alpha: 0.15 + pulse * 0.10)
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 15);
+    final trackPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = math.max(1.3, base * 0.0045)
+      ..strokeCap = StrokeCap.round
+      ..color = ReleafColors.sage.withValues(alpha: 0.22);
 
     final head = Offset(center.dx, center.dy - base * 0.19);
-    final headRadius = base * 0.073;
+    final headRadius = base * 0.071;
     final neckBottom = Offset(center.dx, center.dy - base * 0.075);
     canvas.drawCircle(head, headRadius, figurePaint);
     canvas.drawLine(
@@ -437,7 +659,26 @@ class _ShoulderDropPainter extends CustomPainter {
       figurePaint,
     );
 
-    final shoulderY = center.dy - base * 0.045 + verticalShift;
+    final neutralY = center.dy - base * 0.045;
+    final neutralLeft = Offset(center.dx - base * 0.19, neutralY);
+    final neutralRight = Offset(center.dx + base * 0.19, neutralY);
+    final neutralPath = Path()
+      ..moveTo(neutralLeft.dx, neutralLeft.dy)
+      ..quadraticBezierTo(
+        center.dx - base * 0.08,
+        neutralY - base * 0.025,
+        neckBottom.dx,
+        neckBottom.dy,
+      )
+      ..quadraticBezierTo(
+        center.dx + base * 0.08,
+        neutralY - base * 0.025,
+        neutralRight.dx,
+        neutralRight.dy,
+      );
+    canvas.drawPath(neutralPath, ghostPaint);
+
+    final shoulderY = neutralY + verticalShift;
     final leftShoulder = Offset(center.dx - base * 0.19, shoulderY);
     final rightShoulder = Offset(center.dx + base * 0.19, shoulderY);
     final shoulderPath = Path()
@@ -474,29 +715,21 @@ class _ShoulderDropPainter extends CustomPainter {
       );
     canvas.drawPath(torsoPath, figurePaint);
 
-    if (lifting || releasing) {
-      final direction = lifting ? -1.0 : 1.0;
-      final arrowPaint = Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = math.max(2.0, base * 0.007)
-        ..strokeCap = StrokeCap.round
-        ..color = lifting
-            ? ReleafColors.premium.withValues(alpha: 0.76)
-            : ReleafColors.sage.withValues(alpha: 0.76);
-      for (final x in [leftShoulder.dx, rightShoulder.dx]) {
-        final start = Offset(x, shoulderY - direction * base * 0.012);
-        final end = Offset(x, shoulderY + direction * base * 0.052);
-        canvas.drawLine(start, end, arrowPaint);
-        final tip = end.dy - direction * base * 0.014;
-        canvas.drawLine(
-          end,
-          Offset(end.dx - base * 0.012, tip),
-          arrowPaint,
+    final movementActive = lifting || releasing || settling;
+    if (movementActive) {
+      for (final x in [neutralLeft.dx, neutralRight.dx]) {
+        final top = neutralY - base * 0.055;
+        final bottom = neutralY + base * 0.055;
+        canvas.drawLine(Offset(x, top), Offset(x, bottom), trackPaint);
+        canvas.drawCircle(
+          Offset(x, neutralY),
+          base * 0.008,
+          Paint()..color = ReleafColors.textPrimary.withValues(alpha: 0.24),
         );
-        canvas.drawLine(
-          end,
-          Offset(end.dx + base * 0.012, tip),
-          arrowPaint,
+        canvas.drawCircle(
+          Offset(x, shoulderY),
+          base * 0.010,
+          Paint()..color = ReleafColors.sage.withValues(alpha: 0.76),
         );
       }
     }
