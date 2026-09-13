@@ -100,7 +100,8 @@ GoRouter createAppRouter({String initialLocation = AppRoutes.home}) => GoRouter(
 
     GoRoute(
       path: AppRoutes.meditate,
-      pageBuilder: (context, state) => _fadePage(const MeditationScreen()),
+      pageBuilder: (context, state) =>
+          _fadePage(const MeditationScreen(showBack: true)),
     ),
     GoRoute(
       path: AppRoutes.account,
