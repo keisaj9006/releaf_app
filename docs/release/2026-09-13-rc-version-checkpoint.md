@@ -15,3 +15,7 @@ The P0 run passed analysis, the full Flutter test suite, targeted Brain and Rese
 This checkpoint closes only the engineering version-freeze step. It does not close production signing, real Google Play/RevenueCat configuration, public legal hosting, Store listing assets/screenshots, owner audio review, physical-device RC QA or Play closed testing.
 
 Subsequent code may retain version `1.0.0` while increasing the build number if another RC build is required before store upload.
+
+## Current verification candidate
+
+Home discovery was tightened after the version freeze so the parked Meditate surface is no longer suggested automatically from Home while its direct route and explicit active-session resume path remain available. Candidate code checkpoint: `4ad50b5ee14496c5302a749ece296a48f9832729`. This note records the candidate only; the change is not considered verified until the fresh branch P0 and web smoke workflows complete successfully.
