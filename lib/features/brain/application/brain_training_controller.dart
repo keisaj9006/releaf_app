@@ -24,8 +24,12 @@ const progressiveBrainGameIds = <String>{
 };
 
 const maxBrainTrainingLevel = 12;
-int maxBrainTrainingLevelFor(String gameId) =>
-    gameId == 'memory' ? maxMemoryLevel : maxBrainTrainingLevel;
+const maxLabyrinthTrainingLevel = 50;
+int maxBrainTrainingLevelFor(String gameId) => switch (gameId) {
+  'memory' => maxMemoryLevel,
+  'labyrinth' => maxLabyrinthTrainingLevel,
+  _ => maxBrainTrainingLevel,
+};
 const brainSessionsPerTrainingLevel = 2;
 
 bool usesProgressiveBrainLevel(String gameId) =>
