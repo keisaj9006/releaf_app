@@ -1,3 +1,4 @@
+# Retrigger after initial workflow registration
 name: Labyrinth L50 one-off patch
 
 on:
