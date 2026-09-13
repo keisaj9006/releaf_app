@@ -57,7 +57,8 @@ for label, block in (
 if 'test/labyrinth_level_50_progression_test.dart' not in p0:
     raise SystemExit('Refusing CI cleanup: permanent Labyrinth L50 P0 test is missing.')
 
-p0_path.write_text(p0, encoding='utf-8')
+# Keep the workflow POSIX-clean: exactly one newline at EOF.
+p0_path.write_text(p0.rstrip() + '\n', encoding='utf-8')
 
 for temporary_path in (
     Path('.github/workflows/labyrinth_l50_once.yml'),
