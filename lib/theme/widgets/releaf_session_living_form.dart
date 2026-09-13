@@ -5,41 +5,25 @@ import 'package:flutter/material.dart';
 import '../releaf_design_tokens.dart';
 import 'releaf_artwork.dart';
 
-/// Signature animated Releaf form used during active Reset sessions.
-///
-/// The motion is deliberately subtle and presentation-only. Session timing,
-/// rewards and instructions remain owned by the Reset feature.
 class ReleafSessionLivingForm extends StatefulWidget {
   const ReleafSessionLivingForm({
     super.key,
     required this.variant,
     required this.progress,
-    required this.breathing,
+    this.breathing = false,
+    this.phaseProgress,
     this.phaseLabel,
-    this.inhaleSeconds = 4,
-    this.holdAfterInhaleSeconds = 0,
-    this.exhaleSeconds = 4,
-    this.holdAfterExhaleSeconds = 0,
-    this.showBreathPath = false,
+    this.phaseSecondsRemaining,
     this.reducedMotion = false,
-    this.paused = false,
-    this.elapsedSeconds,
-    this.announcePhase = false,
   });
 
   final ReleafArtworkVariant variant;
   final double progress;
   final bool breathing;
+  final double? phaseProgress;
   final String? phaseLabel;
-  final int inhaleSeconds;
-  final int holdAfterInhaleSeconds;
-  final int exhaleSeconds;
-  final int holdAfterExhaleSeconds;
-  final bool showBreathPath;
+  final int? phaseSecondsRemaining;
   final bool reducedMotion;
-  final bool paused;
-  final Animation<double>? elapsedSeconds;
-  final bool announcePhase;
 
   @override
   State<ReleafSessionLivingForm> createState() =>
@@ -47,410 +31,380 @@ class ReleafSessionLivingForm extends StatefulWidget {
 }
 
 class _ReleafSessionLivingFormState extends State<ReleafSessionLivingForm>
-    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
+    with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
-  bool _lifecyclePaused = false;
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: Duration(seconds: _cycleSecondsFor(widget)),
+      duration: const Duration(milliseconds: 5200),
     );
-    WidgetsBinding.instance.addObserver(this);
-    final lifecycle = WidgetsBinding.instance.lifecycleState;
-    _lifecyclePaused =
-        lifecycle != null && lifecycle != AppLifecycleState.resumed;
-    _syncAnimation();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    _lifecyclePaused = state != AppLifecycleState.resumed;
-    // Stop synchronously: backgrounding may prevent the parent's next rebuild.
-    _syncAnimation();
+    _syncAnimationState();
   }
 
   @override
   void didUpdateWidget(covariant ReleafSessionLivingForm oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.breathing != widget.breathing ||
-        oldWidget.inhaleSeconds != widget.inhaleSeconds ||
-        oldWidget.holdAfterInhaleSeconds != widget.holdAfterInhaleSeconds ||
-        oldWidget.exhaleSeconds != widget.exhaleSeconds ||
-        oldWidget.holdAfterExhaleSeconds != widget.holdAfterExhaleSeconds) {
-      _controller.duration = Duration(seconds: _cycleSecondsFor(widget));
-    }
-    if (oldWidget.reducedMotion != widget.reducedMotion ||
-        oldWidget.elapsedSeconds != widget.elapsedSeconds ||
-        oldWidget.paused != widget.paused ||
-        oldWidget.breathing != widget.breathing ||
-        oldWidget.inhaleSeconds != widget.inhaleSeconds ||
-        oldWidget.holdAfterInhaleSeconds != widget.holdAfterInhaleSeconds ||
-        oldWidget.exhaleSeconds != widget.exhaleSeconds ||
-        oldWidget.holdAfterExhaleSeconds != widget.holdAfterExhaleSeconds) {
-      _syncAnimation();
+        oldWidget.reducedMotion != widget.reducedMotion ||
+        oldWidget.phaseProgress != widget.phaseProgress) {
+      _syncAnimationState();
     }
   }
 
-  void _syncAnimation() {
-    if (widget.elapsedSeconds != null || widget.paused || _lifecyclePaused) {
+  void _syncAnimationState() {
+    if (widget.reducedMotion || widget.phaseProgress != null) {
       _controller.stop();
-    } else if (widget.reducedMotion) {
+      return;
+    }
+    if (widget.breathing) {
+      _controller.repeat(reverse: true);
+    } else {
       _controller.stop();
-      _controller.value = 0.42;
-    } else if (!_controller.isAnimating) {
-      _controller.repeat();
     }
   }
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
     _controller.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final progress = widget.progress.clamp(0.0, 1.0).toDouble();
+    final phaseProgress = widget.phaseProgress?.clamp(0.0, 1.0);
+    final showBreathPath = widget.breathing && phaseProgress != null;
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        final localT = phaseProgress ?? _controller.value;
+        final wave = 0.5 - 0.5 * math.cos(localT * math.pi);
+        final scale = widget.breathing && !widget.reducedMotion
+            ? 0.88 + (0.20 * wave)
+            : 1.0;
+        final glow = widget.breathing && !widget.reducedMotion
+            ? 0.16 + (0.18 * wave)
+            : 0.12;
 
-    return Semantics(
-      container: true,
-      liveRegion: widget.announcePhase && widget.phaseLabel != null,
-      excludeSemantics: true,
-      label: widget.phaseLabel == null
-          ? 'Releaf calming visual'
-          : 'Releaf calming visual. ${widget.phaseLabel}',
-      child: TweenAnimationBuilder<double>(
-        tween: Tween<double>(begin: 0, end: progress),
-        duration: widget.reducedMotion
-            ? Duration.zero
-            : const Duration(milliseconds: 720),
-        curve: Curves.easeOutCubic,
-        builder: (context, animatedProgress, child) {
-          return CustomPaint(
-            key: const Key('reset-living-form'),
-            painter: _SessionProgressPainter(progress: animatedProgress),
-            child: child,
-          );
-        },
-        child: AnimatedBuilder(
-          animation: Listenable.merge([_controller, widget.elapsedSeconds]),
-          builder: (context, child) {
-            final cycleValue = widget.elapsedSeconds == null
-                ? _controller.value
-                : (widget.elapsedSeconds!.value % _cycleSecondsFor(widget)) /
-                      _cycleSecondsFor(widget);
-            final motion = _motionValue(
-              widget.reducedMotion ? 0.42 : cycleValue,
-            );
-            final breathingScale = widget.breathing
-                ? 0.84 + (motion * 0.34)
-                : 0.955 + (motion * 0.075);
-            final glowOpacity = widget.breathing
-                ? 0.10 + (motion * 0.30)
-                : 0.12 + (motion * 0.13);
-            final driftX = widget.breathing
-                ? 0.0
-                : math.sin(_controller.value * math.pi * 2) * 5;
-            final driftY = widget.breathing
-                ? 0.0
-                : math.cos(_controller.value * math.pi * 2) * 3;
-            final rotation = widget.breathing
-                ? 0.0
-                : math.sin(_controller.value * math.pi * 2) * 0.018;
-
-            return AspectRatio(
-              aspectRatio: 1,
-              child: Stack(
-                fit: StackFit.expand,
-                alignment: Alignment.center,
-                children: [
-                  Center(
-                    child: FractionallySizedBox(
-                      widthFactor: 0.78,
-                      heightFactor: 0.78,
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: ReleafColors.sage.withValues(
-                                alpha: glowOpacity,
-                              ),
-                              blurRadius: 58,
-                              spreadRadius: 10,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  Center(
-                    child: Transform.translate(
-                      offset: Offset(driftX, driftY),
-                      child: Transform.rotate(
-                        angle: rotation,
-                        child: Transform.scale(
-                          scale: breathingScale,
-                          child: FractionallySizedBox(
-                            widthFactor: 0.78,
-                            heightFactor: 0.78,
-                            child: ReleafLivingForm(
-                              variant: widget.variant,
-                              opacity: 0.96,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  if (widget.showBreathPath)
-                    Positioned.fill(
-                      child: CustomPaint(
-                        key: const Key('reset-breath-path'),
-                        painter: _BreathOrbitPainter(
-                          cycleValue: cycleValue,
-                          reducedMotion: widget.reducedMotion,
-                          inhaleSeconds: widget.inhaleSeconds,
-                          holdAfterInhaleSeconds: widget.holdAfterInhaleSeconds,
-                          exhaleSeconds: widget.exhaleSeconds,
-                          holdAfterExhaleSeconds: widget.holdAfterExhaleSeconds,
-                        ),
-                      ),
-                    ),
-                  Center(
-                    child: AnimatedOpacity(
-                      duration: widget.reducedMotion
-                          ? Duration.zero
-                          : ReleafMotion.standard,
-                      opacity: widget.phaseLabel == null ? 0 : 1,
-                      child: Text(
-                        widget.phaseLabel ?? '',
-                        textAlign: TextAlign.center,
-                        style: ReleafTypography.sectionTitle.copyWith(
-                          fontSize: 17,
-                          color: ReleafColors.textPrimary.withValues(
-                            alpha: 0.90,
-                          ),
-                          letterSpacing: 0.3,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+        return Stack(
+          alignment: Alignment.center,
+          children: [
+            CustomPaint(
+              key: const Key('reset-living-form'),
+              painter: _LivingFormBackdropPainter(
+                glow: glow,
+                progress: widget.progress.clamp(0.0, 1.0),
               ),
-            );
-          },
-        ),
-      ),
+              child: const SizedBox.expand(),
+            ),
+            if (showBreathPath)
+              CustomPaint(
+                key: const Key('reset-breath-path'),
+                painter: _BreathPathPainter(
+                  progress: widget.reducedMotion ? null : phaseProgress,
+                  reducedMotion: widget.reducedMotion,
+                ),
+                child: const SizedBox.expand(),
+              ),
+            Transform.scale(
+              scale: scale,
+              child: SizedBox(
+                width: 180,
+                height: 180,
+                child: widget.breathing
+                    ? CustomPaint(
+                        key: const Key('reset-breathing-lungs'),
+                        painter: _BreathingLungsPainter(
+                          emphasis: widget.reducedMotion ? 0.58 : wave,
+                        ),
+                      )
+                    : ReleafLivingForm(
+                        variant: widget.variant,
+                        opacity: 0.96,
+                      ),
+              ),
+            ),
+            if (widget.phaseLabel != null && widget.phaseLabel!.isNotEmpty)
+              Positioned(
+                bottom: 20,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: ReleafColors.background.withValues(alpha: 0.78),
+                    borderRadius: BorderRadius.circular(ReleafRadii.pill),
+                    border: Border.all(
+                      color: ReleafColors.sage.withValues(alpha: 0.16),
+                    ),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 7,
+                    ),
+                    child: Text(
+                      widget.phaseSecondsRemaining == null
+                          ? widget.phaseLabel!
+                          : '${widget.phaseLabel!} · ${widget.phaseSecondsRemaining}s',
+                      key: const Key('reset-living-form-phase'),
+                      style: ReleafTypography.meta.copyWith(
+                        color: ReleafColors.textPrimary,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.25,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        );
+      },
     );
-  }
-
-  double _motionValue(double t) {
-    if (!widget.breathing) {
-      return (math.sin(t * math.pi * 2) + 1) / 2;
-    }
-
-    final total = _cycleSecondsFor(widget).toDouble();
-    final inhaleEnd = widget.inhaleSeconds / total;
-    final holdInEnd =
-        (widget.inhaleSeconds + widget.holdAfterInhaleSeconds) / total;
-    final exhaleEnd =
-        (widget.inhaleSeconds +
-            widget.holdAfterInhaleSeconds +
-            widget.exhaleSeconds) /
-        total;
-
-    if (t < inhaleEnd) {
-      return inhaleEnd == 0 ? 1 : t / inhaleEnd;
-    }
-    if (t < holdInEnd) return 1;
-    if (t < exhaleEnd) {
-      final span = exhaleEnd - holdInEnd;
-      return span == 0 ? 0 : 1 - ((t - holdInEnd) / span);
-    }
-    return 0;
-  }
-
-  static int _cycleSecondsFor(ReleafSessionLivingForm widget) {
-    if (!widget.breathing) return 12;
-    final total =
-        widget.inhaleSeconds +
-        widget.holdAfterInhaleSeconds +
-        widget.exhaleSeconds +
-        widget.holdAfterExhaleSeconds;
-    return math.max(1, total);
   }
 }
 
-class _SessionProgressPainter extends CustomPainter {
-  const _SessionProgressPainter({required this.progress});
+class _BreathingLungsPainter extends CustomPainter {
+  const _BreathingLungsPainter({required this.emphasis});
 
+  final double emphasis;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final e = emphasis.clamp(0.0, 1.0);
+    final center = Offset(size.width / 2, size.height * 0.49);
+
+    final haloRect = Rect.fromCenter(
+      center: center,
+      width: size.width * 0.90,
+      height: size.height * 0.86,
+    );
+    final halo = Paint()
+      ..shader = RadialGradient(
+        colors: [
+          ReleafColors.sage.withValues(alpha: 0.10 + 0.07 * e),
+          ReleafColors.sage.withValues(alpha: 0.0),
+        ],
+      ).createShader(haloRect);
+    canvas.drawOval(haloRect, halo);
+
+    Path lobe(bool left) {
+      final direction = left ? -1.0 : 1.0;
+      final p = Path()
+        ..moveTo(size.width * (0.50 + direction * 0.025), size.height * 0.28)
+        ..cubicTo(
+          size.width * (0.50 + direction * 0.13),
+          size.height * 0.25,
+          size.width * (0.50 + direction * 0.31),
+          size.height * 0.34,
+          size.width * (0.50 + direction * 0.33),
+          size.height * 0.54,
+        )
+        ..cubicTo(
+          size.width * (0.50 + direction * 0.34),
+          size.height * 0.72,
+          size.width * (0.50 + direction * 0.19),
+          size.height * 0.83,
+          size.width * (0.50 + direction * 0.055),
+          size.height * 0.77,
+        )
+        ..cubicTo(
+          size.width * (0.50 + direction * 0.02),
+          size.height * 0.67,
+          size.width * (0.50 + direction * 0.018),
+          size.height * 0.40,
+          size.width * (0.50 + direction * 0.025),
+          size.height * 0.28,
+        )
+        ..close();
+      return p;
+    }
+
+    final fillShaderRect = Rect.fromLTWH(
+      size.width * 0.16,
+      size.height * 0.20,
+      size.width * 0.68,
+      size.height * 0.65,
+    );
+    final fill = Paint()
+      ..shader = LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          ReleafColors.sage.withValues(alpha: 0.24 + 0.08 * e),
+          ReleafColors.sage.withValues(alpha: 0.08 + 0.05 * e),
+        ],
+      ).createShader(fillShaderRect)
+      ..style = PaintingStyle.fill;
+    final outline = Paint()
+      ..color = ReleafColors.sage.withValues(alpha: 0.70 + 0.14 * e)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+    final vein = Paint()
+      ..color = ReleafColors.sage.withValues(alpha: 0.26 + 0.12 * e)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.15
+      ..strokeCap = StrokeCap.round;
+
+    for (final left in [true, false]) {
+      final path = lobe(left);
+      canvas.drawPath(path, fill);
+      canvas.drawPath(path, outline);
+
+      final d = left ? -1.0 : 1.0;
+      final branch = Path()
+        ..moveTo(size.width * 0.50, size.height * 0.32)
+        ..cubicTo(
+          size.width * (0.50 + d * 0.07),
+          size.height * 0.38,
+          size.width * (0.50 + d * 0.14),
+          size.height * 0.49,
+          size.width * (0.50 + d * 0.20),
+          size.height * 0.68,
+        );
+      canvas.drawPath(branch, vein);
+
+      final upperVein = Path()
+        ..moveTo(size.width * (0.50 + d * 0.09), size.height * 0.43)
+        ..quadraticBezierTo(
+          size.width * (0.50 + d * 0.19),
+          size.height * 0.39,
+          size.width * (0.50 + d * 0.25),
+          size.height * 0.42,
+        );
+      final lowerVein = Path()
+        ..moveTo(size.width * (0.50 + d * 0.13), size.height * 0.56)
+        ..quadraticBezierTo(
+          size.width * (0.50 + d * 0.22),
+          size.height * 0.56,
+          size.width * (0.50 + d * 0.27),
+          size.height * 0.62,
+        );
+      canvas.drawPath(upperVein, vein);
+      canvas.drawPath(lowerVein, vein);
+    }
+
+    final stem = Paint()
+      ..color = ReleafColors.sage.withValues(alpha: 0.72)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.2
+      ..strokeCap = StrokeCap.round;
+    final airway = Path()
+      ..moveTo(size.width * 0.50, size.height * 0.14)
+      ..lineTo(size.width * 0.50, size.height * 0.30)
+      ..moveTo(size.width * 0.50, size.height * 0.30)
+      ..quadraticBezierTo(
+        size.width * 0.46,
+        size.height * 0.33,
+        size.width * 0.43,
+        size.height * 0.38,
+      )
+      ..moveTo(size.width * 0.50, size.height * 0.30)
+      ..quadraticBezierTo(
+        size.width * 0.54,
+        size.height * 0.33,
+        size.width * 0.57,
+        size.height * 0.38,
+      );
+    canvas.drawPath(airway, stem);
+
+    final centerGlow = Paint()
+      ..color = ReleafColors.sage.withValues(alpha: 0.12 + 0.08 * e)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10);
+    canvas.drawCircle(center, size.width * (0.09 + 0.015 * e), centerGlow);
+  }
+
+  @override
+  bool shouldRepaint(covariant _BreathingLungsPainter oldDelegate) {
+    return oldDelegate.emphasis != emphasis;
+  }
+}
+
+class _LivingFormBackdropPainter extends CustomPainter {
+  const _LivingFormBackdropPainter({
+    required this.glow,
+    required this.progress,
+  });
+
+  final double glow;
   final double progress;
 
   @override
   void paint(Canvas canvas, Size size) {
-    if (size.isEmpty) return;
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = math.min(size.width, size.height) * 0.41;
 
-    final strokeWidth = math.max(1.0, size.shortestSide * 0.006);
-    final rect = Rect.fromLTWH(
-      strokeWidth,
-      strokeWidth,
-      size.width - (strokeWidth * 2),
-      size.height - (strokeWidth * 2),
-    );
+    final halo = Paint()
+      ..shader = RadialGradient(
+        colors: [
+          ReleafColors.sage.withValues(alpha: glow),
+          ReleafColors.sage.withValues(alpha: 0),
+        ],
+      ).createShader(Rect.fromCircle(center: center, radius: radius));
+    canvas.drawCircle(center, radius, halo);
 
-    canvas.drawArc(
-      rect,
-      -math.pi / 2,
-      math.pi * 2,
-      false,
-      Paint()
+    final track = Paint()
+      ..color = ReleafColors.borderSoft.withValues(alpha: 0.52)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2;
+    canvas.drawCircle(center, radius * 0.88, track);
+
+    if (progress > 0) {
+      final progressPaint = Paint()
+        ..color = ReleafColors.sage.withValues(alpha: 0.72)
         ..style = PaintingStyle.stroke
-        ..strokeWidth = strokeWidth
         ..strokeCap = StrokeCap.round
-        ..color = ReleafColors.borderSoft.withValues(alpha: 0.55),
-    );
-
-    canvas.drawArc(
-      rect,
-      -math.pi / 2,
-      math.pi * 2 * progress,
-      false,
-      Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = strokeWidth
-        ..strokeCap = StrokeCap.round
-        ..shader = const SweepGradient(
-          colors: [
-            ReleafColors.sageStrong,
-            ReleafColors.sage,
-            ReleafColors.premium,
-          ],
-        ).createShader(rect),
-    );
+        ..strokeWidth = 2.6;
+      canvas.drawArc(
+        Rect.fromCircle(center: center, radius: radius * 0.88),
+        -math.pi / 2,
+        math.pi * 2 * progress,
+        false,
+        progressPaint,
+      );
+    }
   }
 
   @override
-  bool shouldRepaint(covariant _SessionProgressPainter oldDelegate) {
-    return progress != oldDelegate.progress;
+  bool shouldRepaint(covariant _LivingFormBackdropPainter oldDelegate) {
+    return oldDelegate.glow != glow || oldDelegate.progress != progress;
   }
 }
 
-class _BreathOrbitPainter extends CustomPainter {
-  const _BreathOrbitPainter({
-    required this.cycleValue,
+class _BreathPathPainter extends CustomPainter {
+  const _BreathPathPainter({
+    required this.progress,
     required this.reducedMotion,
-    required this.inhaleSeconds,
-    required this.holdAfterInhaleSeconds,
-    required this.exhaleSeconds,
-    required this.holdAfterExhaleSeconds,
   });
 
-  final double cycleValue;
+  final double? progress;
   final bool reducedMotion;
-  final int inhaleSeconds;
-  final int holdAfterInhaleSeconds;
-  final int exhaleSeconds;
-  final int holdAfterExhaleSeconds;
 
   @override
   void paint(Canvas canvas, Size size) {
-    if (size.isEmpty) return;
-
-    final total = math
-        .max(
-          1,
-          inhaleSeconds +
-              holdAfterInhaleSeconds +
-              exhaleSeconds +
-              holdAfterExhaleSeconds,
-        )
-        .toDouble();
-    final elapsed = cycleValue * total;
-
     final center = Offset(size.width / 2, size.height / 2);
-    final rect = Rect.fromCenter(
-      center: center,
-      width: size.width * 0.82,
-      height: size.height * 0.92,
-    );
-
-    final trackPaint = Paint()
+    final radius = math.min(size.width, size.height) * 0.31;
+    final rect = Rect.fromCircle(center: center, radius: radius);
+    final pathPaint = Paint()
+      ..color = ReleafColors.sage.withValues(alpha: 0.22)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = math.max(1.0, size.shortestSide * 0.004)
-      ..strokeCap = StrokeCap.round
-      ..color = ReleafColors.borderSoft.withValues(alpha: 0.38);
+      ..strokeWidth = 1.6;
+    canvas.drawArc(rect, 0, math.pi * 2, false, pathPaint);
 
-    canvas.drawOval(rect, trackPaint);
-    // The phase caption remains current; reduced motion keeps this outline static.
-    if (reducedMotion) return;
-
-    var cursor = 0.0;
-    late final double angle;
-    late final Color accent;
-
-    final inhaleEnd = cursor + inhaleSeconds;
-    if (elapsed < inhaleEnd) {
-      final p = inhaleSeconds == 0 ? 1.0 : (elapsed - cursor) / inhaleSeconds;
-      angle = (math.pi / 2) + (math.pi * p.clamp(0.0, 1.0));
-      accent = ReleafColors.sage;
-    } else {
-      cursor = inhaleEnd;
-      final holdInEnd = cursor + holdAfterInhaleSeconds;
-      if (holdAfterInhaleSeconds > 0 && elapsed < holdInEnd) {
-        angle = 3 * math.pi / 2;
-        accent = ReleafColors.premium;
-      } else {
-        cursor = holdInEnd;
-        final exhaleEnd = cursor + exhaleSeconds;
-        if (elapsed < exhaleEnd) {
-          final p = exhaleSeconds == 0
-              ? 1.0
-              : (elapsed - cursor) / exhaleSeconds;
-          angle = (3 * math.pi / 2) + (math.pi * p.clamp(0.0, 1.0));
-          accent = ReleafColors.sageStrong;
-        } else {
-          angle = math.pi / 2;
-          accent = ReleafColors.textSecondary;
-        }
-      }
-    }
-
-    final point = Offset(
-      center.dx + (rect.width / 2) * math.cos(angle),
-      center.dy + (rect.height / 2) * math.sin(angle),
+    if (reducedMotion || progress == null) return;
+    final angle = (-math.pi / 2) + (math.pi * 2 * progress!.clamp(0.0, 1.0));
+    final marker = Offset(
+      center.dx + math.cos(angle) * radius,
+      center.dy + math.sin(angle) * radius,
     );
-
-    canvas.drawCircle(
-      point,
-      math.max(10.0, size.shortestSide * 0.035),
-      Paint()
-        ..color = accent.withValues(alpha: 0.16)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8),
-    );
-    canvas.drawCircle(
-      point,
-      math.max(4.5, size.shortestSide * 0.014),
-      Paint()..color = accent,
-    );
-    canvas.drawCircle(
-      point.translate(-1.4, -1.4),
-      math.max(1.2, size.shortestSide * 0.004),
-      Paint()..color = ReleafColors.textPrimary.withValues(alpha: 0.74),
-    );
+    final markerPaint = Paint()..color = ReleafColors.sage;
+    canvas.drawCircle(marker, 4.2, markerPaint);
   }
 
   @override
-  bool shouldRepaint(covariant _BreathOrbitPainter oldDelegate) {
-    return oldDelegate.reducedMotion != reducedMotion ||
-        (!reducedMotion && oldDelegate.cycleValue != cycleValue) ||
-        oldDelegate.inhaleSeconds != inhaleSeconds ||
-        oldDelegate.holdAfterInhaleSeconds != holdAfterInhaleSeconds ||
-        oldDelegate.exhaleSeconds != exhaleSeconds ||
-        oldDelegate.holdAfterExhaleSeconds != holdAfterExhaleSeconds;
+  bool shouldRepaint(covariant _BreathPathPainter oldDelegate) {
+    return oldDelegate.progress != progress ||
+        oldDelegate.reducedMotion != reducedMotion;
   }
 }
