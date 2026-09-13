@@ -19,10 +19,10 @@ Character limit: 30. Current length: 6.
 ### Short description
 
 <!-- SHORT_DESCRIPTION_START -->
-Calm your mind, build focus, meditate and unwind for sleep with Releaf.
+Reset stress, train focus and unwind for sleep with Releaf.
 <!-- SHORT_DESCRIPTION_END -->
 
-Character limit: 80. Current length: 71.
+Character limit: 80. Current length: 59.
 
 ### Full description
 
@@ -35,9 +35,6 @@ Use short guided regulation exercises for moments of stress, mental overload, ru
 Brain
 Train attention, memory, focus and flexible thinking with cognitive games including Memory Mirror, Labyrinth, Rule Shift, Sequence Echo, Color Conflict, Pattern Logic and Signal Scan.
 
-Meditate
-Choose guided meditation sessions with calm narration and dedicated background ambience, designed for a focused, distraction-light experience.
-
 Sleep
 Unwind with sleep-oriented soundscapes, nature sounds and noise, with a timer for bedtime listening. Sleep content does not use narration.
 
@@ -48,7 +45,7 @@ Progress, your way
 Track lightweight progress on your device. For Releaf 1.0, local progress remains the primary source of truth and Releaf does not claim automatic cloud backup.
 
 Premium
-Some content may require a Releaf Premium subscription. Subscription availability and pricing are shown through Google Play where applicable.
+Some deeper Reset protocols, advanced Brain training and expanded Sound & Sleep content may require a Releaf Premium subscription. Subscription availability and pricing are shown through Google Play where applicable.
 
 Releaf is a wellness app, not a medical device. It does not diagnose, treat, cure, or prevent any medical condition. For medical advice, diagnosis, or treatment, consult a qualified healthcare professional.
 <!-- FULL_DESCRIPTION_END -->
@@ -61,7 +58,7 @@ this approved version unless the Health apps declaration is re-reviewed.
 - Application type: **App**.
 - Recommended Google Play category: **Health & Fitness**.
 - Tags: choose only tags suggested by Play Console that clearly match the shipped
-  experience. Prioritise sleep, meditation/mindfulness, stress management and
+  experience. Prioritise sleep, stress-management/relaxation and
   cognitive/brain-training concepts when those exact tags are offered. Do not add
   unrelated tags for search reach.
 
@@ -136,10 +133,9 @@ or higher**. Capture the real release candidate; do not use stale mock-ups.
 Recommended first-pass order:
 1. **Reset** — Reset Hub / a representative regulation-session entry point.
 2. **Brain** — Brain Hub plus a clearly recognisable cognitive-game experience.
-3. **Meditate** — the current Meditation Player with Releaf's signature visual.
-4. **Sleep** — the Sleep sound/player surface and timer.
-5. **Progress** — only if the captured screen accurately reflects local-first 1.0.
-6. **Emergency Calm** — optional; if used, describe it as grounding/wellbeing
+3. **Sleep** — the Sleep sound/player surface and timer.
+4. **Progress** — only if the captured screen accurately reflects local-first 1.0.
+5. **Emergency Calm** — optional; if used, describe it as grounding/wellbeing
    support and never as emergency response or medical treatment.
 
 Screenshot rules for this release:
@@ -157,8 +153,8 @@ truthful:
 
 1. `Reset when your mind feels overloaded`
 2. `Train focus, memory and flexible thinking`
-3. `Meditate with calm guidance and ambience`
-4. `Unwind with sleep sounds and a timer`
+3. `Unwind with sleep sounds and a timer`
+4. `Track lightweight progress on your device`
 
 Do not put the medical-device disclaimer into image graphics; keep it in the full
 description and legal surfaces where it remains legible and maintainable.
