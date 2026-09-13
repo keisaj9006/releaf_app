@@ -487,7 +487,7 @@ class _ShoulderDropPainter extends CustomPainter {
         final start = Offset(x, shoulderY - direction * base * 0.012);
         final end = Offset(x, shoulderY + direction * base * 0.052);
         canvas.drawLine(start, end, arrowPaint);
-        final tip = direction < 0 ? end.dy - base * 0.014 : end.dy + base * 0.014;
+        final tip = end.dy - direction * base * 0.014;
         canvas.drawLine(
           end,
           Offset(end.dx - base * 0.012, tip),
