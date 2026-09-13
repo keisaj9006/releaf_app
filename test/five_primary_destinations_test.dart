@@ -69,7 +69,7 @@ void main() {
 
     expect(find.byType(MeditationScreen), findsOneWidget);
     expect(find.byType(NavigationBar), findsNothing);
-    expect(find.text('Meditate'), findsNothing);
+    expect(find.text('Meditate'), findsOneWidget);
     expect(tester.takeException(), isNull);
 
     await tester.pumpWidget(const SizedBox.shrink());
