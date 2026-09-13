@@ -10,25 +10,17 @@ import 'package:releaf_app/features/meditation/presentation/meditation_screen.da
 import 'package:releaf_app/features/relief/presentation/breathing_widget.dart';
 import 'package:releaf_app/features/account/presentation/account_screen.dart';
 
-class _ReadingTextScaler extends TextScaler {
-  const _ReadingTextScaler();
-  @override
-  double scale(double fontSize) => fontSize < 50 ? fontSize * 2 : fontSize;
-  @override
-  double get textScaleFactor => 2;
-}
-
 void main() {
   const destinations = [
     (AppRoutes.home, 'Home'),
     (AppRoutes.relief, 'Reset'),
-    (AppRoutes.meditate, 'Meditate'),
     (AppRoutes.sleep, 'Sleep'),
     (AppRoutes.brain, 'Brain'),
   ];
+
   for (var index = 0; index < destinations.length; index++) {
     final target = destinations[index];
-    testWidgets('${target.$2} deep link selects the approved primary tab', (
+    testWidgets('${target.$2} deep link selects the active primary tab', (
       tester,
     ) async {
       SharedPreferences.setMockInitialValues({});
@@ -51,7 +43,7 @@ void main() {
         destinations.map((item) => item.$2),
       );
       expect(nav.selectedIndex, index);
-      if (index == 2 || index == 3) {
+      if (target.$1 == AppRoutes.sleep) {
         expect(find.byTooltip('Open Emergency Calm'), findsOneWidget);
         expect(find.byTooltip('Account and Premium'), findsOneWidget);
       }
@@ -59,6 +51,29 @@ void main() {
       await tester.pumpWidget(const SizedBox.shrink());
     });
   }
+
+  testWidgets('Meditate remains parked and accessible only by direct route', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({});
+    final prefs = await SharedPreferences.getInstance();
+    final router = createAppRouter(initialLocation: AppRoutes.meditate);
+    addTearDown(router.dispose);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
+        child: MaterialApp.router(routerConfig: router),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(MeditationScreen), findsOneWidget);
+    expect(find.byType(NavigationBar), findsNothing);
+    expect(find.text('Meditate'), findsNothing);
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
 
   testWidgets(
     'Sleep restores its library and reselecting Sleep opens the root',
@@ -89,7 +104,7 @@ void main() {
       expect(find.byKey(const Key('sound-open-meditate')), findsOneWidget);
       expect(
         tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex,
-        3,
+        2,
       );
       await tester.tap(
         find.descendant(
@@ -117,100 +132,43 @@ void main() {
     },
   );
 
-  for (final scaler in [
-    const TextScaler.linear(2),
-    const _ReadingTextScaler(),
-  ]) {
-    testWidgets(
-      'tab switching preserves Meditation scroll at 320px with $scaler',
-      (tester) async {
-        final originalError = FlutterError.onError;
-        FlutterError.onError = (details) {
-          FlutterError.dumpErrorToConsole(details);
-          originalError?.call(details);
-        };
-        addTearDown(() => FlutterError.onError = originalError);
-        await tester.binding.setSurfaceSize(const Size(320, 640));
-        addTearDown(() => tester.binding.setSurfaceSize(null));
-        SharedPreferences.setMockInitialValues({});
-        final prefs = await SharedPreferences.getInstance();
-        final router = createAppRouter(initialLocation: AppRoutes.meditate);
-        addTearDown(router.dispose);
-        await tester.pumpWidget(
-          ProviderScope(
-            overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
-            child: MaterialApp.router(
-              routerConfig: router,
-              builder: (context, child) => MediaQuery(
-                data: MediaQuery.of(context).copyWith(textScaler: scaler),
-                child: child!,
-              ),
-            ),
+  testWidgets('four active destinations remain stable at large text', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(320, 640));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    SharedPreferences.setMockInitialValues({});
+    final prefs = await SharedPreferences.getInstance();
+    final router = createAppRouter(initialLocation: AppRoutes.home);
+    addTearDown(router.dispose);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
+        child: MaterialApp.router(
+          routerConfig: router,
+          builder: (context, child) => MediaQuery(
+            data: MediaQuery.of(
+              context,
+            ).copyWith(textScaler: const TextScaler.linear(2)),
+            child: child!,
           ),
-        );
-        await tester.pumpAndSettle();
-        expect(tester.takeException(), isNull);
-        final scroll = tester.state<ScrollableState>(
-          find
-              .descendant(
-                of: find.byType(MeditationScreen),
-                matching: find.byType(Scrollable),
-              )
-              .first,
-        );
-        scroll.position.jumpTo(300);
-        await tester.pump();
-        for (final label in ['Sleep', 'Brain', 'Reset', 'Home', 'Meditate']) {
-          await tester.tap(
-            find.descendant(
-              of: find.byType(NavigationBar),
-              matching: find.text(label),
-            ),
-          );
-          await tester.pumpAndSettle();
-          expect(tester.takeException(), isNull, reason: label);
-          if (label == 'Brain' || label == 'Reset') {
-            final card = label == 'Reset'
-                ? find.byKey(const Key('reset-sound-gateway'))
-                : find
-                      .byWidgetPredicate(
-                        (widget) =>
-                            widget.key is ValueKey<String> &&
-                            (widget.key! as ValueKey<String>).value.startsWith(
-                              'brain-game-card-',
-                            ),
-                      )
-                      .first;
-            final overlays = find.descendant(
-              of: card,
-              matching: find.byWidgetPredicate(
-                (widget) =>
-                    widget is DecoratedBox &&
-                    widget.decoration is BoxDecoration &&
-                    (widget.decoration as BoxDecoration).gradient != null,
-              ),
-            );
-            expect(overlays, findsWidgets);
-            for (final overlay in overlays.evaluate()) {
-              expect(
-                (overlay.renderObject! as RenderBox).size.height,
-                greaterThan(0),
-              );
-            }
-          }
-        }
-        final restored = tester.state<ScrollableState>(
-          find
-              .descendant(
-                of: find.byType(MeditationScreen),
-                matching: find.byType(Scrollable),
-              )
-              .first,
-        );
-        expect(identical(scroll, restored), isTrue);
-        expect(restored.position.pixels, 300);
-        await tester.pumpWidget(const SizedBox.shrink());
-      },
+        ),
+      ),
     );
-  }
+    await tester.pumpAndSettle();
+
+    for (final label in ['Reset', 'Sleep', 'Brain', 'Home']) {
+      await tester.tap(
+        find.descendant(
+          of: find.byType(NavigationBar),
+          matching: find.text(label),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull, reason: label);
+    }
+
+    expect(find.text('Meditate'), findsNothing);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
 }
