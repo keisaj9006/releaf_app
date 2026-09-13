@@ -3,6 +3,8 @@ import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 
+import '../tool/release/play_store_asset_policy.dart' as policy;
+
 int _crc32(List<int> bytes) {
   var crc = 0xffffffff;
   for (final byte in bytes) {
@@ -81,42 +83,17 @@ Directory _validStoreFixture() {
   return root;
 }
 
-String _dartExecutable() {
-  final flutterRoot = Platform.environment['FLUTTER_ROOT'];
-  if (flutterRoot != null && flutterRoot.isNotEmpty) {
-    final suffix = Platform.isWindows ? '.exe' : '';
-    return '$flutterRoot/bin/cache/dart-sdk/bin/dart$suffix';
-  }
-  return Platform.isWindows ? 'dart.exe' : 'dart';
-}
-
-ProcessResult _runAudit(Directory root) {
-  return Process.runSync(
-    _dartExecutable(),
-    <String>[
-      'run',
-      'tool/release/play_store_asset_policy.dart',
-      '--root',
-      root.path,
-      '--strong-listing',
-    ],
-    workingDirectory: Directory.current.path,
-  );
-}
-
 void main() {
   test('strong Play listing accepts a complete compliant asset pack', () {
     final root = _validStoreFixture();
     addTearDown(() => root.deleteSync(recursive: true));
 
-    final result = _runAudit(root);
-
-    expect(
-      result.exitCode,
-      0,
-      reason: '${result.stdout}\n${result.stderr}',
+    final result = policy.auditPlayStoreAssets(
+      root.path,
+      strongListing: true,
     );
-    expect(result.stdout.toString(), contains('PASS: Google Play asset pack'));
+
+    expect(result.isReady, isTrue, reason: result.errors.join('\n'));
   });
 
   test('Play listing rejects an app icon without alpha', () {
@@ -129,13 +106,13 @@ void main() {
       colorType: 2,
     );
 
-    final result = _runAudit(root);
-
-    expect(result.exitCode, isNot(0));
-    expect(
-      '${result.stdout}\n${result.stderr}',
-      contains('32-bit PNG with alpha'),
+    final result = policy.auditPlayStoreAssets(
+      root.path,
+      strongListing: true,
     );
+
+    expect(result.isReady, isFalse);
+    expect(result.errors.join('\n'), contains('32-bit PNG with alpha'));
   });
 
   test('strong Play listing requires four portrait phone screenshots', () {
@@ -145,11 +122,14 @@ void main() {
       '${root.path}/store/google-play/screenshots/phone/04-screen.png',
     ).deleteSync();
 
-    final result = _runAudit(root);
+    final result = policy.auditPlayStoreAssets(
+      root.path,
+      strongListing: true,
+    );
 
-    expect(result.exitCode, isNot(0));
+    expect(result.isReady, isFalse);
     expect(
-      '${result.stdout}\n${result.stderr}',
+      result.errors.join('\n'),
       contains('at least 4 portrait phone screenshots'),
     );
   });
