@@ -494,7 +494,7 @@ void main() {
     restored.dispose();
   });
 
-  testWidgets('Meditate opens as a primary destination', (
+  testWidgets('Meditate remains parked outside primary navigation', (
     WidgetTester tester,
   ) async {
     await _pumpRoute(
@@ -504,7 +504,6 @@ void main() {
     );
 
     expect(find.text('MEDITATION'), findsOneWidget);
-    expect(find.text('Meditate'), findsWidgets);
     expect(
       find.text('Choose recorded guidance, on-screen prompts, or quiet time.'),
       findsOneWidget,
@@ -521,8 +520,8 @@ void main() {
     expect(find.byKey(const Key('meditation-sleep-course')), findsOneWidget);
     expect(find.text('QUICK PRACTICES'), findsOneWidget);
     expect(find.text('EXPLORE BY INTENTION'), findsOneWidget);
-    expect(find.byKey(const Key('meditation-back')), findsNothing);
-    expect(find.byType(NavigationBar), findsOneWidget);
+    expect(find.byKey(const Key('meditation-back')), findsOneWidget);
+    expect(find.byType(NavigationBar), findsNothing);
   });
 
   testWidgets('Sleep opens as a primary destination', (
@@ -546,32 +545,40 @@ void main() {
     expect(find.byType(NavigationBar), findsOneWidget);
   });
 
-  testWidgets('Direct Meditation and Sleep can navigate Home', (
+  testWidgets('Parked Meditation and primary Sleep can navigate Home', (
     WidgetTester tester,
   ) async {
-    for (final target in <(String, Key)>[
-      (AppRoutes.meditate, const Key('meditation-back')),
-      (AppRoutes.sleep, const Key('sleep-back')),
-    ]) {
-      await _pumpRoute(
-        tester,
-        location: target.$1,
-        preferences: await _preferences(),
-      );
+    await _pumpRoute(
+      tester,
+      location: AppRoutes.meditate,
+      preferences: await _preferences(),
+    );
+    await tester.tap(find.byKey(const Key('meditation-back')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('RELEAF'), findsOneWidget);
+    expect(find.byType(NavigationBar), findsOneWidget);
+    expect(tester.takeException(), isNull);
 
-      await tester.tap(
-        find.descendant(
-          of: find.byType(NavigationBar),
-          matching: find.text('Home'),
-        ),
-      );
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 300));
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
 
-      expect(find.text('RELEAF'), findsOneWidget);
-      expect(find.byType(NavigationBar), findsOneWidget);
-      expect(tester.takeException(), isNull);
-    }
+    await _pumpRoute(
+      tester,
+      location: AppRoutes.sleep,
+      preferences: await _preferences(),
+    );
+    await tester.tap(
+      find.descendant(
+        of: find.byType(NavigationBar),
+        matching: find.text('Home'),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('RELEAF'), findsOneWidget);
+    expect(find.byType(NavigationBar), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('Legacy Sound library remains in the Sleep branch', (
@@ -589,10 +596,14 @@ void main() {
     expect(find.byKey(const Key('sound-open-sleep')), findsOneWidget);
 
     final navigation = tester.widget<NavigationBar>(find.byType(NavigationBar));
-    expect(navigation.destinations, hasLength(5));
-    expect(navigation.selectedIndex, 3);
-    expect(find.text('Meditate'), findsWidgets);
-    expect(find.text('Sleep'), findsWidgets);
+    expect(navigation.destinations, hasLength(4));
+    expect(navigation.selectedIndex, 2);
+    expect(
+      navigation.destinations.whereType<NavigationDestination>().map(
+        (destination) => destination.label,
+      ),
+      orderedEquals(['Home', 'Reset', 'Sleep', 'Brain']),
+    );
   });
 
   testWidgets('Sleep library preserves legacy Sound shortcuts', (tester) async {
@@ -607,6 +618,8 @@ void main() {
     await tester.tap(find.byKey(const Key('sound-open-meditate')));
     await tester.pumpAndSettle();
     expect(find.text('MEDITATION'), findsOneWidget);
+    expect(find.byKey(const Key('meditation-back')), findsOneWidget);
+    expect(find.byType(NavigationBar), findsNothing);
     await tester.binding.handlePopRoute();
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('sound-open-sleep')), findsOneWidget);
@@ -616,6 +629,7 @@ void main() {
     expect(find.byType(NavigationBar), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+
   testWidgets('Legacy Habits and Daily Loop routes resolve safely to Home', (
     WidgetTester tester,
   ) async {
@@ -655,8 +669,6 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
 
-    // Dispose the first ProviderScope before creating a differently overridden
-    // scope for Sleep. Riverpod does not allow changing override count in-place.
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump();
 
@@ -744,7 +756,6 @@ void main() {
       semantics.dispose();
       expect(find.byKey(const Key('meditation-voice-chip')), findsNothing);
       expect(voice.playAssetCalls, 0);
-      // Starting a captioned practice must not overwrite the recorded-voice preference.
       expect(preferences.getBool('meditation.voice.captions'), isNull);
       await tester.tap(toggle);
       await tester.pump(const Duration(milliseconds: 300));
@@ -920,7 +931,8 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
 
-    expect(find.byKey(const Key('meditation-back')), findsNothing);
+    expect(find.byKey(const Key('meditation-back')), findsOneWidget);
+    expect(find.byType(NavigationBar), findsNothing);
     expect(audioDriver.stopCalls, greaterThanOrEqualTo(1));
     expect(voiceDriver.stopCalls, greaterThanOrEqualTo(1));
 
@@ -937,7 +949,7 @@ void main() {
     expect(resumePayload['remainingSeconds'], greaterThan(0));
   });
 
-  testWidgets('Direct meditation close falls back to Meditation hub', (
+  testWidgets('Direct meditation close falls back to parked Meditation hub', (
     WidgetTester tester,
   ) async {
     final audioDriver = _FakeMeditationAudioDriver();
@@ -956,7 +968,8 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
 
-    expect(find.byKey(const Key('meditation-back')), findsNothing);
+    expect(find.byKey(const Key('meditation-back')), findsOneWidget);
+    expect(find.byType(NavigationBar), findsNothing);
     expect(audioDriver.stopCalls, greaterThanOrEqualTo(1));
     expect(voiceDriver.stopCalls, greaterThanOrEqualTo(1));
     expect(tester.takeException(), isNull);
