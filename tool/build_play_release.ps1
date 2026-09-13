@@ -24,35 +24,9 @@ try {
     $deletionUrl = $env:RELEAF_ACCOUNT_DELETION_URL
     $privacyUpdated = $env:RELEAF_PRIVACY_LAST_UPDATED
 
-    foreach ($entry in @{
-        RELEAF_DATA_CONTROLLER_NAME = $dataController
-        RELEAF_PRIVACY_CONTACT_EMAIL = $privacyEmail
-        RELEAF_PRIVACY_POLICY_URL = $privacyUrl
-        RELEAF_ACCOUNT_DELETION_URL = $deletionUrl
-        RELEAF_PRIVACY_LAST_UPDATED = $privacyUpdated
-    }.GetEnumerator()) {
-        if ([string]::IsNullOrWhiteSpace([string]$entry.Value)) {
-            throw "$($entry.Key) is required for a Play release build."
-        }
-    }
-
-    if ($privacyEmail -notmatch '^[^@\s]+@[^@\s]+\.[^@\s]+$') {
-        throw "RELEAF_PRIVACY_CONTACT_EMAIL must be a valid email address."
-    }
-
-    foreach ($urlEntry in @{
-        RELEAF_PRIVACY_POLICY_URL = $privacyUrl
-        RELEAF_ACCOUNT_DELETION_URL = $deletionUrl
-    }.GetEnumerator()) {
-        $parsed = $null
-        $valid = [System.Uri]::TryCreate(
-            [string]$urlEntry.Value,
-            [System.UriKind]::Absolute,
-            [ref]$parsed
-        )
-        if (-not $valid -or $parsed.Scheme -ne "https") {
-            throw "$($urlEntry.Key) must be an absolute HTTPS URL."
-        }
+    dart run tool/release/legal_metadata_policy.dart
+    if ($LASTEXITCODE -ne 0) {
+        throw "Releaf production legal metadata is incomplete or invalid."
     }
 
     $versionMatch = Select-String -Path "pubspec.yaml" -Pattern '^version:\s*([^\s]+)\s*$' | Select-Object -First 1
