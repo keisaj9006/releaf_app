@@ -1,4 +1,4 @@
-# Retrigger after initial workflow registration
+# Registered one-off workflow; trigger via dedicated marker file.
 name: Labyrinth L50 one-off patch
 
 on:
@@ -6,6 +6,7 @@ on:
     branches: [releaf-development]
     paths:
       - .github/workflows/labyrinth_l50_once.yml
+      - tool/labyrinth_l50_trigger.txt
 
 permissions:
   contents: write
