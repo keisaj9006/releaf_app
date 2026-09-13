@@ -592,7 +592,7 @@ void main() {
 
     expect(find.text('Sound'), findsWidgets);
     expect(find.byKey(const Key('sound-emergency-action')), findsOneWidget);
-    expect(find.byKey(const Key('sound-open-meditate')), findsOneWidget);
+    expect(find.byKey(const Key('sound-open-meditate')), findsNothing);
     expect(find.byKey(const Key('sound-open-sleep')), findsOneWidget);
 
     final navigation = tester.widget<NavigationBar>(find.byType(NavigationBar));
@@ -614,14 +614,7 @@ void main() {
     );
     await tester.tap(find.byKey(const Key('sleep-open-sound-library')));
     await tester.pumpAndSettle();
-    expect(find.byKey(const Key('sound-open-meditate')), findsOneWidget);
-    await tester.tap(find.byKey(const Key('sound-open-meditate')));
-    await tester.pumpAndSettle();
-    expect(find.text('MEDITATION'), findsOneWidget);
-    expect(find.byKey(const Key('meditation-back')), findsOneWidget);
-    expect(find.byType(NavigationBar), findsNothing);
-    await tester.binding.handlePopRoute();
-    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('sound-open-meditate')), findsNothing);
     expect(find.byKey(const Key('sound-open-sleep')), findsOneWidget);
     await tester.tap(find.byKey(const Key('sound-open-sleep')));
     await tester.pumpAndSettle();
