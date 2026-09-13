@@ -57,7 +57,7 @@ void main() {
     expect(
       text,
       contains(
-        '| Device release QA | AUTOMATION READY / PHYSICAL DEVICE RUN REQUIRED |',
+        '| Device release QA | AUTOMATION READY / FINAL PHYSICAL RUN REQUIRED |',
       ),
     );
     expect(text, contains('docs/release/android_device_release_qa.md'));
