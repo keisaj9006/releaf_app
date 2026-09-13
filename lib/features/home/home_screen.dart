@@ -13,9 +13,6 @@ import '../../theme/releaf_design_tokens.dart';
 import '../../theme/widgets/releaf_artwork.dart';
 import '../../theme/widgets/releaf_brain_artwork.dart';
 import '../../theme/widgets/releaf_components.dart';
-import '../meditation/application/meditation_library_controller.dart';
-import '../meditation/data/meditation_catalog.dart';
-import '../meditation/domain/meditation_content.dart';
 import '../progress/data/leaves_repository.dart';
 import '../relief/data/reset_catalog.dart';
 import '../sound/application/sound_player_controller.dart';
@@ -83,35 +80,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     final activeSession = ref.watch(sessionManagerProvider);
     final soundState = ref.watch(soundPlayerControllerProvider);
     final soundCatalog = ref.watch(soundCatalogProvider);
-    final meditationCatalog = ref.watch(meditationCatalogProvider);
-    final meditationLibrary = ref.watch(meditationLibraryControllerProvider);
     final focus = ref.watch(homeFocusProvider);
     final showIntro = ref.watch(homeIntroProvider);
-    final hasPremiumEntitlement = ref
-        .watch(subscriptionControllerProvider)
-        .isPremium;
     final currentSound = soundCatalog.getById(soundState.currentTrackId ?? '');
-    final recentMeditation = _recentAccessibleMeditation(
-      catalog: meditationCatalog,
-      library: meditationLibrary,
-      isPremium: hasPremiumEntitlement,
-    );
 
     final now = ref.watch(homeNowProvider);
     final dailyInsight = DailyInsightCatalog.forDate(now);
-    final suggestedMeditation = _suggestedMeditation(
-      catalog: meditationCatalog,
-      library: meditationLibrary,
-      isPremium: hasPremiumEntitlement,
-    );
     final recommendation = _recommendationFor(
       need: _selectedNeed,
       focus: focus,
       hour: now.hour,
       reliefDone: leaves.reliefDone,
       brainDone: leaves.brainDone,
-      isPremium: hasPremiumEntitlement,
-      suggestedMeditation: suggestedMeditation,
     );
 
     final completedToday = [
@@ -211,8 +191,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                                     _showHomeFocusSheet(context, ref, focus),
                               ),
                               if (activeSession.hasActive ||
-                                  currentSound != null ||
-                                  recentMeditation != null) ...[
+                                  currentSound != null) ...[
                                 const SizedBox(height: ReleafSpacing.section),
                                 const ReleafSectionHeading(
                                   title: 'Continue',
@@ -243,19 +222,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                                       AppRoutes.soundPlayerFor(currentSound.id),
                                     ),
                                   )
-                                else if (recentMeditation != null)
-                                  _ContinueCard(
-                                    eyebrow: 'RECENT MEDITATION',
-                                    title: recentMeditation.title,
-                                    subtitle:
-                                        'Return to a practice you used recently.',
-                                    icon: Icons.spa_outlined,
-                                    onPressed: () => context.push(
-                                      AppRoutes.meditationSessionFor(
-                                        recentMeditation.id,
-                                      ),
-                                    ),
-                                  ),
                               ],
                               const SizedBox(height: ReleafSpacing.section),
                               const ReleafSectionHeading(
@@ -706,8 +672,6 @@ _HomeRecommendation _recommendationFor({
   required int hour,
   required bool reliefDone,
   required bool brainDone,
-  required bool isPremium,
-  required MeditationContent suggestedMeditation,
 }) {
   if (need != null) {
     return switch (need) {
@@ -759,21 +723,6 @@ _HomeRecommendation _recommendationFor({
   }
 
   if (hour >= 20 || hour < 5) {
-    if (!isPremium) {
-      return _HomeRecommendation(
-        eyebrow: 'SUGGESTED NOW',
-        title: 'Let the Day Go',
-        description:
-            'A free night practice for setting down unfinished tasks and moving into a quieter part of the day.',
-        reason: 'Suggested from the time of day.',
-        meta: '6 min • Free • Sleep meditation',
-        route: AppRoutes.meditationSessionFor('let-the-day-go-6'),
-        artwork: ReleafArtworkVariant.ambient,
-        icon: Icons.bedtime_outlined,
-        warm: true,
-      );
-    }
-
     return const _HomeRecommendation(
       eyebrow: 'SUGGESTED NOW',
       title: 'Sleep sounds',
@@ -817,37 +766,28 @@ _HomeRecommendation _recommendationFor({
   }
 
   if (focus == HomeFocus.mindfulness) {
-    return _meditationRecommendation(
-      item: suggestedMeditation,
+    return const _HomeRecommendation(
       eyebrow: 'SUGGESTED FOR YOUR FOCUS',
+      title: 'Back to the Room',
+      description:
+          'A short sensory reset to bring attention back to the present moment.',
       reason: 'Matches your focus: Build mindfulness.',
+      meta: '3 min • Free • Grounding',
+      route: '/relief/session/back-to-room',
+      artwork: ReleafArtworkVariant.grounding,
+      icon: Icons.explore_outlined,
     );
   }
 
   if (focus == HomeFocus.sleep && hour >= 17) {
-    if (isPremium) {
-      return const _HomeRecommendation(
-        eyebrow: 'SUGGESTED FOR YOUR FOCUS',
-        title: 'Tonight',
-        description:
-            'Choose a quiet soundscape, adjust the volume and set a timer. No voice or instructions.',
-        reason: 'Matches your focus: Sleep easier.',
-        meta: 'Sleep • Sound • Timer',
-        route: AppRoutes.sleep,
-        artwork: ReleafArtworkVariant.ambient,
-        icon: Icons.bedtime_outlined,
-        warm: true,
-      );
-    }
-
-    return _HomeRecommendation(
+    return const _HomeRecommendation(
       eyebrow: 'SUGGESTED FOR YOUR FOCUS',
-      title: 'Let the Day Go',
+      title: 'Tonight',
       description:
-          'Use the free night practice before choosing anything longer.',
+          'Choose a quiet soundscape, adjust the volume and set a timer. No voice or instructions.',
       reason: 'Matches your focus: Sleep easier.',
-      meta: '6 min • Free • Sleep meditation',
-      route: AppRoutes.meditationSessionFor('let-the-day-go-6'),
+      meta: 'Sleep • Sound • Timer',
+      route: AppRoutes.sleep,
       artwork: ReleafArtworkVariant.ambient,
       icon: Icons.bedtime_outlined,
       warm: true,
@@ -882,87 +822,17 @@ _HomeRecommendation _recommendationFor({
     );
   }
 
-  return _meditationRecommendation(
-    item: suggestedMeditation,
+  return const _HomeRecommendation(
     eyebrow: 'SUGGESTED NOW',
+    title: 'Back to the Room',
+    description:
+        'A short sensory reset when you want one more deliberate pause in the day.',
     reason: 'Reset and Brain are already complete today.',
+    meta: '3 min • Free • Grounding',
+    route: '/relief/session/back-to-room',
+    artwork: ReleafArtworkVariant.grounding,
+    icon: Icons.explore_outlined,
   );
-}
-
-MeditationContent? _recentAccessibleMeditation({
-  required MeditationCatalog catalog,
-  required MeditationLibraryState library,
-  required bool isPremium,
-}) {
-  for (final id in library.recentIds) {
-    final item = catalog.getById(id);
-    if (item == null) continue;
-    if (item.isPremium && !isPremium) continue;
-    return item;
-  }
-  return null;
-}
-
-MeditationContent _suggestedMeditation({
-  required MeditationCatalog catalog,
-  required MeditationLibraryState library,
-  required bool isPremium,
-}) {
-  bool accessible(MeditationContent item) => !item.isPremium || isPremium;
-
-  final foundations = catalog
-      .getSeries(MeditationCatalog.foundationsSeriesId)
-      .where(accessible)
-      .toList(growable: false);
-
-  for (final item in foundations) {
-    if (!library.isCompleted(item.id)) return item;
-  }
-
-  final available = catalog
-      .getAll()
-      .where(accessible)
-      .where((item) => item.category != MeditationCategory.unguided)
-      .toList(growable: false);
-
-  for (final item in available) {
-    if (!library.isCompleted(item.id)) return item;
-  }
-
-  if (foundations.isNotEmpty) return foundations.first;
-  return available.first;
-}
-
-_HomeRecommendation _meditationRecommendation({
-  required MeditationContent item,
-  required String eyebrow,
-  required String reason,
-}) {
-  final minutes = item.durationSeconds ~/ 60;
-  final access = item.isPremium ? 'Premium' : 'Free';
-
-  return _HomeRecommendation(
-    eyebrow: eyebrow,
-    title: item.title,
-    description: item.subtitle,
-    reason: reason,
-    meta: '$minutes min • $access • Meditation',
-    route: AppRoutes.meditationSessionFor(item.id),
-    artwork: _homeArtworkForMeditation(item.category),
-    icon: Icons.spa_outlined,
-  );
-}
-
-ReleafArtworkVariant _homeArtworkForMeditation(MeditationCategory category) {
-  return switch (category) {
-    MeditationCategory.anxiety => ReleafArtworkVariant.calm,
-    MeditationCategory.body => ReleafArtworkVariant.grounding,
-    MeditationCategory.everyday => ReleafArtworkVariant.lifeUpgrade,
-    MeditationCategory.unguided => ReleafArtworkVariant.ambient,
-    MeditationCategory.startHere ||
-    MeditationCategory.focus ||
-    MeditationCategory.mind => ReleafArtworkVariant.focus,
-  };
 }
 
 class _DailyInsightCard extends StatelessWidget {

@@ -146,7 +146,7 @@ void main() {
         }
         await tester.pump();
         expect(find.text('Good evening'), findsOneWidget);
-        expect(find.text('Let the Day Go'), findsOneWidget);
+        expect(find.text('Sleep sounds'), findsOneWidget);
         await tester.pumpWidget(const SizedBox.shrink());
       },
     );
@@ -396,14 +396,14 @@ void main() {
 
     expect(find.text('Build mindfulness'), findsOneWidget);
     expect(find.text('SUGGESTED FOR YOUR FOCUS'), findsOneWidget);
-    expect(find.text('Mindfulness Basics'), findsOneWidget);
+    expect(find.text('Back to the Room'), findsOneWidget);
     expect(
       preferences.getString('releaf.home.focus.v1'),
       HomeFocus.mindfulness.name,
     );
   });
 
-  testWidgets('Home Continue surfaces the most recent accessible meditation', (
+  testWidgets('Home does not rediscover recent meditation while parked', (
     WidgetTester tester,
   ) async {
     final preferences = await _preferences();
@@ -414,13 +414,8 @@ void main() {
 
     await _pumpHome(tester, preferences: preferences);
 
-    expect(find.text('CONTINUE'), findsOneWidget);
-    expect(find.text('RECENT MEDITATION'), findsOneWidget);
-    expect(find.text('Breath & Body'), findsOneWidget);
-    expect(
-      find.text('Return to a practice you used recently.'),
-      findsOneWidget,
-    );
+    expect(find.text('RECENT MEDITATION'), findsNothing);
+    expect(find.text('Breath & Body'), findsNothing);
   });
 
   testWidgets('Home restores a persisted paused meditation after restart', (
@@ -451,7 +446,7 @@ void main() {
   });
 
   testWidgets(
-    'Home mindfulness recommendation advances with meditation progress',
+    'Home mindfulness recommendation stays in Reset despite meditation history',
     (WidgetTester tester) async {
       final preferences = await _preferences();
       await preferences.setString(
@@ -465,7 +460,7 @@ void main() {
       await _pumpHome(tester, preferences: preferences);
 
       expect(find.text('SUGGESTED FOR YOUR FOCUS'), findsOneWidget);
-      expect(find.text('Breath & Body'), findsOneWidget);
+      expect(find.text('Back to the Room'), findsOneWidget);
       expect(
         find.text('Matches your focus: Build mindfulness.'),
         findsOneWidget,
