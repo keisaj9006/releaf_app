@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../core/providers.dart';
 import '../../core/session/session_manager.dart';
 import '../../routing/app_routes.dart';
 import '../../theme/app_theme.dart';
