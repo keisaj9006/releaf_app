@@ -29,6 +29,11 @@ try {
         throw "Releaf production legal metadata is incomplete or invalid."
     }
 
+    dart run tool/release/play_store_asset_policy.dart --root "$repoRoot" --strong-listing
+    if ($LASTEXITCODE -ne 0) {
+        throw "Google Play store assets are incomplete or invalid for the production listing."
+    }
+
     $versionMatch = Select-String -Path "pubspec.yaml" -Pattern '^version:\s*([^\s]+)\s*$' | Select-Object -First 1
     if ($null -eq $versionMatch) {
         throw "Unable to read the Flutter version from pubspec.yaml."
