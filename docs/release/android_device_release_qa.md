@@ -79,6 +79,7 @@ For each row record `PASS`, `FAIL`, or `BLOCKED`, plus concise evidence (screen 
 | DQA-20 | Reinstall / local-data expectation | Verify behaviour after uninstall/reinstall matches the 1.0 local-first disclosure. Do not represent locally removed progress as cloud-restorable. | `TBD` | `TBD` |
 | DQA-21 | Navigation stress pass | Repeatedly move across primary tabs and core screens in both directions, including rapid but reasonable navigation. No blank screens, severe jank, duplicated routes or stale modal overlays. | `TBD` | `TBD` |
 | DQA-22 | Destructive/exit paths | Exercise cancel/back/confirm behaviour around purchase, sign-out and account deletion. Destructive actions require the intended confirmation and cannot be triggered accidentally by navigation. | `TBD` | `TBD` |
+| DQA-23 | Reset visual pilot | Run one V01 paced-breathing session, Shoulder Drop and the full eight-minute Full Body Scan. V01 must use the dedicated lung visual while preserving that method's real timing; Shoulder Drop must clearly show the intended lift/release movement without confusing arrows; Full Body Scan must progress through Face → Shoulders → Arms → Chest → Center → Legs → Feet → Whole Body with the matching `1 OF 8`…`8 OF 8` state. Repeat the visual check with Android reduced motion enabled and with enlarged system text; guidance must remain understandable, static where expected, and free of clipped/overflowing controls. | `TBD` | `TBD` |
 
 ## Failure policy
 
