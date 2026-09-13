@@ -19,10 +19,10 @@ Character limit: 30. Current length: 6.
 ### Short description
 
 <!-- SHORT_DESCRIPTION_START -->
-Reset stress, train focus and unwind for sleep with Releaf.
+Reset stress, train your brain and unwind for sleep with Releaf.
 <!-- SHORT_DESCRIPTION_END -->
 
-Character limit: 80. Current length: 59.
+Character limit: 80. Current length: 64.
 
 ### Full description
 
