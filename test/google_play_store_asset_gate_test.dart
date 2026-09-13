@@ -81,9 +81,18 @@ Directory _validStoreFixture() {
   return root;
 }
 
+String _dartExecutable() {
+  final flutterRoot = Platform.environment['FLUTTER_ROOT'];
+  if (flutterRoot != null && flutterRoot.isNotEmpty) {
+    final suffix = Platform.isWindows ? '.exe' : '';
+    return '$flutterRoot/bin/cache/dart-sdk/bin/dart$suffix';
+  }
+  return Platform.isWindows ? 'dart.exe' : 'dart';
+}
+
 ProcessResult _runAudit(Directory root) {
   return Process.runSync(
-    Platform.resolvedExecutable,
+    _dartExecutable(),
     <String>[
       'run',
       'tool/release/play_store_asset_policy.dart',
