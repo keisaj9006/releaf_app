@@ -91,7 +91,8 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('sleep-open-sound-library')));
       await tester.pumpAndSettle();
-      expect(find.byKey(const Key('sound-open-meditate')), findsOneWidget);
+      expect(find.byKey(const Key('sound-open-meditate')), findsNothing);
+      expect(find.byKey(const Key('sound-open-sleep')), findsOneWidget);
       for (final label in ['Brain', 'Sleep']) {
         await tester.tap(
           find.descendant(
@@ -101,7 +102,8 @@ void main() {
         );
         await tester.pumpAndSettle();
       }
-      expect(find.byKey(const Key('sound-open-meditate')), findsOneWidget);
+      expect(find.byKey(const Key('sound-open-meditate')), findsNothing);
+      expect(find.byKey(const Key('sound-open-sleep')), findsOneWidget);
       expect(
         tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex,
         2,

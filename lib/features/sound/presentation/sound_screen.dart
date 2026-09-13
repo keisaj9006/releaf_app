@@ -69,8 +69,6 @@ class SoundScreen extends ConsumerWidget {
                               ),
                               const SizedBox(height: ReleafSpacing.lg),
                               _SoundDestinations(
-                                onMeditate: () =>
-                                    context.push(AppRoutes.meditate),
                                 onSleep: () => context.push(AppRoutes.sleep),
                               ),
                               const SizedBox(height: ReleafSpacing.xxl),
@@ -231,7 +229,7 @@ class _SoundHeader extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                'Long-form audio, meditation and sleep spaces for lower-stimulation moments.',
+                'Long-form audio and sleep spaces for lower-stimulation moments.',
                 style: ReleafTypography.meta.copyWith(
                   color: ReleafColors.textSecondary,
                 ),
@@ -253,56 +251,21 @@ class _SoundHeader extends StatelessWidget {
 }
 
 class _SoundDestinations extends StatelessWidget {
-  const _SoundDestinations({required this.onMeditate, required this.onSleep});
+  const _SoundDestinations({required this.onSleep});
 
-  final VoidCallback onMeditate;
   final VoidCallback onSleep;
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final stacked = constraints.maxWidth < 420;
-
-        final meditate = _SoundDestinationCard(
-          key: const Key('sound-open-meditate'),
-          icon: Icons.spa_outlined,
-          eyebrow: 'GUIDED',
-          title: 'Meditate',
-          description:
-              'Voice-led practices with separate ambience and narration controls.',
-          accent: ReleafFeatureAccents.meditation,
-          onPressed: onMeditate,
-        );
-        final sleep = _SoundDestinationCard(
-          key: const Key('sound-open-sleep'),
-          icon: Icons.bedtime_outlined,
-          eyebrow: 'NO VOICE',
-          title: 'Sleep',
-          description:
-              'Low-stimulation tones and nature sound designed for the end of the day.',
-          accent: ReleafFeatureAccents.sleep,
-          onPressed: onSleep,
-        );
-
-        if (stacked) {
-          return Column(
-            children: [
-              meditate,
-              const SizedBox(height: ReleafSpacing.sm),
-              sleep,
-            ],
-          );
-        }
-
-        return Row(
-          children: [
-            Expanded(child: meditate),
-            const SizedBox(width: ReleafSpacing.sm),
-            Expanded(child: sleep),
-          ],
-        );
-      },
+    return _SoundDestinationCard(
+      key: const Key('sound-open-sleep'),
+      icon: Icons.bedtime_outlined,
+      eyebrow: 'NO VOICE',
+      title: 'Sleep',
+      description:
+          'Low-stimulation tones and nature sound designed for the end of the day.',
+      accent: ReleafFeatureAccents.sleep,
+      onPressed: onSleep,
     );
   }
 }
