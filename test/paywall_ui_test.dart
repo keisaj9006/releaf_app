@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -65,7 +67,8 @@ void main() {
     expect(find.text('RELEAF PREMIUM'), findsOneWidget);
     expect(find.text('Unlock Premium'), findsOneWidget);
     expect(find.text('Deeper Reset protocols'), findsOneWidget);
-    expect(find.text('Premium meditation sessions'), findsOneWidget);
+    expect(find.text('Premium meditation sessions'), findsNothing);
+    expect(find.text('Expanded Sound & Sleep library'), findsOneWidget);
     expect(
       find.byKey(const Key('premium-packages-unavailable')),
       findsOneWidget,
@@ -84,6 +87,14 @@ void main() {
     expect(find.textContaining('renew at the displayed price'), findsOneWidget);
     expect(find.textContaining('remains usable without Premium'), findsOneWidget);
     expect(find.text('RECOMMENDED'), findsNothing);
+  });
+
+  test('Account copy does not advertise parked meditation progress', () {
+    final accountSource = File(
+      'lib/features/account/presentation/account_screen.dart',
+    ).readAsStringSync();
+
+    expect(accountSource, isNot(contains('meditation progress')));
   });
 
   testWidgets('Premium paywall stays usable at 320px', (
