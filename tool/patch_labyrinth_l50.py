@@ -1,16 +1,14 @@
 from pathlib import Path
+import subprocess
 
 path = Path('lib/games/labyrinth/labyrinth_game_screen.dart')
 text = path.read_text(encoding='utf-8')
 
-# Idempotent: subsequent CI runs must not try to re-apply the migration.
-if (
+gameplay_already_present = (
     'rawTrainingLevel.clamp(1, 50)' in text
     and 'static const int _maxTrainingLevel = 50;' in text
     and 'final level = rawLevel.clamp(1, 50).toInt();' in text
-):
-    print('Labyrinth L50 gameplay patch is already present.')
-    raise SystemExit(0)
+)
 
 
 def replace_once(old: str, new: str, label: str) -> None:
@@ -21,8 +19,9 @@ def replace_once(old: str, new: str, label: str) -> None:
     text = text.replace(old, new, 1)
 
 
-replace_once(
-    """/// Keeps the persistent Brain level as the medium baseline while allowing a
+if not gameplay_already_present:
+    replace_once(
+        """/// Keeps the persistent Brain level as the medium baseline while allowing a
 /// player to choose a calmer or more demanding maze before the timer starts.
 /// The public progression model remains unchanged.
 @visibleForTesting
@@ -39,7 +38,7 @@ int labyrinthProfileLevelForDifficulty(
   return (trainingLevel + offset).clamp(1, 12).toInt();
 }
 """,
-    """/// Keeps the persistent Brain level as the medium baseline while allowing a
+        """/// Keeps the persistent Brain level as the medium baseline while allowing a
 /// player to choose a calmer or more demanding maze before the timer starts.
 /// Legacy L1-L12 difficulty stays exact; the extended path continues to L50.
 @visibleForTesting
@@ -60,18 +59,18 @@ int labyrinthProfileLevelForDifficulty(
   return (trainingLevel + offset).clamp(1, 50).toInt();
 }
 """,
-    'difficulty resolver',
-)
+        'difficulty resolver',
+    )
 
-replace_once(
-    """@visibleForTesting
+    replace_once(
+        """@visibleForTesting
 double labyrinthBallRadiusForLevel(int rawLevel) {
   final level = rawLevel.clamp(1, 12).toInt();
   final progress = (level - 1) / 11.0;
   return 0.19 - (0.05 * progress);
 }
 """,
-    """@visibleForTesting
+        """@visibleForTesting
 double labyrinthBallRadiusForLevel(int rawLevel) {
   final level = rawLevel.clamp(1, 50).toInt();
   if (level <= 12) {
@@ -83,22 +82,22 @@ double labyrinthBallRadiusForLevel(int rawLevel) {
   return 0.14 - (0.04 * extendedProgress);
 }
 """,
-    'ball radius',
-)
+        'ball radius',
+    )
 
-replace_once(
-    '  static const int _maxTrainingLevel = 12;',
-    '  static const int _maxTrainingLevel = 50;',
-    'screen max level',
-)
+    replace_once(
+        '  static const int _maxTrainingLevel = 12;',
+        '  static const int _maxTrainingLevel = 50;',
+        'screen max level',
+    )
 
-replace_once(
-    """    final level = rawLevel.clamp(1, 12).toInt();
+    replace_once(
+        """    final level = rawLevel.clamp(1, 12).toInt();
     final stage = mazeStage.clamp(1, maxLabyrinthMazeStages).toInt();
     final columns = (5 + ((level - 1) ~/ 2)).clamp(5, 10).toInt();
     final rows = (7 + ((level - 1) ~/ 2)).clamp(7, 12).toInt();
 """,
-    """    final level = rawLevel.clamp(1, 50).toInt();
+        """    final level = rawLevel.clamp(1, 50).toInt();
     final stage = mazeStage.clamp(1, maxLabyrinthMazeStages).toInt();
     final int columns;
     final int rows;
@@ -111,11 +110,11 @@ replace_once(
       rows = (12 + expansionBand).clamp(13, 16).toInt();
     }
 """,
-    'maze dimensions',
-)
+        'maze dimensions',
+    )
 
-replace_once(
-    """    final cellCount = columns * rows;
+    replace_once(
+        """    final cellCount = columns * rows;
     final targetRatio = 0.22 + (((level - 1) / 11.0) * 0.26);
     final targetPathMoves =
         (cellCount * targetRatio).round().clamp(6, cellCount - 1).toInt();
@@ -126,7 +125,7 @@ replace_once(
 
     for (var candidateIndex = 0; candidateIndex < 72; candidateIndex++) {
 """,
-    """    final cellCount = columns * rows;
+        """    final cellCount = columns * rows;
     final targetRatio = level <= 12
         ? 0.22 + (((level - 1) / 11.0) * 0.26)
         : 0.48 + (((level - 12) / 38.0) * 0.10);
@@ -144,11 +143,11 @@ replace_once(
         candidateIndex < candidateCount;
         candidateIndex++) {
 """,
-    'route complexity',
-)
+        'route complexity',
+    )
 
-replace_once(
-    """    final selected = best!;
+    replace_once(
+        """    final selected = best!;
     final secondsPerMove = 2.9 - ((level - 1) * 0.035);
     final timeLimitSeconds =
         (28 + (selected.metrics.moves * secondsPerMove))
@@ -156,7 +155,7 @@ replace_once(
             .clamp(50, 150)
             .toInt();
 """,
-    """    final selected = best!;
+        """    final selected = best!;
     final secondsPerMove = level <= 12
         ? 2.9 - ((level - 1) * 0.035)
         : 2.515 - (((level - 12) / 38.0) * 0.515);
@@ -166,8 +165,33 @@ replace_once(
         ? rawTimeLimit.clamp(50, 150).toInt()
         : rawTimeLimit.clamp(55, 180).toInt();
 """,
-    'timer scaling',
-)
+        'timer scaling',
+    )
 
-path.write_text(text, encoding='utf-8')
-print('Applied Labyrinth L50 gameplay patch.')
+    path.write_text(text, encoding='utf-8')
+    print('Applied Labyrinth L50 gameplay patch.')
+else:
+    print('Labyrinth L50 gameplay patch is already present.')
+
+# Update the one legacy assertion whose intent is cumulative-progress
+# preservation, not the old global L12 cap. This remains narrow and data-driven.
+test_path = Path('test/brain_flow_test.dart')
+test_text = test_path.read_text(encoding='utf-8')
+old_assertion = "expect(restored.state.trainingLevelFor('labyrinth'), maxBrainTrainingLevel);"
+new_assertion = """expect(
+      restored.state.trainingLevelFor('labyrinth'),
+      (1 +
+              restored.state.completionCountFor('labyrinth') ~/
+                  brainSessionsPerTrainingLevel)
+          .clamp(1, maxBrainTrainingLevelFor('labyrinth')),
+    );"""
+
+if old_assertion in test_text:
+    test_text = test_text.replace(old_assertion, new_assertion, 1)
+    test_path.write_text(test_text, encoding='utf-8')
+    subprocess.run(['git', 'add', str(test_path)], check=True)
+    print('Updated the cumulative-progress Labyrinth assertion for the L50 cap.')
+elif new_assertion in test_text:
+    print('Labyrinth cumulative-progress assertion already uses the game-specific cap.')
+else:
+    raise SystemExit('legacy Labyrinth cumulative-progress assertion was not found')
