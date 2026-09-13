@@ -71,7 +71,7 @@ void main() {
       expect(find.text(phase.toUpperCase()), findsOneWidget);
       expect(
         find.bySemanticsLabel(
-          'Full Body Scan. Stage ${index + 1} of 8. $phase is the current area of attention.',
+          'Full Body Scan. Stage ${index + 1} of 8. $phase is the current area of attention. Motion reduced.',
         ),
         findsOneWidget,
       );
