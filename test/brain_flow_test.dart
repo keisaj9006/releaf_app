@@ -712,7 +712,13 @@ void main() {
     addTearDown(restored.dispose);
     expect(restored.state.records, hasLength(120));
     expect(restored.state.completionCountFor('labyrinth'), 50);
-    expect(restored.state.trainingLevelFor('labyrinth'), maxBrainTrainingLevel);
+    expect(
+      restored.state.trainingLevelFor('labyrinth'),
+      (1 +
+              restored.state.completionCountFor('labyrinth') ~/
+                  brainSessionsPerTrainingLevel)
+          .clamp(1, maxBrainTrainingLevelFor('labyrinth')),
+    );
     expect(restored.state.totalSessions, 170);
   });
 

@@ -26,19 +26,23 @@ int labyrinthMazeStageForCompletionCount(int completedSessions) {
 
 /// Keeps the persistent Brain level as the medium baseline while allowing a
 /// player to choose a calmer or more demanding maze before the timer starts.
-/// The public progression model remains unchanged.
+/// Legacy L1-L12 difficulty stays exact; the extended path continues to L50.
 @visibleForTesting
 int labyrinthProfileLevelForDifficulty(
   int rawTrainingLevel,
   BrainDifficulty difficulty,
 ) {
-  final trainingLevel = rawTrainingLevel.clamp(1, 12).toInt();
+  final trainingLevel = rawTrainingLevel.clamp(1, 50).toInt();
   final offset = switch (difficulty) {
     BrainDifficulty.easy => -2,
     BrainDifficulty.medium => 0,
     BrainDifficulty.hard => 2,
   };
-  return (trainingLevel + offset).clamp(1, 12).toInt();
+
+  if (trainingLevel <= 12) {
+    return (trainingLevel + offset).clamp(1, 12).toInt();
+  }
+  return (trainingLevel + offset).clamp(1, 50).toInt();
 }
 
 @visibleForTesting
@@ -46,9 +50,14 @@ double labyrinthGoalCaptureRadiusForTesting() => _labyrinthGoalRadius;
 
 @visibleForTesting
 double labyrinthBallRadiusForLevel(int rawLevel) {
-  final level = rawLevel.clamp(1, 12).toInt();
-  final progress = (level - 1) / 11.0;
-  return 0.19 - (0.05 * progress);
+  final level = rawLevel.clamp(1, 50).toInt();
+  if (level <= 12) {
+    final progress = (level - 1) / 11.0;
+    return 0.19 - (0.05 * progress);
+  }
+
+  final extendedProgress = (level - 12) / 38.0;
+  return 0.14 - (0.04 * extendedProgress);
 }
 
 Offset _nextLabyrinthVelocity({
@@ -57,8 +66,7 @@ Offset _nextLabyrinthVelocity({
 }) {
   var next = tilt.distance < _labyrinthTiltMovementThreshold
       ? velocity * _labyrinthIdleDamping
-      : (velocity * _labyrinthMovingDamping) +
-          (tilt * _labyrinthAcceleration);
+      : (velocity * _labyrinthMovingDamping) + (tilt * _labyrinthAcceleration);
 
   if (next.distance > _labyrinthMaxSpeed) {
     next = next / next.distance * _labyrinthMaxSpeed;
@@ -86,20 +94,18 @@ Offset _velocityAfterLabyrinthWallCollision(
 Offset labyrinthVelocityStepForTesting({
   required Offset velocity,
   required Offset tilt,
-}) =>
-    _nextLabyrinthVelocity(velocity: velocity, tilt: tilt);
+}) => _nextLabyrinthVelocity(velocity: velocity, tilt: tilt);
 
 @visibleForTesting
 Offset labyrinthVelocityAfterWallCollisionForTesting(
   Offset velocity, {
   bool blockHorizontal = false,
   bool blockVertical = false,
-}) =>
-    _velocityAfterLabyrinthWallCollision(
-      velocity,
-      blockHorizontal: blockHorizontal,
-      blockVertical: blockVertical,
-    );
+}) => _velocityAfterLabyrinthWallCollision(
+  velocity,
+  blockHorizontal: blockHorizontal,
+  blockVertical: blockVertical,
+);
 
 class LabirynthGameScreen extends StatefulWidget {
   const LabirynthGameScreen({
@@ -123,7 +129,7 @@ class LabirynthGameScreen extends StatefulWidget {
 
 class _LabirynthGameScreenState extends State<LabirynthGameScreen>
     with WidgetsBindingObserver {
-  static const int _maxTrainingLevel = 12;
+  static const int _maxTrainingLevel = 50;
   static const double _wallThickness = 0.075;
   static const Duration _physicsStep = Duration(milliseconds: 16);
   static const int _motionCalibrationSampleTarget = 12;
@@ -154,10 +160,8 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen>
   int get _trainingLevelNumber =>
       widget.trainingLevel.clamp(1, _maxTrainingLevel).toInt();
 
-  int get _profileLevelNumber => labyrinthProfileLevelForDifficulty(
-        _trainingLevelNumber,
-        _difficulty,
-      );
+  int get _profileLevelNumber =>
+      labyrinthProfileLevelForDifficulty(_trainingLevelNumber, _difficulty);
 
   int get _mazeStage =>
       widget.mazeStage.clamp(1, maxLabyrinthMazeStages).toInt();
@@ -166,10 +170,7 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _level = _MazeLevel.generate(
-      _profileLevelNumber,
-      mazeStage: _mazeStage,
-    );
+    _level = _MazeLevel.generate(_profileLevelNumber, mazeStage: _mazeStage);
     _position = _level.start;
     _timeLeft = _level.timeLimitSeconds;
     _listenToMotion();
@@ -189,10 +190,9 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen>
     if (kIsWeb) return;
 
     try {
-      final stream = widget.motionStream ??
-          accelerometerEventStream(
-            samplingPeriod: SensorInterval.gameInterval,
-          );
+      final stream =
+          widget.motionStream ??
+          accelerometerEventStream(samplingPeriod: SensorInterval.gameInterval);
 
       _sensorSubscription = stream.listen(
         (event) {
@@ -203,7 +203,8 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen>
             _motionCalibrationSum += raw;
             _motionCalibrationSamples++;
             if (_motionCalibrationSamples == _motionCalibrationSampleTarget) {
-              _motionBaseline = _motionCalibrationSum /
+              _motionBaseline =
+                  _motionCalibrationSum /
                   _motionCalibrationSampleTarget.toDouble();
               if (!_motionAvailable) {
                 setState(() => _motionAvailable = true);
@@ -289,10 +290,7 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen>
       _startTimerIfNeeded();
     }
 
-    _velocity = _nextLabyrinthVelocity(
-      velocity: _velocity,
-      tilt: _tilt,
-    );
+    _velocity = _nextLabyrinthVelocity(velocity: _velocity, tilt: _tilt);
     if (_velocity == Offset.zero) return;
 
     final moved = _attemptMove(_velocity);
@@ -368,8 +366,8 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen>
   }
 
   bool _canOccupy(Offset point) {
-    final r = labyrinthBallRadiusForLevel(_profileLevelNumber) +
-        (_wallThickness / 2);
+    final r =
+        labyrinthBallRadiusForLevel(_profileLevelNumber) + (_wallThickness / 2);
 
     if (point.dx - r <= 0 ||
         point.dy - r <= 0 ||
@@ -379,11 +377,11 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen>
     }
 
     final minColumn = math.max(0, (point.dx - r).floor()).toInt();
-    final maxColumn =
-        math.min(_level.columns - 1, (point.dx + r).floor()).toInt();
+    final maxColumn = math
+        .min(_level.columns - 1, (point.dx + r).floor())
+        .toInt();
     final minRow = math.max(0, (point.dy - r).floor()).toInt();
-    final maxRow =
-        math.min(_level.rows - 1, (point.dy + r).floor()).toInt();
+    final maxRow = math.min(_level.rows - 1, (point.dy + r).floor()).toInt();
 
     for (var row = minRow; row <= maxRow; row++) {
       for (var xLine = minColumn; xLine <= maxColumn + 1; xLine++) {
@@ -505,10 +503,7 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen>
 
     setState(() {
       _difficulty = difficulty;
-      _level = _MazeLevel.generate(
-        _profileLevelNumber,
-        mazeStage: _mazeStage,
-      );
+      _level = _MazeLevel.generate(_profileLevelNumber, mazeStage: _mazeStage);
       _position = _level.start;
       _velocity = Offset.zero;
       _timeLeft = _level.timeLimitSeconds;
@@ -558,10 +553,7 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen>
           } else {
             Navigator.of(context).pushReplacement(
               MaterialPageRoute(
-                builder: (_) => GameResultScreen(
-                  score: score,
-                  completed: true,
-                ),
+                builder: (_) => GameResultScreen(score: score, completed: true),
               ),
             );
           }
@@ -583,7 +575,8 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen>
       barrierDismissible: false,
       builder: (_) => _MazeResultDialog(
         title: 'Time up',
-        subtitle: 'Try the route again. The maze stays the same for this level.',
+        subtitle:
+            'Try the route again. The maze stays the same for this level.',
         stats: [
           ('Brain level', 'L$_trainingLevelNumber'),
           ('Difficulty', _difficulty.label),
@@ -614,16 +607,16 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen>
             builder: (context, constraints) {
               final compact = constraints.maxWidth < 380;
               final hudHeight = compact ? 216.0 : 180.0;
-              final availableHeight =
-                  math.max(220.0, constraints.maxHeight - hudHeight).toDouble();
+              final availableHeight = math
+                  .max(220.0, constraints.maxHeight - hudHeight)
+                  .toDouble();
               final boardWidth = math
                   .min(
                     constraints.maxWidth - (ReleafSpacing.screen * 2),
                     availableHeight * (_level.columns / _level.rows),
                   )
                   .toDouble();
-              final boardHeight =
-                  boardWidth * (_level.rows / _level.columns);
+              final boardHeight = boardWidth * (_level.rows / _level.columns);
               final boardSize = Size(boardWidth, boardHeight);
 
               return Stack(
@@ -639,8 +632,7 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen>
                         paused: _paused,
                         motionAvailable: _motionAvailable,
                         difficulty: _difficulty,
-                        difficultyEnabled:
-                            !_started && !_finished && !_paused,
+                        difficultyEnabled: !_started && !_finished && !_paused,
                         onDifficultyChanged: _setDifficulty,
                         onPause: _togglePause,
                         onExit: () => Navigator.of(context).maybePop(),
@@ -707,10 +699,7 @@ class _LabirynthGameScreenState extends State<LabirynthGameScreen>
                               subtitle:
                                   'Your current route and timer will reset.',
                               stats: [
-                                (
-                                  'Maze',
-                                  '$_mazeStage/$maxLabyrinthMazeStages',
-                                ),
+                                ('Maze', '$_mazeStage/$maxLabyrinthMazeStages'),
                                 ('Brain level', 'L$_trainingLevelNumber'),
                                 ('Difficulty', _difficulty.label),
                                 ('Time left', '${_timeLeft}s'),
@@ -779,10 +768,7 @@ LabyrinthLevelProfile labyrinthLevelProfileForTesting(
 }
 
 class _MazeCandidate {
-  const _MazeCandidate({
-    required this.cells,
-    required this.metrics,
-  });
+  const _MazeCandidate({required this.cells, required this.metrics});
 
   final List<List<_MazeCell>> cells;
   final _MazeMetrics metrics;
@@ -830,20 +816,25 @@ class _MazeLevel {
   final int deadEnds;
 
   String get entryLabel => switch (entrySide) {
-        _MazeEntrySide.bottom => 'Bottom',
-        _MazeEntrySide.left => 'Left',
-        _MazeEntrySide.top => 'Top',
-        _MazeEntrySide.right => 'Right',
-      };
+    _MazeEntrySide.bottom => 'Bottom',
+    _MazeEntrySide.left => 'Left',
+    _MazeEntrySide.top => 'Top',
+    _MazeEntrySide.right => 'Right',
+  };
 
-  factory _MazeLevel.generate(
-    int rawLevel, {
-    int mazeStage = 1,
-  }) {
-    final level = rawLevel.clamp(1, 12).toInt();
+  factory _MazeLevel.generate(int rawLevel, {int mazeStage = 1}) {
+    final level = rawLevel.clamp(1, 50).toInt();
     final stage = mazeStage.clamp(1, maxLabyrinthMazeStages).toInt();
-    final columns = (5 + ((level - 1) ~/ 2)).clamp(5, 10).toInt();
-    final rows = (7 + ((level - 1) ~/ 2)).clamp(7, 12).toInt();
+    final int columns;
+    final int rows;
+    if (level <= 12) {
+      columns = (5 + ((level - 1) ~/ 2)).clamp(5, 10).toInt();
+      rows = (7 + ((level - 1) ~/ 2)).clamp(7, 12).toInt();
+    } else {
+      final expansionBand = 1 + ((level - 13) ~/ 10);
+      columns = (10 + expansionBand).clamp(11, 14).toInt();
+      rows = (12 + expansionBand).clamp(13, 16).toInt();
+    }
     final entrySide = _MazeEntrySide.values[(stage - 1) % 4];
     final (startColumn, startRow) = switch (entrySide) {
       _MazeEntrySide.bottom => (columns ~/ 2, rows - 1),
@@ -858,15 +849,26 @@ class _MazeLevel {
     // single random DFS result. Higher levels target a progressively larger
     // fraction of the board, while keeping physics calm and predictable.
     final cellCount = columns * rows;
-    final targetRatio = 0.22 + (((level - 1) / 11.0) * 0.26);
-    final targetPathMoves =
-        (cellCount * targetRatio).round().clamp(6, cellCount - 1).toInt();
-    final targetTurns = (2 + (level * 0.65)).round();
+    final targetRatio = level <= 12
+        ? 0.22 + (((level - 1) / 11.0) * 0.26)
+        : 0.48 + (((level - 12) / 38.0) * 0.10);
+    final targetPathMoves = (cellCount * targetRatio)
+        .round()
+        .clamp(6, cellCount - 1)
+        .toInt();
+    final targetTurns = level <= 12
+        ? (2 + (level * 0.65)).round()
+        : 10 + (((level - 12) / 38.0) * 7).round();
 
     _MazeCandidate? best;
     var bestScore = double.infinity;
+    final candidateCount = level <= 12 ? 72 : 96;
 
-    for (var candidateIndex = 0; candidateIndex < 72; candidateIndex++) {
+    for (
+      var candidateIndex = 0;
+      candidateIndex < candidateCount;
+      candidateIndex++
+    ) {
       final candidate = _generateCandidate(
         columns: columns,
         rows: rows,
@@ -874,7 +876,8 @@ class _MazeLevel {
         startRow: startRow,
         goalColumn: goalColumn,
         goalRow: goalRow,
-        seed: 4813 +
+        seed:
+            4813 +
             (level * 7919) +
             (stage * 15485863) +
             (columns * 1009) +
@@ -889,7 +892,8 @@ class _MazeLevel {
       );
       final turnGap = (candidate.metrics.turns - targetTurns).abs();
 
-      final score = (pathGap * 12.0) +
+      final score =
+          (pathGap * 12.0) +
           (shortfall * 42.0) +
           (turnGap * 1.4) -
           (math.min(candidate.metrics.deadEnds, 18) * 0.12);
@@ -901,12 +905,14 @@ class _MazeLevel {
     }
 
     final selected = best!;
-    final secondsPerMove = 2.9 - ((level - 1) * 0.035);
-    final timeLimitSeconds =
-        (28 + (selected.metrics.moves * secondsPerMove))
-            .round()
-            .clamp(50, 150)
-            .toInt();
+    final secondsPerMove = level <= 12
+        ? 2.9 - ((level - 1) * 0.035)
+        : 2.515 - (((level - 12) / 38.0) * 0.515);
+    final rawTimeLimit = (28 + (selected.metrics.moves * secondsPerMove))
+        .round();
+    final timeLimitSeconds = level <= 12
+        ? rawTimeLimit.clamp(50, 150).toInt()
+        : rawTimeLimit.clamp(55, 180).toInt();
 
     return _MazeLevel(
       level: level,
@@ -935,10 +941,7 @@ class _MazeLevel {
   }) {
     final cells = List<List<_MazeCell>>.generate(
       rows,
-      (_) => List<_MazeCell>.generate(
-        columns,
-        (_) => _MazeCell(),
-      ),
+      (_) => List<_MazeCell>.generate(columns, (_) => _MazeCell()),
     );
 
     final random = math.Random(seed);
@@ -1105,11 +1108,7 @@ class _MazeLevel {
         ? distances[goalRow][goalColumn]
         : math.max(columns, rows).toInt();
 
-    return _MazeMetrics(
-      moves: moves,
-      turns: turns,
-      deadEnds: deadEnds,
-    );
+    return _MazeMetrics(moves: moves, turns: turns, deadEnds: deadEnds);
   }
 
   bool hasVerticalWall(int xLine, int row) {
@@ -1164,11 +1163,7 @@ class _MazeBoardPainter extends CustomPainter {
         ..shader = const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            Color(0xFF0F1C17),
-            Color(0xFF09130F),
-            Color(0xFF07100D),
-          ],
+          colors: [Color(0xFF0F1C17), Color(0xFF09130F), Color(0xFF07100D)],
         ).createShader(boardRect),
     );
 
@@ -1183,8 +1178,9 @@ class _MazeBoardPainter extends CustomPainter {
 
     final wallPaint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth =
-          math.max(3.0, math.min(cellWidth, cellHeight) * 0.09).toDouble()
+      ..strokeWidth = math
+          .max(3.0, math.min(cellWidth, cellHeight) * 0.09)
+          .toDouble()
       ..strokeCap = StrokeCap.round
       ..color = const Color(0xFF557C68);
 
@@ -1203,8 +1199,7 @@ class _MazeBoardPainter extends CustomPainter {
 
     final innerWallPaint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth =
-          math.max(1.2, wallPaint.strokeWidth * 0.38).toDouble()
+      ..strokeWidth = math.max(1.2, wallPaint.strokeWidth * 0.38).toDouble()
       ..strokeCap = StrokeCap.round
       ..color = const Color(0xFF9FC8B4).withValues(alpha: 0.35);
 
@@ -1284,8 +1279,7 @@ class _MazeBoardPainter extends CustomPainter {
       level.start.dx / level.columns * size.width,
       level.start.dy / level.rows * size.height,
     );
-    final startRadius =
-        math.min(cellWidth, cellHeight).toDouble() * 0.20;
+    final startRadius = math.min(cellWidth, cellHeight).toDouble() * 0.20;
     canvas.drawCircle(
       start,
       startRadius * 1.45,
@@ -1301,21 +1295,21 @@ class _MazeBoardPainter extends CustomPainter {
     );
     final ballRadius =
         math.min(cellWidth, cellHeight).toDouble() *
-            labyrinthBallRadiusForLevel(level.level);
+        labyrinthBallRadiusForLevel(level.level);
 
     canvas.drawCircle(
       ball,
       ballRadius * 2.0,
       Paint()
-        ..color = const Color(0xFF76D5B8).withValues(
-          alpha: paused ? 0.08 : 0.20,
-        )
+        ..color = const Color(0xFF76D5B8)
+            .withValues(alpha: paused ? 0.08 : 0.20)
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 18),
     );
     canvas.drawCircle(
       ball,
       ballRadius,
-      Paint()..color = paused ? const Color(0xFF69877A) : const Color(0xFFD7FFF2),
+      Paint()
+        ..color = paused ? const Color(0xFF69877A) : const Color(0xFFD7FFF2),
     );
     canvas.drawCircle(
       ball,
@@ -1339,10 +1333,7 @@ class _MazeBoardPainter extends CustomPainter {
 
       textPainter.paint(
         canvas,
-        Offset(
-          ball.dx - (textPainter.width / 2),
-          ball.dy + ballRadius + 9,
-        ),
+        Offset(ball.dx - (textPainter.width / 2), ball.dy + ballRadius + 9),
       );
     }
   }
@@ -1477,9 +1468,7 @@ class _MazeStat extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xFF14201B).withValues(alpha: 0.92),
         borderRadius: BorderRadius.circular(ReleafRadii.pill),
-        border: Border.all(
-          color: ReleafColors.sage.withValues(alpha: 0.16),
-        ),
+        border: Border.all(color: ReleafColors.sage.withValues(alpha: 0.16)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -1507,10 +1496,7 @@ class _MazeStat extends StatelessWidget {
 }
 
 class _PauseOverlay extends StatelessWidget {
-  const _PauseOverlay({
-    required this.onResume,
-    required this.onRestart,
-  });
+  const _PauseOverlay({required this.onResume, required this.onRestart});
 
   final VoidCallback onResume;
   final VoidCallback onRestart;
@@ -1540,10 +1526,7 @@ class _PauseOverlay extends StatelessWidget {
                 size: 42,
               ),
               const SizedBox(height: ReleafSpacing.sm),
-              Text(
-                'Paused',
-                style: ReleafTypography.sectionTitle,
-              ),
+              Text('Paused', style: ReleafTypography.sectionTitle),
               const SizedBox(height: ReleafSpacing.lg),
               SizedBox(
                 width: double.infinity,
@@ -1626,14 +1609,8 @@ class _MazeResultDialog extends StatelessWidget {
       ),
       actions: [
         if (secondaryLabel != null && onSecondary != null)
-          TextButton(
-            onPressed: onSecondary,
-            child: Text(secondaryLabel!),
-          ),
-        FilledButton(
-          onPressed: onPrimary,
-          child: Text(primaryLabel),
-        ),
+          TextButton(onPressed: onSecondary, child: Text(secondaryLabel!)),
+        FilledButton(onPressed: onPrimary, child: Text(primaryLabel)),
       ],
     );
   }
