@@ -1,9 +1,6 @@
 name: Deploy Releaf Web to GitHub Pages
 
 on:
-  push:
-    branches:
-      - releaf-development
   workflow_dispatch:
 
 permissions:
