@@ -20,7 +20,7 @@ void main() {
       'DQA-11',
       'Password recovery deep link',
       'DQA-13',
-      'Monthly purchase',
+      'Monthly Play Billing test purchase',
       'DQA-15',
       'Restore purchases',
       'DQA-16',
@@ -41,7 +41,7 @@ void main() {
       '8 OF 8',
       'Android reduced motion enabled',
       'enlarged system text',
-      'Play-distributed test build',
+      'Play-distributed production-equivalent build',
       'FAIL',
       'BLOCKED',
     ]) {
