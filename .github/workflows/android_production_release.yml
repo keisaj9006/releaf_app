@@ -11,6 +11,12 @@ jobs:
     name: Build signed production AAB
     runs-on: ubuntu-latest
     timeout-minutes: 35
+    env:
+      RELEAF_DATA_CONTROLLER_NAME: Relief
+      RELEAF_PRIVACY_CONTACT_EMAIL: canius.uk@gmail.com
+      RELEAF_PRIVACY_POLICY_URL: https://releaf-account-deletion-89juqm.v2.appdeploy.ai/privacy-policy.html
+      RELEAF_ACCOUNT_DELETION_URL: https://releaf-account-deletion-89juqm.v2.appdeploy.ai/
+      RELEAF_PRIVACY_LAST_UPDATED: 2026-09-14
 
     steps:
       - name: Checkout
@@ -74,12 +80,6 @@ jobs:
 
       - name: Validate production legal metadata
         shell: bash
-        env:
-          RELEAF_DATA_CONTROLLER_NAME: ${{ vars.RELEAF_DATA_CONTROLLER_NAME }}
-          RELEAF_PRIVACY_CONTACT_EMAIL: ${{ vars.RELEAF_PRIVACY_CONTACT_EMAIL }}
-          RELEAF_PRIVACY_POLICY_URL: ${{ vars.RELEAF_PRIVACY_POLICY_URL }}
-          RELEAF_ACCOUNT_DELETION_URL: ${{ vars.RELEAF_ACCOUNT_DELETION_URL }}
-          RELEAF_PRIVACY_LAST_UPDATED: ${{ vars.RELEAF_PRIVACY_LAST_UPDATED }}
         run: dart run tool/release/legal_metadata_policy.dart
 
       - name: Materialize private upload signing configuration
@@ -105,11 +105,6 @@ jobs:
       - name: Build signed production app bundle
         env:
           REVENUECAT_ANDROID_API_KEY: ${{ secrets.REVENUECAT_ANDROID_API_KEY }}
-          RELEAF_DATA_CONTROLLER_NAME: ${{ vars.RELEAF_DATA_CONTROLLER_NAME }}
-          RELEAF_PRIVACY_CONTACT_EMAIL: ${{ vars.RELEAF_PRIVACY_CONTACT_EMAIL }}
-          RELEAF_PRIVACY_POLICY_URL: ${{ vars.RELEAF_PRIVACY_POLICY_URL }}
-          RELEAF_ACCOUNT_DELETION_URL: ${{ vars.RELEAF_ACCOUNT_DELETION_URL }}
-          RELEAF_PRIVACY_LAST_UPDATED: ${{ vars.RELEAF_PRIVACY_LAST_UPDATED }}
         run: >-
           flutter build appbundle --release
           --dart-define=REVENUECAT_ANDROID_API_KEY="$REVENUECAT_ANDROID_API_KEY"
