@@ -2,6 +2,8 @@
 
 Status: **copy ready; assets, owner contact details and Play Console entry required**.
 
+Last policy verification: **2026-09-14**.
+
 This document is the canonical English (UK) store-listing pack for Releaf 1.0.
 It describes only functionality present in the `releaf-development` release
 surface and keeps health claims aligned with the Health apps declaration.
@@ -98,9 +100,9 @@ The automated policy verifies file presence, supported formats, dimensions,
 required icon alpha and the strong-listing screenshot count/orientation. It does
 **not** certify creative quality, owner approval, rights/provenance, screenshot
 freshness, truthful visual content or successful Play Console entry. At the
-`3186cb1` checkpoint the real `store/google-play/` pack is still absent, so the
-Store listing release gate remains open. Do not add placeholder graphics merely
-to make the validator pass.
+frozen build candidate `dd20fb5`, the real `store/google-play/` pack is still
+absent by deliberate release sequencing, so the Store listing release gate remains
+open. Do not add placeholder graphics merely to make the validator pass.
 
 ### App icon
 
@@ -202,6 +204,12 @@ Before entering this copy in Play Console:
   https://support.google.com/googleplay/android-developer/answer/9859673?hl=en
 - Health apps declaration:
   https://support.google.com/googleplay/android-developer/answer/14738291?hl=en-GB
+- Health Content and Services:
+  https://support.google.com/googleplay/android-developer/answer/16679511?hl=en-GB
+
+The approved full description already includes the current Google-required
+non-medical-device disclaimer and healthcare-professional reminder for health
+apps that are not regulated medical devices.
 
 Google Play requirements can change. Re-verify these sources immediately before
 final Play submission.
