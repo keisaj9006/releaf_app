@@ -25,7 +25,7 @@ Complete this block for every candidate that is eligible to close the gate.
 | Field | Value |
 | --- | --- |
 | Date | `TBD` |
-| App build-candidate Git SHA | `dd20fb5a3f0f00c9cf4760c22f2ba0d8c034e22e` |
+| App build-candidate Git SHA | `ecd3e977b55a9f247459f79e2c4ede92303db323` |
 | App version / build | `1.0.0+20260913` |
 | Production-signed AAB SHA-256 | `TBD` |
 | Play test track / release | `TBD` |
@@ -43,14 +43,16 @@ If multiple devices are used, add one row set per device. At least one real supp
 
 ## Automated release evidence already present
 
-The frozen `dd20fb5` build candidate already has immutable CI evidence in `docs/release/2026-09-14-ci-dd20fb5.md`:
+The frozen `ecd3e97` build candidate has immutable CI evidence in `docs/release/2026-09-14-ci-ecd3e97.md`:
 
 - `flutter analyze`: clean;
-- full Flutter suite: **582/582 PASS**;
+- full Flutter suite: **583/583 PASS**;
 - Android release AAB smoke build and 16 KB ZIP/ELF compatibility: PASS;
-- Releaf Web Release Smoke on the same SHA: PASS;
+- Releaf Web Release Smoke run `34834895129` on the same SHA: PASS;
+- Flutter P0 Validation run `34834895182`: PASS;
 - production manifests exported;
 - both debug APK variants built;
+- legacy Android API 24–25 launcher PNGs are protected by a regression test and were verified directly inside the built standard APK artifact as Releaf-branded across all five density buckets;
 - Reset lifecycle/session tests;
 - Brain flow and Labyrinth lifecycle/progression tests;
 - Sleep/Sound behaviour and background-audio/interruption contracts;
@@ -68,7 +70,7 @@ For each row record `PASS`, `FAIL`, or `BLOCKED`, plus concise evidence (screen 
 
 | ID | Scenario | Mandatory acceptance criteria | Result | Evidence / notes |
 | --- | --- | --- | --- | --- |
-| DQA-01 | Cold start online | App launches cleanly from a force-stopped state; primary navigation is usable and no release-only initialization error is shown. | `TBD` | `TBD` |
+| DQA-01 | Cold start online | App launches cleanly from a force-stopped state; primary navigation is usable and no release-only initialization error is shown. Confirm the installed launcher uses Releaf branding rather than a framework/template icon. | `TBD` | `TBD` |
 | DQA-02 | Cold start offline | With network unavailable, local-first areas that do not require network still launch and remain usable; the app does not claim cloud backup or silently discard local progress. Network-only actions fail clearly rather than hanging/crashing. | `TBD` | `TBD` |
 | DQA-03 | Background / foreground | Move app to background and return repeatedly during active Reset, Brain and player flows. State follows the intended lifecycle policy with no duplicate timers, runaway input, crash or corrupted progress. | `TBD` | `TBD` |
 | DQA-04 | Sleep background audio + timer | Start a Sleep sound, background/lock the device, resume, change timer and allow timer expiry. Rapidly change tracks during loading; use notification pause/stop during loading and expiry, then Play. The latest choice wins and resumed audio uses the selected volume. Audio/timer behaviour matches the UI, no narration appears in Sleep, and playback does not continue incorrectly after expiry. | `TBD` | `TBD` |
@@ -107,11 +109,11 @@ For DQA-13–DQA-15:
 
 ## Failure policy
 
-- Any crash, data-loss path, broken account access, Premium leakage between accounts, failed authorized Play Billing test purchase/restore, inaccessible Emergency flow, broken deletion flow, or repeatable severe navigation/audio defect is P0 and blocks release.
+- Any crash, data-loss path, broken account access, Premium leakage between accounts, failed authorized Play Billing test purchase/restore, inaccessible Emergency flow, broken deletion flow, repeatable severe navigation/audio defect, or shipped launcher regression is P0 and blocks release.
 - A failed mandatory row must be linked to a fix and retested on the release candidate.
 - `BLOCKED` is not equivalent to PASS. If a row depends on external production configuration, keep the corresponding release gate open until that dependency is available and the row is rerun.
 - Parked Meditate content incompleteness by itself is not a P0 for the active Reset / Brain / Sleep 1.0 surface. A crash, broken exit/resume path or accidental reintroduction into active discovery can still be release-blocking.
-- Cosmetic issues may be triaged separately only when they do not impair comprehension, accessibility, navigation, purchase disclosure, privacy, or safety.
+- Cosmetic issues may be triaged separately only when they do not impair comprehension, accessibility, navigation, purchase disclosure, privacy, safety or core brand identity.
 
 ## Sign-off
 
