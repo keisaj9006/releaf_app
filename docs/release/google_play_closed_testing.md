@@ -2,6 +2,8 @@
 
 This is the canonical Play Console testing plan for Releaf 1.0. It converts the store requirement into an auditable release process; it does not claim that testing has already happened.
 
+Last policy verification: **2026-09-14**.
+
 ## 1. First determine whether the 12 / 14 rule applies
 
 Before scheduling the production-access date, verify in the Play Console developer account:
@@ -18,15 +20,16 @@ If the Dashboard does not impose that eligibility requirement, closed testing is
 
 The build used for final Releaf 1.0 closed testing should be production-equivalent. Before calling a run the release-candidate test, confirm:
 
-- the candidate commit is green in Flutter P0 Validation and Releaf Web Release Smoke;
+- the frozen build candidate is green in Flutter P0 Validation and Releaf Web Release Smoke;
 - the production upload keystore is configured privately and the uploaded AAB is not debug-signed;
 - the real Android RevenueCat public SDK key is supplied at build time;
-- monthly and annual Google Play subscription products are active and mapped into the current RevenueCat Offering;
+- RevenueCat's Google Play service credentials are valid, with required permissions green;
+- monthly and annual Google Play subscription products/base plans are active and mapped into the current RevenueCat Offering;
 - the updated Supabase `delete-account` Edge Function is deployed with the server-only RevenueCat erasure secret;
 - the public HTTPS privacy-policy and external account-deletion URLs are live and match Play Console entries;
 - Health apps declaration, Data safety answers and Store Listing are aligned with the candidate;
 - the candidate version/build code is unique and recorded;
-- test accounts and, where required, Play licence testers are prepared.
+- designated billing QA Google accounts are configured as Play **license testers** where test payment methods are required.
 
 A preliminary closed/internal build may be used earlier, but it does not close the production-equivalent QA gates above.
 
@@ -57,13 +60,19 @@ Testers should not merely install the app. Ask them to use the main release surf
 - sign-up/sign-in/sign-out and email confirmation;
 - password reset/recovery deep link;
 - Premium paywall presentation;
-- real Google Play purchase on designated licence-test accounts where assigned;
+- Google Play Billing **test purchase** on designated licence-test accounts where assigned, using Play-provided test instruments rather than an unnecessary real-money charge;
 - Restore Purchases on the designated purchase test path;
 - Emergency access without Premium;
 - offline/local-first behaviour;
 - any crash, frozen state, severe jank, broken navigation or misleading copy.
 
 Destructive account deletion should be performed only by designated QA testers using disposable accounts, according to `docs/release/android_device_release_qa.md`.
+
+### Billing-test safety
+
+A tester being enrolled in an internal/closed test does **not** by itself make purchases free. Google's current Billing documentation states that ordinary test-track users can still incur real charges. For release-gate billing QA, use designated **license testers** and verify that the Play purchase dialog shows the intended tester account and test payment method. Play Billing Lab may be used for controlled subscription state scenarios.
+
+If a device contains multiple Google accounts, record which account downloaded the Play build and confirm the purchasing account in the purchase dialog before proceeding.
 
 ## 5. Feedback record
 
@@ -78,6 +87,7 @@ Keep a lightweight evidence table throughout the run.
 | Eligibility rule shown by Play Console | `TBD` |
 | Tester count opted in | `TBD` |
 | Continuous eligibility date, if applicable | `TBD` |
+| Billing licence-test accounts prepared | `TBD` |
 | Feedback channel | `TBD` |
 | Issues found | `TBD` |
 | P0/P1 fixes shipped during test | `TBD` |
@@ -117,11 +127,17 @@ If Releaf requires authentication for review, ensure Play Console App access con
 - applicable minimum tester/duration requirement is complete;
 - meaningful tester feedback has been reviewed and release-blocking defects are fixed/retested;
 - Android Device Release QA mandatory rows are PASS on the final candidate or a later equivalent candidate;
-- real purchase/restore checks have passed on the Play-distributed build;
+- Play Billing test-purchase/restore checks have passed on the Play-distributed build with traceable licence-test evidence;
 - Production access has been granted when the account requires an application.
 
 Until then the gate remains open, even if CI is fully green.
 
 ## Source lock
 
-The account-specific 12-tester/14-day rule must always be rechecked against the current official Google Play Console Help guidance immediately before starting the eligibility clock or applying for Production access; store requirements can change independently of the Releaf codebase.
+Verified against current official Google guidance on **14 September 2026**:
+
+- personal developer accounts created after 13 November 2023 require at least 12 testers continuously opted in for at least 14 days before applying for Production access;
+- Google recommends license testers and Play Billing Lab for billing integration testing;
+- license testers have Play-provided test payment methods that avoid real charges, whereas normal users on testing tracks can still make real purchases.
+
+The account-specific testing rule and Billing test guidance must be rechecked against current official Google documentation immediately before starting the eligibility clock, executing final billing QA or applying for Production access; store requirements can change independently of the Releaf codebase.
