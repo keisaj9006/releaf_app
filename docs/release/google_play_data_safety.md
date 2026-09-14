@@ -1,8 +1,8 @@
 # Google Play Data Safety — Releaf 1.0
 
-Status: **content mapping prepared; vendor/dashboard verification and Play Console submission required**.
+Status: **content mapping prepared; vendor/dashboard verification, final Privacy Policy and Play Console submission required**.
 
-Last reviewed: **2026-09-10**.
+Last reviewed: **2026-09-14**.
 
 This document maps the actual `releaf-development` release surface to Google
 Play's Data safety form. It is a release-control worksheet, not evidence that
@@ -94,9 +94,10 @@ the current release.
 ### 5. Health and wellness content
 
 Releaf must make a Health apps declaration because the product includes Sleep,
-meditation, Reset/mental-wellbeing support and cognitive training. That product
-classification does **not** by itself mean that Releaf collects Google Play
-**Health and fitness** user data.
+Reset/mental-wellbeing support and cognitive training; the preserved Meditate
+module/direct route also remains in the app even though it is parked outside the
+active 1.0 discovery/marketing surface. Product classification does **not** by
+itself mean that Releaf collects Google Play **Health and fitness** user data.
 
 The current audited release surface does not transmit sleep measurements,
 heart rate, medical records, diagnoses, exercise measurements or other measured
@@ -123,11 +124,12 @@ exact labels presented by Play Console at submission time.
   RevenueCat states its collected data is encrypted in transit. Do not submit
   this answer until the final production endpoints/SDK configuration have been
   smoke-tested.
-- **Can users request deletion of collected data? — YES only after the release
-  deletion infrastructure is live and verified.** Code exists for in-app
-  deletion, RevenueCat customer erasure and an external web deletion resource;
-  the Edge Function secret/deploy and public HTTPS deletion page are still
-  release dependencies.
+- **Can users request deletion of collected data? — YES, engineering and public
+  deletion availability are implemented; final RC re-verification remains.**
+  Releaf has an in-app deletion path, RevenueCat customer erasure through the
+  hardened Supabase deletion function, and a live external web deletion portal.
+  The final Data Safety submission must use the live deletion URL and must remain
+  consistent with the final published Privacy Policy/retention wording.
 
 ### Data types to declare
 
@@ -181,26 +183,41 @@ this document rather than relying on the current `Shared = No` worksheet.
 
 ## Account deletion / retention closure
 
-Current engineering path:
+Google Play currently requires apps that allow account creation to provide both
+an in-app account-deletion path and an external web resource where users can
+request deletion without having to reinstall the app. Account deletion must also
+delete associated account data, subject only to clearly disclosed legitimate
+retention requirements.
+
+Verified Releaf engineering/public state on 14 September 2026:
 
 1. user authenticates;
 2. Releaf invokes the authenticated `delete-account` Edge Function;
 3. the function requests deletion of the matching RevenueCat customer using a
    server-only `REVENUECAT_SECRET_API_KEY`;
-4. the function deletes the Supabase auth user so dependent account records can
+4. the hardened `delete-account` Edge Function version 4 is deployed and the
+   server-only erasure secret has been verified in the tested environment;
+5. the function deletes the Supabase auth user so dependent account records can
    be removed according to the database relationships/policies;
-5. the app signs out locally.
+6. the app signs out locally;
+7. disposable-account in-app deletion E2E has already been verified against
+   Supabase and RevenueCat;
+8. the public Releaf account-deletion portal is live at
+   `https://releaf-account-deletion-89juqm.v2.appdeploy.ai/` and does not require
+   the Android app to be installed.
 
-Before answering the Play deletion question as production-ready, verify all of:
+The deletion gate therefore no longer depends on creating an external resource.
+Before final Play submission, still verify all of:
 
-- the updated Edge Function is deployed;
-- `REVENUECAT_SECRET_API_KEY` is configured only as an Edge secret;
-- deleting an identified RevenueCat customer succeeds end-to-end;
-- the public `https://...` account-deletion resource is deployed and usable in
-  a normal browser without requiring the Android app to be installed;
-- the final Privacy Policy explains retention/deletion accurately;
-- any data that must legally be retained is described with the applicable
-  retention rationale rather than silently promised as immediate deletion.
+- DQA-18 passes again on the exact production-equivalent RC with a disposable
+  account only;
+- the live external deletion URL still loads, clearly references Releaf and
+  completes the intended authenticated deletion route;
+- the URL is entered in the correct Play Console Data deletion field;
+- the final Privacy Policy accurately explains retention/deletion and any data
+  that must legally be retained;
+- production RevenueCat/service-provider configuration has not introduced an
+  undeclared retention or sharing behaviour.
 
 ## Final submission checklist
 
@@ -209,23 +226,37 @@ Before answering the Play deletion question as production-ready, verify all of:
    new analytics, advertising, crash, social, health or identifier collection.
 3. Verify production RevenueCat integrations and customer attributes; confirm no
    advertising/device-ID integration has been enabled unexpectedly.
-4. Verify Supabase production project, Edge Function and deletion secret.
-5. Deploy and test the public Privacy Policy and Account Deletion URLs.
-6. Confirm local progress still does not upload in Releaf 1.0.
-7. Complete Play Console **App content → Data safety** using this worksheet and
+4. Verify Supabase production project, deployed Edge Function and deletion secret.
+5. Publish/test the final Privacy Policy URL and re-verify the already-live
+   Account Deletion URL.
+6. Repeat DQA-18 on the exact production-equivalent RC using a disposable account.
+7. Confirm local progress still does not upload in Releaf 1.0.
+8. Complete Play Console **App content → Data safety**, including the required
+   Data deletion questions and external deletion URL, using this worksheet and
    the exact current Play wording.
-8. Preview the resulting Data safety section and cross-check it against the
+9. Preview the resulting Data safety section and cross-check it against the
    public Privacy Policy and Store Listing.
-9. Record any Play wording/category change back into this file before release.
+10. Record any Play wording/category change back into this file before release.
 
 ## Current primary sources
 
+Verified on **14 September 2026**:
+
 - Google Play — Provide information for the Data safety section:
   https://support.google.com/googleplay/android-developer/answer/10787469?hl=en-GB
+- Google Play — User data policy / privacy and account deletion requirements:
+  https://support.google.com/googleplay/android-developer/answer/10144311?hl=en-GB
+- Google Play — Understanding app account deletion requirements:
+  https://support.google.com/googleplay/android-developer/answer/13327111?hl=en
 - RevenueCat — Google Play's Data Safety:
   https://www.revenuecat.com/docs/platform-resources/google-platform-resources/google-plays-data-safety
 - RevenueCat — Customers / App User IDs:
   https://www.revenuecat.com/docs/customers/user-ids
+
+RevenueCat's current Data Safety guidance still requires **Financial info →
+Purchase history** when RevenueCat is used and lists App functionality and
+Analytics as the purposes. Device/other identifiers remain conditional on
+integrations that use those identifiers.
 
 Re-verify these sources immediately before final Play submission because Google
 Play and SDK disclosure requirements can change.
