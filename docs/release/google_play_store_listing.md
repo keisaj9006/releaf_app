@@ -1,6 +1,6 @@
 # Google Play Store Listing — Releaf 1.0
 
-Status: **copy ready; assets, owner contact details and Play Console entry required**.
+Status: **copy + legal contact fields ready; assets, website and Play Console entry required**.
 
 Last policy verification: **2026-09-14**.
 
@@ -66,14 +66,18 @@ this approved version unless the Health apps declaration is re-reviewed.
 
 ## Required contact and legal fields
 
-Do not invent these values. They must be supplied before store submission:
+Owner-supplied/public values approved on 14 September 2026:
 
-- support email — **required by Google Play**;
-- website — strongly recommended and should use a stable public HTTPS domain;
-- public Privacy Policy URL — required by Releaf's health/privacy release gate;
-- public Account Deletion URL — required because Releaf supports account creation;
-- data-controller identity and privacy contact — must match the in-app legal config
-  and public Privacy Policy.
+- support / privacy email: **`canius.uk@gmail.com`**;
+- public Privacy Policy URL: **`https://releaf-account-deletion-89juqm.v2.appdeploy.ai/privacy-policy.html`**;
+- public Account Deletion URL: **`https://releaf-account-deletion-89juqm.v2.appdeploy.ai/`**;
+- data-controller name shown in the public policy: **`Relief`**.
+
+Still open:
+
+- website — strongly recommended and should use a stable public HTTPS destination. Do not invent a marketing site solely to fill the field.
+
+The controller/contact values used in Play must match the production Android legal config and public Privacy Policy. If legal review determines that `Relief` is only a product/trading label rather than the true legal controller identity, replace it consistently before release rather than silently diverging between surfaces.
 
 ## Graphic asset pack
 
@@ -100,7 +104,7 @@ The automated policy verifies file presence, supported formats, dimensions,
 required icon alpha and the strong-listing screenshot count/orientation. It does
 **not** certify creative quality, owner approval, rights/provenance, screenshot
 freshness, truthful visual content or successful Play Console entry. At the
-frozen build candidate `dd20fb5`, the real `store/google-play/` pack is still
+frozen app build candidate `ecd3e97`, the real `store/google-play/` pack is still
 absent by deliberate release sequencing, so the Store listing release gate remains
 open. Do not add placeholder graphics merely to make the validator pass.
 
@@ -183,8 +187,8 @@ Before entering this copy in Play Console:
    every reported structural error.
 2. Enter the approved app name, short description and full description.
 3. Set category to Health & Fitness and select only clearly relevant available tags.
-4. Supply the real support email and, preferably, support website.
-5. Supply the live public Privacy Policy and Account Deletion URLs.
+4. Enter support email `canius.uk@gmail.com` and add a website if/when a suitable stable HTTPS destination exists.
+5. Enter the live Privacy Policy URL and Account Deletion URL recorded above.
 6. Upload final 512 × 512 app icon and 1,024 × 500 feature graphic.
 7. Upload at least four current portrait phone screenshots for the strongest listing
    (minimum two are required to publish the store listing).
