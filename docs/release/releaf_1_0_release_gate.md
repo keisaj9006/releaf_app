@@ -18,15 +18,18 @@ When that state is reached, explicitly report:
 ## Current gates
 
 Latest complete automated artifact evidence:
-[14 September 2026 RC external-gates checkpoint for `2f3c8d2`](2026-09-14-rc-external-gates.md).
-Flutter P0 Validation run `34820595815` completed **SUCCESS** with clean analysis,
-**581/581 full-suite tests**, all targeted Brain/Reset gates, three production
+[14 September 2026 final RC automated evidence for `dd20fb5`](2026-09-14-ci-dd20fb5.md).
+Flutter P0 Validation run `34822680105` completed **SUCCESS** with clean analysis,
+**582/582 full-suite tests**, all targeted Brain/Reset gates, three production
 manifests, standard and Premium Preview debug APKs, release AAB smoke artifact and
-Android 16 KB compatibility. Releaf Web Release Smoke run `34820595840` also
-completed **SUCCESS**. This supersedes the 13 September artifact checkpoint for the
-current code/build state. It does not close production signing, owner-listening,
-RevenueCat/Play configuration, public Privacy Policy, Play Console/store assets or
-physical-device gates.
+Android 16 KB compatibility. Releaf Web Release Smoke run `34822680100` also
+completed **SUCCESS** on the exact same SHA. The earlier
+[14 September external-gates checkpoint](2026-09-14-rc-external-gates.md) remains
+the companion record for external configuration state. Evidence-only documentation
+commits after `dd20fb5a3f0f00c9cf4760c22f2ba0d8c034e22e` do not redefine the frozen
+build candidate. These automated results do not close production signing,
+owner-listening, RevenueCat/Play configuration, public Privacy Policy, Play
+Console/store assets or physical-device gates.
 
 RC hardening has frozen the release version at `1.0.0+20260913`, parked Meditate
 outside the active 1.0 discovery/marketing surface, aligned Home/Account/Premium
@@ -48,9 +51,9 @@ scope decision does not certify unfinished meditation recordings.
 | Emergency privacy/access | DONE | No Premium gate; excluded from standard progress sync and DB-enforced exclusion is present. |
 | Progress sync | DEFERRED / HARDENED | Local progress remains the user-facing truth for 1.0. Upload/download/reconciliation primitives remain inactive until materialization + multi-device conflict tests are complete. Do not claim cloud backup. |
 | Supabase security | DONE / MONITOR | RLS is enabled on product tables and current Supabase security advisor reports no lints. |
-| Android API level | DONE | Release baseline explicitly targets Android 16 / API 36 and the current `2f3c8d2` checkpoint passes release-AAB smoke plus the Android 16 KB ZIP/ELF compatibility gate. |
+| Android API level | DONE | Release baseline explicitly targets Android 16 / API 36 and the frozen `dd20fb5` build candidate passes release-AAB smoke plus the Android 16 KB ZIP/ELF compatibility gate. |
 | Android release signing | WORKFLOW READY / SECRETS REQUIRED | Debug signing is forbidden for release. `.github/workflows/android_production_release.yml` is a manual fail-closed path requiring the private upload keystore/password/alias, a real `goog_` RevenueCat Android public key and validated production legal metadata. It verifies the signed AAB with `jarsigner`, records SHA-256 and removes runner signing material. Final closure requires the real private production upload key/secrets and successful production-signed AAB evidence. |
-| Release AAB | CI SMOKE DONE / PROD SIGNING REQUIRED | `2f3c8d2` builds/uploads the release AAB smoke artifact and passes the 16 KB compatibility gate in run `34820595815`. This artifact uses the short-lived CI signing key and is not the Play upload artifact. Final Play artifact still requires the production signing workflow and private upload key. |
+| Release AAB | CI SMOKE DONE / PROD SIGNING REQUIRED | `dd20fb5` builds/uploads the release AAB smoke artifact and passes the 16 KB compatibility gate in run `34822680105`. The smoke AAB artifact is `10338829531` with SHA-256 `0a788c6376901466e318d060eb2efcd85bb6d7d35c81de976194fc0f29618808`. This artifact uses the short-lived CI signing key and is not the Play upload artifact. Final Play artifact still requires the production signing workflow and private upload key. |
 | RevenueCat / Google Play Billing | ENGINEERING CONTRACT LOCKED / EXTERNAL CONFIG REQUIRED | Runtime billing hardening covers entitlement refresh, account-switch isolation, normalized store failures, annual/monthly package gating, restore and subscription management. `docs/release/revenuecat_google_play_production_setup.md` locks entitlement `premium`, current Offering, standard Annual/Monthly packages and real Android `goog_` key. Recommended Play structure is `releaf_premium_v1` with `monthly-autorenewing` and `annual-autorenewing` base plans. Approved GBP prices remain an owner/business decision. Final closure requires Play products/base plans, RevenueCat Play credentials/import/entitlement/current Offering, the real `goog_` SDK key and purchase + restore verification from a Play-distributed test build. |
 | Privacy policy | CODE READY / OWNER METADATA + PUBLIC DEPLOY REQUIRED | In-app disclosures are present and `tool/release/render_privacy_policy.dart` now generates a public policy only after fail-closed validation of controller name, privacy email, Privacy URL, Delete Account URL and last-updated date. The policy covers controller/contact, purposes/lawful basis, Supabase, RevenueCat/Google Play, local progress, local accelerometer use, recipients, international processing, retention, deletion, data-subject rights and Information Commissioner complaints. The current missing owner inputs are the real data-controller name and privacy contact email. Preferred final deployment is a Privacy route on the existing Releaf AppDeploy legal host; no placeholder policy may be published. |
 | Web account-deletion URL | LIVE / FINAL RC QA REQUIRED | The public deletion portal is live at `https://releaf-account-deletion-89juqm.v2.appdeploy.ai/` under AppDeploy app `releaf-account-deletion-89juqm`. On 14 September 2026 AppDeploy reports status `ready`, public HTTPS, no frontend/network/backend errors and QA screenshots for web/mobile. The portal authenticates directly against Releaf Supabase and invokes the existing authenticated deletion function without requiring Android installation. Public availability is closed; final DQA-18 on the exact production-equivalent RC and Play Console entry remain required. |
@@ -92,9 +95,11 @@ layout fixes improve reliability; production transaction QA, owner listening and
 the full release-device matrix remain open.
 
 The latest complete automated release evidence is now
-[the 14 September RC external-gates checkpoint](2026-09-14-rc-external-gates.md).
-It supersedes older CI artifact checkpoints for the current code/build state while
-preserving the historical milestones above.
+[the 14 September final RC automated checkpoint](2026-09-14-ci-dd20fb5.md).
+The [14 September RC external-gates checkpoint](2026-09-14-rc-external-gates.md)
+remains the external-state companion record. Together they supersede older CI
+artifact checkpoints for the current release decision while preserving the
+historical milestones above.
 
 ## Non-blocking after 1.0
 
