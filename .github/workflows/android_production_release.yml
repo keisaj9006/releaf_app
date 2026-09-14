@@ -72,6 +72,16 @@ jobs:
             exit 1
           fi
 
+      - name: Validate production legal metadata
+        shell: bash
+        env:
+          RELEAF_DATA_CONTROLLER_NAME: ${{ vars.RELEAF_DATA_CONTROLLER_NAME }}
+          RELEAF_PRIVACY_CONTACT_EMAIL: ${{ vars.RELEAF_PRIVACY_CONTACT_EMAIL }}
+          RELEAF_PRIVACY_POLICY_URL: ${{ vars.RELEAF_PRIVACY_POLICY_URL }}
+          RELEAF_ACCOUNT_DELETION_URL: ${{ vars.RELEAF_ACCOUNT_DELETION_URL }}
+          RELEAF_PRIVACY_LAST_UPDATED: ${{ vars.RELEAF_PRIVACY_LAST_UPDATED }}
+        run: dart run tool/release/legal_metadata_policy.dart
+
       - name: Materialize private upload signing configuration
         shell: bash
         env:
@@ -95,9 +105,19 @@ jobs:
       - name: Build signed production app bundle
         env:
           REVENUECAT_ANDROID_API_KEY: ${{ secrets.REVENUECAT_ANDROID_API_KEY }}
+          RELEAF_DATA_CONTROLLER_NAME: ${{ vars.RELEAF_DATA_CONTROLLER_NAME }}
+          RELEAF_PRIVACY_CONTACT_EMAIL: ${{ vars.RELEAF_PRIVACY_CONTACT_EMAIL }}
+          RELEAF_PRIVACY_POLICY_URL: ${{ vars.RELEAF_PRIVACY_POLICY_URL }}
+          RELEAF_ACCOUNT_DELETION_URL: ${{ vars.RELEAF_ACCOUNT_DELETION_URL }}
+          RELEAF_PRIVACY_LAST_UPDATED: ${{ vars.RELEAF_PRIVACY_LAST_UPDATED }}
         run: >-
           flutter build appbundle --release
           --dart-define=REVENUECAT_ANDROID_API_KEY="$REVENUECAT_ANDROID_API_KEY"
+          --dart-define=RELEAF_DATA_CONTROLLER_NAME="$RELEAF_DATA_CONTROLLER_NAME"
+          --dart-define=RELEAF_PRIVACY_CONTACT_EMAIL="$RELEAF_PRIVACY_CONTACT_EMAIL"
+          --dart-define=RELEAF_PRIVACY_POLICY_URL="$RELEAF_PRIVACY_POLICY_URL"
+          --dart-define=RELEAF_ACCOUNT_DELETION_URL="$RELEAF_ACCOUNT_DELETION_URL"
+          --dart-define=RELEAF_PRIVACY_LAST_UPDATED="$RELEAF_PRIVACY_LAST_UPDATED"
 
       - name: Verify AAB signature and checksum
         shell: bash
