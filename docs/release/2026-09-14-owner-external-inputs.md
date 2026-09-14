@@ -1,6 +1,6 @@
 # Releaf 1.0 — minimal owner/external input handoff — 14 September 2026
 
-Status: **PRIVACY + PRICING RESOLVED / PROVIDER + SIGNING INPUTS REMAIN**
+Status: **PRIVACY + PRICING + PLAY ACCOUNT TYPE RESOLVED / PROVIDER + SIGNING INPUTS REMAIN**
 
 Current app build candidate: `ecd3e977b55a9f247459f79e2c4ede92303db323`  
 Version: `1.0.0+20260913`  
@@ -41,24 +41,28 @@ Owner-approved Releaf 1.0 targets:
 
 Google Play localized store metadata remains the runtime source; do not hardcode displayed prices in the app.
 
-## 3. Google Play developer-account eligibility — ONE FACTUAL CHECK REMAINS
+## 3. Google Play developer account — PERSONAL LOCKED
 
-Gmail searches did not provide reliable evidence of the Play developer-account registration date/type. Consumer Google Play receipts are not evidence of a Play Console developer account.
+Owner decision on 14 September 2026:
 
-In Play Console, record only:
+- account type: **Personal**;
+- full public Google Play distribution is intended;
+- Releaf Android package/application ID: `app.releaf.mobile`;
+- no existing Play app, Play App Signing state, upload certificate or production upload key has been identified yet.
 
-- account type: **Personal** or **Organisation**;
-- developer account creation date / whether Dashboard shows the production-access testing requirement.
+For a new Personal developer account created after 13 November 2023, current Google policy requires a closed test with at least 12 testers continuously opted in for at least 14 days before applying for Production access. Because this is a new account flow, plan the release assuming this testing requirement applies unless Play Console explicitly shows otherwise.
 
-If the account is Personal and was created after 13 November 2023, current policy requires the applicable 12-testers / 14-days closed-test eligibility process before applying for Production access. Otherwise do not manufacture that blocker.
+Account creation requires the owner to use the intended Google account, accept the developer agreements, pay the one-off registration fee, link/create the personal Google Payments profile, verify identity/contact details, and complete any device/identity verification requested by Google.
+
+Do not create a second Play developer account if the intended Google account unexpectedly reveals an existing developer account during signup; stop and inspect that state first.
 
 ## 4. Android production upload signing — PRIVATE OWNER/PROVIDER ACTION
 
 Follow `docs/release/2026-09-14-production-signing-runbook.md`.
 
-First inspect Play Console > Play app signing and determine whether an Upload key certificate already exists.
+Because no existing Releaf Play app/upload certificate has been identified, first create the Play app and inspect the Play App Signing surface before generating the private upload key.
 
-- Existing certificate + matching private keystore available → use it.
+- Existing certificate unexpectedly present + matching private keystore available → use it.
 - Existing certificate but private key lost/compromised → request upload-key reset; do not silently create an unrelated key.
 - Genuine new setup/reset instruction → generate a new private upload key locally on the owner's trusted machine.
 
@@ -91,31 +95,35 @@ RevenueCat:
 
 Do not put RevenueCat secret/server keys or Google service-account JSON into the mobile SDK-key secret.
 
-## 6. GitHub Actions legal variables — VALUES KNOWN, ENTRY REMAINS
+## 6. Production legal metadata — EMBEDDED / NO MANUAL GITHUB VARIABLES
 
-The current production workflow reads these public values from repository Actions variables. Enter exactly:
+The five approved public legal values are now embedded as the production workflow baseline and protected by `production_android_release_workflow_contract_test.dart`.
 
-- `RELEAF_DATA_CONTROLLER_NAME` → `Relief`
-- `RELEAF_PRIVACY_CONTACT_EMAIL` → `canius.uk@gmail.com`
-- `RELEAF_PRIVACY_POLICY_URL` → `https://releaf-account-deletion-89juqm.v2.appdeploy.ai/privacy-policy.html`
-- `RELEAF_ACCOUNT_DELETION_URL` → `https://releaf-account-deletion-89juqm.v2.appdeploy.ai/`
-- `RELEAF_PRIVACY_LAST_UPDATED` → `2026-09-14`
+No manual GitHub Actions variables are required for:
 
-These are public metadata, not secrets. No placeholder may be used to force the production AAB workflow through.
+- controller: `Relief`;
+- privacy contact: `canius.uk@gmail.com`;
+- privacy URL: `https://releaf-account-deletion-89juqm.v2.appdeploy.ai/privacy-policy.html`;
+- account deletion URL: `https://releaf-account-deletion-89juqm.v2.appdeploy.ai/`;
+- privacy last updated: `2026-09-14`.
 
-## 7. What engineering does immediately after provider/signing configuration exists
+Private signing and RevenueCat values remain secrets and are not embedded.
 
-1. verify Play account requirement and Play App Signing/upload-key state;
-2. verify Play products / RevenueCat entitlement/current Offering/public `goog_` key;
-3. verify the known GitHub legal variables are entered;
-4. run the manual production-signed AAB workflow;
-5. record signed AAB SHA-256;
-6. upload the same production-equivalent candidate to the authorized Play test track;
-7. complete Store assets from the actual RC (existing Releaf mark for store icon; real RC screenshots; feature graphic);
-8. complete Data Safety / Health / Store Listing entries using the live legal URLs and support email;
-9. run the one consolidated final Samsung/Play-distributed device matrix, including license-tester purchase/restore and disposable-account deletion;
-10. complete applicable closed testing / Production-access process;
-11. close the canonical release gate only from observed evidence.
+## 7. What engineering does immediately after Play/RevenueCat/signing configuration exists
+
+1. create/verify the Releaf app in Play Console using package `app.releaf.mobile`;
+2. inspect Play App Signing/upload-key state;
+3. configure the private upload key and GitHub signing secrets;
+4. create/activate Play subscription/base plans and connect RevenueCat;
+5. verify entitlement/current Offering/public `goog_` key;
+6. run the manual production-signed AAB workflow;
+7. record signed AAB SHA-256;
+8. upload the same production-equivalent candidate to the authorized Play test track;
+9. complete Store assets from the actual RC (existing Releaf mark for store icon; real RC screenshots; feature graphic);
+10. complete Data Safety / Health / Store Listing entries using the live legal URLs and support email;
+11. run the one consolidated final Samsung/Play-distributed device matrix, including license-tester purchase/restore and disposable-account deletion;
+12. complete the 12-testers / 14-days closed-testing requirement for the Personal account and apply for Production access;
+13. close the canonical release gate only from observed evidence.
 
 ## Release guard
 
