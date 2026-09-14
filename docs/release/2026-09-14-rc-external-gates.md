@@ -2,61 +2,75 @@
 
 ## Scope
 
-This checkpoint records the verified Releaf 1.0 release-candidate state after RC hardening, public legal-resource preparation and production-release workflow hardening. It does **not** declare the app release-ready. External owner/account configuration, production signing, Play Billing setup, store assets, Play Console submission and the final production-equivalent physical-device matrix remain separate gates.
+This is the current external-gates register for the frozen Releaf 1.0 app build candidate. It does **not** declare the app release-ready. Repo-side automated hardening is complete; owner/account configuration, production signing, Play Billing setup, public Privacy Policy, store assets, Play Console submission and the final production-equivalent physical-device matrix remain separate gates.
 
-Verified code checkpoint: `2f3c8d2b5869faf4577790205d880c972551bcfd` on `releaf-development`.
+Frozen app build candidate: `dd20fb5a3f0f00c9cf4760c22f2ba0d8c034e22e` on `releaf-development`.
 Frozen release version: `1.0.0+20260913`.
 Android package: `app.releaf.mobile`.
 
-## Automated evidence on `2f3c8d2`
+Evidence-only documentation commits after `dd20fb5` do not redefine the app build candidate.
 
-Flutter P0 Validation run `34820595815`: **SUCCESS**.
+## Automated evidence
 
-The run completed all mandatory steps:
+The immutable automated record is:
 
-- dependency lockfile verification: PASS;
-- bundled sound audit/full decode: PASS;
-- Android API/signing/release configuration audit: PASS;
-- analyzer: PASS;
-- targeted Brain gate: PASS;
-- targeted Reset model/hub/access gates: PASS;
-- full Flutter suite: **581 tests PASS**;
-- Releaf Guide production manifest: exported/uploaded;
-- Reset Releaf Guide production manifest: exported/uploaded;
-- Reset demo production manifest: exported/uploaded;
-- RevenueCat configuration check: completed;
-- standard debug APK: built/uploaded;
-- Premium Preview debug APK: built/uploaded;
-- release AAB smoke artifact: built/uploaded;
-- Android 16 KB ZIP/ELF compatibility: PASS.
+`docs/release/2026-09-14-ci-dd20fb5.md`
 
-Artifact evidence from run `34820595815`:
+Verified on the exact frozen SHA:
 
-- `releaf-android-debug-standard` — artifact `10338506135`, SHA-256 digest `86cd82495bbd4f5a503a172e6d809ad15c9f74c85b88d046defb5d31055832c5`;
-- `releaf-android-debug-premium-preview` — artifact `10338346625`, SHA-256 digest `ab16445135063473730440c525c0a2f9ece002633ebb97f766847970ede332d7`;
-- `releaf-android-release-aab-smoke` — artifact `10338232487`, SHA-256 digest `ac14f986a3e99e8a058b3c6078063361a86f1ecb4ed66b00ef972a2d9089bb87`;
-- `releaf-guide-production-manifest` — artifact `10337714077`, SHA-256 digest `6f7fef1f55c917bd67b0ce72b1f4c3c1e41ce8b97b6277c31c0e904c07c08866`;
-- `releaf-reset-guide-production-manifest` — artifact `10337724067`, SHA-256 digest `cb38fa1792a0e24f39fc0a2cc888b646efe0f27c94accf6d0acdd5b3f49f0a81`;
-- `releaf-reset-demo-production-manifest` — artifact `10337579911`, SHA-256 digest `45a15b2d10bf4bf9744bac85953519335f5a03ce233df5b98897ed63cebd46f2`.
+- Flutter P0 Validation run `34822680105`: **SUCCESS**;
+- `flutter analyze`: clean;
+- full Flutter suite: **582/582 PASS**;
+- targeted Brain/Memory, Reset and Relief gates: PASS;
+- production manifests: exported/uploaded;
+- standard and Premium Preview debug APKs: built/uploaded;
+- release AAB smoke: built/uploaded;
+- Android 16 KB ZIP/ELF compatibility: PASS;
+- Releaf Web Release Smoke run `34822680100`: **SUCCESS** on the same SHA.
 
-Releaf Web Release Smoke run `34820595840`: **SUCCESS**. The Flutter web release and external deletion resource contract build cleanly on the same checkpoint.
+Release AAB smoke artifact `10338829531` has SHA-256:
+`0a788c6376901466e318d060eb2efcd85bb6d7d35c81de976194fc0f29618808`.
+
+That smoke artifact uses the short-lived CI signing key. It is not the final Play upload artifact.
+
+## Current Google Play policy verification
+
+Policy/runbook guidance was rechecked against current official Google/RevenueCat documentation on **14 September 2026**.
+
+Current release assumptions remain valid:
+
+- new Android mobile apps and updates submitted after 31 August 2026 must target Android 16 / API 36; Releaf does;
+- personal Play developer accounts created after 13 November 2023 require at least 12 testers continuously opted in for at least 14 days before applying for Production access; this remains conditional on Releaf's actual account type/creation date;
+- apps that allow account creation need both an in-app account-deletion path and an external web deletion resource;
+- all published Play apps must complete the Health apps declaration, including closed/open testing and Production tracks;
+- current RevenueCat Google Play setup requires Play service credentials and those credentials can take up to 36 hours to validate;
+- final billing QA should use designated Play license testers/test payment methods where appropriate, because ordinary users on a testing track can still incur real charges.
+
+Updated release runbooks:
+
+- `docs/release/revenuecat_google_play_production_setup.md`;
+- `docs/release/google_play_closed_testing.md`;
+- `docs/release/google_play_data_safety.md`;
+- `docs/release/google_play_health_declaration.md`;
+- `docs/release/google_play_store_listing.md`;
+- `docs/release/android_device_release_qa.md`.
 
 ## Production Android signing
 
-Production signing is **workflow-ready, not yet release-closed**.
+Production signing is **workflow-ready, not release-closed**.
 
-`.github/workflows/android_production_release.yml` is a manual `workflow_dispatch` path that:
+`.github/workflows/android_production_release.yml` remains a manual fail-closed production path that:
 
 - requires `releaf-development` and frozen `1.0.0+20260913`;
-- rejects a missing/non-Google RevenueCat Android key and requires a `goog_` public SDK key;
-- requires the private Android upload keystore/password/alias through GitHub Actions secrets;
-- validates all five production legal metadata values before building;
+- requires the private Android upload keystore/password/alias via GitHub Actions secrets;
+- requires a Google RevenueCat public SDK key beginning `goog_`;
+- validates all five production legal metadata values;
 - materialises signing files only inside the runner;
-- builds the production AAB;
+- builds the release AAB;
 - verifies its signature with `jarsigner -verify -strict`;
 - records SHA-256;
-- uploads the resulting AAB/checksum artifact;
-- removes private signing material in the cleanup step.
+- uploads the AAB/checksum artifact;
+- removes private signing material in cleanup.
 
 Required secrets remain external:
 
@@ -70,93 +84,118 @@ No private upload key, password or production RevenueCat key is committed to the
 
 ## RevenueCat / Google Play Billing
 
-The app-side contract is now locked and documented in `docs/release/revenuecat_google_play_production_setup.md`.
-
-Releaf 1.0 expects:
+The app-side contract remains locked:
 
 - entitlement: `premium`;
-- the RevenueCat **current** Offering;
+- RevenueCat **current** Offering;
 - standard Annual and Monthly packages (`current.annual` / `current.monthly`);
-- a real Android public SDK key beginning `goog_`;
+- Android public SDK key beginning `goog_`;
 - Google Play package `app.releaf.mobile`.
 
-Recommended permanent Play structure:
+Recommended permanent Play structure remains:
 
 - subscription: `releaf_premium_v1`;
 - base plan: `monthly-autorenewing`;
 - base plan: `annual-autorenewing`.
 
-The repository does not contain an approved production GBP monthly or annual price. Pricing remains an explicit owner/business decision and must not be invented by engineering.
+External closure requires:
 
-External closure still requires Play subscription/base-plan activation, RevenueCat Play credentials, product import/entitlement attachment/current Offering, real `goog_` key, and Play-distributed purchase/restore verification.
+1. approved GBP monthly/annual price;
+2. Play subscription/base-plan creation, prices/regions and activation;
+3. RevenueCat Google Play service credentials with required permissions;
+4. RevenueCat credential validation — allow for up to 36 hours of Google propagation after credential creation/change;
+5. import both active base-plan products;
+6. attach both to entitlement `premium`;
+7. configure the intended Offering as current with standard Annual/Monthly packages;
+8. obtain/store the real Android `goog_...` public SDK key outside source control;
+9. complete Play-distributed license-tester purchase/restore/account-isolation QA.
+
+No approved production GBP price was found in the repository or prior Releaf decisions. Pricing remains an owner/business decision rather than something engineering may invent silently.
 
 ## Public account deletion
 
-The external account-deletion resource is **LIVE / READY** independently of the Android app.
-
-Verified public resource:
+The external account-deletion resource is **LIVE / READY** independently of the Android app:
 
 `https://releaf-account-deletion-89juqm.v2.appdeploy.ai/`
 
 AppDeploy application: `releaf-account-deletion-89juqm`.
 
-Verified state on 14 September 2026:
+Verified state:
 
-- deployment status: `ready`;
-- public HTTPS available;
-- frontend errors: none reported;
-- network errors: none reported;
-- backend errors: none reported;
-- QA screenshots available for desktop/web and mobile;
-- existing flow signs the user into Releaf Supabase in the browser and invokes the existing authenticated `delete-account` Edge Function;
-- no Android app installation is required;
-- deletion warns separately about Google Play subscription cancellation.
+- public HTTPS deployment is live;
+- browser flow signs a user into Releaf Supabase directly and invokes the authenticated `delete-account` Edge Function;
+- Android installation is not required;
+- the page warns separately that deleting the Releaf account does not automatically cancel a Google Play subscription;
+- the hardened `delete-account` Edge Function version 4 and server-only RevenueCat erasure secret were previously verified;
+- disposable-account in-app deletion E2E already passed against Supabase and RevenueCat.
 
-This closes the **public availability** part of the external Delete Account URL gate. It does **not** replace final DQA-18 on the exact production-equivalent RC.
+This closes public availability of the external Delete Account resource. Final DQA-18/DQA-19 must still be repeated/recorded against the production-equivalent RC using disposable accounts only.
 
 ## Privacy Policy
 
-The code path is **READY / OWNER METADATA + PUBLIC DEPLOY REQUIRED**.
+The Privacy Policy engineering path is **READY / TWO OWNER VALUES + PUBLIC DEPLOY REQUIRED**.
 
-Implemented and contract-tested:
+The release validator requires exactly:
 
-- `tool/release/render_privacy_policy.dart`;
-- fail-closed validation through `ReleafLegalConfig.productionProblems`;
-- policy coverage for controller/contact, account data, Supabase, RevenueCat/Google Play, local progress, local/transient accelerometer input, lawful basis, recipients, international processing, retention, deletion, rights and Information Commissioner complaint route;
-- HTML escaping of injected metadata;
-- no placeholder controller/email and no server-only credentials in generated HTML.
-
-The Pages publication path was intentionally tested with missing production metadata. It passed analyzer and **581/581 tests** and then failed exactly at `Validate production legal metadata`; no incomplete Privacy Policy was published.
-
-Required release metadata:
-
-- `RELEAF_DATA_CONTROLLER_NAME` — **OPEN: owner input required**;
-- `RELEAF_PRIVACY_CONTACT_EMAIL` — **OPEN: owner input required**;
-- `RELEAF_PRIVACY_POLICY_URL` — set after final public Privacy route is deployed;
-- `RELEAF_ACCOUNT_DELETION_URL` — known approved live value: `https://releaf-account-deletion-89juqm.v2.appdeploy.ai/`;
+- `RELEAF_DATA_CONTROLLER_NAME` — **OPEN: real legal controller identity required**;
+- `RELEAF_PRIVACY_CONTACT_EMAIL` — **OPEN: real public privacy contact email required**;
+- `RELEAF_PRIVACY_POLICY_URL` — will be set to the final public route after deployment;
+- `RELEAF_ACCOUNT_DELETION_URL` — known live value: `https://releaf-account-deletion-89juqm.v2.appdeploy.ai/`;
 - `RELEAF_PRIVACY_LAST_UPDATED` — use the actual publication date.
 
-Preferred final hosting direction is a single Releaf legal host: extend the existing AppDeploy deletion portal with a static public Privacy Policy route after the real controller name/contact email are supplied. This avoids maintaining two competing production legal hosts. GitHub Pages remains a prepared fallback, not evidence of the final production Privacy URL.
+No earlier Releaf decision supplied the controller identity or privacy/support email, so they must not be guessed.
 
-## Google Play production-access rule to verify against the account
+`tool/release/render_privacy_policy.dart` already covers the current data inventory, purposes/lawful basis, recipients, international processing, retention criteria, deletion, rights and Information Commissioner complaint route. Current ICO guidance allows retention to be described by criteria where a single fixed period is not available, provided the controller can justify and review retention.
 
-Google's current Help documentation states that **personal developer accounts created after 13 November 2023** must run a closed test with at least **12 testers opted in continuously for 14 days** before applying for Production access. This requirement is conditional on the actual Play Console account type and creation date; verify those account facts before treating the 12/14 requirement as applicable to Releaf.
+Preferred final hosting remains a single Releaf legal host: extend the existing AppDeploy deletion portal with a public Privacy Policy route after the two real owner values are available. Do not publish a placeholder policy.
 
-## Deliberately still open
+## Health / Data Safety / Store Listing
 
-This checkpoint does not close:
+Current status after policy re-verification:
 
-- real production upload key/secrets and production-signed AAB evidence;
-- controller name and privacy contact email;
-- live public Privacy Policy;
-- approved GBP monthly/annual Premium pricing;
-- Play subscription/base-plan activation;
-- RevenueCat Google Play connection/product import/current Offering;
-- Play-distributed purchase and restore;
+- **Health declaration:** mapping ready; Play Console submission still required. Releaf maps to Sleep Management; Stress Management, Relaxation, Mental Acuity; and Mental and Behavioral Health. Required non-medical-device disclaimer is present in canonical Store Listing copy.
+- **Data Safety:** mapping ready; the live account-deletion resource is now recorded as implemented rather than an unresolved dependency. Final RevenueCat integration check, Privacy URL and Play submission remain required.
+- **Store Listing:** canonical UK-English copy is aligned with active Reset / Brain / Sleep scope and Emergency Calm. Real Google Play graphic pack is still absent by deliberate sequencing; screenshots must come from the actual release candidate rather than stale mock-ups.
+
+## Play account eligibility
+
+The exact Releaf Play developer-account type and creation date have **not** been supplied in prior project context.
+
+Therefore:
+
+- do not assume the 12-testers/14-days eligibility rule applies;
+- check Play Console account type and creation date before scheduling the Production-access clock;
+- if it is a personal account created after 13 November 2023, follow the 12/14 closed-testing requirement and apply for Production access after Play reports eligibility.
+
+## Final device QA
+
+`docs/release/android_device_release_qa.md` is aligned with the frozen active 1.0 scope.
+
+Key corrections now locked:
+
+- Meditate is PARKED and its unfinished narration does not become a hidden P0 again; DQA-05 verifies parked-route/resume safety rather than requiring final meditation content;
+- DQA-13/DQA-14 use authorized Play license-tester test transactions and test payment methods;
+- DQA-18/DQA-19 require disposable account deletion evidence;
+- DQA-23 retains the V01 lungs / Shoulder Drop / eight-stage Full Body Scan / reduced-motion / enlarged-text final visual pass.
+
+The agreed discipline remains one consolidated final physical-device run after production signing, billing configuration and public legal URLs are ready.
+
+## External inputs/actions still blocking release
+
+The remaining blockers are now intentionally narrow:
+
+- real data-controller legal identity;
+- real privacy/support contact email;
+- public Privacy Policy deployment after those values are supplied;
+- private Android upload keystore and signing secrets;
+- approved monthly/annual GBP Premium pricing;
+- Play subscription/base-plan creation and activation;
+- RevenueCat Google Play credentials/products/current Offering/real `goog_` key;
+- Releaf Play developer-account type and creation date;
 - final app icon, feature graphic and current-RC screenshots;
-- Google Play Data safety/Health declaration/store listing submission;
-- account-specific closed-testing/Production-access requirement;
-- final consolidated production-equivalent physical-device matrix;
-- final owner listening/content approval where still called out by the canonical gate.
+- Play Console Data Safety / Health / Store Listing entry;
+- applicable closed testing / Production-access process;
+- final production-equivalent physical-device matrix;
+- final owner listening/content approval where still called out by the canonical release gate.
 
-No phone QA was added at this checkpoint; the agreed release discipline remains one consolidated final physical-device run after signing, billing, public legal URLs and the production-equivalent candidate are ready.
+No optional feature work should be added merely to avoid these external gates. Overall release authority remains `docs/release/releaf_1_0_release_gate.md`.
