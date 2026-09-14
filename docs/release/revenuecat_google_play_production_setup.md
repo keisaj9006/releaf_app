@@ -1,6 +1,6 @@
 # RevenueCat + Google Play Production Setup — Releaf 1.0
 
-Status: **ENGINEERING CONTRACT LOCKED / EXTERNAL CONFIGURATION OPEN**
+Status: **ENGINEERING CONTRACT + PRICING LOCKED / EXTERNAL CONFIGURATION OPEN**
 
 Branch: `releaf-development`
 Package: `app.releaf.mobile`
@@ -56,20 +56,20 @@ Before final billing QA:
 3. Create the `releaf_premium_v1` subscription if it does not already exist.
 4. Add the monthly auto-renewing base plan.
 5. Add the annual auto-renewing base plan.
-6. Set supported countries/regions and prices.
+6. Configure the UK launch target prices recorded below and use Google Play's country/region pricing controls for other markets.
 7. Activate both base plans and the subscription.
 8. Do not add a free trial or introductory offer to the 1.0 production contract unless it is intentionally approved and separately QA-tested.
 9. Prepare the Google accounts used for billing QA as Play **license testers** where test payment methods are required.
 
-### Price decision still required
+### Approved Releaf 1.0 launch pricing
 
-The repository contains no approved production GBP price. Therefore prices must remain an explicit owner/business decision rather than being invented by engineering.
+Owner-approved on **14 September 2026**:
 
-Record before release:
+- Monthly UK target price: **£5.99**
+- Annual UK target price: **£39.99**
+- Free trial / introductory offer: **none for 1.0 by default**
 
-- Monthly GBP price: `OPEN`
-- Annual GBP price: `OPEN`
-- Annual saving/positioning: `OPEN`
+Do not hardcode these strings in the app UI. Google Play localized store metadata remains the runtime source shown to users.
 
 ## 4. RevenueCat production configuration
 
@@ -146,14 +146,15 @@ These checks belong in the consolidated final Play/device QA pass; do not fragme
 The following are not satisfied by this document:
 
 - Play Console app/product/base-plan creation and activation
-- approved GBP monthly/annual pricing
 - RevenueCat Google Play service credentials creation/permissions/upload and successful validation
 - import/attachment of the real products
 - real production `goog_` public SDK key stored as a GitHub secret
 - private Android upload keystore stored as GitHub secrets
 - Play-distributed license-tester purchase + restore verification
 
-Until those items are evidenced, the canonical release gate remains `ENGINEERING CONTRACT LOCKED / EXTERNAL CONFIG REQUIRED` for RevenueCat / Google Play Billing.
+Approved launch pricing is no longer an open owner decision.
+
+Until the remaining items are evidenced, the canonical release gate remains `ENGINEERING CONTRACT + PRICING LOCKED / EXTERNAL CONFIG REQUIRED` for RevenueCat / Google Play Billing.
 
 ## References checked for the 2026 release contract
 
