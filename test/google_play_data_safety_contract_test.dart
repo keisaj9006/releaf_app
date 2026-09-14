@@ -21,7 +21,9 @@ void main() {
     expect(source, contains('local-only Leaves/progress values'));
     expect(
       source,
-      contains('content mapping prepared; vendor/dashboard verification and Play Console submission required'),
+      contains(
+        'content mapping prepared; vendor/dashboard verification, final Privacy Policy and Play Console submission required',
+      ),
     );
     expect(
       gateSource,
