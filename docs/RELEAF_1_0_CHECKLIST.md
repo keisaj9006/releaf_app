@@ -4,7 +4,7 @@
 
 This checklist is an execution view, not a replacement gate.
 
-**Latest complete automated code/build checkpoint:** `dd20fb5a3f0f00c9cf4760c22f2ba0d8c034e22e` — see `docs/release/2026-09-14-ci-dd20fb5.md`. Evidence-only documentation commits after this checkpoint do not redefine the frozen build candidate.
+**Latest complete automated code/build checkpoint:** `ecd3e977b55a9f247459f79e2c4ede92303db323` — see `docs/release/2026-09-14-ci-ecd3e97.md`. Evidence-only documentation commits after this checkpoint do not redefine the frozen build candidate.
 
 ## A. Engineering baseline
 
@@ -12,9 +12,10 @@ This checklist is an execution view, not a replacement gate.
 - [ ] Confirm local working tree state immediately before the final production-signed RC build.
 - [x] Run `flutter pub get`.
 - [x] Run `flutter analyze`.
-- [x] Run full `flutter test` — **582/582 PASS** on `dd20fb5`.
+- [x] Run full `flutter test` — **583/583 PASS** on `ecd3e97`.
 - [x] Run relevant existing release/tooling checks.
 - [x] Verify latest Reset movement/visual changes have not introduced regression.
+- [x] Verify legacy Android launcher resources are Releaf-branded across mdpi/hdpi/xhdpi/xxhdpi/xxxhdpi and inspect the built APK artifact.
 - [x] Record exact baseline results and artifact digests for the frozen build candidate.
 
 ## B. Core product — preserve / QA
@@ -79,19 +80,20 @@ This checklist is an execution view, not a replacement gate.
 - [ ] Configure real Google Play RevenueCat SDK key (`goog_...`) outside source control.
 - [ ] Verify active Play subscription products.
 - [ ] Verify current RevenueCat Offering/packages.
-- [ ] Purchase verification from Play-distributed build.
+- [ ] Purchase verification from Play-distributed build using designated license tester/test payment method.
 - [ ] Restore verification from Play-distributed build.
 - [ ] Subscription management flow verification on the final candidate.
 
 ## E. Android release
 
 - [x] Android API target/release tooling prepared per gate.
+- [x] Legacy API 24–25 launcher resources corrected to the existing Releaf brand and verified inside the built APK.
 - [ ] Configure private production upload keystore outside repo.
 - [ ] Produce final production-signed candidate.
-- [x] Verify automated release AAB and 16 KB compatibility checks on `dd20fb5`.
+- [x] Verify automated release AAB and 16 KB compatibility checks on `ecd3e97`.
 - [x] Freeze RC marketing/build version at `1.0.0+20260913`.
 - [ ] Execute physical-device release matrix DQA-01…DQA-23.
-- [x] Capture automated release evidence and artifact digests for `dd20fb5` in `docs/release/2026-09-14-ci-dd20fb5.md`.
+- [x] Capture automated release evidence and artifact digests for `ecd3e97` in `docs/release/2026-09-14-ci-ecd3e97.md`.
 - [ ] Capture final production-equivalent device/store evidence after external gates are available.
 
 ## F. Google Play Console
