@@ -16,7 +16,7 @@ This checklist is an execution view, not a replacement gate.
 - [x] Run relevant existing release/tooling checks.
 - [x] Verify latest Reset movement/visual changes have not introduced regression.
 - [x] Verify legacy Android launcher resources are Releaf-branded across mdpi/hdpi/xhdpi/xxhdpi/xxxhdpi and inspect the built APK artifact.
-- [x] Record exact baseline results and artifact digests for the frozen build candidate.
+- [x] Record exact baseline results and corrected GitHub artifact evidence for the frozen build candidate.
 
 ## B. Core product — preserve / QA
 
@@ -67,19 +67,21 @@ This checklist is an execution view, not a replacement gate.
 - [x] Disposable-account in-app deletion E2E verified against Supabase and RevenueCat.
 - [ ] Repeat DQA-18 on the final production-equivalent RC.
 - [x] RLS/security release gate currently DONE/MONITOR.
-- [ ] Final privacy controller/contact/retention details.
-- [ ] Final legal review as required.
-- [ ] Publish stable HTTPS privacy-policy URL.
+- [x] Owner supplied privacy controller/contact metadata and current retention criteria are present in the public policy.
+- [ ] Final legal review as required, including confirming `Relief` is the correct legal controller identity rather than only a product/trading label.
+- [x] Publish stable HTTPS Privacy Policy at `https://releaf-account-deletion-89juqm.v2.appdeploy.ai/privacy-policy.html`.
 - [x] Deploy stable external account-deletion URL on Releaf-specific hosting.
-- [x] Verify the public deletion URL availability and web deployment health.
-- [ ] Repeat deletion end-to-end against the final production-equivalent RC as part of DQA-18.
+- [x] Verify the public legal deployment health in AppDeploy.
+- [ ] Enter the five known legal metadata values as GitHub Actions repository variables for the production AAB workflow.
+- [ ] Repeat deletion end-to-end against the final production-equivalent RC as part of DQA-18/DQA-19.
 
 ## D. Subscription / Google Play
 
 - [x] RevenueCat client/paywall code prepared.
+- [x] Owner approved UK launch targets: **£5.99 monthly / £39.99 annual**, no trial/intro offer by default for 1.0.
 - [ ] Configure real Google Play RevenueCat SDK key (`goog_...`) outside source control.
-- [ ] Verify active Play subscription products.
-- [ ] Verify current RevenueCat Offering/packages.
+- [ ] Create/verify active Play subscription `releaf_premium_v1` with monthly/annual base plans and approved pricing.
+- [ ] Verify current RevenueCat Offering/packages and entitlement `premium`.
 - [ ] Purchase verification from Play-distributed build using designated license tester/test payment method.
 - [ ] Restore verification from Play-distributed build.
 - [ ] Subscription management flow verification on the final candidate.
@@ -93,7 +95,7 @@ This checklist is an execution view, not a replacement gate.
 - [x] Verify automated release AAB and 16 KB compatibility checks on `ecd3e97`.
 - [x] Freeze RC marketing/build version at `1.0.0+20260913`.
 - [ ] Execute physical-device release matrix DQA-01…DQA-23.
-- [x] Capture automated release evidence and artifact digests for `ecd3e97` in `docs/release/2026-09-14-ci-ecd3e97.md`.
+- [x] Capture automated release evidence and corrected artifact metadata for `ecd3e97` in `docs/release/2026-09-14-ci-ecd3e97.md`.
 - [ ] Capture final production-equivalent device/store evidence after external gates are available.
 
 ## F. Google Play Console
@@ -101,12 +103,12 @@ This checklist is an execution view, not a replacement gate.
 - [ ] Verify account-specific closed-testing requirement.
 - [ ] Complete required closed-test run if applicable.
 - [ ] Submit Health declaration.
-- [ ] Submit Data safety answers after final verification.
+- [ ] Submit Data safety answers after final RevenueCat/provider verification.
 - [ ] Enter Store listing.
-- [ ] Provide support/contact fields.
+- [ ] Enter support email `canius.uk@gmail.com`.
 - [ ] Provide current screenshots.
 - [ ] Provide app icon / feature graphic.
-- [ ] Enter public privacy URL.
+- [ ] Enter public Privacy Policy URL.
 - [ ] Enter public account-deletion URL.
 - [ ] Apply for Production access when eligible.
 
