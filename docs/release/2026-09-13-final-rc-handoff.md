@@ -1,6 +1,6 @@
 # Releaf 1.0 — final RC handoff
 
-Status: **automated RC evidence complete; external/production execution pending**.
+Status: **automated RC evidence + public legal resources complete; provider/signing execution pending**.
 
 This checklist continues from the current frozen app build candidate after repo-side RC
 hardening. It does not change the current release-gate status and must not be
@@ -13,7 +13,7 @@ The repo-side automated P0 programme is complete for the current build candidate
 `34834895182` passed clean analysis, **583/583 Flutter tests**, production
 manifests, both debug APK variants, release-AAB smoke and Android 16 KB ZIP/ELF
 compatibility. Releaf Web Release Smoke run `34834895129` also passed on the
-exact same SHA. Immutable evidence is recorded in
+exact same SHA. Corrected evidence is recorded in
 `docs/release/2026-09-14-ci-ecd3e97.md`.
 
 `ecd3e97` supersedes the earlier `dd20fb5` candidate after artifact inspection
@@ -28,32 +28,34 @@ the pre-upload branding correction does not require an artificial version bump.
 Evidence-only documentation commits after `ecd3e97` do not redefine the app build
 candidate.
 
-What remains is primarily owner/account configuration, production credentials,
-public Privacy Policy publication, Play Console state, store assets and the
-exact-RC physical/distributed verification. Do not create optional product scope
-merely to avoid these external gates.
+The public Privacy Policy and account-deletion resources are now live. Owner-supplied
+legal metadata and the launch pricing decision are also recorded. What remains is
+primarily provider/account configuration, production signing credentials, Play Console
+state, store assets and exact-RC physical/distributed verification. Do not create
+optional product scope merely to avoid these external gates.
 
 ## Inputs still required before production RC execution
 
-Collect these without committing secrets to the repository:
+Do not commit or paste private credentials into chat.
 
-- final data-controller identity;
-- privacy contact/support email;
-- final legal review where required;
-- stable public HTTPS Privacy Policy URL after publication;
+Resolved inputs:
+
+- controller name supplied as `Relief`;
+- public privacy/support email `canius.uk@gmail.com`;
+- live Privacy Policy `https://releaf-account-deletion-89juqm.v2.appdeploy.ai/privacy-policy.html`;
+- live account-deletion URL `https://releaf-account-deletion-89juqm.v2.appdeploy.ai/`;
+- approved Premium targets **£5.99/month** and **£39.99/year**, no trial/intro offer by default for 1.0.
+
+Still required:
+
+- final legal review where required, including confirming `Relief` is the correct legal controller identity rather than only a product/trading label;
+- five known public legal metadata values entered as GitHub Actions repository variables;
 - private Android upload keystore and its passwords/alias;
 - real public RevenueCat Google SDK key (`goog_...`), kept outside source control;
-- active Google Play subscription products/base plans and the matching current
-  RevenueCat Offering/packages;
-- approved GBP monthly/annual Premium pricing;
+- active Google Play subscription/base plans using the approved UK pricing and the matching current RevenueCat Offering/packages;
 - final owner-approved Sleep/Reset audio selection;
-- Play Console access/account information needed to confirm closed-testing rules.
-
-Already satisfied external resource:
-
-- public Releaf account-deletion portal is live at
-  `https://releaf-account-deletion-89juqm.v2.appdeploy.ai/`; final DQA-18/DQA-19
-  on the exact production-equivalent RC remain required.
+- Play Console account type/creation-date or Dashboard production-access evidence;
+- current-RC Google Play graphics/screenshots.
 
 Meditate remains parked outside the active 1.0 discovery/marketing surface, so
 unfinished meditation narration does not reopen the active 1.0 release path
@@ -69,21 +71,26 @@ same candidate family.
    - keep active primary destinations Home / Reset / Sleep / Brain, with Emergency
      available and Meditate parked/direct-access only;
    - keep Sleep narration-free and Emergency outside Premium;
-   - any artifact-affecting code/configuration change after `ecd3e97` creates a
-     superseding candidate and requires fresh automated release evidence.
+   - any artifact-affecting app-source change after `ecd3e97` creates a superseding
+     candidate and requires fresh automated release evidence.
 
-2. **Finalize public legal resources**
-   - provide the real controller identity and privacy contact email;
-   - render and deploy the Privacy Policy to the approved stable HTTPS Releaf host;
-   - use retention wording already grounded in the audited policy unless legal
-     review requires a factual change;
-   - keep the existing live Releaf account-deletion portal;
-   - verify both live URLs and the authenticated deletion route end to end;
-   - keep secrets server-side only.
+2. **Preserve and enter final public legal metadata**
+   - public Privacy Policy is already live at
+     `https://releaf-account-deletion-89juqm.v2.appdeploy.ai/privacy-policy.html`;
+   - public Delete Account portal is already live at
+     `https://releaf-account-deletion-89juqm.v2.appdeploy.ai/`;
+   - enter the five known values as GitHub Actions repository variables for the
+     production AAB workflow;
+   - enter the same Privacy/Delete URLs and `canius.uk@gmail.com` in Play Console;
+   - keep secrets server-side only;
+   - if legal review changes the controller identity, update every legal surface
+     consistently before the final production build.
 
 3. **Finalize production billing configuration**
-   - approve the monthly/annual GBP launch price or supply replacement values;
-   - activate/verify Google Play subscription and monthly/annual base plans;
+   - use the approved UK launch targets **£5.99 monthly / £39.99 annual**;
+   - no trial/intro offer by default for Releaf 1.0;
+   - activate/verify Google Play subscription `releaf_premium_v1` and the
+     `monthly-autorenewing` / `annual-autorenewing` base plans;
    - connect/import the products in RevenueCat;
    - attach them to entitlement `premium` and the current Offering using the
      expected Annual/Monthly packages;
@@ -118,10 +125,8 @@ same candidate family.
      upload key blindly if Play already has one;
    - follow `docs/release/2026-09-14-production-signing-runbook.md`;
    - configure the private upload keystore through the prepared secret path;
-   - configure production legal metadata and the real RevenueCat public Google
-     SDK key outside source control;
-   - execute `.github/workflows/android_production_release.yml` or the controlled
-     production build gate as documented by the canonical release gate;
+   - configure the real RevenueCat public Google SDK key outside source control;
+   - execute `.github/workflows/android_production_release.yml`;
    - verify the signed AAB and retain its exact SHA-256/build identifier;
    - never substitute the CI smoke-signing key for the real upload key.
 
@@ -159,7 +164,7 @@ same candidate family.
 
 11. **Complete Play Console declarations/listing**
     - enter the canonical UK-English Store Listing copy;
-    - enter support/legal URLs;
+    - enter support email `canius.uk@gmail.com` and the live legal URLs;
     - submit Data safety answers after final provider verification;
     - submit Health apps declaration using the existing release mapping;
     - upload the validated graphics/screenshots;
@@ -181,7 +186,7 @@ same candidate family.
 
 ## Deliberately not done now
 
-- no fragmented final phone test before signing/billing/legal prerequisites are ready;
+- no fragmented final phone test before signing/billing/provider prerequisites are ready;
 - no production release artifact signed with a temporary CI key;
 - no private signing key or secret committed or sent through chat;
 - no fake Store screenshots/feature graphic merely to satisfy the validator;
