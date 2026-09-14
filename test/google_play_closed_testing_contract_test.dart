@@ -15,7 +15,7 @@ void main() {
       'Do not assume this applies to Releaf',
       'production upload keystore',
       'RevenueCat',
-      'Play licence testers',
+      'license testers',
       'Restore Purchases',
       'Emergency access without Premium',
       'android_device_release_qa.md',
