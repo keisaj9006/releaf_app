@@ -19,7 +19,7 @@ void main() {
     expect(yaml, contains("flutter-version: '3.47.2'"));
     expect(yaml, contains('actions/configure-pages@v5'));
     expect(yaml, contains('flutter build web --release --base-href'));
-    expect(yaml, contains('href=\"./#/account\"'));
+    expect(yaml, contains('href="./#/account"'));
     expect(yaml, contains('build/web/delete-account.html'));
     expect(yaml, contains('SUPABASE_SERVICE_ROLE_KEY'));
     expect(yaml, contains('actions/upload-pages-artifact@v4'));
