@@ -1,57 +1,64 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:image/image.dart' as img;
+
+int _fnv1a32(List<int> bytes) {
+  var hash = 0x811c9dc5;
+  for (final byte in bytes) {
+    hash ^= byte;
+    hash = (hash * 0x01000193) & 0xffffffff;
+  }
+  return hash;
+}
 
 void main() {
-  test('all legacy Android launcher icons use Releaf branding', () {
-    const expectedSizes = <String, int>{
-      'mipmap-mdpi': 48,
-      'mipmap-hdpi': 72,
-      'mipmap-xhdpi': 96,
-      'mipmap-xxhdpi': 144,
-      'mipmap-xxxhdpi': 192,
+  test('all legacy Android launcher icons use the approved Releaf render', () {
+    const expected = <String, List<int>>{
+      'mipmap-mdpi': <int>[48, 0x4275b5cd],
+      'mipmap-hdpi': <int>[72, 0x1a2d5d9a],
+      'mipmap-xhdpi': <int>[96, 0x3f19ba45],
+      'mipmap-xxhdpi': <int>[144, 0xf7277db0],
+      'mipmap-xxxhdpi': <int>[192, 0xab12a212],
     };
 
-    for (final entry in expectedSizes.entries) {
+    for (final entry in expected.entries) {
       final file = File(
         'android/app/src/main/res/${entry.key}/ic_launcher.png',
       );
       expect(file.existsSync(), isTrue, reason: '${file.path} must exist.');
 
-      final icon = img.decodePng(file.readAsBytesSync());
-      expect(icon, isNotNull, reason: '${file.path} must be a readable PNG.');
-      expect(icon!.width, entry.value, reason: '${file.path} width mismatch.');
-      expect(icon.height, entry.value, reason: '${file.path} height mismatch.');
-
-      final corner = icon.getPixel(0, 0);
+      final bytes = file.readAsBytesSync();
       expect(
-        corner.a.toInt(),
-        255,
-        reason: '${file.path} must have an opaque Releaf launcher background.',
+        bytes.take(8),
+        orderedEquals(const <int>[137, 80, 78, 71, 13, 10, 26, 10]),
+        reason: '${file.path} must be a PNG.',
       );
       expect(
-        corner.r.toInt(),
-        closeTo(0x0A, 2),
-        reason: '${file.path} must use the Releaf #0A1712 background.',
+        String.fromCharCodes(bytes.sublist(12, 16)),
+        'IHDR',
+        reason: '${file.path} must start with a valid IHDR chunk.',
       );
-      expect(corner.g.toInt(), closeTo(0x17, 2));
-      expect(corner.b.toInt(), closeTo(0x12, 2));
 
-      var releafGreenPixels = 0;
-      for (final pixel in icon) {
-        final r = pixel.r.toInt();
-        final g = pixel.g.toInt();
-        final b = pixel.b.toInt();
-        if (g > r && g > b && r >= 70 && g >= 100) {
-          releafGreenPixels++;
-        }
-      }
+      final header = ByteData.sublistView(bytes);
+      final expectedSize = entry.value[0];
+      expect(
+        header.getUint32(16, Endian.big),
+        expectedSize,
+        reason: '${file.path} width mismatch.',
+      );
+      expect(
+        header.getUint32(20, Endian.big),
+        expectedSize,
+        reason: '${file.path} height mismatch.',
+      );
 
       expect(
-        releafGreenPixels,
-        greaterThan(icon.width * icon.height * 0.03),
-        reason: '${file.path} must contain the Releaf green leaf mark, not a Flutter placeholder.',
+        _fnv1a32(bytes),
+        entry.value[1],
+        reason:
+            '${file.path} must be the approved Releaf legacy launcher render, '
+            'not the Flutter template icon or another unreviewed asset.',
       );
     }
   });
