@@ -4,34 +4,38 @@
 
 This is the current external-gates register for the frozen Releaf 1.0 app build candidate. It does **not** declare the app release-ready. Repo-side automated hardening is complete; owner/account configuration, production signing, Play Billing setup, public Privacy Policy, store assets, Play Console submission and the final production-equivalent physical-device matrix remain separate gates.
 
-Frozen app build candidate: `dd20fb5a3f0f00c9cf4760c22f2ba0d8c034e22e` on `releaf-development`.
+Frozen app build candidate: `ecd3e977b55a9f247459f79e2c4ede92303db323` on `releaf-development`.
 Frozen release version: `1.0.0+20260913`.
 Android package: `app.releaf.mobile`.
 
-Evidence-only documentation commits after `dd20fb5` do not redefine the app build candidate.
+`ecd3e97` supersedes `dd20fb5` after a supported-range launcher regression was found in the earlier built APK: API 24–25 would use legacy Flutter-template launcher PNGs while API 26+ used the Releaf adaptive icon. The current candidate fixes the legacy path using the existing Releaf artwork. Evidence-only documentation commits after `ecd3e97` do not redefine the app build candidate.
 
 ## Automated evidence
 
 The immutable automated record is:
 
-`docs/release/2026-09-14-ci-dd20fb5.md`
+`docs/release/2026-09-14-ci-ecd3e97.md`
 
 Verified on the exact frozen SHA:
 
-- Flutter P0 Validation run `34822680105`: **SUCCESS**;
+- Flutter P0 Validation run `34834895182`: **SUCCESS**;
 - `flutter analyze`: clean;
-- full Flutter suite: **582/582 PASS**;
+- full Flutter suite: **583/583 PASS**;
 - targeted Brain/Memory, Reset and Relief gates: PASS;
 - production manifests: exported/uploaded;
 - standard and Premium Preview debug APKs: built/uploaded;
 - release AAB smoke: built/uploaded;
 - Android 16 KB ZIP/ELF compatibility: PASS;
-- Releaf Web Release Smoke run `34822680100`: **SUCCESS** on the same SHA.
+- Releaf Web Release Smoke run `34834895129`: **SUCCESS** on the same SHA.
 
-Release AAB smoke artifact `10338829531` has SHA-256:
-`0a788c6376901466e318d060eb2efcd85bb6d7d35c81de976194fc0f29618808`.
+Current release AAB smoke artifact:
+
+- artifact ID `10343132454`;
+- SHA-256 `a8e343311d963667688b376faa876195fff8145ce0317fc60f6bc328a76d05c0`.
 
 That smoke artifact uses the short-lived CI signing key. It is not the final Play upload artifact.
+
+The standard debug APK from the same run was inspected directly after build. All five packed legacy `mipmap-*` launcher resources match the approved Releaf raster fingerprints; the xxxhdpi resource is 192×192 with SHA-256 `309fcfcb8515a89ba116fbaa1472ddea189af85410020214deef0bf1dbc52ca9`. This closes the identified automated launcher-branding regression without replacing final physical-device QA.
 
 ## Current Google Play policy verification
 
@@ -53,7 +57,8 @@ Updated release runbooks:
 - `docs/release/google_play_data_safety.md`;
 - `docs/release/google_play_health_declaration.md`;
 - `docs/release/google_play_store_listing.md`;
-- `docs/release/android_device_release_qa.md`.
+- `docs/release/android_device_release_qa.md`;
+- `docs/release/2026-09-14-production-signing-runbook.md`.
 
 ## Production Android signing
 
@@ -80,7 +85,7 @@ Required secrets remain external:
 - `ANDROID_UPLOAD_KEY_ALIAS`;
 - `REVENUECAT_ANDROID_API_KEY`.
 
-No private upload key, password or production RevenueCat key is committed to the repository.
+No private upload key, password or production RevenueCat key is committed to the repository. Follow `docs/release/2026-09-14-production-signing-runbook.md`: check Play App Signing/upload certificate state before generating any new upload key.
 
 ## RevenueCat / Google Play Billing
 
@@ -110,7 +115,13 @@ External closure requires:
 8. obtain/store the real Android `goog_...` public SDK key outside source control;
 9. complete Play-distributed license-tester purchase/restore/account-isolation QA.
 
-No approved production GBP price was found in the repository or prior Releaf decisions. Pricing remains an owner/business decision rather than something engineering may invent silently.
+Commercial recommendation only — **not yet owner-approved/configured**:
+
+- monthly: £5.99;
+- annual: £39.99;
+- no trial/intro offer by default for 1.0.
+
+See `docs/release/2026-09-14-premium-pricing-recommendation.md`. Production pricing remains an owner/business decision rather than something engineering may silently activate.
 
 ## Public account deletion
 
@@ -154,8 +165,8 @@ Preferred final hosting remains a single Releaf legal host: extend the existing 
 Current status after policy re-verification:
 
 - **Health declaration:** mapping ready; Play Console submission still required. Releaf maps to Sleep Management; Stress Management, Relaxation, Mental Acuity; and Mental and Behavioral Health. Required non-medical-device disclaimer is present in canonical Store Listing copy.
-- **Data Safety:** mapping ready; the live account-deletion resource is now recorded as implemented rather than an unresolved dependency. Final RevenueCat integration check, Privacy URL and Play submission remain required.
-- **Store Listing:** canonical UK-English copy is aligned with active Reset / Brain / Sleep scope and Emergency Calm. Real Google Play graphic pack is still absent by deliberate sequencing; screenshots must come from the actual release candidate rather than stale mock-ups.
+- **Data Safety:** mapping ready; the live account-deletion resource is recorded as implemented rather than an unresolved dependency. Final RevenueCat integration check, Privacy URL and Play submission remain required.
+- **Store Listing:** canonical UK-English copy is aligned with active Reset / Brain / Sleep scope and Emergency Calm. Real Google Play graphic pack is still absent by deliberate sequencing; screenshots must come from the actual release candidate rather than stale mock-ups. The store icon should be derived from the existing Releaf launcher mark, not the stale web Flutter icon.
 
 ## Play account eligibility
 
@@ -169,10 +180,11 @@ Therefore:
 
 ## Final device QA
 
-`docs/release/android_device_release_qa.md` is aligned with the frozen active 1.0 scope.
+`docs/release/android_device_release_qa.md` is aligned with the frozen active 1.0 scope and `ecd3e97` candidate.
 
 Key corrections now locked:
 
+- DQA-01 includes installed launcher-brand sanity verification;
 - Meditate is PARKED and its unfinished narration does not become a hidden P0 again; DQA-05 verifies parked-route/resume safety rather than requiring final meditation content;
 - DQA-13/DQA-14 use authorized Play license-tester test transactions and test payment methods;
 - DQA-18/DQA-19 require disposable account deletion evidence;
@@ -182,17 +194,17 @@ The agreed discipline remains one consolidated final physical-device run after p
 
 ## External inputs/actions still blocking release
 
-The remaining blockers are now intentionally narrow:
+The remaining blockers are intentionally narrow:
 
 - real data-controller legal identity;
 - real privacy/support contact email;
 - public Privacy Policy deployment after those values are supplied;
 - private Android upload keystore and signing secrets;
-- approved monthly/annual GBP Premium pricing;
+- owner approval/change of monthly/annual GBP Premium pricing;
 - Play subscription/base-plan creation and activation;
 - RevenueCat Google Play credentials/products/current Offering/real `goog_` key;
 - Releaf Play developer-account type and creation date;
-- final app icon, feature graphic and current-RC screenshots;
+- final Play store icon, feature graphic and current-RC screenshots;
 - Play Console Data Safety / Health / Store Listing entry;
 - applicable closed testing / Production-access process;
 - final production-equivalent physical-device matrix;
