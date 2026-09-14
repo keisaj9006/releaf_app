@@ -27,6 +27,24 @@ void main() {
     expect(yaml, contains('RELEAF_PRIVACY_POLICY_URL'));
     expect(yaml, contains('RELEAF_ACCOUNT_DELETION_URL'));
     expect(yaml, contains('RELEAF_PRIVACY_LAST_UPDATED'));
+    expect(yaml, contains('RELEAF_DATA_CONTROLLER_NAME: Relief'));
+    expect(
+      yaml,
+      contains('RELEAF_PRIVACY_CONTACT_EMAIL: canius.uk@gmail.com'),
+    );
+    expect(
+      yaml,
+      contains(
+        'RELEAF_PRIVACY_POLICY_URL: https://releaf-account-deletion-89juqm.v2.appdeploy.ai/privacy-policy.html',
+      ),
+    );
+    expect(
+      yaml,
+      contains(
+        'RELEAF_ACCOUNT_DELETION_URL: https://releaf-account-deletion-89juqm.v2.appdeploy.ai/',
+      ),
+    );
+    expect(yaml, contains('RELEAF_PRIVACY_LAST_UPDATED: 2026-09-14'));
     expect(yaml, contains('tool/release/legal_metadata_policy.dart'));
     expect(yaml, contains('--dart-define=RELEAF_DATA_CONTROLLER_NAME'));
     expect(yaml, contains('--dart-define=RELEAF_PRIVACY_CONTACT_EMAIL'));
