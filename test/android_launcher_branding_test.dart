@@ -15,11 +15,11 @@ int _fnv1a32(List<int> bytes) {
 void main() {
   test('all legacy Android launcher icons use the approved Releaf render', () {
     const expected = <String, List<int>>{
-      'mipmap-mdpi': <int>[48, 0x8efd94f9],
-      'mipmap-hdpi': <int>[72, 0xcbe0e6cc],
-      'mipmap-xhdpi': <int>[96, 0x8488dc69],
-      'mipmap-xxhdpi': <int>[144, 0xf5ae02af],
-      'mipmap-xxxhdpi': <int>[192, 0x317fe250],
+      'mipmap-mdpi': <int>[48, 0x730b5259],
+      'mipmap-hdpi': <int>[72, 0xd4323b41],
+      'mipmap-xhdpi': <int>[96, 0x27a71364],
+      'mipmap-xxhdpi': <int>[144, 0x3ab44226],
+      'mipmap-xxxhdpi': <int>[192, 0x1232be13],
     };
 
     for (final entry in expected.entries) {
