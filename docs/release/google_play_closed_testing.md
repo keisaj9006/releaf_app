@@ -54,7 +54,6 @@ Testers should not merely install the app. Ask them to use the main release surf
 - RESET start, interruption/resume and completion;
 - BRAIN including at least one normal game and Labyrinth on a physical device;
 - Sleep sound playback, timer, lock/background/resume;
-- Meditation playback, pause/resume and background/foreground;
 - sign-up/sign-in/sign-out and email confirmation;
 - password reset/recovery deep link;
 - Premium paywall presentation;
