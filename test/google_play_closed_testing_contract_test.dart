@@ -26,6 +26,29 @@ void main() {
     }
   });
 
+  test('tester brief matches the active Reset Brain Sleep 1.0 surface', () {
+    final plan = File('docs/release/google_play_closed_testing.md');
+    expect(plan.existsSync(), isTrue);
+
+    final text = plan.readAsStringSync();
+    for (final activeTask in <String>[
+      'RESET start, interruption/resume and completion',
+      'BRAIN including at least one normal game and Labyrinth on a physical device',
+      'Sleep sound playback, timer, lock/background/resume',
+      'Premium paywall presentation',
+      'Restore Purchases',
+      'Emergency access without Premium',
+    ]) {
+      expect(text, contains(activeTask), reason: 'Missing active 1.0 tester task: $activeTask');
+    }
+
+    expect(
+      text,
+      isNot(contains('Meditation playback')),
+      reason: 'Meditate is parked outside the active Releaf 1.0 testing/marketing surface.',
+    );
+  });
+
   test('release gate does not claim closed testing is complete', () {
     final gate = File('docs/release/releaf_1_0_release_gate.md');
     expect(gate.existsSync(), isTrue);
