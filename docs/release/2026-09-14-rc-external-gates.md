@@ -2,7 +2,7 @@
 
 ## Scope
 
-This is the current external-gates register for the frozen Releaf 1.0 app build candidate. It does **not** declare the app release-ready. Repo-side automated hardening is complete; owner/account configuration, production signing, Play Billing setup, public Privacy Policy, store assets, Play Console submission and the final production-equivalent physical-device matrix remain separate gates.
+This is the current external-gates register for the frozen Releaf 1.0 app build candidate. It does **not** declare the app release-ready. Repo-side automated hardening is complete; production signing, Play Billing/RevenueCat provider configuration, store assets, Play Console submission and the final production-equivalent physical-device matrix remain separate gates. The public Privacy Policy and account-deletion resources are now live.
 
 Frozen app build candidate: `ecd3e977b55a9f247459f79e2c4ede92303db323` on `releaf-development`.
 Frozen release version: `1.0.0+20260913`.
@@ -12,7 +12,7 @@ Android package: `app.releaf.mobile`.
 
 ## Automated evidence
 
-The immutable automated record is:
+The automated record is:
 
 `docs/release/2026-09-14-ci-ecd3e97.md`
 
@@ -28,10 +28,10 @@ Verified on the exact frozen SHA:
 - Android 16 KB ZIP/ELF compatibility: PASS;
 - Releaf Web Release Smoke run `34834895129`: **SUCCESS** on the same SHA.
 
-Current release AAB smoke artifact:
+Fresh GitHub Actions artifact evidence for the release AAB smoke:
 
-- artifact ID `10343132454`;
-- SHA-256 `a8e343311d963667688b376faa876195fff8145ce0317fc60f6bc328a76d05c0`.
+- artifact ID `10343214232`;
+- GitHub artifact-ZIP SHA-256 `da6b90145ade640edd78d82a640d159abdbf6dde1f24667f80eef31e803dcb87`.
 
 That smoke artifact uses the short-lived CI signing key. It is not the final Play upload artifact.
 
@@ -58,7 +58,8 @@ Updated release runbooks:
 - `docs/release/google_play_health_declaration.md`;
 - `docs/release/google_play_store_listing.md`;
 - `docs/release/android_device_release_qa.md`;
-- `docs/release/2026-09-14-production-signing-runbook.md`.
+- `docs/release/2026-09-14-production-signing-runbook.md`;
+- `docs/release/2026-09-14-privacy-policy-deployment.md`.
 
 ## Production Android signing
 
@@ -85,6 +86,14 @@ Required secrets remain external:
 - `ANDROID_UPLOAD_KEY_ALIAS`;
 - `REVENUECAT_ANDROID_API_KEY`.
 
+The legal metadata values are now known and public, but the current workflow still reads them from GitHub Actions repository variables. Those variables still need to be entered before the production workflow can run:
+
+- `RELEAF_DATA_CONTROLLER_NAME=Relief`
+- `RELEAF_PRIVACY_CONTACT_EMAIL=canius.uk@gmail.com`
+- `RELEAF_PRIVACY_POLICY_URL=https://releaf-account-deletion-89juqm.v2.appdeploy.ai/privacy-policy.html`
+- `RELEAF_ACCOUNT_DELETION_URL=https://releaf-account-deletion-89juqm.v2.appdeploy.ai/`
+- `RELEAF_PRIVACY_LAST_UPDATED=2026-09-14`
+
 No private upload key, password or production RevenueCat key is committed to the repository. Follow `docs/release/2026-09-14-production-signing-runbook.md`: check Play App Signing/upload certificate state before generating any new upload key.
 
 ## RevenueCat / Google Play Billing
@@ -103,25 +112,24 @@ Recommended permanent Play structure remains:
 - base plan: `monthly-autorenewing`;
 - base plan: `annual-autorenewing`.
 
+Owner-approved Releaf 1.0 launch pricing:
+
+- monthly UK target price: **£5.99**;
+- annual UK target price: **£39.99**;
+- free trial / introductory offer: **none for 1.0 by default**.
+
 External closure requires:
 
-1. approved GBP monthly/annual price;
-2. Play subscription/base-plan creation, prices/regions and activation;
-3. RevenueCat Google Play service credentials with required permissions;
-4. RevenueCat credential validation — allow for up to 36 hours of Google propagation after credential creation/change;
-5. import both active base-plan products;
-6. attach both to entitlement `premium`;
-7. configure the intended Offering as current with standard Annual/Monthly packages;
-8. obtain/store the real Android `goog_...` public SDK key outside source control;
-9. complete Play-distributed license-tester purchase/restore/account-isolation QA.
+1. Play subscription/base-plan creation, prices/regions and activation using the approved UK targets;
+2. RevenueCat Google Play service credentials with required permissions;
+3. RevenueCat credential validation — allow for up to 36 hours of Google propagation after credential creation/change;
+4. import both active base-plan products;
+5. attach both to entitlement `premium`;
+6. configure the intended Offering as current with standard Annual/Monthly packages;
+7. obtain/store the real Android `goog_...` public SDK key outside source control;
+8. complete Play-distributed license-tester purchase/restore/account-isolation QA.
 
-Commercial recommendation only — **not yet owner-approved/configured**:
-
-- monthly: £5.99;
-- annual: £39.99;
-- no trial/intro offer by default for 1.0.
-
-See `docs/release/2026-09-14-premium-pricing-recommendation.md`. Production pricing remains an owner/business decision rather than something engineering may silently activate.
+See `docs/release/2026-09-14-premium-pricing-recommendation.md` and `docs/release/revenuecat_google_play_production_setup.md`.
 
 ## Public account deletion
 
@@ -138,51 +146,58 @@ Verified state:
 - Android installation is not required;
 - the page warns separately that deleting the Releaf account does not automatically cancel a Google Play subscription;
 - the hardened `delete-account` Edge Function version 4 and server-only RevenueCat erasure secret were previously verified;
-- disposable-account in-app deletion E2E already passed against Supabase and RevenueCat.
+- disposable-account in-app deletion E2E already passed against Supabase and RevenueCat;
+- the public page now exposes a visible link to the Releaf Privacy Policy.
 
 This closes public availability of the external Delete Account resource. Final DQA-18/DQA-19 must still be repeated/recorded against the production-equivalent RC using disposable accounts only.
 
 ## Privacy Policy
 
-The Privacy Policy engineering path is **READY / TWO OWNER VALUES + PUBLIC DEPLOY REQUIRED**.
+The Privacy Policy public-resource gate is **LIVE / METADATA SUPPLIED**.
 
-The release validator requires exactly:
+Public URL:
 
-- `RELEAF_DATA_CONTROLLER_NAME` — **OPEN: real legal controller identity required**;
-- `RELEAF_PRIVACY_CONTACT_EMAIL` — **OPEN: real public privacy contact email required**;
-- `RELEAF_PRIVACY_POLICY_URL` — will be set to the final public route after deployment;
-- `RELEAF_ACCOUNT_DELETION_URL` — known live value: `https://releaf-account-deletion-89juqm.v2.appdeploy.ai/`;
-- `RELEAF_PRIVACY_LAST_UPDATED` — use the actual publication date.
+`https://releaf-account-deletion-89juqm.v2.appdeploy.ai/privacy-policy.html`
 
-No earlier Releaf decision supplied the controller identity or privacy/support email, so they must not be guessed.
+Owner-supplied production metadata:
 
-`tool/release/render_privacy_policy.dart` already covers the current data inventory, purposes/lawful basis, recipients, international processing, retention criteria, deletion, rights and Information Commissioner complaint route. Current ICO guidance allows retention to be described by criteria where a single fixed period is not available, provided the controller can justify and review retention.
+- `RELEAF_DATA_CONTROLLER_NAME=Relief`
+- `RELEAF_PRIVACY_CONTACT_EMAIL=canius.uk@gmail.com`
+- `RELEAF_PRIVACY_POLICY_URL=https://releaf-account-deletion-89juqm.v2.appdeploy.ai/privacy-policy.html`
+- `RELEAF_ACCOUNT_DELETION_URL=https://releaf-account-deletion-89juqm.v2.appdeploy.ai/`
+- `RELEAF_PRIVACY_LAST_UPDATED=2026-09-14`
 
-Preferred final hosting remains a single Releaf legal host: extend the existing AppDeploy deletion portal with a public Privacy Policy route after the two real owner values are available. Do not publish a placeholder policy.
+AppDeploy applied source snapshot `1789387063562` and reported deployment status `ready` with no frontend, network or backend errors and fresh desktop/mobile QA screenshots.
+
+The policy covers the current data inventory, purposes/lawful basis, recipients, international processing, retention criteria, deletion, rights and Information Commissioner complaint route. Current ICO guidance requires controller identity/contact information and the other transparency elements reflected in the policy.
+
+Engineering records `Relief` exactly as supplied by the owner. If legal review determines that this is only a product/trading label rather than the true legal controller identity, replace it consistently before release. Engineering must not guess the legal person/entity.
+
+Deployment evidence: `docs/release/2026-09-14-privacy-policy-deployment.md`.
 
 ## Health / Data Safety / Store Listing
 
 Current status after policy re-verification:
 
 - **Health declaration:** mapping ready; Play Console submission still required. Releaf maps to Sleep Management; Stress Management, Relaxation, Mental Acuity; and Mental and Behavioral Health. Required non-medical-device disclaimer is present in canonical Store Listing copy.
-- **Data Safety:** mapping ready; the live account-deletion resource is recorded as implemented rather than an unresolved dependency. Final RevenueCat integration check, Privacy URL and Play submission remain required.
-- **Store Listing:** canonical UK-English copy is aligned with active Reset / Brain / Sleep scope and Emergency Calm. Real Google Play graphic pack is still absent by deliberate sequencing; screenshots must come from the actual release candidate rather than stale mock-ups. The store icon should be derived from the existing Releaf launcher mark, not the stale web Flutter icon.
+- **Data Safety:** mapping ready; both the Privacy Policy URL and account-deletion resource are now public. Final RevenueCat integration/provider verification and Play submission remain required.
+- **Store Listing:** canonical UK-English copy is aligned with active Reset / Brain / Sleep scope and Emergency Calm. Support/privacy email `canius.uk@gmail.com`, Privacy URL and Account Deletion URL are now known. A separate marketing website remains optional/open. Real Google Play graphic assets are still absent by deliberate sequencing; screenshots must come from the actual release candidate. The store icon should be derived from the existing Releaf launcher mark, not stale Flutter/template artwork.
 
 ## Play account eligibility
 
-The exact Releaf Play developer-account type and creation date have **not** been supplied in prior project context.
+The exact Releaf Play developer-account type and creation date have **not** been established from reliable evidence. Gmail searches surfaced consumer Google Play receipts only, which are not Play Console registration evidence.
 
 Therefore:
 
 - do not assume the 12-testers/14-days eligibility rule applies;
-- check Play Console account type and creation date before scheduling the Production-access clock;
-- if it is a personal account created after 13 November 2023, follow the 12/14 closed-testing requirement and apply for Production access after Play reports eligibility.
+- check Play Console account type and creation date / Dashboard production-access requirement before scheduling the Production-access clock;
+- if it is a personal account created after 13 November 2023, follow the applicable 12/14 closed-testing requirement and apply for Production access after Play reports eligibility.
 
 ## Final device QA
 
 `docs/release/android_device_release_qa.md` is aligned with the frozen active 1.0 scope and `ecd3e97` candidate.
 
-Key corrections now locked:
+Key corrections locked:
 
 - DQA-01 includes installed launcher-brand sanity verification;
 - Meditate is PARKED and its unfinished narration does not become a hidden P0 again; DQA-05 verifies parked-route/resume safety rather than requiring final meditation content;
@@ -196,18 +211,16 @@ The agreed discipline remains one consolidated final physical-device run after p
 
 The remaining blockers are intentionally narrow:
 
-- real data-controller legal identity;
-- real privacy/support contact email;
-- public Privacy Policy deployment after those values are supplied;
+- enter the five known public legal metadata values as GitHub Actions repository variables;
 - private Android upload keystore and signing secrets;
-- owner approval/change of monthly/annual GBP Premium pricing;
-- Play subscription/base-plan creation and activation;
+- Play subscription/base-plan creation and activation using approved £5.99 / £39.99 UK pricing;
 - RevenueCat Google Play credentials/products/current Offering/real `goog_` key;
-- Releaf Play developer-account type and creation date;
+- Releaf Play developer-account type and creation date / Dashboard production-access requirement;
 - final Play store icon, feature graphic and current-RC screenshots;
 - Play Console Data Safety / Health / Store Listing entry;
 - applicable closed testing / Production-access process;
 - final production-equivalent physical-device matrix;
-- final owner listening/content approval where still called out by the canonical release gate.
+- final owner listening/content approval where still called out by the canonical release gate;
+- legal review of the supplied controller identity if required before public launch.
 
 No optional feature work should be added merely to avoid these external gates. Overall release authority remains `docs/release/releaf_1_0_release_gate.md`.
