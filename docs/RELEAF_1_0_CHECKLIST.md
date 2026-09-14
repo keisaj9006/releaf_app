@@ -4,18 +4,18 @@
 
 This checklist is an execution view, not a replacement gate.
 
-**Latest complete automated code/build checkpoint:** `7fb186a9551c2fbb8fd6149fba540a9d23519c47` — see `docs/release/2026-09-13-ci-7fb186a.md`.
+**Latest complete automated code/build checkpoint:** `dd20fb5a3f0f00c9cf4760c22f2ba0d8c034e22e` — see `docs/release/2026-09-14-ci-dd20fb5.md`. Evidence-only documentation commits after this checkpoint do not redefine the frozen build candidate.
 
 ## A. Engineering baseline
 
 - [x] Confirm `releaf-development`.
-- [ ] Confirm local working tree state immediately before the final RC build.
+- [ ] Confirm local working tree state immediately before the final production-signed RC build.
 - [x] Run `flutter pub get`.
 - [x] Run `flutter analyze`.
-- [x] Run full `flutter test`.
+- [x] Run full `flutter test` — **582/582 PASS** on `dd20fb5`.
 - [x] Run relevant existing release/tooling checks.
 - [x] Verify latest Reset movement/visual changes have not introduced regression.
-- [x] Record exact baseline results and artifact digests.
+- [x] Record exact baseline results and artifact digests for the frozen build candidate.
 
 ## B. Core product — preserve / QA
 
@@ -45,6 +45,7 @@ This checklist is an execution view, not a replacement gate.
 - [ ] Resolve missing approved narrator provider ID / production rendering dependency without guessing.
 - [x] Verify pause/resume/seek/back/background behavior in automated coverage.
 - [ ] Final content/audio owner QA.
+- [x] Keep Meditate parked outside active 1.0 discovery/marketing until its content gate is deliberately reopened.
 
 ### SLEEP / SOUND
 - [x] Player/timer engineering release gate marked DONE/CONTENT.
@@ -68,8 +69,9 @@ This checklist is an execution view, not a replacement gate.
 - [ ] Final privacy controller/contact/retention details.
 - [ ] Final legal review as required.
 - [ ] Publish stable HTTPS privacy-policy URL.
-- [ ] Deploy stable external account-deletion URL on Releaf-specific hosting.
-- [ ] Verify the public deletion URL end-to-end in a normal browser.
+- [x] Deploy stable external account-deletion URL on Releaf-specific hosting.
+- [x] Verify the public deletion URL availability and web deployment health.
+- [ ] Repeat deletion end-to-end against the final production-equivalent RC as part of DQA-18.
 
 ## D. Subscription / Google Play
 
@@ -86,16 +88,16 @@ This checklist is an execution view, not a replacement gate.
 - [x] Android API target/release tooling prepared per gate.
 - [ ] Configure private production upload keystore outside repo.
 - [ ] Produce final production-signed candidate.
-- [x] Verify automated release AAB and 16 KB compatibility checks.
-- [ ] Set final `1.0.0+<build>` only at RC.
+- [x] Verify automated release AAB and 16 KB compatibility checks on `dd20fb5`.
+- [x] Freeze RC marketing/build version at `1.0.0+20260913`.
 - [ ] Execute physical-device release matrix DQA-01…DQA-23.
-- [x] Capture current automated release evidence and artifact digests for `7fb186a`.
+- [x] Capture automated release evidence and artifact digests for `dd20fb5` in `docs/release/2026-09-14-ci-dd20fb5.md`.
 - [ ] Capture final production-equivalent device/store evidence after external gates are available.
 
 ## F. Google Play Console
 
 - [ ] Verify account-specific closed-testing requirement.
-- [ ] Complete required closed-test run.
+- [ ] Complete required closed-test run if applicable.
 - [ ] Submit Health declaration.
 - [ ] Submit Data safety answers after final verification.
 - [ ] Enter Store listing.
