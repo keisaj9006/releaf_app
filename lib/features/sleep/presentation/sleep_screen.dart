@@ -11,11 +11,17 @@ import '../../../theme/widgets/releaf_sleep_artwork.dart';
 import '../../relief/application/relief_paywall_hooks.dart';
 import '../../sound/data/sound_catalog.dart';
 import '../../sound/domain/sound_content.dart';
+import '../../stories/story_preview_config.dart';
 
 class SleepScreen extends ConsumerWidget {
-  const SleepScreen({super.key, this.showBack = false});
+  const SleepScreen({
+    super.key,
+    this.showBack = false,
+    this.storiesPreviewEnabled = StoryPreviewConfig.enabled,
+  });
 
   final bool showBack;
+  final bool storiesPreviewEnabled;
 
   static const _sleepToneIds = <String>[
     'deep-drift',
@@ -137,6 +143,13 @@ class SleepScreen extends ConsumerWidget {
                                   label: const Text('Your sound library'),
                                 ),
                               ),
+                              if (storiesPreviewEnabled) ...[
+                                const SizedBox(height: ReleafSpacing.md),
+                                _StoriesPreviewEntry(
+                                  onPressed: () =>
+                                      context.push(AppRoutes.storiesPreview),
+                                ),
+                              ],
                               const SizedBox(height: ReleafSpacing.xl),
                               if (featured != null)
                                 _FeaturedSleepSound(
@@ -297,6 +310,80 @@ class _Header extends StatelessWidget {
           ],
         );
       },
+    );
+  }
+}
+
+class _StoriesPreviewEntry extends StatelessWidget {
+  const _StoriesPreviewEntry({required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        key: const Key('sleep-stories-preview'),
+        onTap: onPressed,
+        borderRadius: BorderRadius.circular(ReleafRadii.large),
+        child: Ink(
+          width: double.infinity,
+          padding: const EdgeInsets.all(ReleafSpacing.lg),
+          decoration: BoxDecoration(
+            color: ReleafColors.surface,
+            borderRadius: BorderRadius.circular(ReleafRadii.large),
+            border: Border.all(
+              color: ReleafColors.premium.withValues(alpha: 0.28),
+            ),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                width: 46,
+                height: 46,
+                decoration: BoxDecoration(
+                  color: ReleafColors.premiumSoft,
+                  borderRadius: BorderRadius.circular(ReleafRadii.medium),
+                ),
+                child: const Icon(
+                  Icons.auto_stories_rounded,
+                  color: ReleafColors.premium,
+                ),
+              ),
+              const SizedBox(width: ReleafSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'OWNER PREVIEW',
+                      style: ReleafTypography.eyebrow.copyWith(
+                        color: ReleafColors.premium,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text('Stories', style: ReleafTypography.cardTitle),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Test narrated Stories before they become part of the public Sleep library.',
+                      style: ReleafTypography.meta.copyWith(
+                        color: ReleafColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: ReleafSpacing.sm),
+              const Icon(
+                Icons.chevron_right_rounded,
+                color: ReleafColors.textSecondary,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

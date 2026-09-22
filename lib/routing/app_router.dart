@@ -18,6 +18,8 @@ import '../features/meditation/presentation/meditation_screen.dart';
 import '../features/meditation/presentation/meditation_session_gate.dart';
 import '../features/meditation/domain/meditation_resume_state.dart';
 import '../features/sleep/presentation/sleep_screen.dart';
+import '../features/stories/presentation/stories_preview_screen.dart';
+import '../features/stories/story_preview_config.dart';
 import '../features/brain/presentation/game_host_screen.dart';
 import '../features/brain/presentation/game_result_screen.dart';
 
@@ -31,7 +33,10 @@ CustomTransitionPage<void> _fadePage(Widget child) {
   );
 }
 
-GoRouter createAppRouter({String initialLocation = AppRoutes.home}) => GoRouter(
+GoRouter createAppRouter({
+  String initialLocation = AppRoutes.home,
+  bool storiesPreviewEnabled = StoryPreviewConfig.enabled,
+}) => GoRouter(
   initialLocation: initialLocation,
   errorPageBuilder: (context, state) {
     return _fadePage(
@@ -79,7 +84,9 @@ GoRouter createAppRouter({String initialLocation = AppRoutes.home}) => GoRouter(
           routes: [
             GoRoute(
               path: AppRoutes.sleep,
-              pageBuilder: (context, state) => _fadePage(const SleepScreen()),
+              pageBuilder: (context, state) => _fadePage(
+                SleepScreen(storiesPreviewEnabled: storiesPreviewEnabled),
+              ),
             ),
             GoRoute(
               path: AppRoutes.sound,
@@ -98,6 +105,15 @@ GoRouter createAppRouter({String initialLocation = AppRoutes.home}) => GoRouter(
       ],
     ),
 
+    GoRoute(
+      path: AppRoutes.storiesPreview,
+      redirect: (context, state) => StoryPreviewConfig.redirectWhenDisabled(
+        enabled: storiesPreviewEnabled,
+        sleepRoute: AppRoutes.sleep,
+      ),
+      pageBuilder: (context, state) =>
+          _fadePage(const StoriesPreviewScreen()),
+    ),
     GoRoute(
       path: AppRoutes.meditate,
       pageBuilder: (context, state) =>
