@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../../routing/app_routes.dart';
 
 import '../../../theme/app_theme.dart';
 import '../../../theme/releaf_design_tokens.dart';
@@ -29,6 +32,22 @@ class StoriesPreviewScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: IconButton(
+                        key: const Key('stories-preview-back'),
+                        tooltip: 'Back to Sleep',
+                        onPressed: () {
+                          if (context.canPop()) {
+                            context.pop();
+                          } else {
+                            context.go(AppRoutes.sleep);
+                          }
+                        },
+                        icon: const Icon(Icons.arrow_back_rounded),
+                      ),
+                    ),
+                    const SizedBox(height: ReleafSpacing.sm),
                     Text(
                       'OWNER PREVIEW',
                       style: ReleafTypography.eyebrow.copyWith(
