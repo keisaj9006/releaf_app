@@ -9,7 +9,9 @@ import 'package:releaf_app/core/audio/relief_audio_runtime.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('one root subscription forwards interruption and headphone events once', (tester) async {
+  // This contract has no widget frames. Run stream setup/cleanup on the real
+  // async event loop rather than awaiting cleanup inside a widget fake clock.
+  test('one root subscription forwards interruption and headphone events once', () async {
     final interruptions = StreamController<AudioInterruptionEvent>.broadcast();
     final noisy = StreamController<void>.broadcast();
     final seen = <AudioInterruptionEvent>[];
@@ -20,25 +22,23 @@ void main() {
       onNoisy: () async { pauses++; },
       onResume: () async {}, onCheckpoint: () async {},
     );
-    debugPrint('[audio-runtime-test] start');
     await runtime.start();
     await runtime.start();
-    debugPrint('[audio-runtime-test] started');
     final beginning = AudioInterruptionEvent(true, AudioInterruptionType.pause);
     final ending = AudioInterruptionEvent(false, AudioInterruptionType.pause);
     interruptions.add(beginning); interruptions.add(ending); noisy.add(null);
-    await tester.pump();
+    await Future<void>.delayed(Duration.zero);
     expect(seen, [beginning, ending]);
     expect(pauses, 1);
-    debugPrint('[audio-runtime-test] close');
     await runtime.close();
-    debugPrint('[audio-runtime-test] closed');
+    await runtime.close();
+    expect(interruptions.hasListener, isFalse);
+    expect(noisy.hasListener, isFalse);
     noisy.add(null); interruptions.add(beginning);
-    await tester.pump();
+    await Future<void>.delayed(Duration.zero);
     expect(pauses, 1);
     expect(seen, hasLength(2));
     await interruptions.close(); await noisy.close();
-    debugPrint('[audio-runtime-test] streams closed');
   }, timeout: const Timeout(Duration(seconds: 20)));
 
   testWidgets('root checkpoints background and resynchronises resume with no player widget', (tester) async {
@@ -51,10 +51,8 @@ void main() {
       onCheckpoint: () async { checkpoints++; },
     );
     await runtime.start();
-    debugPrint('[audio-runtime-test] lifecycle paused');
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
     await tester.pump();
-    debugPrint('[audio-runtime-test] lifecycle resumed');
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
     await tester.pump();
     expect(checkpoints, greaterThanOrEqualTo(1));
