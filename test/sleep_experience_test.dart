@@ -36,6 +36,8 @@ void main() {
       findsOneWidget,
     );
     expect(find.textContaining('Voice guidance'), findsNothing);
+    expect(find.text('Stories Preview'), findsNothing);
+    expect(find.byKey(const Key('sleep-stories-preview')), findsNothing);
     expect(find.byKey(const Key('sleep-featured-sound')), findsOneWidget);
     expect(find.text('LOW-STIMULATION AMBIENCE'), findsOneWidget);
     expect(find.text('Releaf Atmosphere I'), findsOneWidget);
@@ -65,6 +67,30 @@ void main() {
       find.byKey(const Key('sleep-premium-preview-unlock')),
       findsOneWidget,
     );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Sleep exposes the Stories owner preview when enabled', (
+    WidgetTester tester,
+  ) async {
+    final preferences = await _preferences();
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(preferences),
+        ],
+        child: const MaterialApp(
+          home: SleepScreen(storiesPreviewEnabled: true),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.byKey(const Key('sleep-stories-preview')), findsOneWidget);
+    expect(find.text('OWNER PREVIEW'), findsOneWidget);
+    expect(find.text('Stories'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
