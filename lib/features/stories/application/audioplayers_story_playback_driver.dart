@@ -67,7 +67,9 @@ class AudioplayersStoryPlaybackDriver implements StoryPlaybackDriver {
       var loadingSource = false;
       final subscription = _player.onDurationChanged.listen((duration) {
         if (loadingSource && _current(request) && duration > Duration.zero &&
-            !measured.isCompleted) measured.complete(duration);
+            !measured.isCompleted) {
+          measured.complete(duration);
+        }
       });
       try {
         await _player.stop();

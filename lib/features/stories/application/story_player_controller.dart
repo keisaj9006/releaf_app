@@ -377,7 +377,9 @@ class StoryPlayerController extends StateNotifier<StoryPlayerState> {
     if (request == null) return;
     await _interruptionPause;
     if (!_current(request) || _interruptedRequest != request ||
-        nativeIntent != _driver.playbackIntentVersion) return;
+        nativeIntent != _driver.playbackIntentVersion) {
+      return;
+    }
     _interruptedRequest = null;
     await syncSleepTimerNow();
     if (_current(request)) await resume();
