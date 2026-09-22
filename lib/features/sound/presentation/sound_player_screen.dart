@@ -10,14 +10,16 @@ import '../../../core/audio/releaf_audio_session.dart';
 import '../../../core/audio/relief_shared_audio_handler.dart';
 import '../../../routing/app_routes.dart';
 import '../../../theme/app_theme.dart';
+import '../../../theme/releaf_design_tokens.dart';
+import '../../../theme/widgets/releaf_sound_artwork.dart';
+import '../../../theme/widgets/releaf_components.dart';
 import '../application/sound_player_controller.dart';
 import '../data/sound_catalog.dart';
 
 class SoundPlayerScreen extends ConsumerStatefulWidget {
-  const SoundPlayerScreen({super.key, required this.trackId, this.fromSleep = false});
+  const SoundPlayerScreen({super.key, required this.trackId});
 
   final String trackId;
-  final bool fromSleep;
 
   @override
   ConsumerState<SoundPlayerScreen> createState() => _SoundPlayerScreenState();
@@ -39,45 +41,44 @@ class _SoundPlayerScreenState extends ConsumerState<SoundPlayerScreen>
   Future<void> _configureAudioSession() async {
     if (ref.read(soundPlayerControllerProvider.notifier)
         is ReliefManagedSoundController) {
-      // The application root owns managed events; the driver sets content mode.
+      // The application root owns managed events; drivers set content mode.
       return;
     }
-    try {
-      final session = await configureReleafAudioSession(ReleafAudioMode.sound);
-      if (!mounted) return;
-      _interruptionSubscription = session.interruptionEventStream.listen((event) {
-        if (!mounted) return;
+    final session = await configureReleafAudioSession(ReleafAudioMode.sound);
+    if (!mounted) return;
+
+    _interruptionSubscription?.cancel();
+    _becomingNoisySubscription?.cancel();
+
+    _interruptionSubscription = session.interruptionEventStream.listen((event) {
+      unawaited(
         ref
             .read(soundPlayerControllerProvider.notifier)
-            .handleAudioInterruption(event);
-      });
-      _becomingNoisySubscription = session.becomingNoisyEventStream.listen((_) {
-        if (!mounted) return;
-        ref
-            .read(soundPlayerControllerProvider.notifier)
-            .handleBecomingNoisy();
-      });
-    } catch (_) {
-      // Keep playback available on platforms without native audio-session hooks.
-    }
+            .handleAudioInterruption(event),
+      );
+    });
+    _becomingNoisySubscription = session.becomingNoisyEventStream.listen((_) {
+      unawaited(
+        ref.read(soundPlayerControllerProvider.notifier).handleBecomingNoisy(),
+      );
+    });
   }
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
     _interruptionSubscription?.cancel();
     _becomingNoisySubscription?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (!mounted || state != AppLifecycleState.resumed) return;
+    if (state != AppLifecycleState.resumed) return;
     if (ref.read(soundPlayerControllerProvider.notifier)
         is ReliefManagedSoundController) {
       return;
     }
-
     unawaited(
       ref.read(soundPlayerControllerProvider.notifier).syncSleepTimerNow(),
     );
@@ -90,612 +91,478 @@ class _SoundPlayerScreenState extends ConsumerState<SoundPlayerScreen>
     _started = true;
 
     final track = ref.read(soundCatalogProvider).getById(widget.trackId);
-    if (track == null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) context.go(widget.fromSleep ? AppRoutes.sleep : AppRoutes.sound);
+    if (track != null) {
+      Future<void>.microtask(() async {
+        if (!mounted) return;
+        await ref.read(soundPlayerControllerProvider.notifier).play(track);
       });
-      return;
     }
-
-    Future.microtask(() {
-      if (!mounted) return;
-      ref.read(soundPlayerControllerProvider.notifier).play(track);
-    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final track = ref.watch(soundCatalogProvider).getById(widget.trackId);
-    if (track == null) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    }
-
+    final catalog = ref.watch(soundCatalogProvider);
+    final track = catalog.getById(widget.trackId);
     final state = ref.watch(soundPlayerControllerProvider);
     final controller = ref.read(soundPlayerControllerProvider.notifier);
-    final active = state.currentTrackId == track.id;
-    final isPlaying = active && state.isPlaying;
-    final isLoading = active && state.isLoading;
-    final hasPlaybackError = active && state.hasPlaybackError;
+
+    if (track == null) {
+      return Theme(
+        data: AppTheme.premiumDark(),
+        child: Scaffold(
+          backgroundColor: ReleafColors.background,
+          appBar: AppBar(title: const Text('Sound unavailable')),
+          body: const Center(child: Text('This sound is not available.')),
+        ),
+      );
+    }
+
+    final isCurrent = state.currentTrackId == track.id;
+    final isPlaying = isCurrent && state.isPlaying;
+    final isLoading = isCurrent && state.isLoading;
+    final hasError = isCurrent && state.hasPlaybackError;
+    final status = isLoading
+        ? 'LOADING'
+        : hasError
+        ? 'UNAVAILABLE'
+        : isPlaying
+        ? 'PLAYING'
+        : 'PAUSED';
+    final duration = isCurrent ? state.duration : Duration.zero;
+    final position = isCurrent ? state.position : Duration.zero;
     final favorite = state.favoriteIds.contains(track.id);
-    final position = active ? state.position : Duration.zero;
-    final duration = active ? state.duration : Duration.zero;
-    final progress = duration.inMilliseconds <= 0
-        ? 0.0
-        : (position.inMilliseconds / duration.inMilliseconds).clamp(0.0, 1.0);
 
-    final playbackStatus = isLoading
-        ? 'Preparing your sound...'
-        : hasPlaybackError
-        ? 'Sound could not start. Try again.'
-        : isPlaying
-        ? (widget.fromSleep ? 'Settling in' : 'Playing')
-        : 'Paused';
-    final playbackAction = isLoading
-        ? 'Cancel loading'
-        : hasPlaybackError
-        ? 'Retry sound'
-        : isPlaying
-        ? 'Pause'
-        : 'Play';
+    return Theme(
+      data: AppTheme.premiumDark(),
+      child: Scaffold(
+        backgroundColor: ReleafColors.background,
+        body: Stack(
+          children: [
+            const Positioned.fill(child: _PlayerBackdrop()),
+            SafeArea(
+              child: LayoutBuilder(
+                builder: (context, viewport) {
+                  final compact =
+                      viewport.maxHeight < 760 || viewport.maxWidth < 360;
+                  final artSize = math.min(
+                    compact ? 190.0 : 320.0,
+                    viewport.maxWidth * (compact ? 0.68 : 0.62),
+                  );
 
-    return Scaffold(
-      backgroundColor: AppTheme.deepGreen,
-      body: DecoratedBox(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFF173C35), Color(0xFF071D1A)],
-          ),
-        ),
-        child: SafeArea(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final maxWidth = math.min(constraints.maxWidth, 520.0).toDouble();
-              final compact =
-                  constraints.maxHeight < 650 || constraints.maxWidth < 350;
-              final orbSize = compact ? 170.0 : 242.0;
-
-              return Align(
-                alignment: Alignment.topCenter,
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: maxWidth),
-                  child: SingleChildScrollView(
-                    padding: EdgeInsets.fromLTRB(22, 12, 22, compact ? 22 : 34),
-                    child: Column(
-                      children: [
-                        Row(
+                  return SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    padding: EdgeInsets.fromLTRB(
+                      ReleafSpacing.screen,
+                      compact ? ReleafSpacing.sm : ReleafSpacing.lg,
+                      ReleafSpacing.screen,
+                      compact ? ReleafSpacing.md : ReleafSpacing.xl,
+                    ),
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 720),
+                        child: Column(
                           children: [
-                            IconButton(
-                              onPressed: () {
-                                if (context.canPop()) {
-                                  context.pop();
-                                } else {
-                                  context.go(widget.fromSleep ? AppRoutes.sleep : AppRoutes.sound);
-                                }
-                              },
-                              icon: const Icon(
-                                Icons.keyboard_arrow_down_rounded,
-                              ),
-                              color: Colors.white.withValues(alpha: 0.92),
-                              tooltip: 'Close',
-                            ),
-                            const Spacer(),
-                            Text(
-                              widget.fromSleep ? 'SLEEP SOUNDS' : 'SOUND SPACE',
-                              style: TextStyle(
-                                color: Colors.white.withValues(alpha: 0.58),
-                                fontSize: 11,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: 2.0,
-                              ),
-                            ),
-                            const Spacer(),
-                            IconButton(
-                              onPressed: () =>
-                                  controller.toggleFavorite(track.id),
-                              icon: Icon(
-                                favorite
-                                    ? Icons.favorite_rounded
-                                    : Icons.favorite_border_rounded,
-                              ),
-                              tooltip: favorite ? 'Unfavorite' : 'Favorite',
-                              color: favorite
-                                  ? AppTheme.leafGreenLight
-                                  : Colors.white.withValues(alpha: 0.92),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 20),
-                        AnimatedOpacity(
-                          duration: const Duration(milliseconds: 280),
-                          opacity: 1,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 7,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.07),
-                              borderRadius: BorderRadius.circular(999),
-                              border: Border.all(
-                                color: Colors.white.withValues(alpha: 0.1),
-                              ),
-                            ),
-                            child: Text(
-                              playbackStatus,
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: hasPlaybackError
-                                    ? const Color(0xFFF3CBBE)
-                                    : isPlaying
-                                    ? AppTheme.leafGreenLight
-                                    : Colors.white.withValues(alpha: 0.68),
-                                fontSize: 11,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: 0.35,
-                              ),
-                            ),
-                          ),
-                        ),
-                        SizedBox(height: compact ? 26 : 34),
-                        SoundOrb(
-                          size: orbSize,
-                          isPlaying: isPlaying,
-                          seed: track.id.hashCode,
-                          sleepMode: widget.fromSleep,
-                        ),
-                        SizedBox(height: compact ? 26 : 40),
-                        Text(
-                          track.title,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 30,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: -1.0,
-                            height: 1.08,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          track.subtitle,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.58),
-                            fontSize: 14,
-                            height: 1.5,
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          widget.fromSleep
-                              ? 'Audio only. Your screen can rest too.'
-                              : track.description,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.4),
-                            fontSize: 12,
-                            height: 1.5,
-                          ),
-                        ),
-                        SizedBox(height: compact ? 22 : 34),
-                        SliderTheme(
-                          data: SliderThemeData(
-                            trackHeight: 2,
-                            activeTrackColor: AppTheme.leafGreenLight,
-                            inactiveTrackColor: Colors.white.withValues(
-                              alpha: 0.12,
-                            ),
-                            thumbColor: AppTheme.leafGreenLight,
-                            thumbShape: const RoundSliderThumbShape(
-                              enabledThumbRadius: 4,
-                            ),
-                            overlayShape: const RoundSliderOverlayShape(
-                              overlayRadius: 14,
-                            ),
-                          ),
-                          child: Slider(
-                            value: progress,
-                            onChanged: duration == Duration.zero
-                                ? null
-                                : (value) {
-                                    controller.seekTo(
-                                      Duration(
-                                        milliseconds:
-                                            (duration.inMilliseconds * value)
-                                                .round(),
-                                      ),
-                                    );
+                            Row(
+                              children: [
+                                ReleafRoundIconButton(
+                                  icon: Icons.keyboard_arrow_down_rounded,
+                                  tooltip: 'Close player',
+                                  accentColor: ReleafFeatureAccents.sound,
+                                  onPressed: () {
+                                    if (context.canPop()) {
+                                      context.pop();
+                                    } else {
+                                      context.go(AppRoutes.sound);
+                                    }
                                   },
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 18),
-                          child: Row(
-                            children: [
-                              Text(
-                                _formatDuration(position),
-                                style: TextStyle(
-                                  color: Colors.white.withValues(alpha: 0.42),
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w600,
+                                ),
+                                const Spacer(),
+                                Flexible(
+                                  child: Text(
+                                    'SOUND SPACE',
+                                    textAlign: TextAlign.center,
+                                    style: ReleafTypography.eyebrow.copyWith(
+                                      color: ReleafFeatureAccents.sound,
+                                      letterSpacing: 1.8,
+                                    ),
+                                  ),
+                                ),
+                                const Spacer(),
+                                ReleafRoundIconButton(
+                                  icon: favorite
+                                      ? Icons.favorite_rounded
+                                      : Icons.favorite_border_rounded,
+                                  tooltip: favorite
+                                      ? 'Remove favorite'
+                                      : 'Add favorite',
+                                  accentColor: ReleafFeatureAccents.sound,
+                                  onPressed: () =>
+                                      controller.toggleFavorite(track.id),
+                                ),
+                              ],
+                            ),
+                            SizedBox(
+                              height: compact
+                                  ? ReleafSpacing.md
+                                  : ReleafSpacing.xxl,
+                            ),
+                            SizedBox(
+                              width: artSize,
+                              height: artSize,
+                              child: _SoundArtworkDisc(
+                                isPlaying: isPlaying,
+                                statusLabel: isLoading
+                                    ? 'Loading sound.'
+                                    : hasError
+                                    ? 'Sound unavailable.'
+                                    : null,
+                                progress: _progress(position, duration),
+                                variant: _artworkForTrack(track.id),
+                                reducedMotion:
+                                    MediaQuery.maybeOf(
+                                      context,
+                                    )?.disableAnimations ??
+                                    false,
+                              ),
+                            ),
+                            SizedBox(
+                              height: compact
+                                  ? ReleafSpacing.md
+                                  : ReleafSpacing.xl,
+                            ),
+                            DecoratedBox(
+                              decoration: BoxDecoration(
+                                color: ReleafFeatureAccents.sound.withValues(
+                                  alpha: 0.08,
+                                ),
+                                borderRadius: BorderRadius.circular(
+                                  ReleafRadii.pill,
+                                ),
+                                border: Border.all(
+                                  color: ReleafFeatureAccents.sound.withValues(
+                                    alpha: 0.20,
+                                  ),
                                 ),
                               ),
-                              const Spacer(),
-                              Icon(
-                                Icons.repeat_rounded,
-                                size: 13,
-                                color: Colors.white.withValues(alpha: 0.38),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 11,
+                                  vertical: 6,
+                                ),
+                                child: Semantics(
+                                  liveRegion: true,
+                                  child: Text(
+                                    status,
+                                    key: const Key('sound-player-state'),
+                                    style: ReleafTypography.eyebrow.copyWith(
+                                      fontSize: 9,
+                                      color: ReleafFeatureAccents.sound,
+                                    ),
+                                  ),
+                                ),
                               ),
-                              const SizedBox(width: 4),
+                            ),
+                            const SizedBox(height: ReleafSpacing.sm),
+                            Text(
+                              track.title,
+                              textAlign: TextAlign.center,
+                              style: ReleafTypography.display.copyWith(
+                                fontSize: compact ? 25 : 28,
+                                letterSpacing: -0.7,
+                              ),
+                            ),
+                            const SizedBox(height: ReleafSpacing.xs),
+                            ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 460),
+                              child: Text(
+                                track.subtitle,
+                                textAlign: TextAlign.center,
+                                style: ReleafTypography.meta.copyWith(
+                                  color: ReleafColors.textSecondary,
+                                  height: 1.45,
+                                ),
+                              ),
+                            ),
+                            SizedBox(
+                              height: compact
+                                  ? ReleafSpacing.md
+                                  : ReleafSpacing.xl,
+                            ),
+                            const _ContinuousLoopStatus(),
+                            if (hasError) ...[
+                              const SizedBox(height: ReleafSpacing.sm),
                               Text(
-                                'CONTINUOUS',
-                                style: TextStyle(
-                                  color: Colors.white.withValues(alpha: 0.38),
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.w700,
-                                  letterSpacing: 1.0,
+                                'There was a playback problem. Try again.',
+                                textAlign: TextAlign.center,
+                                style: ReleafTypography.body.copyWith(
+                                  color: ReleafColors.textPrimary,
                                 ),
                               ),
                             ],
-                          ),
-                        ),
-                        SizedBox(height: compact ? 18 : 26),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            _RoundControl(
-                              icon: Icons.replay_10_rounded,
-                              tooltip: 'Back 10 seconds',
-                              onTap: () => controller.seekRelative(
-                                const Duration(seconds: -10),
-                              ),
+                            SizedBox(
+                              height: compact
+                                  ? ReleafSpacing.sm
+                                  : ReleafSpacing.md,
                             ),
-                            const SizedBox(width: 28),
-                            Semantics(
-                              button: true,
-                              label: playbackAction,
-                              child: Material(
-                                color: AppTheme.leafGreenLight,
-                                shape: const CircleBorder(),
-                                child: InkWell(
-                                  customBorder: const CircleBorder(),
-                                  onTap: controller.togglePlayPause,
-                                  child: SizedBox(
-                                    width: 78,
-                                    height: 78,
-                                    child: isLoading
-                                        ? Stack(
-                                            alignment: Alignment.center,
-                                            children: [
-                                              SizedBox(
-                                                width: 35,
-                                                height: 35,
-                                                child:
-                                                    CircularProgressIndicator(
-                                                      strokeWidth: 2.5,
-                                                      color:
-                                                          AppTheme.deepGreen,
-                                                    ),
-                                              ),
-                                              const Icon(
-                                                Icons.close_rounded,
-                                                color: AppTheme.deepGreen,
-                                                size: 21,
-                                              ),
-                                            ],
-                                          )
-                                        : Icon(
-                                            hasPlaybackError
-                                                ? Icons.refresh_rounded
-                                                : isPlaying
-                                                ? Icons.pause_rounded
-                                                : Icons.play_arrow_rounded,
-                                            color: AppTheme.deepGreen,
-                                            size: 38,
-                                          ),
-                                  ),
-                                ),
-                              ),
+                            _PrimaryPlayButton(
+                              isPlaying: isPlaying,
+                              isLoading: isLoading,
+                              hasError: hasError,
+                              compact: compact,
+                              onPressed: isCurrent
+                                  ? controller.togglePlayPause
+                                  : () => controller.play(track),
                             ),
-                            const SizedBox(width: 28),
-                            _RoundControl(
-                              icon: Icons.forward_10_rounded,
-                              tooltip: 'Forward 10 seconds',
-                              onTap: () => controller.seekRelative(
-                                const Duration(seconds: 10),
-                              ),
+                            SizedBox(
+                              height: compact
+                                  ? ReleafSpacing.md
+                                  : ReleafSpacing.xl,
                             ),
+                            _VolumeControl(
+                              volume: state.volume,
+                              onChanged: controller.setVolume,
+                            ),
+                            SizedBox(
+                              height: compact
+                                  ? ReleafSpacing.md
+                                  : ReleafSpacing.lg,
+                            ),
+                            _SleepTimer(
+                              selectedMinutes: state.sleepTimerMinutes,
+                              remainingSeconds:
+                                  state.sleepTimerRemainingSeconds,
+                              onSelected: controller.setSleepTimer,
+                            ),
+                            const SizedBox(height: ReleafSpacing.sm),
                           ],
                         ),
-                        if (hasPlaybackError) ...[
-                          const SizedBox(height: 12),
-                          TextButton.icon(
-                            onPressed: controller.togglePlayPause,
-                            icon: const Icon(Icons.refresh_rounded, size: 16),
-                            label: const Text('Retry sound'),
-                            style: TextButton.styleFrom(
-                              foregroundColor: const Color(0xFFF3CBBE),
-                            ),
-                          ),
-                        ],
-                        SizedBox(height: compact ? 16 : 24),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 8,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.05),
-                            borderRadius: BorderRadius.circular(18),
-                            border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.08),
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                state.volume <= 0
-                                    ? Icons.volume_off_rounded
-                                    : Icons.volume_down_rounded,
-                                color: Colors.white.withValues(alpha: 0.6),
-                                size: 19,
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: SliderTheme(
-                                  data: SliderThemeData(
-                                    trackHeight: 2,
-                                    activeTrackColor: AppTheme.leafGreenLight,
-                                    inactiveTrackColor: Colors.white.withValues(
-                                      alpha: 0.12,
-                                    ),
-                                    thumbColor: AppTheme.leafGreenLight,
-                                    thumbShape: const RoundSliderThumbShape(
-                                      enabledThumbRadius: 4,
-                                    ),
-                                    overlayShape:
-                                        const RoundSliderOverlayShape(
-                                          overlayRadius: 14,
-                                        ),
-                                  ),
-                                  child: Slider(
-                                    label:
-                                        'Volume ${(state.volume * 100).round()}%',
-                                    value: state.volume,
-                                    onChanged: controller.setVolume,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              ConstrainedBox(
-                                constraints: const BoxConstraints(
-                                  minWidth: 42,
-                                ),
-                                child: Text(
-                                  '${(state.volume * 100).round()}%',
-                                  textAlign: TextAlign.right,
-                                  style: TextStyle(
-                                    color: Colors.white.withValues(
-                                      alpha: 0.6,
-                                    ),
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(height: compact ? 18 : 28),
-                        Wrap(
-                          alignment: WrapAlignment.center,
-                          spacing: 12,
-                          runSpacing: 10,
-                          children: [
-                            _PillControl(
-                              icon: Icons.bedtime_outlined,
-                              label: state.sleepTimerRemainingSeconds == null
-                                  ? 'Sleep timer'
-                                  : _formatCountdown(
-                                      state.sleepTimerRemainingSeconds!,
-                                    ),
-                              active: state.sleepTimerMinutes != null,
-                              onTap: () =>
-                                  _showSleepTimerSheet(context, controller),
-                            ),
-                            _PillControl(
-                              icon: Icons.stop_rounded,
-                              label: 'Stop',
-                              onTap: () async {
-                                await controller.stop();
-                                if (!context.mounted) return;
-                                if (context.canPop()) {
-                                  context.pop();
-                                } else {
-                                  context.go(widget.fromSleep ? AppRoutes.sleep : AppRoutes.sound);
-                                }
-                              },
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 24),
-                        Text(
-                          'A softer space for your nervous system.',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.24),
-                            fontSize: 11,
-                            height: 1.6,
-                            letterSpacing: 0.1,
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
-                  ),
-                ),
-              );
-            },
-          ),
+                  );
+                },
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Future<void> _showSleepTimerSheet(
-    BuildContext context,
-    SoundPlayerController controller,
-  ) async {
-    final selected = await showModalBottomSheet<int>(
-      context: context,
-      backgroundColor: const Color(0xFFF6F1E5),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-      ),
-      builder: (context) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(22, 12, 22, 24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 34,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: AppTheme.deepGreen.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(99),
-                ),
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                'Let the sound fade into rest',
-                style: TextStyle(
-                  color: AppTheme.deepGreen,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: -0.5,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Choose when your sound space should become quiet.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: AppTheme.deepGreen.withValues(alpha: 0.55),
-                  fontSize: 13,
-                  height: 1.45,
-                ),
-              ),
-              const SizedBox(height: 22),
-              Wrap(
-                spacing: 10,
-                runSpacing: 10,
-                alignment: WrapAlignment.center,
-                children: [
-                  for (final minutes in [15, 30, 45, 60, 90])
-                    ActionChip(
-                      label: Text('$minutes min'),
-                      onPressed: () => Navigator.of(context).pop(minutes),
-                    ),
-                  ActionChip(
-                    label: const Text('No timer'),
-                    onPressed: () => Navigator.of(context).pop(0),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-
-    if (selected == null) return;
-    await controller.setSleepTimer(selected == 0 ? null : selected);
-  }
-
-  static String _formatDuration(Duration duration) {
-    final minutes = duration.inMinutes.toString();
-    final seconds = (duration.inSeconds % 60).toString().padLeft(2, '0');
-    return '$minutes:$seconds';
-  }
-
-  static String _formatCountdown(int totalSeconds) {
-    final minutes = totalSeconds ~/ 60;
-    final seconds = (totalSeconds % 60).toString().padLeft(2, '0');
-    return '$minutes:$seconds left';
+  double _progress(Duration position, Duration duration) {
+    if (duration.inMilliseconds <= 0) return 0;
+    return (position.inMilliseconds / duration.inMilliseconds)
+        .clamp(0.0, 1.0)
+        .toDouble();
   }
 }
 
-class SoundOrb extends StatefulWidget {
-  const SoundOrb({
-    super.key,
-    required this.size,
+class _PlayerBackdrop extends StatelessWidget {
+  const _PlayerBackdrop();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Stack(
+      fit: StackFit.expand,
+      children: [
+        ReleafSoundArtwork(
+          variant: ReleafSoundArtworkVariant.field,
+          intensity: 0.80,
+        ),
+        DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color(0xB8061014),
+                Color(0xE5070E12),
+                ReleafColors.background,
+              ],
+              stops: [0, 0.52, 1],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _SoundArtworkDisc extends StatefulWidget {
+  const _SoundArtworkDisc({
     required this.isPlaying,
-    required this.seed,
-    this.sleepMode = false,
+    this.statusLabel,
+    required this.progress,
+    required this.variant,
+    required this.reducedMotion,
   });
 
-  final double size;
   final bool isPlaying;
-  final int seed;
-  final bool sleepMode;
+  final String? statusLabel;
+  final double progress;
+  final ReleafSoundArtworkVariant variant;
+  final bool reducedMotion;
 
   @override
-  State<SoundOrb> createState() => _SoundOrbState();
+  State<_SoundArtworkDisc> createState() => _SoundArtworkDiscState();
 }
 
-class _SoundOrbState extends State<SoundOrb>
+class _SoundArtworkDiscState extends State<_SoundArtworkDisc>
     with SingleTickerProviderStateMixin {
-  late final AnimationController _animation = AnimationController(
-    vsync: this,
-    duration: const Duration(seconds: 11),
-  )..repeat();
+  late final AnimationController _controller;
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _syncAnimation();
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 6),
+    );
+    _sync();
   }
 
   @override
-  void didUpdateWidget(covariant SoundOrb oldWidget) {
+  void didUpdateWidget(covariant _SoundArtworkDisc oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.isPlaying != widget.isPlaying) {
-      _syncAnimation();
+    if (oldWidget.isPlaying != widget.isPlaying ||
+        oldWidget.reducedMotion != widget.reducedMotion) {
+      _sync();
     }
   }
 
-  void _syncAnimation() {
-    final reduceMotion =
-        MediaQuery.maybeOf(context)?.disableAnimations ?? false;
-    if (widget.isPlaying && !reduceMotion) {
-      _animation.repeat();
-    } else {
-      _animation.stop();
+  void _sync() {
+    if (widget.reducedMotion || !widget.isPlaying) {
+      _controller
+        ..stop()
+        ..value = 0.28;
+      return;
+    }
+    if (!_controller.isAnimating) {
+      _controller.repeat();
     }
   }
 
   @override
   void dispose() {
-    _animation.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: widget.size,
-      height: widget.size,
+    final progress = widget.progress.clamp(0.0, 1.0).toDouble();
+
+    return Semantics(
+      container: true,
+      label:
+          widget.statusLabel ??
+          (widget.isPlaying
+              ? 'Ambient sound is playing.'
+              : 'Ambient sound is paused.'),
       child: AnimatedBuilder(
-        animation: _animation,
-        builder: (context, _) {
+        animation: _controller,
+        builder: (context, child) {
+          final pulse = widget.isPlaying && !widget.reducedMotion
+              ? (math.sin(_controller.value * math.pi * 2) + 1) / 2
+              : 0.28;
+
           return CustomPaint(
-            painter: _SoundOrbPainter(
-              phase: _animation.value,
-              active: widget.isPlaying,
-              seed: widget.seed,
-              sleepMode: widget.sleepMode,
+            key: const Key('sound-immersive-visual'),
+            painter: _SoundPulsePainter(
+              t: _controller.value,
+              active: widget.isPlaying && !widget.reducedMotion,
+            ),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: ReleafFeatureAccents.sound.withValues(
+                          alpha: 0.10 + pulse * 0.11,
+                        ),
+                        blurRadius: 38 + pulse * 24,
+                        spreadRadius: 2,
+                      ),
+                    ],
+                  ),
+                ),
+                ClipOval(
+                  child: ReleafSoundArtwork(
+                    variant: widget.variant,
+                    intensity: 0.92,
+                  ),
+                ),
+                const ClipOval(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: RadialGradient(
+                        center: Alignment(-0.20, -0.25),
+                        radius: 0.95,
+                        colors: [
+                          Color(0x12000000),
+                          Color(0x32000000),
+                          Color(0x8C000000),
+                        ],
+                        stops: [0, 0.62, 1],
+                      ),
+                    ),
+                  ),
+                ),
+                CircularProgressIndicator(
+                  value: progress,
+                  strokeWidth: 2.5,
+                  backgroundColor: ReleafColors.borderSoft.withValues(
+                    alpha: 0.42,
+                  ),
+                  valueColor: const AlwaysStoppedAnimation(
+                    ReleafFeatureAccents.sound,
+                  ),
+                ),
+                Center(
+                  child: AnimatedScale(
+                    scale: 0.98 + pulse * 0.035,
+                    duration: widget.reducedMotion
+                        ? Duration.zero
+                        : ReleafMotion.standard,
+                    child: FractionallySizedBox(
+                      widthFactor: 0.32,
+                      heightFactor: 0.32,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: ReleafColors.background.withValues(
+                            alpha: 0.62,
+                          ),
+                          border: Border.all(
+                            color: ReleafColors.textPrimary.withValues(
+                              alpha: 0.16,
+                            ),
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: ReleafFeatureAccents.sound.withValues(
+                                alpha: 0.08 + pulse * 0.08,
+                              ),
+                              blurRadius: 22,
+                            ),
+                          ],
+                        ),
+                        child: Icon(
+                          widget.isPlaying
+                              ? Icons.graphic_eq_rounded
+                              : Icons.music_note_rounded,
+                          size: 34,
+                          color: ReleafColors.textPrimary.withValues(
+                            alpha: 0.86,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           );
         },
@@ -704,187 +571,273 @@ class _SoundOrbState extends State<SoundOrb>
   }
 }
 
-class _SoundOrbPainter extends CustomPainter {
-  const _SoundOrbPainter({
-    required this.phase,
-    required this.active,
-    required this.seed,
-    required this.sleepMode,
-  });
+class _SoundPulsePainter extends CustomPainter {
+  const _SoundPulsePainter({required this.t, required this.active});
 
-  final double phase;
+  final double t;
   final bool active;
-  final int seed;
-  final bool sleepMode;
 
   @override
   void paint(Canvas canvas, Size size) {
+    if (size.isEmpty) return;
+
     final center = Offset(size.width / 2, size.height / 2);
-    final radius = size.width * 0.34;
-    final time = phase * math.pi * 2;
-    final seedShift = (seed.abs() % 100) / 100;
-    final breathing = active ? math.sin(time) * 0.018 : 0.0;
-    final outer = radius * (1.12 + breathing);
+    final maxRadius = size.shortestSide * 0.47;
 
-    canvas.drawCircle(
-      center,
-      outer * 1.24,
-      Paint()
-        ..shader = RadialGradient(
-          colors: [
-            const Color(0xFFB7CCA4).withValues(alpha: 0.13),
-            const Color(0xFFB7CCA4).withValues(alpha: 0),
-          ],
-        ).createShader(
-          Rect.fromCircle(center: center, radius: outer * 1.24),
-        ),
-    );
+    for (var index = 0; index < 3; index++) {
+      final phase = active ? (t + index * 0.29) % 1.0 : index * 0.24 + 0.18;
+      final radius = maxRadius * (0.68 + phase * 0.28);
+      final alpha = active ? (1 - phase) * 0.18 : 0.06;
 
-    for (var ring = 0; ring < 4; ring++) {
-      final path = Path();
-      final baseRadius = radius * (0.76 + ring * 0.125);
-      for (var degree = 0; degree <= 360; degree += 3) {
-        final angle = degree * math.pi / 180;
-        final wave =
-            math.sin(angle * (3 + ring) + time + seedShift * 5) * 0.018 +
-            math.cos(angle * 5 - time * 0.8 + ring) * 0.012;
-        final currentRadius =
-            baseRadius * (1 + wave + breathing * (ring + 1));
-        final point = center +
-            Offset(
-              math.cos(angle) * currentRadius,
-              math.sin(angle) * currentRadius,
-            );
-        if (degree == 0) {
-          path.moveTo(point.dx, point.dy);
-        } else {
-          path.lineTo(point.dx, point.dy);
-        }
-      }
-      path.close();
-      canvas.drawPath(
-        path,
+      canvas.drawCircle(
+        center,
+        radius,
         Paint()
           ..style = PaintingStyle.stroke
-          ..strokeWidth = ring == 0 ? 1.2 : 0.75
-          ..color = Color.lerp(
-            const Color(0xFFF4F1D7),
-            const Color(0xFFAACB97),
-            ring / 4,
-          )!.withValues(alpha: 0.55 - ring * 0.09),
-      );
-    }
-
-    for (var line = 0; line < 9; line++) {
-      final lineY = center.dy - radius * 0.43 + line * radius * 0.107;
-      final distance = (lineY - center.dy).abs() / radius;
-      final halfWidth = math.sqrt(1 - distance * distance) * radius * 0.6;
-      final path = Path();
-      for (var step = 0; step <= 40; step++) {
-        final fraction = step / 40;
-        final x = center.dx - halfWidth + fraction * halfWidth * 2;
-        final amp = (active ? 4.0 : 2.0) *
-            math.sin(fraction * math.pi) *
-            (1 - distance * 0.35);
-        final y = lineY +
-            math.sin(fraction * math.pi * 3 + time + line * 0.7) * amp;
-        if (step == 0) {
-          path.moveTo(x, y);
-        } else {
-          path.lineTo(x, y);
-        }
-      }
-      canvas.drawPath(
-        path,
-        Paint()
-          ..color = Colors.white.withValues(alpha: 0.2)
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 0.7,
+          ..strokeWidth = 1.2
+          ..color = ReleafFeatureAccents.sound.withValues(alpha: alpha),
       );
     }
   }
 
   @override
-  bool shouldRepaint(covariant _SoundOrbPainter oldDelegate) {
-    return oldDelegate.phase != phase ||
-        oldDelegate.active != active ||
-        oldDelegate.seed != seed ||
-        oldDelegate.sleepMode != sleepMode;
+  bool shouldRepaint(covariant _SoundPulsePainter oldDelegate) {
+    return oldDelegate.t != t || oldDelegate.active != active;
   }
 }
 
-class _RoundControl extends StatelessWidget {
-  const _RoundControl({
-    required this.icon,
-    required this.tooltip,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String tooltip;
-  final VoidCallback onTap;
+class _ContinuousLoopStatus extends StatelessWidget {
+  const _ContinuousLoopStatus();
 
   @override
   Widget build(BuildContext context) {
-    return IconButton(
-      tooltip: tooltip,
-      onPressed: onTap,
-      icon: Icon(icon, size: 31),
-      color: Colors.white.withValues(alpha: 0.75),
-    );
-  }
-}
-
-class _PillControl extends StatelessWidget {
-  const _PillControl({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-    this.active = false,
-  });
-
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-  final bool active;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: active
-          ? AppTheme.leafGreenLight.withValues(alpha: 0.13)
-          : Colors.white.withValues(alpha: 0.06),
-      borderRadius: BorderRadius.circular(999),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(999),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                icon,
-                size: 17,
-                color: active
-                    ? AppTheme.leafGreenLight
-                    : Colors.white.withValues(alpha: 0.55),
+    return Container(
+      key: const Key('sound-continuous-loop'),
+      padding: const EdgeInsets.symmetric(
+        horizontal: ReleafSpacing.md,
+        vertical: 10,
+      ),
+      decoration: BoxDecoration(
+        color: ReleafColors.surfaceSoft.withValues(alpha: 0.54),
+        borderRadius: BorderRadius.circular(ReleafRadii.pill),
+        border: Border.all(color: ReleafColors.borderSoft),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(
+            Icons.all_inclusive_rounded,
+            size: 17,
+            color: ReleafFeatureAccents.sound,
+          ),
+          const SizedBox(width: 7),
+          Flexible(
+            child: Text(
+              'Continuous loop',
+              textAlign: TextAlign.center,
+              style: ReleafTypography.meta.copyWith(
+                color: ReleafColors.textSecondary,
+                fontWeight: FontWeight.w600,
               ),
-              const SizedBox(width: 7),
-              Text(
-                label,
-                style: TextStyle(
-                  color: active
-                      ? AppTheme.leafGreenLight
-                      : Colors.white.withValues(alpha: 0.62),
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PrimaryPlayButton extends StatelessWidget {
+  const _PrimaryPlayButton({
+    required this.isPlaying,
+    required this.isLoading,
+    required this.hasError,
+    required this.onPressed,
+    this.compact = false,
+  });
+
+  final bool isPlaying;
+  final bool isLoading;
+  final bool hasError;
+  final VoidCallback onPressed;
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      key: const Key('sound-primary-play'),
+      button: true,
+      label: isLoading
+          ? 'Cancel loading'
+          : hasError
+          ? 'Retry sound'
+          : isPlaying
+          ? 'Pause sound'
+          : 'Play sound',
+      child: InkResponse(
+        onTap: onPressed,
+        radius: 42,
+        child: Container(
+          width: compact ? 66 : 76,
+          height: compact ? 66 : 76,
+          decoration: const BoxDecoration(
+            shape: BoxShape.circle,
+            color: ReleafFeatureAccents.sound,
+            boxShadow: [
+              BoxShadow(
+                color: Color(0x334B95A2),
+                blurRadius: 26,
+                spreadRadius: 2,
               ),
             ],
+          ),
+          alignment: Alignment.center,
+          child: Icon(
+            isLoading
+                ? Icons.close_rounded
+                : hasError
+                ? Icons.refresh_rounded
+                : isPlaying
+                ? Icons.pause_rounded
+                : Icons.play_arrow_rounded,
+            size: compact ? 33 : 38,
+            color: ReleafColors.background,
           ),
         ),
       ),
     );
   }
+}
+
+class _VolumeControl extends StatelessWidget {
+  const _VolumeControl({required this.volume, required this.onChanged});
+
+  final double volume;
+  final ValueChanged<double> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        const Icon(
+          Icons.volume_down_rounded,
+          size: 20,
+          color: ReleafColors.textSecondary,
+        ),
+        Expanded(
+          child: Slider(value: volume, onChanged: onChanged),
+        ),
+        const Icon(
+          Icons.volume_up_rounded,
+          size: 20,
+          color: ReleafColors.textSecondary,
+        ),
+      ],
+    );
+  }
+}
+
+class _SleepTimer extends StatelessWidget {
+  const _SleepTimer({
+    required this.selectedMinutes,
+    required this.remainingSeconds,
+    required this.onSelected,
+  });
+
+  final int? selectedMinutes;
+  final int? remainingSeconds;
+  final ValueChanged<int?> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(
+          'SLEEP TIMER',
+          style: ReleafTypography.eyebrow.copyWith(
+            color: ReleafColors.textSecondary,
+          ),
+        ),
+        const SizedBox(height: 5),
+        Text(
+          remainingSeconds == null
+              ? 'Sound will keep playing until you stop it.'
+              : remainingSeconds! <= soundSleepTimerFadeSeconds
+              ? 'Fading out · ${_formatTimerCountdown(remainingSeconds!)}'
+              : 'Stops in ${_formatTimerCountdown(remainingSeconds!)}',
+          key: const Key('sound-sleep-timer-status'),
+          style: ReleafTypography.meta.copyWith(
+            color: remainingSeconds == null
+                ? ReleafColors.textMuted
+                : ReleafColors.textPrimary,
+            fontWeight: remainingSeconds == null
+                ? FontWeight.w500
+                : FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: ReleafSpacing.sm),
+        Wrap(
+          alignment: WrapAlignment.center,
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            _TimerChip(
+              label: 'Off',
+              selected: selectedMinutes == null,
+              onTap: () => onSelected(null),
+            ),
+            for (final minutes in const [15, 30, 45, 60, 90])
+              _TimerChip(
+                label: '$minutes min',
+                selected: selectedMinutes == minutes,
+                onTap: () => onSelected(minutes),
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _TimerChip extends StatelessWidget {
+  const _TimerChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return ChoiceChip(
+      selected: selected,
+      label: Text(label),
+      onSelected: (_) => onTap(),
+      selectedColor: ReleafFeatureAccents.sound.withValues(alpha: 0.20),
+      backgroundColor: ReleafColors.surfaceSoft,
+      side: BorderSide(
+        color: selected ? ReleafFeatureAccents.sound : ReleafColors.borderSoft,
+      ),
+      labelStyle: ReleafTypography.meta.copyWith(
+        color: selected ? ReleafColors.textPrimary : ReleafColors.textSecondary,
+        fontWeight: FontWeight.w600,
+      ),
+    );
+  }
+}
+
+String _formatTimerCountdown(int totalSeconds) {
+  final safe = totalSeconds.clamp(0, 24 * 60 * 60);
+  final minutes = safe ~/ 60;
+  final seconds = safe % 60;
+  return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+}
+
+ReleafSoundArtworkVariant _artworkForTrack(String id) {
+  return id.endsWith('02')
+      ? ReleafSoundArtworkVariant.atmosphereTwo
+      : ReleafSoundArtworkVariant.atmosphereOne;
 }
