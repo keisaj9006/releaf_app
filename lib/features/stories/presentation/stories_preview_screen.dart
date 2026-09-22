@@ -118,6 +118,13 @@ class _StoryPreviewCard extends StatelessWidget {
                   .map((label) => _StoryLabel(label: label))
                   .toList(growable: false),
             ),
+            const SizedBox(height: ReleafSpacing.xs),
+            Text(
+              'About ${story.estimatedDuration.inMinutes} min',
+              style: ReleafTypography.meta.copyWith(
+                color: ReleafColors.textSecondary,
+              ),
+            ),
             const SizedBox(height: ReleafSpacing.sm),
             Text(story.title, style: ReleafTypography.cardTitle),
             const SizedBox(height: ReleafSpacing.xs),
