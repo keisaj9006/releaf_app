@@ -26,6 +26,7 @@ class _Player implements AudioPlayer {
   Duration? length = const Duration(seconds: 100);
   Duration cursor = Duration.zero;
   double rate = 1;
+  @override
   double volume = 1;
   bool playing = false;
 
