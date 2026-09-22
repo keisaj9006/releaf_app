@@ -52,6 +52,7 @@ void main() {
     expect(find.text('TRUE STORY'), findsNWidgets(2));
     expect(find.text('WORLD WAR II'), findsNWidgets(2));
     expect(find.text('NON-GRAPHIC'), findsNWidgets(2));
+    expect(find.text('About 28 min'), findsNWidgets(2));
     expect(find.widgetWithText(FilledButton, 'Play'), findsNothing);
     expect(tester.takeException(), isNull);
   });
