@@ -6,6 +6,7 @@ class AppRoutes {
   static const sound = '/sound';
   static const meditate = '/meditate';
   static const sleep = '/sleep';
+  static const storiesPreview = '/sleep/stories-preview';
   static const brain = '/brain';
   static const dailyLoop = '/daily-loop';
   static const account = '/account';
