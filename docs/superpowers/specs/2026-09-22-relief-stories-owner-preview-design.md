@@ -156,6 +156,7 @@ Required preview capabilities:
 ### Playback speed
 
 Initial supported rates:
+- 0.65x
 - 0.75x
 - 0.85x
 - 0.90x
