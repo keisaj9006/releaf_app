@@ -33,7 +33,10 @@ CustomTransitionPage<void> _fadePage(Widget child) {
   );
 }
 
-GoRouter createAppRouter({String initialLocation = AppRoutes.home}) => GoRouter(
+GoRouter createAppRouter({
+  String initialLocation = AppRoutes.home,
+  bool storiesPreviewEnabled = StoryPreviewConfig.enabled,
+}) => GoRouter(
   initialLocation: initialLocation,
   errorPageBuilder: (context, state) {
     return _fadePage(
@@ -81,7 +84,9 @@ GoRouter createAppRouter({String initialLocation = AppRoutes.home}) => GoRouter(
           routes: [
             GoRoute(
               path: AppRoutes.sleep,
-              pageBuilder: (context, state) => _fadePage(const SleepScreen()),
+              pageBuilder: (context, state) => _fadePage(
+                SleepScreen(storiesPreviewEnabled: storiesPreviewEnabled),
+              ),
             ),
             GoRoute(
               path: AppRoutes.sound,
@@ -103,7 +108,7 @@ GoRouter createAppRouter({String initialLocation = AppRoutes.home}) => GoRouter(
     GoRoute(
       path: AppRoutes.storiesPreview,
       redirect: (context, state) => StoryPreviewConfig.redirectWhenDisabled(
-        enabled: StoryPreviewConfig.enabled,
+        enabled: storiesPreviewEnabled,
         sleepRoute: AppRoutes.sleep,
       ),
       pageBuilder: (context, state) =>
