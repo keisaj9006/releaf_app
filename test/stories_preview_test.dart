@@ -28,6 +28,7 @@ void main() {
   ) async {
     await _pumpStories(tester);
 
+    expect(find.byKey(const Key('stories-preview-back')), findsOneWidget);
     expect(find.text('OWNER PREVIEW'), findsOneWidget);
     expect(find.text('Stories Preview'), findsOneWidget);
     expect(find.text('TRUE STORIES OF COURAGE'), findsOneWidget);
