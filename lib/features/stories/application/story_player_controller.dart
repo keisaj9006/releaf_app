@@ -70,6 +70,7 @@ class StoryPlayerController extends StateNotifier<StoryPlayerState> {
     if (_closed) return Future<void>.value();
     final checkpoint = flushProgress();
     final previous = state;
+    final previousPosition = _confirmedPosition;
     final request = ++_request;
     _interruptedRequest = null;
     _seekRequest++;
@@ -94,6 +95,10 @@ class StoryPlayerController extends StateNotifier<StoryPlayerState> {
       final halted = await halting;
       if (!_current(request)) return;
       if (!halted.stopped) {
+        // The old source could still be audible. Restore its checkpoint as
+        // well as its UI; never save the new source's zero against the old ID.
+        _confirmedPosition = previousPosition;
+        _wantPlaying = previous.isPlaying;
         state = previous.copyWith(
           isLoading: false,
           errorMessage: 'Playback could not be stopped. Please try again.',
@@ -358,7 +363,12 @@ class StoryPlayerController extends StateNotifier<StoryPlayerState> {
     const mode = ReleafAudioMode.guidedMeditation;
     if (event.begin) {
       if (!releafShouldPauseForInterruption(mode, event.type)) return;
-      if (!state.isPlaying && !state.isLoading) return;
+      if (!state.isPlaying && !state.isLoading) {
+        // A new interruption while paused invalidates the older event's
+        // resume permission; its end must not restart audio unexpectedly.
+        _interruptedRequest = null;
+        return;
+      }
       final pausing = pause();
       _interruptionPause = pausing;
       _interruptedRequest = releafShouldAutoResumeAfterInterruption(mode, event.type)
@@ -404,7 +414,15 @@ class StoryPlayerController extends StateNotifier<StoryPlayerState> {
   void _onNativeState(PlayerState native) {
     if (_closed || !_ready || state.isLoading) return;
     if (native == PlayerState.completed) {
-      if (_seeking) return;
+      if (_seeking) {
+        // Seeking to EOF can synchronously end native playback. Reflect the
+        // stop now, but let the seek operation save its target without falsely
+        // awarding a listening completion.
+        _wantPlaying = false;
+        _cancelTimer();
+        state = state.copyWith(isPlaying: false);
+        return;
+      }
       _wantPlaying = false;
       _confirmedPosition = state.duration;
       _cancelTimer();

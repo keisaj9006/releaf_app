@@ -63,14 +63,25 @@ class AudioplayersStoryPlaybackDriver implements StoryPlaybackDriver {
       if (!StoryPlaybackPolicy.hasDeliveryMetadata(story)) {
         throw StateError('No versioned narration delivery is available');
       }
-      final measured = Completer<Duration>();
+      final measured = Completer<Duration?>();
       var loadingSource = false;
-      final subscription = _player.onDurationChanged.listen((duration) {
-        if (loadingSource && _current(request) && duration > Duration.zero &&
-            !measured.isCompleted) {
-          measured.complete(duration);
-        }
-      });
+      var measurementFailed = false;
+      final subscription = _player.onDurationChanged.listen(
+        (duration) {
+          if (loadingSource && _current(request) && duration > Duration.zero &&
+              !measured.isCompleted) {
+            measured.complete(duration);
+          }
+        },
+        onError: (Object error, StackTrace stack) {
+          if (loadingSource && _current(request)) {
+            measurementFailed = true;
+            // Resolve without completeError: the duration wait may not yet be
+            // attached while setSource is emitting synchronously.
+            if (!measured.isCompleted) measured.complete(null);
+          }
+        },
+      );
       try {
         await _player.stop();
         if (!_current(request)) return null;
@@ -83,6 +94,7 @@ class AudioplayersStoryPlaybackDriver implements StoryPlaybackDriver {
         loadingSource = true;
         await _player.setSource(AssetSource(story.audioAssetPath!));
         if (!_current(request)) return null;
+        if (measurementFailed) throw StateError('Narration duration event failed');
         var duration = await _player.getDuration();
         if (!_current(request)) return null;
         if (duration == null || duration <= Duration.zero) {
@@ -92,7 +104,7 @@ class AudioplayersStoryPlaybackDriver implements StoryPlaybackDriver {
           ]).timeout(const Duration(seconds: 10), onTimeout: () => null);
         }
         if (!_current(request)) return null;
-        if (duration == null || duration <= Duration.zero) {
+        if (measurementFailed || duration == null || duration <= Duration.zero) {
           throw StateError('Measured narration duration unavailable');
         }
         _duration = duration;
