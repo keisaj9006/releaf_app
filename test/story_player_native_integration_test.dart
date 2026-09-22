@@ -36,6 +36,7 @@ class _Native implements AudioPlayer {
   final durations = StreamController<Duration>.broadcast(sync: true);
   bool failHalt = false;
   bool failDurationStream = false;
+  bool completeOnSeekToEnd = false;
   bool playing = false;
   int sourceLoads = 0;
   Duration cursor = Duration.zero;
@@ -77,6 +78,10 @@ class _Native implements AudioPlayer {
   Future<void> seek(Duration value) async {
     cursor = value;
     positions.add(value);
+    if (completeOnSeekToEnd && value >= const Duration(seconds: 100)) {
+      playing = false;
+      states.add(PlayerState.completed);
+    }
   }
   @override
   Future<void> setSource(Source value) async {
@@ -165,6 +170,19 @@ void main() {
     expect(native.playing, isFalse);
     native.failDurationStream = false;
     await controller.resume();
+    expect(controller.state.isPlaying, isTrue);
+  });
+
+  test('dragging to the end stops the playing indicator without inventing completion', () async {
+    await controller.playStory(_story('first'));
+    native.completeOnSeekToEnd = true;
+    await controller.seekTo(const Duration(seconds: 100));
+    expect(native.playing, isFalse);
+    expect(controller.state.isPlaying, isFalse);
+    expect(controller.state.position, const Duration(seconds: 100));
+    expect(store.readProgress(_story('first'), duration: const Duration(seconds: 100)).completed, isFalse);
+    await controller.resume();
+    expect(native.cursor, Duration.zero);
     expect(controller.state.isPlaying, isTrue);
   });
 }
