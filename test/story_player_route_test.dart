@@ -57,7 +57,7 @@ void main() {
   ) async {
     await _pumpStoriesRoute(tester, previewEnabled: false);
 
-    expect(find.text('Sleep'), findsOneWidget);
+    expect(find.byKey(const Key('sleep-featured-sound')), findsOneWidget);
     expect(find.text('Stories Preview'), findsNothing);
     expect(tester.takeException(), isNull);
   });
