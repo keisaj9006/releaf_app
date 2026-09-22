@@ -36,7 +36,7 @@ class _Native implements AudioPlayer {
   int loads = 0;
   int audibleStarts = 0;
   double rate = 1;
-  ReleaseMode? release;
+  ReleaseMode? releaseModeSeen;
   Duration cursor = Duration.zero;
   void Function()? checkAudibility;
   @override
@@ -93,7 +93,7 @@ class _Native implements AudioPlayer {
   @override
   Future<void> setPlaybackRate(double value) async { rate = value; }
   @override
-  Future<void> setReleaseMode(ReleaseMode value) async { release = value; }
+  Future<void> setReleaseMode(ReleaseMode value) async { releaseModeSeen = value; }
   @override
   Future<void> seek(Duration value) async { cursor = value; positions.add(value); }
   @override
@@ -158,14 +158,14 @@ void main() {
     await handler.sound.playById('soft-rain');
     expect(story.playing, isFalse);
     expect(sound.playing, isTrue);
-    expect(sound.release, ReleaseMode.loop);
+    expect(sound.releaseModeSeen, ReleaseMode.loop);
     expect(sound.rate, 1.0);
     expect(handler.owner, ReliefMediaOwner.sound);
     expect(store.readProgress(_story(), duration: const Duration(seconds: 100)).position, const Duration(seconds: 37));
     await handler.stories.resume();
     expect(story.cursor, const Duration(seconds: 37));
     expect(story.rate, 1.2);
-    expect(story.release, ReleaseMode.stop);
+    expect(story.releaseModeSeen, ReleaseMode.stop);
     expect(overlapped, isFalse);
   });
 
@@ -206,7 +206,6 @@ void main() {
     final loading = handler.sound.playById('deep-drift');
     await sound.sourceStarted.future;
     final replacement = handler.stories.playStory(_story());
-    // Allow the Story controller to reach the ownership handoff.
     await Future<void>.delayed(Duration.zero);
     gate.complete();
     await Future.wait([loading, replacement]);
@@ -219,7 +218,7 @@ void main() {
     await handler.stories.playStory(_story());
     final gate = story.stopGate = Completer<void>();
     final replacing = handler.sound.playById('deep-drift');
-    await story.stopStarted.future;
+    await story.stopStarted.future.timeout(const Duration(seconds: 2));
     final stopping = handler.stop();
     gate.complete();
     await Future.wait([replacing, stopping]);
