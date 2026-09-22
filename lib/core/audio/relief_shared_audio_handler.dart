@@ -41,7 +41,7 @@ class ReliefSharedAudioHandler extends BaseAudioHandler {
     DateTime Function()? now,
   }) : _soundDriver = soundDriver,
        _storyDriver = storyDriver {
-    sound = ReliefManagedSoundController(
+    sound = ReliefManagedSoundController._(
       preferences: preferences,
       driver: soundDriver,
       now: now,
@@ -304,14 +304,14 @@ class ReliefSharedAudioHandler extends BaseAudioHandler {
 /// The existing Sound controller still owns Sound's loops, volume, timers and
 /// cancellation. This boundary only reserves shared ownership before entry.
 class ReliefManagedSoundController extends SoundPlayerController {
-  ReliefManagedSoundController({
+  ReliefManagedSoundController._({
     required SharedPreferences preferences,
     required SoundPlaybackDriver driver,
     required _MediaClaim Function() reserve,
     required Future<void> Function() configureSession,
-    DateTime Function()? now,
+    super.now,
   }) : _reserve = reserve, _configureSession = configureSession,
-       super(const SoundCatalog(), preferences, driver: driver, now: now);
+       super(const SoundCatalog(), preferences, driver: driver);
 
   final _MediaClaim Function() _reserve;
   final Future<void> Function() _configureSession;
@@ -384,12 +384,12 @@ class ReliefManagedSoundController extends SoundPlayerController {
 
 class ReliefManagedStoryController extends StoryPlayerController {
   ReliefManagedStoryController({
-    required StoryPlaybackStore store,
+    required super.store,
     required super.driver,
     required void Function() reserve,
     required super.beforePlayback,
     super.now,
-  }) : _store = store, _reserve = reserve, super(store: store);
+  }) : _store = store, _reserve = reserve;
 
   final StoryPlaybackStore _store;
   final void Function() _reserve;
