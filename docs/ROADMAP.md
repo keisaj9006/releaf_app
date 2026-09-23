@@ -242,7 +242,8 @@ Work from `docs/release/releaf_1_0_release_gate.md`.
 ### Sleep/Sound
 - asset QA for every bundled track,
 - verify seamless looping, timers, interruption/background behavior and metadata,
-- keep Sleep narration-free,
+- keep Nature and Sleep Music narration-free; use only approved narration for
+  Stories and guided Sleep Meditations,
 - do not add unlicensed/fake assets,
 - treat a full multi-layer mixer as a deliberate scope item, not hidden P0.
 
@@ -319,5 +320,12 @@ Avoid building large speculative systems before retention data supports them.
 Resumed milestone: [Reset audio handoff](release/2026-09-12-reset-audio-handoff.md) cancels pending Sound on entry/return. Subsequent ambience cancellation is complete.
 
 Reset ambience cancellation milestone passed 453 tests, clean analysis and Android build. Subsequent Memory Mirror 50-level progression is complete; bounded Sleep/Sound recheck found no additional demonstrable defect.
+
+The 23 September owner rebaseline elevates Sleep into four frozen categories:
+Stories, Nature, Meditations and Sleep Music. The recovery audit found no prior
+Story subsystem. The first implementation task is the canonical Sleep registry;
+then persistent long-form progress, finite playback on the existing AudioService
+boundary, Story player/discovery UI and production-asset intake follow. See
+`docs/superpowers/plans/2026-09-23-sleep-content-and-playback.md`.
 
 Memory 50-level milestone implemented and verified: 462 full tests, clean analysis and Android APK. The subsequently identified subscription identity race is fixed; 467 full tests, clean analysis and Android build passed. Local web release build and all six resource assertions also passed; see release/2026-09-12-programme-verification.md. Owner/content and production-equivalent device/store gates remain open.

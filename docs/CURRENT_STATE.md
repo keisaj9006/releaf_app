@@ -399,6 +399,14 @@ The canonical release gate says the meditation player is engineering-done/conten
 
 ## Sound / Sleep
 
+The 23 September recovery audit is recorded in
+[`release/2026-09-23-sleep-stories-recovery-audit.md`](release/2026-09-23-sleep-stories-recovery-audit.md).
+It confirmed that no hidden Sleep Stories implementation or Story player exists.
+The first foundation batch adds a Sleep-owned taxonomy/registry referencing the
+existing Sound and Meditation catalogs, the five approved Story collections,
+chapter metadata capability and an honest asset-pending entry for `ST-DC-004`.
+No Story audio, artwork, duration or Premium assignment has been fabricated.
+
 Current bundled canonical sound catalog contains 10 real tracks:
 
 - Releaf Atmosphere I — free
@@ -421,7 +429,11 @@ Timer expiry cannot override a newer transport choice or leave the next Play
 muted. Full player and mini-player now show loading/cancel and failure/retry;
 system interruption recovery preserves later user and notification decisions.
 
-Sleep must not contain narration.
+Nature and Sleep Music must not contain narration. Stories and guided Sleep
+Meditations may use approved narration; missing production recordings remain
+unavailable rather than falling back to another voice. The current visible
+Sleep screen is still the earlier sound-first implementation until the new
+registry-driven discovery/player milestones are complete.
 
 The user previously reported timer/seek/audio UX defects during development; later project work reported the ±10-second seek fix and the current release gate marks player/timer behavior as tested. Treat those earlier bug reports as historical unless reproduced.
 

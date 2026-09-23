@@ -1024,7 +1024,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Sleep remains voice-free regardless of entitlement', (
+  testWidgets('current Sleep sound experience remains voice-free', (
     WidgetTester tester,
   ) async {
     await _pumpRoute(

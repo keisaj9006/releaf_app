@@ -4,7 +4,7 @@
 
 Voice selection is complete. The owner-selected female voice is the locked Releaf Guide baseline; canonical delivery speed is **0.82x**.
 
-This document remains as the QA reference for future regenerations or a future voice recast. Releaf Guide applies to Meditate, guided Reset content, and Emergency guidance where enabled. **Sleep remains voice-free.**
+This document remains as the QA reference for future regenerations or a future voice recast. Releaf Guide applies to Meditate, guided Reset content, and Emergency guidance where enabled. **Nature and Sleep Music remain voice-free. Sleep Stories use their approved Story narrator, and guided Sleep Meditations use their approved guidance voice.**
 
 ## Core audition prompt
 

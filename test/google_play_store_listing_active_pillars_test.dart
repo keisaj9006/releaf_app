@@ -14,7 +14,7 @@ void main() {
   test('Google Play listing promotes only active Releaf 1.0 pillars', () {
     final source = File(
       'docs/release/google_play_store_listing.md',
-    ).readAsStringSync();
+    ).readAsStringSync().replaceAll('\r\n', '\n');
     final shortDescription = _between(
       source,
       '<!-- SHORT_DESCRIPTION_START -->',
@@ -36,7 +36,10 @@ void main() {
     expect(fullDescription, contains('\nSleep\n'));
     expect(fullDescription, contains('\nEmergency Calm\n'));
     expect(fullDescription, isNot(contains('\nMeditate\n')));
-    expect(fullDescription.toLowerCase(), isNot(contains('meditation sessions')));
+    expect(
+      fullDescription.toLowerCase(),
+      isNot(contains('meditation sessions')),
+    );
 
     expect(source, isNot(contains('sleep, meditation/mindfulness')));
     expect(source, isNot(contains('**Meditate**')));

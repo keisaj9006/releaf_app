@@ -186,7 +186,7 @@ class PaywallSheet extends ConsumerWidget {
                             icon: Icons.graphic_eq_rounded,
                             title: 'Expanded Sound & Sleep library',
                             description:
-                                'Unlock additional ambient and coloured-noise tracks while keeping Sleep narration-free.',
+                                'Unlock additional ambient and coloured-noise tracks. Nature and Sleep Music remain narration-free.',
                           ),
                           SizedBox(height: ReleafSpacing.md),
                           _PremiumBenefit(

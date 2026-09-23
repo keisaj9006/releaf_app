@@ -108,10 +108,19 @@ Content quantity is a strategic target, not permission to block an otherwise val
 ## Sleep
 
 ### LOCKED
-**No narration in the core Sleep experience.**
+**Nature and Sleep Music remain narration-free. Stories and guided Sleep
+Meditations may use approved narration.** Missing approved narration stays
+silent/unavailable; Releaf never substitutes device TTS or a guessed voice.
 
 ### LOCKED
-Primary Sleep value is soundscape/ambient/noise/nature playback and a low-stimulation wind-down environment.
+Sleep has four content categories: **Stories / Nature / Meditations / Sleep
+Music**. `All` is an aggregate view, not a fifth category. Nature and Sleep
+Music preserve the low-stimulation sound-first experience.
+
+### LOCKED
+Stories use five collections: **Dream Classics / Night Mysteries / Fiction
+Escapes / Wonder Journeys / Drift Through History**. Long-form content must use
+a scalable registry and player rather than bespoke screens.
 
 ### LOCKED
 Avoid “432/528 Hz”, healing-frequency, “deep sleep frequency”, guaranteed REM/deep-sleep and similar claims.
