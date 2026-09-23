@@ -52,6 +52,7 @@ class ReleafBackgroundSoundDriver extends BaseAudioHandler
   Duration _lastPosition = Duration.zero;
   audio.PlayerState _lastPlayerState = audio.PlayerState.stopped;
   AudioProcessingState _processingState = AudioProcessingState.idle;
+  audio.ReleaseMode _releaseMode = audio.ReleaseMode.loop;
 
   @override
   Stream<Duration> get onDurationChanged => _player.onDurationChanged;
@@ -64,8 +65,12 @@ class ReleafBackgroundSoundDriver extends BaseAudioHandler
       _player.onPlayerStateChanged;
 
   @override
-  Future<void> setReleaseMode(audio.ReleaseMode mode) =>
-      _native.setReleaseMode(mode);
+  Future<void> setReleaseMode(audio.ReleaseMode mode) async {
+    await _native.setReleaseMode(mode);
+    if (_disposed) return;
+    _releaseMode = mode;
+    _broadcastPlaybackState();
+  }
 
   @override
   Future<void> setVolume(double volume) => _native.setVolume(volume);
@@ -148,7 +153,9 @@ class ReleafBackgroundSoundDriver extends BaseAudioHandler
         playing: playing,
         updatePosition: _lastPosition,
         speed: 1.0,
-        repeatMode: AudioServiceRepeatMode.one,
+        repeatMode: _releaseMode == audio.ReleaseMode.loop
+            ? AudioServiceRepeatMode.one
+            : AudioServiceRepeatMode.none,
       ),
     );
   }

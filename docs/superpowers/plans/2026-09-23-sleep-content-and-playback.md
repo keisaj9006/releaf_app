@@ -78,10 +78,10 @@
 - Consumes: `SleepPlaybackSource` plus an explicit `looping` or `finite` playback mode.
 - Produces: one background playback path with exact clamped `seekRelative`, finite completion events and correct media repeat metadata.
 
-- [ ] Add failing driver/controller tests proving looped sounds repeat and finite Stories stop once.
-- [ ] Add boundary tests for `-10 s`, `+10 s`, zero, unknown duration and duration end.
-- [ ] Extend the current driver/controller rather than creating another audio service.
-- [ ] Verify focused Sound/Sleep tests and analyzer.
+- [x] Add failing driver/controller tests proving looped sounds repeat and finite Stories stop once.
+- [x] Add boundary tests for `-10 s`, `+10 s`, zero, unknown duration and duration end.
+- [x] Extend the current driver/controller rather than creating another audio service.
+- [x] Verify focused Sound/Sleep tests and analyzer.
 
 ### Task 4: Story player and resume
 

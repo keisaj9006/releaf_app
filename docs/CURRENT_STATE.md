@@ -420,6 +420,15 @@ anonymous use has a separate local scope. This does not enable cloud progress
 sync. Focused Sleep/Stories/account verification passed 57/57 and the analyzer
 is clean.
 
+The existing Sound playback controller and background AudioService now expose an
+explicit looping/finite mode. Existing Nature and Sleep Music remain looped;
+future long-form Stories use finite playback, report completion once and restart
+from zero after completion. Relative and absolute seeking clamp exactly at zero
+and the known duration, while forward seeking remains available before duration
+metadata arrives. Android media repeat metadata follows the selected mode. No
+second audio service was introduced. Focused audio regression passed 102/102;
+the full suite passed 619/619 and analysis is clean.
+
 Current bundled canonical sound catalog contains 10 real tracks:
 
 - Releaf Atmosphere I — free

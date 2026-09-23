@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:audio_service/audio_service.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:audio_session/audio_session.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -124,6 +125,23 @@ class _StatefulDelayedPlayer extends _DelayedPlayer {
 }
 
 void main() {
+  test(
+    'background metadata mirrors finite and looping release modes',
+    () async {
+      final driver = ReleafBackgroundSoundDriver(player: _DelayedPlayer());
+      addTearDown(driver.dispose);
+
+      await driver.setReleaseMode(ReleaseMode.stop);
+      expect(
+        driver.playbackState.value.repeatMode,
+        AudioServiceRepeatMode.none,
+      );
+
+      await driver.setReleaseMode(ReleaseMode.loop);
+      expect(driver.playbackState.value.repeatMode, AudioServiceRepeatMode.one);
+    },
+  );
+
   for (final action in [
     'none',
     'manual pause',

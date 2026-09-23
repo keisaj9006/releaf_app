@@ -13,6 +13,8 @@ import '../domain/sound_content.dart';
 const int soundSleepTimerFadeSeconds = 20;
 const double defaultSoundVolume = 0.62;
 
+enum ReleafPlaybackMode { looping, finite }
+
 double soundOutputVolumeForSleepTimer({
   required double baseVolume,
   int? remainingSeconds,
@@ -162,6 +164,8 @@ class SoundPlayerState {
     this.isPlaying = false,
     this.isLoading = false,
     this.hasPlaybackError = false,
+    this.isCompleted = false,
+    this.playbackMode = ReleafPlaybackMode.looping,
     this.position = Duration.zero,
     this.duration = Duration.zero,
     this.volume = defaultSoundVolume,
@@ -175,6 +179,8 @@ class SoundPlayerState {
   final bool isPlaying;
   final bool isLoading;
   final bool hasPlaybackError;
+  final bool isCompleted;
+  final ReleafPlaybackMode playbackMode;
   final Duration position;
   final Duration duration;
   final double volume;
@@ -196,6 +202,8 @@ class SoundPlayerState {
     bool? isPlaying,
     bool? isLoading,
     bool? hasPlaybackError,
+    bool? isCompleted,
+    ReleafPlaybackMode? playbackMode,
     Duration? position,
     Duration? duration,
     double? volume,
@@ -212,6 +220,8 @@ class SoundPlayerState {
       isPlaying: isPlaying ?? this.isPlaying,
       isLoading: isLoading ?? this.isLoading,
       hasPlaybackError: hasPlaybackError ?? this.hasPlaybackError,
+      isCompleted: isCompleted ?? this.isCompleted,
+      playbackMode: playbackMode ?? this.playbackMode,
       position: position ?? this.position,
       duration: duration ?? this.duration,
       volume: volume ?? this.volume,
@@ -225,6 +235,22 @@ class SoundPlayerState {
           : (sleepTimerRemainingSeconds ?? this.sleepTimerRemainingSeconds),
     );
   }
+}
+
+class _PlaybackAsset {
+  const _PlaybackAsset({
+    required this.id,
+    required this.title,
+    required this.assetPath,
+    required this.mode,
+    required this.addToSoundRecents,
+  });
+
+  final String id;
+  final String title;
+  final String assetPath;
+  final ReleafPlaybackMode mode;
+  final bool addToSoundRecents;
 }
 
 final soundPlaybackDriverProvider = Provider<SoundPlaybackDriver?>((ref) {
@@ -271,8 +297,14 @@ class SoundPlayerController extends StateNotifier<SoundPlayerState> {
       playerState,
     ) {
       if (!mounted) return;
+      final completed = playerState == audio.PlayerState.completed;
       state = state.copyWith(
         isPlaying: playerState == audio.PlayerState.playing,
+        isCompleted: completed
+            ? state.playbackMode == ReleafPlaybackMode.finite
+            : playerState == audio.PlayerState.playing
+            ? false
+            : state.isCompleted,
       );
     });
   }
@@ -295,6 +327,9 @@ class SoundPlayerController extends StateNotifier<SoundPlayerState> {
   int _playbackRequest = 0;
   int? _startingRequest;
   String? _readyTrackId;
+  String? _readyAssetPath;
+  ReleafPlaybackMode? _readyPlaybackMode;
+  _PlaybackAsset? _activeAsset;
   int _outputVolumeRequest = 0;
   double _desiredOutputVolume = defaultSoundVolume;
   int? _interruptedPlaybackRequest;
@@ -374,6 +409,43 @@ class SoundPlayerController extends StateNotifier<SoundPlayerState> {
   }
 
   Future<void> play(SoundContent track) async {
+    await _playAsset(
+      _PlaybackAsset(
+        id: track.id,
+        title: track.title,
+        assetPath: track.assetPath,
+        mode: ReleafPlaybackMode.looping,
+        addToSoundRecents: true,
+      ),
+    );
+  }
+
+  Future<void> playAsset({
+    required String id,
+    required String title,
+    required String assetPath,
+    required ReleafPlaybackMode mode,
+  }) async {
+    final cleanId = id.trim();
+    final cleanTitle = title.trim();
+    final cleanAssetPath = assetPath.trim();
+    if (cleanId.isEmpty || cleanTitle.isEmpty || cleanAssetPath.isEmpty) {
+      throw ArgumentError(
+        'Playback id, title and asset path must not be empty.',
+      );
+    }
+    await _playAsset(
+      _PlaybackAsset(
+        id: cleanId,
+        title: cleanTitle,
+        assetPath: cleanAssetPath,
+        mode: mode,
+        addToSoundRecents: false,
+      ),
+    );
+  }
+
+  Future<void> _playAsset(_PlaybackAsset asset) async {
     if (!mounted) return;
     final request = ++_playbackRequest;
     var driverIntent = _driverPlaybackIntent;
@@ -381,11 +453,17 @@ class SoundPlayerController extends StateNotifier<SoundPlayerState> {
         _currentPlaybackRequest(request) &&
         driverIntent == _driverPlaybackIntent;
     _startingRequest = request;
-    final canResume = _readyTrackId == track.id;
+    final canResume =
+        _readyTrackId == asset.id &&
+        _readyAssetPath == asset.assetPath &&
+        _readyPlaybackMode == asset.mode;
+    _activeAsset = asset;
     state = state.copyWith(
-      currentTrackId: track.id,
+      currentTrackId: asset.id,
       isLoading: true,
       hasPlaybackError: false,
+      isCompleted: false,
+      playbackMode: asset.mode,
       isPlaying: canResume && state.isPlaying,
       position: canResume ? state.position : Duration.zero,
       duration: canResume ? state.duration : Duration.zero,
@@ -393,13 +471,19 @@ class SoundPlayerController extends StateNotifier<SoundPlayerState> {
     try {
       if (!canResume) {
         _readyTrackId = null;
+        _readyAssetPath = null;
+        _readyPlaybackMode = null;
         // Invalidate a pending native load before waiting on configuration.
         final stopping = _driver.stop();
         driverIntent = _driverPlaybackIntent;
         await stopping;
         if (!current()) return;
       }
-      await _driver.setReleaseMode(audio.ReleaseMode.loop);
+      await _driver.setReleaseMode(
+        asset.mode == ReleafPlaybackMode.looping
+            ? audio.ReleaseMode.loop
+            : audio.ReleaseMode.stop,
+      );
       if (!current()) return;
       await _writeOutputVolume(
         soundOutputVolumeForSleepTimer(
@@ -410,24 +494,34 @@ class SoundPlayerController extends StateNotifier<SoundPlayerState> {
       if (!current()) return;
 
       if (canResume) {
+        if (state.position >= state.duration &&
+            state.duration > Duration.zero) {
+          await _driver.seek(Duration.zero);
+          if (!current()) return;
+          state = state.copyWith(position: Duration.zero);
+        }
         final resuming = _driver.resume();
         driverIntent = _driverPlaybackIntent;
         await resuming;
       } else {
         final playing = _driver.playAsset(
-          track.assetPath,
-          trackId: track.id,
-          title: track.title,
+          asset.assetPath,
+          trackId: asset.id,
+          title: asset.title,
         );
         driverIntent = _driverPlaybackIntent;
         await playing;
         if (!current()) return;
-        _readyTrackId = track.id;
-        await _markRecent(track.id);
+        _readyTrackId = asset.id;
+        _readyAssetPath = asset.assetPath;
+        _readyPlaybackMode = asset.mode;
+        if (asset.addToSoundRecents) await _markRecent(asset.id);
       }
     } catch (_) {
       if (current()) {
         _readyTrackId = null;
+        _readyAssetPath = null;
+        _readyPlaybackMode = null;
         state = state.copyWith(isPlaying: false, hasPlaybackError: true);
       }
     } finally {
@@ -447,7 +541,12 @@ class SoundPlayerController extends StateNotifier<SoundPlayerState> {
   Future<void> togglePlayPause() async {
     if (!mounted) return;
     if (state.hasPlaybackError && state.currentTrackId != null) {
-      await playById(state.currentTrackId!);
+      final activeAsset = _activeAsset;
+      if (activeAsset != null) {
+        await _playAsset(activeAsset);
+      } else {
+        await playById(state.currentTrackId!);
+      }
       return;
     }
     if (state.isPlaying || _startingRequest == _playbackRequest) {
@@ -469,24 +568,27 @@ class SoundPlayerController extends StateNotifier<SoundPlayerState> {
   Future<void> resume() async {
     if (!mounted) return;
     if (state.currentTrackId == null || state.isPlaying) return;
+    final activeAsset = _activeAsset;
+    if (activeAsset != null) {
+      await _playAsset(activeAsset);
+      return;
+    }
     await playById(state.currentTrackId!);
   }
 
   Future<void> seekRelative(Duration delta) async {
     if (state.currentTrackId == null) return;
 
-    final maxMs = state.duration.inMilliseconds;
-    final targetMs = (state.position + delta).inMilliseconds;
-    final clamped = maxMs <= 0
-        ? targetMs.clamp(0, 1 << 31)
-        : targetMs.clamp(0, maxMs);
-
-    await _driver.seek(Duration(milliseconds: clamped.toInt()));
+    await seekTo(state.position + delta);
   }
 
   Future<void> seekTo(Duration position) async {
     if (state.currentTrackId == null) return;
-    await _driver.seek(position);
+    final target = _clampSeekPosition(position, state.duration);
+    if (state.isCompleted && target < state.duration) {
+      state = state.copyWith(isCompleted: false);
+    }
+    await _driver.seek(target);
   }
 
   Future<void> setVolume(double volume) async {
@@ -508,6 +610,9 @@ class SoundPlayerController extends StateNotifier<SoundPlayerState> {
     _playbackRequest++;
     _sleepTimerRequest++;
     _readyTrackId = null;
+    _readyAssetPath = null;
+    _readyPlaybackMode = null;
+    _activeAsset = null;
     _sleepTimer?.cancel();
     _sleepTimer = null;
     _sleepTimerDeadline = null;
@@ -516,6 +621,7 @@ class SoundPlayerController extends StateNotifier<SoundPlayerState> {
       clearSleepTimer: true,
       isLoading: false,
       hasPlaybackError: false,
+      isCompleted: false,
       position: Duration.zero,
       duration: Duration.zero,
       isPlaying: false,
@@ -643,7 +749,12 @@ class SoundPlayerController extends StateNotifier<SoundPlayerState> {
             playbackCurrent() &&
             trackId == state.currentTrackId &&
             trackId != null) {
-          await playById(trackId);
+          final activeAsset = _activeAsset;
+          if (activeAsset != null) {
+            await _playAsset(activeAsset);
+          } else {
+            await playById(trackId);
+          }
           return;
         }
         if (_currentSleepTimerRequest(request) && playbackCurrent()) {
@@ -731,4 +842,10 @@ class SoundPlayerController extends StateNotifier<SoundPlayerState> {
     unawaited(_driver.dispose());
     super.dispose();
   }
+}
+
+Duration _clampSeekPosition(Duration position, Duration duration) {
+  if (position.isNegative) return Duration.zero;
+  if (duration > Duration.zero && position > duration) return duration;
+  return position;
 }
