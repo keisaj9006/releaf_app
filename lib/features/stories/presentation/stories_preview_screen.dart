@@ -69,7 +69,7 @@ class StoriesPreviewScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: ReleafSpacing.md),
-                    ...StoryCatalog.all.map(
+                    ...StoryCatalog.ownerPreview.map(
                       (story) => Padding(
                         padding: const EdgeInsets.only(
                           bottom: ReleafSpacing.md,
@@ -120,7 +120,9 @@ class _StoryPreviewCard extends StatelessWidget {
             ),
             const SizedBox(height: ReleafSpacing.xs),
             Text(
-              'About ${story.estimatedDuration.inMinutes} min',
+              story.estimatedDuration == null
+                  ? 'Duration pending'
+                  : 'About ${story.estimatedDuration!.inMinutes} min',
               style: ReleafTypography.meta.copyWith(
                 color: ReleafColors.textSecondary,
               ),

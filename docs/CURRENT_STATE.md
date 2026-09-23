@@ -401,10 +401,15 @@ The canonical release gate says the meditation player is engineering-done/conten
 
 The 23 September recovery audit is recorded in
 [`release/2026-09-23-sleep-stories-recovery-audit.md`](release/2026-09-23-sleep-stories-recovery-audit.md).
-It confirmed that no hidden Sleep Stories implementation or Story player exists.
-The first foundation batch adds a Sleep-owned taxonomy/registry referencing the
-existing Sound and Meditation catalogs, the five approved Story collections,
-chapter metadata capability and an honest asset-pending entry for `ST-DC-004`.
+At the audited `8bf84e0` it confirmed that no Sleep Stories implementation or
+Story player existed. A concurrent owner-preview PR then reached
+`releaf-development` as merge `977f095`, adding the `ReliefStory` model,
+TS01/TS02 metadata and a feature-flagged preview library. The foundation batch
+was rebased and consolidated with that work: `ReliefStory`/`StoryCatalog` are
+the canonical Story source, while the Sleep registry references Stories, Sound
+and Meditation without creating a second Story model. It also adds the five
+approved Story collections, chapter lookup capability and an honest
+asset-pending entry for `ST-DC-004`.
 No Story audio, artwork, duration or Premium assignment has been fabricated.
 
 Current bundled canonical sound catalog contains 10 real tracks:

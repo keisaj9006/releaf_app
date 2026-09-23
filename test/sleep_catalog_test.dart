@@ -7,6 +7,8 @@ import 'package:releaf_app/features/sleep/data/sleep_catalog.dart';
 import 'package:releaf_app/features/sleep/domain/sleep_content.dart';
 import 'package:releaf_app/features/sound/data/sound_catalog.dart';
 import 'package:releaf_app/features/sound/domain/sound_content.dart';
+import 'package:releaf_app/features/stories/data/story_catalog.dart';
+import 'package:releaf_app/features/stories/domain/relief_story.dart';
 
 void main() {
   group('Sleep taxonomy', () {
@@ -45,14 +47,18 @@ void main() {
         'The Princess and the Pea — A Rainy Night at the Palace',
       );
       expect(story.category, SleepCategory.stories);
-      expect(story.storyCollection, SleepStoryCollection.dreamClassics);
-      expect(story.narrator, 'Theo Silk');
       expect(story.releaseStatus, SleepReleaseStatus.assetPending);
       expect(story.accessTier, SleepAccessTier.undecided);
       expect(story.duration, isNull);
-      expect(story.artworkAssetPath, isNull);
-      expect(story.playbackSource, isNull);
+      expect(story.playbackSource?.type, SleepPlaybackSourceType.story);
       expect(story.isPlayable, isFalse);
+
+      final canonicalStory = StoryCatalog.getById(story.id);
+      expect(
+        canonicalStory?.sleepCollection,
+        SleepStoryCollection.dreamClassics,
+      );
+      expect(canonicalStory?.narrator, 'Theo Silk');
     });
 
     test('references canonical Sound and Meditation content', () {
@@ -136,34 +142,41 @@ void main() {
 
   group('Story chapters', () {
     test('resolve the current chapter from ordered start positions', () {
-      const content = SleepContent(
+      const content = ReliefStory(
         id: 'story-test',
         title: 'Test Story',
         subtitle: 'A test',
+        series: 'Fiction Escapes',
+        category: null,
         description: 'Used to verify chapter resolution.',
-        category: SleepCategory.stories,
-        accessTier: SleepAccessTier.free,
-        releaseStatus: SleepReleaseStatus.ready,
-        duration: Duration(minutes: 30),
-        playbackSource: SleepPlaybackSource.asset('sounds/story-test.mp3'),
-        storyCollection: SleepStoryCollection.fictionEscapes,
+        estimatedDuration: Duration(minutes: 30),
+        audioAssetPath: 'sounds/story-test.mp3',
+        artworkAssetPath: null,
+        contentWarning: '',
+        labels: [],
+        isPremium: false,
+        sleepCollection: SleepStoryCollection.fictionEscapes,
+        narrator: 'Test Narrator',
         chapters: [
-          SleepChapter(
+          ReliefStoryChapter(
             id: 'arrival',
             title: 'Arrival',
-            startsAt: Duration.zero,
+            start: Duration.zero,
           ),
-          SleepChapter(
+          ReliefStoryChapter(
             id: 'garden',
             title: 'The Garden',
-            startsAt: Duration(minutes: 10),
+            start: Duration(minutes: 10),
           ),
-          SleepChapter(
+          ReliefStoryChapter(
             id: 'home',
             title: 'Home',
-            startsAt: Duration(minutes: 20),
+            start: Duration(minutes: 20),
           ),
         ],
+        rightsStatus: 'TEST ONLY',
+        scriptVersion: 'test',
+        audioVersion: 'test',
       );
 
       expect(content.chapterAt(Duration.zero)?.id, 'arrival');

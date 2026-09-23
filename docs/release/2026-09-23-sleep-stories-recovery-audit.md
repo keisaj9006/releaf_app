@@ -76,7 +76,11 @@
 - Initial `flutter test --no-pub --reporter expanded`: 582 tests executed,
   581 passed and one CRLF-sensitive listing test failed.
 - Focused listing regression test after the portability fix: PASS, 1/1.
-- Final full suite after the Sleep registry implementation: PASS, 591/591.
+- Full suite after the initial Sleep registry implementation: PASS, 591/591.
+- Post-rebase full suite after reconciling the upstream Relief Stories batch with
+  the canonical Sleep registry: PASS, 604/604. `ReliefStory` and
+  `StoryCatalog` remain the single Story source of truth; `SleepCatalog` is the
+  cross-pillar discovery aggregator.
 - Sleep/Sound/Meditation focused suite: PASS, 45/45. Release-gate,
   navigation and paywall follow-up suite after documentation/copy reconciliation:
   PASS, 59/59.
@@ -99,3 +103,15 @@ categories and five Story collections, references existing Sound and Meditation
 content rather than copying it, and registers `ST-DC-004` honestly as awaiting
 its production artwork/audio. This is the prerequisite for player hardening and
 the new discovery UI.
+
+## Post-audit remote reconciliation
+
+After the foundation commit was created, the first push was rejected because
+`origin/releaf-development` had advanced from the audited `8bf84e0` to merge
+commit `977f095`. That merge added an owner-preview Stories model, TS01/TS02
+metadata, a preview library and a compile-time route guard. The local work was
+rebased without force-push and the two models were consolidated: `ReliefStory`
+and `StoryCatalog` are now the canonical Story source, while `SleepCatalog`
+aggregates Story references alongside existing Sound and Meditation references.
+The owner-preview list remains TS01/TS02 only, and `ST-DC-004` is registered in
+the canonical Story catalog with missing production data left explicit.

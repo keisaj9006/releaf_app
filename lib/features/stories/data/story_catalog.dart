@@ -1,7 +1,7 @@
 import '../domain/relief_story.dart';
 
 abstract final class StoryCatalog {
-  static const all = <ReliefStory>[
+  static const ownerPreview = <ReliefStory>[
     ReliefStory(
       id: 'TS01_BEYOND_THE_GATE',
       title: 'Beyond the Gate',
@@ -107,6 +107,32 @@ abstract final class StoryCatalog {
       audioVersion: 'pending',
     ),
   ];
+
+  static const sleepStories = <ReliefStory>[
+    ReliefStory(
+      id: 'ST-DC-004',
+      title: 'The Princess and the Pea — A Rainy Night at the Palace',
+      subtitle: 'A Dream Classics story currently in audio production.',
+      series: 'Dream Classics',
+      category: null,
+      description:
+          'A rain-soaked return to the palace, prepared as a long-form bedtime story.',
+      estimatedDuration: null,
+      audioAssetPath: null,
+      artworkAssetPath: null,
+      contentWarning: '',
+      labels: <String>['DREAM CLASSICS'],
+      isPremium: null,
+      chapters: <ReliefStoryChapter>[],
+      rightsStatus: 'PRODUCTION ASSETS PENDING',
+      scriptVersion: 'pending',
+      audioVersion: 'pending',
+      sleepCollection: SleepStoryCollection.dreamClassics,
+      narrator: 'Theo Silk',
+    ),
+  ];
+
+  static const all = <ReliefStory>[...ownerPreview, ...sleepStories];
 
   static ReliefStory? getById(String id) {
     for (final story in all) {

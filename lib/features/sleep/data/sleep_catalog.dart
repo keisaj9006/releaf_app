@@ -4,6 +4,8 @@ import '../../meditation/data/meditation_catalog.dart';
 import '../../meditation/domain/meditation_content.dart';
 import '../../sound/data/sound_catalog.dart';
 import '../../sound/domain/sound_content.dart';
+import '../../stories/data/story_catalog.dart';
+import '../../stories/domain/relief_story.dart';
 import '../domain/sleep_content.dart';
 
 final sleepCatalogProvider = Provider<SleepCatalog>((ref) {
@@ -22,22 +24,7 @@ class SleepCatalog {
   final SoundCatalog soundCatalog;
   final MeditationCatalog meditationCatalog;
 
-  static const _stories = <SleepContent>[
-    SleepContent(
-      id: 'ST-DC-004',
-      title: 'The Princess and the Pea — A Rainy Night at the Palace',
-      subtitle: 'A Dream Classics story currently in audio production.',
-      description:
-          'A rain-soaked return to the palace, prepared as a long-form bedtime story.',
-      category: SleepCategory.stories,
-      accessTier: SleepAccessTier.undecided,
-      releaseStatus: SleepReleaseStatus.assetPending,
-      storyCollection: SleepStoryCollection.dreamClassics,
-      narrator: 'Theo Silk',
-      accessibilityLabel:
-          'The Princess and the Pea, a Dream Classics sleep story narrated by Theo Silk. Audio is coming soon.',
-    ),
-  ];
+  static const _storyIds = <String>['ST-DC-004'];
 
   static const _natureIds = <String>[
     'soft-rain',
@@ -60,7 +47,7 @@ class SleepCatalog {
 
   List<SleepContent> getAll() {
     final items = <SleepContent>[
-      ..._stories,
+      ..._storyItems(),
       ..._soundItems(_natureIds, SleepCategory.nature),
       ..._sleepMeditations(),
       ..._soundItems(_sleepMusicIds, SleepCategory.sleepMusic),
@@ -81,13 +68,23 @@ class SleepCatalog {
 
   List<SleepContent> getByStoryCollection(SleepStoryCollection collection) =>
       getAll()
-          .where((item) => item.storyCollection == collection)
+          .where((item) {
+            final source = item.playbackSource;
+            if (source?.type != SleepPlaybackSourceType.story) return false;
+            return StoryCatalog.getById(source!.reference)?.sleepCollection ==
+                collection;
+          })
           .toList(growable: false);
 
   List<String> validateReferences() {
     final errors = <String>[];
     final seenIds = <String>{};
 
+    for (final id in _storyIds) {
+      if (StoryCatalog.getById(id) == null) {
+        errors.add('$id references unknown Story $id');
+      }
+    }
     for (final id in [..._natureIds, ..._sleepMusicIds]) {
       if (soundCatalog.getById(id) == null) {
         errors.add('$id references unknown Sound $id');
@@ -107,6 +104,12 @@ class SleepCatalog {
       final source = item.playbackSource;
       if (source == null) continue;
       switch (source.type) {
+        case SleepPlaybackSourceType.story:
+          if (StoryCatalog.getById(source.reference) == null) {
+            errors.add(
+              '${item.id} references unknown Story ${source.reference}',
+            );
+          }
         case SleepPlaybackSourceType.sound:
           if (soundCatalog.getById(source.reference) == null) {
             errors.add(
@@ -119,13 +122,37 @@ class SleepCatalog {
               '${item.id} references unknown Meditation ${source.reference}',
             );
           }
-        case SleepPlaybackSourceType.asset:
-          if (source.reference.trim().isEmpty) {
-            errors.add('${item.id} has an empty asset reference');
-          }
       }
     }
     return List<String>.unmodifiable(errors);
+  }
+
+  List<SleepContent> _storyItems() {
+    return _storyIds
+        .map(StoryCatalog.getById)
+        .whereType<ReliefStory>()
+        .map(
+          (story) => SleepContent(
+            id: story.id,
+            title: story.title,
+            subtitle: story.subtitle,
+            description: story.description,
+            category: SleepCategory.stories,
+            accessTier: switch (story.isPremium) {
+              true => SleepAccessTier.premium,
+              false => SleepAccessTier.free,
+              null => SleepAccessTier.undecided,
+            },
+            releaseStatus: story.isAudioAvailable
+                ? SleepReleaseStatus.ready
+                : SleepReleaseStatus.assetPending,
+            duration: story.estimatedDuration,
+            playbackSource: SleepPlaybackSource.story(story.id),
+            accessibilityLabel:
+                '${story.title}, ${story.sleepCollection?.label ?? 'Sleep Story'}${story.narrator == null ? '' : ', narrated by ${story.narrator}'}.',
+          ),
+        )
+        .toList(growable: false);
   }
 
   List<SleepContent> _soundItems(List<String> ids, SleepCategory category) {

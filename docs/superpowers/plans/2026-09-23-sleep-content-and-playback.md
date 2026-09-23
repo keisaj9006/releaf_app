@@ -39,7 +39,11 @@
 
 **Interfaces:**
 - Consumes: `SoundCatalog.getById(String)`, `MeditationCatalog.getById(String)` and `MeditationCatalog.getSeries(String)`.
-- Produces: `SleepContent`, `SleepChapter`, `SleepCategory`, `SleepStoryCollection`, `SleepPlaybackSource`, and `SleepCatalog` query/validation methods.
+- Consumes: the existing `ReliefStory`, `ReliefStoryChapter` and `StoryCatalog`
+  introduced by owner-preview merge `977f095`.
+- Produces: `SleepContent`, the four-category `SleepCategory`, canonical
+  `SleepStoryCollection` metadata on `ReliefStory`, `SleepPlaybackSource`, and
+  `SleepCatalog` query/validation methods.
 
 - [x] Write tests asserting the exact four categories, exact five collections, unique IDs, valid canonical references and chapter lookup/clamping rules.
 - [x] Run `flutter test --no-pub test/sleep_catalog_test.dart --reporter expanded` and confirm it fails because the Sleep domain is absent.

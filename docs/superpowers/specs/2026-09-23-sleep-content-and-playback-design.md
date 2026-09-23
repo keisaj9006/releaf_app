@@ -14,11 +14,11 @@ Sleep has exactly four categories: Stories, Nature, Meditations and Sleep Music.
 collections: Dream Classics, Night Mysteries, Fiction Escapes, Wonder Journeys
 and Drift Through History.
 
-The Sleep registry owns Sleep-specific editorial metadata and references
-canonical Sound or Meditation IDs. It does not copy audio paths, scripts or
-access rules from those catalogs. Story entries may directly reference a final
-mastered asset or URL when supplied. Missing production audio remains an
-explicit non-playable state.
+The existing `ReliefStory` and `StoryCatalog` types are the canonical Story
+source. The Sleep registry owns cross-category editorial placement and
+references canonical Story, Sound or Meditation IDs. It does not copy audio
+paths, scripts or access rules from those catalogs. Missing production audio
+remains an explicit non-playable state.
 
 `ST-DC-004`, *The Princess and the Pea — A Rainy Night at the Palace*, is the
 first registered Story. Its narrator display name is Theo Silk. Its final
