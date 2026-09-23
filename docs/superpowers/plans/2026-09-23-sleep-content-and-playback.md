@@ -62,9 +62,9 @@
 - Consumes: stable Sleep content IDs and optional chapter IDs.
 - Produces: `SleepProgressRecord`, `SleepProgressStore.state`, `updatePosition`, `markCompleted`, `toggleFavourite`, `clear`, and ordered continue-listening records.
 
-- [ ] Write failing tests for process restart, corrupt data, per-account local isolation where identity is available, clamping, completion and no cross-content overwrite.
-- [ ] Implement queued SharedPreferences persistence with versioned keys and fail-closed decoding.
-- [ ] Verify the focused tests and analyzer.
+- [x] Write failing tests for process restart, corrupt data, per-account local isolation where identity is available, clamping, completion and no cross-content overwrite.
+- [x] Implement queued SharedPreferences persistence with versioned keys and fail-closed decoding.
+- [x] Verify the focused tests and analyzer.
 
 ### Task 3: Playback mode and exact seeking
 

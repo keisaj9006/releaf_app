@@ -412,6 +412,14 @@ approved Story collections, chapter lookup capability and an honest
 asset-pending entry for `ST-DC-004`.
 No Story audio, artwork, duration or Premium assignment has been fabricated.
 
+Long-form Sleep progress now has a local-first, versioned persistence boundary.
+It records position, known duration, chapter, completion and favourite state,
+orders eligible items for Continue Listening, fails closed on corrupt records
+and queues rapid writes. Signed-in data is isolated by stable account UUID;
+anonymous use has a separate local scope. This does not enable cloud progress
+sync. Focused Sleep/Stories/account verification passed 57/57 and the analyzer
+is clean.
+
 Current bundled canonical sound catalog contains 10 real tracks:
 
 - Releaf Atmosphere I — free
