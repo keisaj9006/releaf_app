@@ -84,6 +84,31 @@ Directory _validStoreFixture() {
 }
 
 void main() {
+  test('canonical Play icon is a compliant derivative of the launcher mark', () {
+    final root = _validStoreFixture();
+    addTearDown(() => root.deleteSync(recursive: true));
+    final canonicalIcon = File('store/google-play/app-icon.png');
+
+    expect(
+      canonicalIcon.existsSync(),
+      isTrue,
+      reason: 'The approved launcher mark needs a canonical Google Play icon.',
+    );
+    canonicalIcon.copySync(
+      '${root.path}/store/google-play/app-icon.png',
+    );
+
+    final result = policy.auditPlayStoreAssets(
+      root.path,
+      strongListing: true,
+    );
+
+    expect(result.isReady, isTrue, reason: result.errors.join('\n'));
+    final provenance = File('store/google-play/README.md').readAsStringSync();
+    expect(provenance, contains('assets/icon/app_icon.png'));
+    expect(provenance, contains('9D44B42A62268FA2B9ED79C92C3F245A5DC451F1B8DFAFC1BD3648D77029CAB2'));
+  });
+
   test('strong Play listing accepts a complete compliant asset pack', () {
     final root = _validStoreFixture();
     addTearDown(() => root.deleteSync(recursive: true));

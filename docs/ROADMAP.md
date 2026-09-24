@@ -100,6 +100,11 @@ asset tree exceeds 63,000,000 bytes. The policy runs after local and GitHub prod
 builds. Final production signing, Store assets and physical performance QA remain
 open.
 
+The [Google Play app icon](release/2026-09-24-play-store-icon.md) is now prepared
+from the existing 1024 px Releaf launcher mark as a compliant 512 px RGBA asset,
+with pinned source/output hashes and a guarded conversion script. Feature graphic,
+exact-RC screenshots, owner review and Play Console work remain open.
+
 [Single SDK initialization](release/2026-09-12-sdk-single-initialization.md)
 closes overlapping native configuration: 517 tests, clean analysis and Android
 debug build. Device installation is batched with the next device-review milestone.

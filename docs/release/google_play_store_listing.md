@@ -1,6 +1,7 @@
 # Google Play Store Listing — Releaf 1.0
 
-Status: **copy + legal contact fields ready; assets, website and Play Console entry required**.
+Status: **copy + legal contact fields + app icon ready; feature graphic,
+screenshots, website and Play Console entry required**.
 
 Last policy verification: **2026-09-14**.
 
@@ -103,10 +104,11 @@ P0 CI do not require the real store pack to exist.
 The automated policy verifies file presence, supported formats, dimensions,
 required icon alpha and the strong-listing screenshot count/orientation. It does
 **not** certify creative quality, owner approval, rights/provenance, screenshot
-freshness, truthful visual content or successful Play Console entry. At the
-frozen app build candidate `ecd3e97`, the real `store/google-play/` pack is still
-absent by deliberate release sequencing, so the Store listing release gate remains
-open. Do not add placeholder graphics merely to make the validator pass.
+freshness, truthful visual content or successful Play Console entry. The
+canonical app icon is now present as a measured derivative of the existing
+Releaf launcher mark. The feature graphic and current RC screenshots remain
+absent, so the Store listing release gate remains open. Do not add placeholder
+graphics merely to make the validator pass.
 
 ### App icon
 
