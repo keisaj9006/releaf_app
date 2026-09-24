@@ -1,32 +1,33 @@
 import 'dart:io';
 
 const int measuredAppBundleBaselineBytes = 93375235;
-const int measuredRuntimeAssetBaselineBytes = 56348319;
+const int measuredReleaseAssetTreeBaselineBytes = 56348319;
 
 // These limits leave roughly 12% above the measured 1.0 baseline. Crossing a
 // limit is allowed only through an intentional, reviewed policy update.
 const int maxAppBundleBytes = 105000000;
-const int maxRuntimeAssetBytes = 63000000;
+const int maxReleaseAssetTreeBytes = 63000000;
 
 final class ReleaseSizeBudgetResult {
   const ReleaseSizeBudgetResult({
     required this.appBundleBytes,
-    required this.runtimeAssetBytes,
+    required this.releaseAssetTreeBytes,
     required this.errors,
   });
 
   final int appBundleBytes;
-  final int runtimeAssetBytes;
+  final int releaseAssetTreeBytes;
   final List<String> errors;
 
   bool get isReady => errors.isEmpty;
   int get appBundleHeadroomBytes => maxAppBundleBytes - appBundleBytes;
-  int get runtimeAssetHeadroomBytes => maxRuntimeAssetBytes - runtimeAssetBytes;
+  int get releaseAssetTreeHeadroomBytes =>
+      maxReleaseAssetTreeBytes - releaseAssetTreeBytes;
 }
 
 ReleaseSizeBudgetResult auditReleaseSizeBudget({
   required int appBundleBytes,
-  required int runtimeAssetBytes,
+  required int releaseAssetTreeBytes,
 }) {
   final errors = <String>[];
   if (appBundleBytes > maxAppBundleBytes) {
@@ -35,15 +36,15 @@ ReleaseSizeBudgetResult auditReleaseSizeBudget({
       '$maxAppBundleBytes bytes.',
     );
   }
-  if (runtimeAssetBytes > maxRuntimeAssetBytes) {
+  if (releaseAssetTreeBytes > maxReleaseAssetTreeBytes) {
     errors.add(
-      'Runtime assets are $runtimeAssetBytes bytes; budget is '
-      '$maxRuntimeAssetBytes bytes.',
+      'Release asset tree is $releaseAssetTreeBytes bytes; budget is '
+      '$maxReleaseAssetTreeBytes bytes.',
     );
   }
   return ReleaseSizeBudgetResult(
     appBundleBytes: appBundleBytes,
-    runtimeAssetBytes: runtimeAssetBytes,
+    releaseAssetTreeBytes: releaseAssetTreeBytes,
     errors: List.unmodifiable(errors),
   );
 }
@@ -90,16 +91,16 @@ void main(List<String> arguments) {
 
   final result = auditReleaseSizeBudget(
     appBundleBytes: aab.lengthSync(),
-    runtimeAssetBytes: _directoryBytes(assets),
+    releaseAssetTreeBytes: _directoryBytes(assets),
   );
   stdout.writeln(
     'Release AAB: ${result.appBundleBytes} / $maxAppBundleBytes bytes '
     '(baseline $measuredAppBundleBaselineBytes)',
   );
   stdout.writeln(
-    'Runtime assets: ${result.runtimeAssetBytes} / '
-    '$maxRuntimeAssetBytes bytes '
-    '(baseline $measuredRuntimeAssetBaselineBytes)',
+    'Release asset tree: ${result.releaseAssetTreeBytes} / '
+    '$maxReleaseAssetTreeBytes bytes '
+    '(baseline $measuredReleaseAssetTreeBaselineBytes)',
   );
   if (!result.isReady) {
     for (final error in result.errors) {

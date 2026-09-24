@@ -1,20 +1,22 @@
 # Release size budget checkpoint — 24 September 2026
 
-Scope: fail-closed Android release artifact and bundled runtime-asset growth
+Scope: fail-closed Android release artifact and release asset-tree growth
 checks. This checkpoint changes release tooling only; it does not change Flutter
 runtime behavior, content, billing, signing material or production configuration.
 
 ## Measured baseline and limits
 
 The locally retained release AAB measured **93,375,235 bytes**. The current
-`assets/` tree measured **56,348,319 bytes** across 138 files. These measurements
-define the documented baseline; the retained AAB is not claimed to be the final
+source `assets/` tree measured **56,348,319 bytes** across 138 files. The latter
+is intentionally a conservative source-tree measurement and is not presented as
+the exact subset compressed into the AAB. These measurements define the
+documented baseline; the retained AAB is not claimed to be the final
 production-signed artifact or the latest production-equivalent RC.
 
 `tool/release/release_size_budget_policy.dart` now enforces:
 
 - release AAB: at most **105,000,000 bytes**;
-- bundled runtime assets: at most **63,000,000 bytes**.
+- release source asset tree: at most **63,000,000 bytes**.
 
 Both limits leave roughly twelve percent above the measured baseline. A future
 approved content intake may deliberately revise a limit, but must do so as a
@@ -29,7 +31,7 @@ and never reads or prints signing or RevenueCat secrets.
 - `flutter test test/release_size_budget_policy_test.dart test/production_android_release_workflow_contract_test.dart --no-pub --reporter expanded`
   — **5/5 passed**.
 - `dart run tool/release/release_size_budget_policy.dart --aab build/app/outputs/bundle/release/app-release.aab --assets assets`
-  — **PASS**, AAB `93,375,235 / 105,000,000`, assets
+  — **PASS**, AAB `93,375,235 / 105,000,000`, source asset tree
   `56,348,319 / 63,000,000` bytes.
 - `flutter analyze --no-pub` — **no issues found**.
 - `flutter test --no-pub --reporter expanded` — **640/640 passed**.

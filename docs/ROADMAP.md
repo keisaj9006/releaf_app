@@ -95,8 +95,8 @@ and existing Android source checks. This adds artifact evidence without closing
 private signing, public URL deployment, owner listening or physical release QA.
 
 [Measured release size budgets](release/2026-09-24-release-size-budgets.md) now
-fail closed when a production AAB exceeds 105,000,000 bytes or bundled runtime
-assets exceed 63,000,000 bytes. The policy runs after local and GitHub production
+fail closed when a production AAB exceeds 105,000,000 bytes or the release source
+asset tree exceeds 63,000,000 bytes. The policy runs after local and GitHub production
 builds. Final production signing, Store assets and physical performance QA remain
 open.
 

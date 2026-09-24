@@ -248,7 +248,7 @@ Do not duplicate this table as a new authority; update the release gate itself w
 Release artifact growth is now guarded by the
 [measured size-budget policy](release/2026-09-24-release-size-budgets.md): local
 and GitHub production AAB builds fail closed above 105,000,000 bytes or when the
-bundled runtime assets exceed 63,000,000 bytes. This closes the unimplemented
+release source asset tree exceeds 63,000,000 bytes. This closes the unimplemented
 measured-budget requirement without claiming a final signed artifact or device
 performance result.
 
