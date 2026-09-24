@@ -18,6 +18,7 @@ import 'package:releaf_app/features/meditation/domain/meditation_content.dart';
 import 'package:releaf_app/features/meditation/domain/meditation_resume_state.dart';
 import 'package:releaf_app/features/meditation/presentation/meditation_player_screen.dart';
 import 'package:releaf_app/features/meditation/presentation/meditation_session_gate.dart';
+import 'package:releaf_app/features/sleep/application/sleep_progress_store.dart';
 import 'package:releaf_app/features/sound/data/sound_catalog.dart';
 import 'package:releaf_app/routing/app_router.dart';
 import 'package:releaf_app/routing/app_routes.dart';
@@ -166,6 +167,9 @@ Future<void> _pumpRoute(
         if (catalog != null)
           meditationCatalogProvider.overrideWithValue(catalog),
         sharedPreferencesProvider.overrideWithValue(preferences),
+        sleepProgressStoreProvider.overrideWith(
+          (ref) => SleepProgressStore(preferences),
+        ),
         subscriptionControllerProvider.overrideWith(
           (ref) => _FixedSubscriptionController(isPremium: isPremium),
         ),
@@ -535,11 +539,11 @@ void main() {
 
     expect(find.text('NIGHT'), findsOneWidget);
     expect(find.text('Sleep'), findsWidgets);
-    expect(find.text('SLEEP TONES'), findsOneWidget);
+    expect(find.text('SLEEP MUSIC'), findsOneWidget);
     expect(find.text('NATURE AT NIGHT'), findsOneWidget);
     expect(find.byKey(const Key('sleep-featured-sound')), findsOneWidget);
     expect(find.text('TONIGHT · NO VOICE'), findsOneWidget);
-    expect(find.text('SLEEP MEDITATIONS'), findsNothing);
+    expect(find.text('SLEEP MEDITATIONS'), findsOneWidget);
     expect(find.text('WIND DOWN'), findsNothing);
     expect(find.byKey(const Key('sleep-back')), findsNothing);
     expect(find.byType(NavigationBar), findsOneWidget);
@@ -665,12 +669,16 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump();
 
+    final sleepPreferences = await _preferences();
     final sleepRouter = createAppRouter(initialLocation: AppRoutes.sleep);
     addTearDown(sleepRouter.dispose);
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          sharedPreferencesProvider.overrideWithValue(await _preferences()),
+          sharedPreferencesProvider.overrideWithValue(sleepPreferences),
+          sleepProgressStoreProvider.overrideWith(
+            (ref) => SleepProgressStore(sleepPreferences),
+          ),
           subscriptionControllerProvider.overrideWith(
             (ref) => _FixedSubscriptionController(isPremium: false),
           ),
@@ -1024,21 +1032,23 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('current Sleep sound experience remains voice-free', (
-    WidgetTester tester,
-  ) async {
-    await _pumpRoute(
-      tester,
-      location: AppRoutes.sleep,
-      preferences: await _preferences(),
-    );
+  testWidgets(
+    'Sleep keeps Nature and Music voice-free while disclosing guidance',
+    (WidgetTester tester) async {
+      await _pumpRoute(
+        tester,
+        location: AppRoutes.sleep,
+        preferences: await _preferences(),
+      );
 
-    expect(find.text('TONIGHT · NO VOICE'), findsOneWidget);
-    expect(find.text('SLEEP MEDITATIONS'), findsNothing);
-    expect(find.text('Let the Day Go'), findsNothing);
-    expect(find.text('Evening → Proper Unwind'), findsNothing);
-    expect(find.text('Deep Drift'), findsWidgets);
-    expect(find.text('Soft Rain'), findsOneWidget);
-    expect(find.text('Night Air'), findsOneWidget);
-  });
+      expect(find.text('TONIGHT · NO VOICE'), findsOneWidget);
+      expect(find.text('SLEEP MEDITATIONS'), findsOneWidget);
+      expect(find.text('Let the Day Go'), findsOneWidget);
+      expect(find.text('RECORDED VOICE PENDING'), findsNWidgets(3));
+      expect(find.text('Evening → Proper Unwind'), findsNothing);
+      expect(find.text('Deep Drift'), findsWidgets);
+      expect(find.text('Soft Rain'), findsWidgets);
+      expect(find.text('Night Air'), findsOneWidget);
+    },
+  );
 }

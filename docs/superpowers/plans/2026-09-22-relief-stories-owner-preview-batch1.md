@@ -13,7 +13,8 @@
 ## Global Constraints
 
 - Work only on branch `feature/relief-stories-owner-preview-batch1`; never modify `main`.
-- Public Sleep remains narration-free when `RELIEF_STORIES_PREVIEW` is false.
+- Nature and Sleep Music remain narration-free when
+  `RELIEF_STORIES_PREVIEW` is false; preview Stories remain hidden.
 - Preview flag is `RELIEF_STORIES_PREVIEW=true`; default is false.
 - No Story audio asset is imported in this batch.
 - No public Store Listing/release-gate scope change.
@@ -26,7 +27,8 @@
 
 ## Review Focus
 
-- A build without the preview define must still show the existing narration-free Sleep experience and no Stories entry.
+- A build without the preview define must preserve narration-free Nature and
+  Sleep Music and show no owner-preview Stories entry.
 - A direct Stories preview route with the flag off must redirect to Sleep rather than expose hidden preview UI.
 - Duplicate story IDs must be impossible in the canonical catalogue and covered by a test.
 - TS01/TS02 missing audio must be represented as an explicit unavailable-for-playback state, not an invalid empty path.
@@ -383,7 +385,7 @@ PR title:
 
 PR body must state:
 - owner preview only;
-- public Sleep remains narration-free by default;
+- public Nature and Sleep Music remain narration-free;
 - TS01/TS02 metadata are imported, not audio;
 - real delivery audio and Story Player are Batch 2;
 - testing performed and CI status.

@@ -137,7 +137,9 @@ headphones, and in a noisy-room case without forcing louder listening.
 
 Keep measured respiratory cycles/minute, narrator WPM, music BPM, acoustic Hz,
 LUFS and dBTP as separate fields. Do not infer medical effects from any of them.
-Sleep remains narration-free regardless of shared mixing infrastructure.
+Nature and Sleep Music remain narration-free regardless of shared mixing
+infrastructure. Stories and guided Sleep Meditations may use only their approved
+recorded narration; missing narration stays silent/unavailable.
 
 ## Intake record and acceptance
 

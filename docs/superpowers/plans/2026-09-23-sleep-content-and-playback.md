@@ -111,10 +111,10 @@
 - Consumes: Sleep catalog queries and continue-listening progress.
 - Produces: All/Stories/Nature/Meditations/Sleep Music filters, Featured/Tonight, Continue Listening, Popular and five Story collection rails with See All navigation.
 
-- [ ] Write failing widget tests for taxonomy, ordering, asset-pending cards, subtle Premium state, narrow/large-text layout and legacy Sound access.
-- [ ] Implement the registry-driven discovery surface in the existing Releaf design language.
-- [ ] Route Sound references to the existing Sound player, Meditation references to the existing Meditation gate/player and Stories to the Story player.
-- [ ] Verify focused tests, analyzer, full suite and Android build.
+- [x] Write failing widget tests for taxonomy, ordering, asset-pending cards, subtle Premium state, narrow/large-text layout and legacy Sound access.
+- [x] Implement the registry-driven discovery surface in the existing Releaf design language.
+- [x] Route Sound references to the existing Sound player, Meditation references to the existing Meditation gate/player and Stories to the Story player.
+- [x] Verify focused tests, analyzer, full suite and Android build.
 
 ### Task 6: Release evidence and device checkpoint
 
@@ -128,7 +128,7 @@
 - Consumes: verified command output and actual hardware observations.
 - Produces: honest release-gate evidence separating automation from owner/audio/device dependencies.
 
-- [ ] Update older broad “Sleep has no narration” language to the precise approved rule: Nature/Music have no narration; Stories and guided Sleep Meditations may narrate.
-- [ ] Record missing approved production audio/artwork and physical Bluetooth/background/lock-screen checks as open dependencies.
-- [ ] Run `dart format`, `flutter analyze --no-pub`, focused tests, full tests and the ignored-config Android build.
+- [x] Update older broad “Sleep has no narration” language to the precise approved rule: Nature/Music have no narration; Stories and guided Sleep Meditations may narrate.
+- [x] Record missing approved production audio/artwork and physical Bluetooth/background/lock-screen checks as open dependencies.
+- [x] Run `dart format`, `flutter analyze --no-pub`, focused tests, full tests and the ignored-config Android build.
 - [ ] Inspect `git diff --check`, confirm no secrets/generated artifacts, commit and push only `origin/releaf-development`.

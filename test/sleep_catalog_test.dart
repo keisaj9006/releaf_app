@@ -127,6 +127,27 @@ void main() {
       );
     });
 
+    test(
+      'editorial ranks are deterministic and only reference ready content',
+      () {
+        final featured = catalog.getFeatured();
+        final popular = catalog.getPopular();
+
+        expect(featured, isNotEmpty);
+        expect(popular, isNotEmpty);
+        expect(featured.every((item) => item.isPlayable), isTrue);
+        expect(popular.every((item) => item.isPlayable), isTrue);
+        expect(
+          featured.map((item) => item.featuredRank),
+          orderedEquals([1, 2]),
+        );
+        expect(
+          popular.map((item) => item.popularRank),
+          orderedEquals([1, 2, 3, 4]),
+        );
+      },
+    );
+
     test('does not add an ElevenLabs runtime dependency', () {
       final domain = File(
         'lib/features/sleep/domain/sleep_content.dart',

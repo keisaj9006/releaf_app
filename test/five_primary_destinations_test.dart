@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:releaf_app/core/providers.dart';
+import 'package:releaf_app/features/sleep/application/sleep_progress_store.dart';
 import 'package:releaf_app/routing/app_router.dart';
 import 'package:releaf_app/routing/app_routes.dart';
 import 'package:releaf_app/features/meditation/presentation/meditation_screen.dart';
@@ -29,7 +30,12 @@ void main() {
       addTearDown(router.dispose);
       await tester.pumpWidget(
         ProviderScope(
-          overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
+          overrides: [
+            sharedPreferencesProvider.overrideWithValue(prefs),
+            sleepProgressStoreProvider.overrideWith(
+              (ref) => SleepProgressStore(prefs),
+            ),
+          ],
           child: MaterialApp.router(routerConfig: router),
         ),
       );
@@ -61,7 +67,12 @@ void main() {
     addTearDown(router.dispose);
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(prefs),
+          sleepProgressStoreProvider.overrideWith(
+            (ref) => SleepProgressStore(prefs),
+          ),
+        ],
         child: MaterialApp.router(routerConfig: router),
       ),
     );
@@ -84,7 +95,12 @@ void main() {
       addTearDown(router.dispose);
       await tester.pumpWidget(
         ProviderScope(
-          overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
+          overrides: [
+            sharedPreferencesProvider.overrideWithValue(prefs),
+            sleepProgressStoreProvider.overrideWith(
+              (ref) => SleepProgressStore(prefs),
+            ),
+          ],
           child: MaterialApp.router(routerConfig: router),
         ),
       );
@@ -145,7 +161,12 @@ void main() {
     addTearDown(router.dispose);
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(prefs),
+          sleepProgressStoreProvider.overrideWith(
+            (ref) => SleepProgressStore(prefs),
+          ),
+        ],
         child: MaterialApp.router(
           routerConfig: router,
           builder: (context, child) => MediaQuery(

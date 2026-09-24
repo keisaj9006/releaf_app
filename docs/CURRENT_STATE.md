@@ -437,9 +437,9 @@ on entry and persists during meaningful movement, pause, lifecycle transitions
 and finite completion. Premium Stories use the existing entitlement preview
 gate. The current `ST-DC-004` entry remains honestly asset-pending and exposes no
 play action because approved audio, duration, artwork and access assignment have
-not been supplied. The player is route-ready but is intentionally not promoted
-from the public Sleep discovery screen until the registry-driven discovery
-milestone is complete. Focused Sleep/Sound/Stories verification passed 138/138;
+not been supplied. The player is route-ready and the public discovery screen
+shows the Story honestly as audio in production without a start action. Focused
+Sleep/Sound/Stories verification passed 138/138;
 the full suite passed 629/629, analysis is clean and the configured Android debug
 APK built successfully. See
 [`release/2026-09-24-sleep-story-player.md`](release/2026-09-24-sleep-story-player.md).
@@ -468,9 +468,19 @@ system interruption recovery preserves later user and notification decisions.
 
 Nature and Sleep Music must not contain narration. Stories and guided Sleep
 Meditations may use approved narration; missing production recordings remain
-unavailable rather than falling back to another voice. The current visible
-Sleep screen is still the earlier sound-first implementation until the
-registry-driven discovery milestone is complete.
+unavailable rather than falling back to another voice.
+
+The visible Sleep screen now reads the canonical registry. It exposes the exact
+All / Stories / Nature / Meditations / Sleep Music taxonomy, Tonight, Popular,
+local Continue Listening, and all five Story collections with See all views.
+Cards route to the existing Sound, Meditation and Story boundaries; Premium
+content previews before the paywall, and the legacy Sound library remains
+reachable. Pending Story audio and missing recorded Meditation guidance are
+labelled and disabled rather than substituted. The 320 px / 200% text layout is
+covered. Focused cross-route verification passed 90/90, the full suite passed
+636/636, analysis is clean and the configured Android debug APK built. ADB
+reported no attached device, so installation and physical review remain open.
+See [Sleep discovery evidence](release/2026-09-24-sleep-discovery.md).
 
 The user previously reported timer/seek/audio UX defects during development; later project work reported the ±10-second seek fix and the current release gate marks player/timer behavior as tested. Treat those earlier bug reports as historical unless reproduced.
 

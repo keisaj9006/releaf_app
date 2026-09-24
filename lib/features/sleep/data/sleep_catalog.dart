@@ -66,6 +66,16 @@ class SleepCatalog {
       .where((item) => item.category == category)
       .toList(growable: false);
 
+  List<SleepContent> getFeatured() => _ranked(
+    getAll().where((item) => item.featuredRank != null && item.isPlayable),
+    (item) => item.featuredRank!,
+  );
+
+  List<SleepContent> getPopular() => _ranked(
+    getAll().where((item) => item.popularRank != null && item.isPlayable),
+    (item) => item.popularRank!,
+  );
+
   List<SleepContent> getByStoryCollection(SleepStoryCollection collection) =>
       getAll()
           .where((item) {
@@ -170,6 +180,18 @@ class SleepCatalog {
                 ? SleepAccessTier.premium
                 : SleepAccessTier.free,
             releaseStatus: SleepReleaseStatus.ready,
+            featuredRank: switch (track.id) {
+              'deep-drift' => 1,
+              'soft-rain' => 2,
+              _ => null,
+            },
+            popularRank: switch (track.id) {
+              'deep-drift' => 1,
+              'soft-rain' => 2,
+              'ocean-wash' => 3,
+              'releaf-atmosphere-01' => 4,
+              _ => null,
+            },
             playbackSource: SleepPlaybackSource.sound(track.id),
             accessibilityLabel: '${track.title}. ${track.subtitle}',
           ),
@@ -201,5 +223,17 @@ class SleepCatalog {
           ),
         )
         .toList(growable: false);
+  }
+
+  static List<SleepContent> _ranked(
+    Iterable<SleepContent> items,
+    int Function(SleepContent) rankOf,
+  ) {
+    final ranked = items.toList(growable: false)
+      ..sort((a, b) {
+        final byRank = rankOf(a).compareTo(rankOf(b));
+        return byRank != 0 ? byRank : a.id.compareTo(b.id);
+      });
+    return List<SleepContent>.unmodifiable(ranked);
   }
 }

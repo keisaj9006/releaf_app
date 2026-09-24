@@ -9,11 +9,27 @@ import '../../../theme/app_theme.dart';
 import '../../../theme/releaf_design_tokens.dart';
 import '../../../theme/widgets/releaf_sleep_artwork.dart';
 import '../../relief/application/relief_paywall_hooks.dart';
-import '../../sound/data/sound_catalog.dart';
-import '../../sound/domain/sound_content.dart';
+import '../../stories/domain/relief_story.dart';
 import '../../stories/story_preview_config.dart';
+import '../application/sleep_progress_store.dart';
+import '../data/sleep_catalog.dart';
+import '../domain/sleep_content.dart';
 
-class SleepScreen extends ConsumerWidget {
+String? sleepRouteFor(SleepContent content) {
+  final source = content.playbackSource;
+  if (source == null) return null;
+  return switch (source.type) {
+    SleepPlaybackSourceType.story => AppRoutes.sleepStoryPlayerFor(
+      source.reference,
+    ),
+    SleepPlaybackSourceType.sound => AppRoutes.soundPlayerFor(source.reference),
+    SleepPlaybackSourceType.meditation => AppRoutes.meditationSessionFor(
+      source.reference,
+    ),
+  };
+}
+
+class SleepScreen extends ConsumerStatefulWidget {
   const SleepScreen({
     super.key,
     this.showBack = false,
@@ -23,67 +39,42 @@ class SleepScreen extends ConsumerWidget {
   final bool showBack;
   final bool storiesPreviewEnabled;
 
-  static const _sleepToneIds = <String>[
-    'deep-drift',
-    'pink-noise',
-    'brown-noise',
-    'white-noise',
-  ];
+  @override
+  ConsumerState<SleepScreen> createState() => _SleepScreenState();
+}
 
-  static const _natureSoundIds = <String>[
-    'soft-rain',
-    'night-air',
-    'ocean-wash',
-    'forest-canopy',
-  ];
-
-  static const _sleepAtmosphereIds = <String>[
-    'releaf-atmosphere-01',
-    'releaf-atmosphere-02',
-  ];
+class _SleepScreenState extends ConsumerState<SleepScreen> {
+  SleepCategory? _selectedCategory;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final catalog = ref.watch(soundCatalogProvider);
+  Widget build(BuildContext context) {
+    final catalog = ref.watch(sleepCatalogProvider);
     final isPremium = ref.watch(subscriptionControllerProvider).isPremium;
-    final sleepTones = _sleepToneIds
-        .map(catalog.getById)
-        .whereType<SoundContent>()
-        .toList(growable: false);
-    final natureSounds = _natureSoundIds
-        .map(catalog.getById)
-        .whereType<SoundContent>()
-        .toList(growable: false);
-    final sleepAtmospheres = _sleepAtmosphereIds
-        .map(catalog.getById)
-        .whereType<SoundContent>()
-        .toList(growable: false);
-    final featured = catalog.getById('deep-drift');
+    final progress = ref.watch(sleepProgressStoreProvider);
+    final continueRecords = _resolveContinueListening(catalog, progress);
 
-    Future<void> open(SoundContent track) async {
-      if (!track.isPremium || isPremium) {
-        await context.push(AppRoutes.soundPlayerFor(track.id));
-        return;
+    Future<void> open(SleepContent content) async {
+      final route = sleepRouteFor(content);
+      if (!content.isPlayable || route == null) return;
+
+      if (content.isPremium && !isPremium) {
+        final unlock = await showModalBottomSheet<bool>(
+          context: context,
+          useSafeArea: true,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          barrierColor: Colors.black.withValues(alpha: 0.72),
+          builder: (_) => _SleepPremiumPreview(content: content),
+        );
+        if (unlock != true || !context.mounted) return;
+        await maybeShowPaywall(context, ref, force: true, softOffer: true);
+        if (!context.mounted ||
+            !ref.read(subscriptionControllerProvider).isPremium) {
+          return;
+        }
       }
 
-      final unlock = await showModalBottomSheet<bool>(
-        context: context,
-        useSafeArea: true,
-        isScrollControlled: true,
-        backgroundColor: Colors.transparent,
-        barrierColor: Colors.black.withValues(alpha: 0.72),
-        builder: (_) => _SleepPremiumSoundPreview(track: track),
-      );
-
-      if (unlock != true || !context.mounted) return;
-
-      await maybeShowPaywall(context, ref, force: true, softOffer: true);
-      if (!context.mounted) return;
-
-      final nowPremium = ref.read(subscriptionControllerProvider).isPremium;
-      if (nowPremium) {
-        await context.push(AppRoutes.soundPlayerFor(track.id));
-      }
+      if (context.mounted) await context.push(route);
     }
 
     return Theme(
@@ -97,117 +88,69 @@ class SleepScreen extends ConsumerWidget {
               child: Center(
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 780),
-                  child: CustomScrollView(
+                  child: SingleChildScrollView(
+                    key: const Key('sleep-discovery-scroll'),
                     physics: const BouncingScrollPhysics(),
-                    slivers: [
-                      SliverToBoxAdapter(
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(
-                            ReleafSpacing.screen,
-                            ReleafSpacing.lg,
-                            ReleafSpacing.screen,
-                            124,
+                    padding: const EdgeInsets.fromLTRB(
+                      ReleafSpacing.screen,
+                      ReleafSpacing.lg,
+                      ReleafSpacing.screen,
+                      124,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (widget.showBack) ...[
+                          IconButton(
+                            key: const Key('sleep-back'),
+                            tooltip: 'Back',
+                            onPressed: () => _close(context),
+                            icon: const Icon(Icons.arrow_back_rounded),
                           ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              if (showBack) ...[
-                                Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: IconButton(
-                                    key: const Key('sleep-back'),
-                                    tooltip: 'Back',
-                                    onPressed: () {
-                                      if (context.canPop()) {
-                                        context.pop();
-                                      } else {
-                                        context.go(AppRoutes.home);
-                                      }
-                                    },
-                                    icon: const Icon(Icons.arrow_back_rounded),
-                                  ),
-                                ),
-                                const SizedBox(height: ReleafSpacing.sm),
-                              ],
-                              const _Header(),
-                              const PrimaryDestinationActions(),
-                              Align(
-                                alignment: Alignment.centerLeft,
-                                child: TextButton.icon(
-                                  key: const Key('sleep-open-sound-library'),
-                                  onPressed: () =>
-                                      context.push(AppRoutes.sound),
-                                  icon: const Icon(
-                                    Icons.library_music_outlined,
-                                  ),
-                                  label: const Text('Your sound library'),
-                                ),
-                              ),
-                              if (storiesPreviewEnabled) ...[
-                                const SizedBox(height: ReleafSpacing.md),
-                                _StoriesPreviewEntry(
-                                  onPressed: () =>
-                                      context.push(AppRoutes.storiesPreview),
-                                ),
-                              ],
-                              const SizedBox(height: ReleafSpacing.xl),
-                              if (featured != null)
-                                _FeaturedSleepSound(
-                                  track: featured,
-                                  onPressed: () => open(featured),
-                                ),
-                              if (sleepTones.isNotEmpty) ...[
-                                const SizedBox(height: ReleafSpacing.section),
-                                const _SectionHeading(
-                                  eyebrow: 'SLEEP TONES',
-                                  title: 'Steady sound, kept low.',
-                                  description:
-                                      'No voice and no instructions. Choose a soft tonal bed or coloured noise, then let it loop quietly.',
-                                ),
-                                const SizedBox(height: ReleafSpacing.md),
-                                _SoundRail(
-                                  sounds: sleepTones,
-                                  isPremium: isPremium,
-                                  onOpen: open,
-                                ),
-                              ],
-                              if (natureSounds.isNotEmpty) ...[
-                                const SizedBox(height: ReleafSpacing.section),
-                                const _SectionHeading(
-                                  eyebrow: 'NATURE AT NIGHT',
-                                  title: 'Rain and quiet night air.',
-                                  description:
-                                      'Simple environmental textures without speech, wildlife calls, thunder or sudden peaks.',
-                                ),
-                                const SizedBox(height: ReleafSpacing.md),
-                                _SoundRail(
-                                  sounds: natureSounds,
-                                  isPremium: isPremium,
-                                  onOpen: open,
-                                ),
-                              ],
-                              if (sleepAtmospheres.isNotEmpty) ...[
-                                const SizedBox(height: ReleafSpacing.section),
-                                const _SectionHeading(
-                                  eyebrow: 'LOW-STIMULATION AMBIENCE',
-                                  title: 'Longer spaces for the night.',
-                                  description:
-                                      'Existing Releaf ambient soundscapes surfaced for sleep: no voice, no sleep-frequency claims and no sudden instructions.',
-                                ),
-                                const SizedBox(height: ReleafSpacing.md),
-                                _SoundRail(
-                                  sounds: sleepAtmospheres,
-                                  isPremium: isPremium,
-                                  onOpen: open,
-                                ),
-                              ],
-                              const SizedBox(height: ReleafSpacing.section),
-                              const _ResearchNote(),
-                            ],
-                          ),
+                          const SizedBox(height: ReleafSpacing.sm),
+                        ],
+                        const _Header(),
+                        const PrimaryDestinationActions(),
+                        TextButton.icon(
+                          key: const Key('sleep-open-sound-library'),
+                          onPressed: () => context.push(AppRoutes.sound),
+                          icon: const Icon(Icons.library_music_outlined),
+                          label: const Text('Your sound library'),
                         ),
-                      ),
-                    ],
+                        if (widget.storiesPreviewEnabled) ...[
+                          const SizedBox(height: ReleafSpacing.sm),
+                          _OwnerPreviewEntry(
+                            onPressed: () =>
+                                context.push(AppRoutes.storiesPreview),
+                          ),
+                        ],
+                        const SizedBox(height: ReleafSpacing.lg),
+                        _CategoryFilters(
+                          selected: _selectedCategory,
+                          onSelected: (category) {
+                            setState(() => _selectedCategory = category);
+                          },
+                        ),
+                        const SizedBox(height: ReleafSpacing.xl),
+                        if (_selectedCategory == null)
+                          _AllDiscovery(
+                            catalog: catalog,
+                            continueRecords: continueRecords,
+                            onOpen: open,
+                            onSeeCategory: (category) {
+                              setState(() => _selectedCategory = category);
+                            },
+                          )
+                        else
+                          _CategoryDiscovery(
+                            category: _selectedCategory!,
+                            catalog: catalog,
+                            onOpen: open,
+                          ),
+                        const SizedBox(height: ReleafSpacing.section),
+                        const _ResearchNote(),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -215,6 +158,694 @@ class SleepScreen extends ConsumerWidget {
           ],
         ),
       ),
+    );
+  }
+
+  void _close(BuildContext context) {
+    if (context.canPop()) {
+      context.pop();
+    } else {
+      context.go(AppRoutes.home);
+    }
+  }
+}
+
+List<({SleepContent content, SleepProgressRecord progress})>
+_resolveContinueListening(
+  SleepCatalog catalog,
+  List<SleepProgressRecord> progress,
+) {
+  final sorted =
+      progress
+          .where(
+            (record) => !record.isCompleted && record.position > Duration.zero,
+          )
+          .toList(growable: false)
+        ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+  return sorted
+      .map((record) {
+        final content = catalog.getById(record.contentId);
+        return content == null || !content.isPlayable
+            ? null
+            : (content: content, progress: record);
+      })
+      .whereType<({SleepContent content, SleepProgressRecord progress})>()
+      .toList(growable: false);
+}
+
+class _AllDiscovery extends StatelessWidget {
+  const _AllDiscovery({
+    required this.catalog,
+    required this.continueRecords,
+    required this.onOpen,
+    required this.onSeeCategory,
+  });
+
+  final SleepCatalog catalog;
+  final List<({SleepContent content, SleepProgressRecord progress})>
+  continueRecords;
+  final ValueChanged<SleepContent> onOpen;
+  final ValueChanged<SleepCategory> onSeeCategory;
+
+  @override
+  Widget build(BuildContext context) {
+    final featured = catalog.getFeatured();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (featured.isNotEmpty)
+          _TonightCard(content: featured.first, onOpen: onOpen),
+        if (continueRecords.isNotEmpty) ...[
+          const SizedBox(height: ReleafSpacing.section),
+          const _SectionTitle(title: 'Continue Listening'),
+          const SizedBox(height: ReleafSpacing.md),
+          _ContinueRail(records: continueRecords, onOpen: onOpen),
+        ],
+        const SizedBox(height: ReleafSpacing.section),
+        const _SectionTitle(eyebrow: 'FAMILIAR FAVOURITES', title: 'Popular'),
+        const SizedBox(height: ReleafSpacing.md),
+        _ContentRail(
+          items: catalog.getPopular(),
+          keyPrefix: 'sleep-popular',
+          onOpen: onOpen,
+        ),
+        const SizedBox(height: ReleafSpacing.section),
+        _CategorySection(
+          eyebrow: 'NATURE AT NIGHT',
+          title: 'Nature for the night',
+          items: catalog.getByCategory(SleepCategory.nature),
+          onOpen: onOpen,
+          onSeeAll: () => onSeeCategory(SleepCategory.nature),
+        ),
+        const SizedBox(height: ReleafSpacing.section),
+        _CategorySection(
+          eyebrow: 'SLEEP MEDITATIONS',
+          title: 'Settle with gentle guidance',
+          items: catalog.getByCategory(SleepCategory.meditations),
+          onOpen: onOpen,
+          onSeeAll: () => onSeeCategory(SleepCategory.meditations),
+        ),
+        const SizedBox(height: ReleafSpacing.section),
+        _CategorySection(
+          eyebrow: 'SLEEP MUSIC',
+          title: 'Low-stimulation sound',
+          items: catalog.getByCategory(SleepCategory.sleepMusic),
+          onOpen: onOpen,
+          onSeeAll: () => onSeeCategory(SleepCategory.sleepMusic),
+        ),
+        const SizedBox(height: ReleafSpacing.section),
+        _StoryCollections(catalog: catalog, onOpen: onOpen),
+      ],
+    );
+  }
+}
+
+class _CategoryDiscovery extends StatelessWidget {
+  const _CategoryDiscovery({
+    required this.category,
+    required this.catalog,
+    required this.onOpen,
+  });
+
+  final SleepCategory category;
+  final SleepCatalog catalog;
+  final ValueChanged<SleepContent> onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    if (category == SleepCategory.stories) {
+      return _StoryCollections(catalog: catalog, onOpen: onOpen);
+    }
+    final title = switch (category) {
+      SleepCategory.nature => 'Nature for the night',
+      SleepCategory.meditations => 'Sleep Meditations',
+      SleepCategory.sleepMusic => 'Sleep Music',
+      SleepCategory.stories => 'Stories',
+    };
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _SectionTitle(title: title),
+        const SizedBox(height: ReleafSpacing.md),
+        _ContentWrap(items: catalog.getByCategory(category), onOpen: onOpen),
+      ],
+    );
+  }
+}
+
+class _StoryCollections extends StatelessWidget {
+  const _StoryCollections({required this.catalog, required this.onOpen});
+  final SleepCatalog catalog;
+  final ValueChanged<SleepContent> onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const _SectionTitle(
+          eyebrow: 'STORIES',
+          title: 'Story collections',
+          description:
+              'Long-form listening will appear here only after its narration and artwork are approved.',
+        ),
+        const SizedBox(height: ReleafSpacing.md),
+        for (final collection in SleepStoryCollection.values) ...[
+          _StoryCollectionSection(
+            collection: collection,
+            items: catalog.getByStoryCollection(collection),
+            onOpen: onOpen,
+          ),
+          if (collection != SleepStoryCollection.values.last)
+            const SizedBox(height: ReleafSpacing.lg),
+        ],
+      ],
+    );
+  }
+}
+
+class _StoryCollectionSection extends StatelessWidget {
+  const _StoryCollectionSection({
+    required this.collection,
+    required this.items,
+    required this.onOpen,
+  });
+  final SleepStoryCollection collection;
+  final List<SleepContent> items;
+  final ValueChanged<SleepContent> onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(collection.label, style: ReleafTypography.cardTitle),
+            ),
+            TextButton(
+              key: Key('sleep-story-collection-${collection.name}-see-all'),
+              onPressed: () => _showCollection(context),
+              child: const Text('See all'),
+            ),
+          ],
+        ),
+        const SizedBox(height: ReleafSpacing.sm),
+        if (items.isEmpty)
+          _EmptyCollection(collection: collection)
+        else
+          _ContentRail(
+            items: items,
+            keyPrefix: 'sleep-content',
+            onOpen: onOpen,
+          ),
+      ],
+    );
+  }
+
+  Future<void> _showCollection(BuildContext context) {
+    return showModalBottomSheet<void>(
+      context: context,
+      useSafeArea: true,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _StoryCollectionSheet(
+        collection: collection,
+        items: items,
+        onOpen: onOpen,
+      ),
+    );
+  }
+}
+
+class _StoryCollectionSheet extends StatelessWidget {
+  const _StoryCollectionSheet({
+    required this.collection,
+    required this.items,
+    required this.onOpen,
+  });
+  final SleepStoryCollection collection;
+  final List<SleepContent> items;
+  final ValueChanged<SleepContent> onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      key: Key('sleep-story-collection-${collection.name}-sheet'),
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.sizeOf(context).height * 0.82,
+      ),
+      decoration: const BoxDecoration(
+        color: ReleafColors.surface,
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(ReleafRadii.extraLarge),
+        ),
+      ),
+      padding: EdgeInsets.fromLTRB(
+        ReleafSpacing.screen,
+        ReleafSpacing.lg,
+        ReleafSpacing.screen,
+        ReleafSpacing.lg + MediaQuery.paddingOf(context).bottom,
+      ),
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('STORIES', style: ReleafTypography.eyebrow),
+            const SizedBox(height: ReleafSpacing.xs),
+            Text(collection.label, style: ReleafTypography.display),
+            const SizedBox(height: ReleafSpacing.lg),
+            if (items.isEmpty)
+              _EmptyCollection(collection: collection)
+            else
+              _ContentWrap(
+                items: items,
+                onOpen: (content) {
+                  Navigator.of(context).pop();
+                  onOpen(content);
+                },
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CategoryFilters extends StatelessWidget {
+  const _CategoryFilters({required this.selected, required this.onSelected});
+  final SleepCategory? selected;
+  final ValueChanged<SleepCategory?> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final entries = <(SleepCategory?, String)>[
+      (null, 'All'),
+      for (final category in SleepCategory.values) (category, category.label),
+    ];
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: [
+          for (var index = 0; index < entries.length; index++) ...[
+            ChoiceChip(
+              key: Key('sleep-filter-${entries[index].$1?.name ?? 'all'}'),
+              label: Text(entries[index].$2),
+              selected: selected == entries[index].$1,
+              onSelected: (_) => onSelected(entries[index].$1),
+            ),
+            if (index != entries.length - 1)
+              const SizedBox(width: ReleafSpacing.sm),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _TonightCard extends StatelessWidget {
+  const _TonightCard({required this.content, required this.onOpen});
+  final SleepContent content;
+  final ValueChanged<SleepContent> onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      key: const Key('sleep-featured-sound'),
+      constraints: const BoxConstraints(minHeight: 280),
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(ReleafRadii.extraLarge),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.14)),
+      ),
+      child: Stack(
+        children: [
+          const Positioned.fill(
+            child: ReleafSleepArtwork(
+              variant: ReleafSleepArtworkVariant.sound,
+              intensity: 1,
+            ),
+          ),
+          const Positioned.fill(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Color(0x12000000), Color(0xF007090D)],
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(ReleafSpacing.lg),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'TONIGHT · NO VOICE',
+                  style: ReleafTypography.eyebrow.copyWith(
+                    color: const Color(0xFFD1D3DE),
+                  ),
+                ),
+                const SizedBox(height: 110),
+                Text('Tonight', style: ReleafTypography.eyebrow),
+                const SizedBox(height: ReleafSpacing.xs),
+                Text(content.title, style: ReleafTypography.display),
+                const SizedBox(height: ReleafSpacing.xs),
+                Text(content.subtitle, style: ReleafTypography.body),
+                const SizedBox(height: ReleafSpacing.md),
+                FilledButton.icon(
+                  onPressed: () => onOpen(content),
+                  icon: const Icon(Icons.play_arrow_rounded),
+                  label: const Text('Play for sleep'),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CategorySection extends StatelessWidget {
+  const _CategorySection({
+    required this.eyebrow,
+    required this.title,
+    required this.items,
+    required this.onOpen,
+    required this.onSeeAll,
+  });
+  final String eyebrow;
+  final String title;
+  final List<SleepContent> items;
+  final ValueChanged<SleepContent> onOpen;
+  final VoidCallback onSeeAll;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: _SectionTitle(eyebrow: eyebrow, title: title),
+            ),
+            TextButton(onPressed: onSeeAll, child: const Text('See all')),
+          ],
+        ),
+        const SizedBox(height: ReleafSpacing.md),
+        _ContentRail(items: items, keyPrefix: 'sleep-content', onOpen: onOpen),
+      ],
+    );
+  }
+}
+
+class _ContentRail extends StatelessWidget {
+  const _ContentRail({
+    required this.items,
+    required this.keyPrefix,
+    required this.onOpen,
+  });
+  final List<SleepContent> items;
+  final String keyPrefix;
+  final ValueChanged<SleepContent> onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          for (var index = 0; index < items.length; index++) ...[
+            SizedBox(
+              width: 242,
+              child: _ContentCard(
+                itemKey: Key('$keyPrefix-${items[index].id}'),
+                content: items[index],
+                onOpen: onOpen,
+              ),
+            ),
+            if (index != items.length - 1)
+              const SizedBox(width: ReleafSpacing.md),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _ContentWrap extends StatelessWidget {
+  const _ContentWrap({required this.items, required this.onOpen});
+  final List<SleepContent> items;
+  final ValueChanged<SleepContent> onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth >= 540
+            ? (constraints.maxWidth - ReleafSpacing.md) / 2
+            : constraints.maxWidth;
+        return Wrap(
+          spacing: ReleafSpacing.md,
+          runSpacing: ReleafSpacing.md,
+          children: [
+            for (final item in items)
+              SizedBox(
+                width: width,
+                child: _ContentCard(
+                  itemKey: Key('sleep-content-${item.id}'),
+                  content: item,
+                  onOpen: onOpen,
+                ),
+              ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _ContentCard extends StatelessWidget {
+  const _ContentCard({
+    required this.itemKey,
+    required this.content,
+    required this.onOpen,
+  });
+  final Key itemKey;
+  final SleepContent content;
+  final ValueChanged<SleepContent> onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    final status = switch (content.releaseStatus) {
+      SleepReleaseStatus.assetPending => 'AUDIO IN PRODUCTION',
+      SleepReleaseStatus.guidanceOnly => 'RECORDED VOICE PENDING',
+      SleepReleaseStatus.ready => null,
+    };
+    return Semantics(
+      button: content.isPlayable,
+      label: content.accessibilityLabel,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          key: itemKey,
+          onTap: content.isPlayable ? () => onOpen(content) : null,
+          borderRadius: BorderRadius.circular(ReleafRadii.large),
+          child: Ink(
+            padding: const EdgeInsets.all(ReleafSpacing.md),
+            decoration: BoxDecoration(
+              color: ReleafColors.surface.withValues(alpha: 0.92),
+              borderRadius: BorderRadius.circular(ReleafRadii.large),
+              border: Border.all(
+                color: content.isPremium
+                    ? ReleafColors.premium.withValues(alpha: 0.28)
+                    : Colors.white.withValues(alpha: 0.08),
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    _CategoryIcon(category: content.category),
+                    if (content.isPremium)
+                      const Expanded(
+                        child: Align(
+                          alignment: Alignment.centerRight,
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerRight,
+                            child: _PremiumTag(),
+                          ),
+                        ),
+                      )
+                    else
+                      const Spacer(),
+                  ],
+                ),
+                const SizedBox(height: ReleafSpacing.md),
+                Text(content.title, style: ReleafTypography.cardTitle),
+                const SizedBox(height: ReleafSpacing.xs),
+                Text(content.subtitle, style: ReleafTypography.meta),
+                if (status != null) ...[
+                  const SizedBox(height: ReleafSpacing.sm),
+                  Text(
+                    status,
+                    style: ReleafTypography.eyebrow.copyWith(
+                      color: ReleafColors.textSecondary,
+                    ),
+                  ),
+                ] else ...[
+                  const SizedBox(height: ReleafSpacing.sm),
+                  Row(
+                    children: [
+                      if (content.duration != null)
+                        Text(
+                          '${content.duration!.inMinutes} min',
+                          style: ReleafTypography.meta,
+                        ),
+                      const Spacer(),
+                      const Icon(Icons.play_arrow_rounded, size: 22),
+                    ],
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ContinueRail extends StatelessWidget {
+  const _ContinueRail({required this.records, required this.onOpen});
+  final List<({SleepContent content, SleepProgressRecord progress})> records;
+  final ValueChanged<SleepContent> onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        for (final entry in records)
+          Padding(
+            padding: const EdgeInsets.only(bottom: ReleafSpacing.sm),
+            child: ListTile(
+              key: Key('sleep-continue-${entry.content.id}'),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(ReleafRadii.large),
+              ),
+              tileColor: ReleafColors.surface.withValues(alpha: 0.92),
+              leading: _CategoryIcon(category: entry.content.category),
+              title: Text(entry.content.title),
+              subtitle: Text(
+                '${entry.progress.position.inMinutes} min listened',
+              ),
+              trailing: const Icon(Icons.play_arrow_rounded),
+              onTap: () => onOpen(entry.content),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _SectionTitle extends StatelessWidget {
+  const _SectionTitle({this.eyebrow, required this.title, this.description});
+  final String? eyebrow;
+  final String title;
+  final String? description;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (eyebrow != null) ...[
+          Text(eyebrow!, style: ReleafTypography.eyebrow),
+          const SizedBox(height: ReleafSpacing.xs),
+        ],
+        Text(title, style: ReleafTypography.sectionTitle),
+        if (description != null) ...[
+          const SizedBox(height: ReleafSpacing.xs),
+          Text(description!, style: ReleafTypography.body),
+        ],
+      ],
+    );
+  }
+}
+
+class _CategoryIcon extends StatelessWidget {
+  const _CategoryIcon({required this.category});
+  final SleepCategory category;
+
+  @override
+  Widget build(BuildContext context) {
+    final icon = switch (category) {
+      SleepCategory.stories => Icons.auto_stories_rounded,
+      SleepCategory.nature => Icons.park_outlined,
+      SleepCategory.meditations => Icons.self_improvement_rounded,
+      SleepCategory.sleepMusic => Icons.graphic_eq_rounded,
+    };
+    return Container(
+      width: 42,
+      height: 42,
+      decoration: BoxDecoration(
+        color: const Color(0xFF202638),
+        borderRadius: BorderRadius.circular(ReleafRadii.medium),
+      ),
+      child: Icon(icon, color: const Color(0xFFC7CAD8), size: 21),
+    );
+  }
+}
+
+class _EmptyCollection extends StatelessWidget {
+  const _EmptyCollection({required this.collection});
+  final SleepStoryCollection collection;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(ReleafSpacing.md),
+      decoration: BoxDecoration(
+        color: ReleafColors.surface.withValues(alpha: 0.56),
+        borderRadius: BorderRadius.circular(ReleafRadii.medium),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+      ),
+      child: Text(
+        '${collection.label} is being prepared for a later content release.',
+        style: ReleafTypography.meta,
+      ),
+    );
+  }
+}
+
+class _Header extends StatelessWidget {
+  const _Header();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('NIGHT', style: ReleafTypography.eyebrow),
+        const SizedBox(height: ReleafSpacing.xs),
+        Text('Sleep', style: ReleafTypography.display.copyWith(fontSize: 34)),
+        const SizedBox(height: ReleafSpacing.xs),
+        Text(
+          'Stories, nature, meditation and low-stimulation sound for a quieter night.',
+          style: ReleafTypography.body.copyWith(
+            color: ReleafColors.textSecondary,
+          ),
+        ),
+      ],
     );
   }
 }
@@ -236,12 +867,8 @@ class _SleepBackdrop extends StatelessWidget {
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [
-                Color(0x9E070A11),
-                Color(0xE5080A0F),
-                ReleafColors.background,
-              ],
-              stops: [0, 0.50, 1],
+              colors: [Color(0x9E070A11), Color(0xE5080A0F), Color(0xFF071013)],
+              stops: [0, 0.5, 1],
             ),
           ),
         ),
@@ -250,569 +877,76 @@ class _SleepBackdrop extends StatelessWidget {
   }
 }
 
-class _Header extends StatelessWidget {
-  const _Header();
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final compact = constraints.maxWidth < 360;
-
-        final copy = Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'NIGHT',
-              style: ReleafTypography.eyebrow.copyWith(
-                color: const Color(0xFFB8B9C9),
-                letterSpacing: 1.9,
-              ),
-            ),
-            const SizedBox(height: 7),
-            Text(
-              'Sleep',
-              style: ReleafTypography.display.copyWith(fontSize: 34),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              'No voice. No instructions. Just low-stimulation sound for the final part of the day.',
-              style: ReleafTypography.body.copyWith(
-                color: ReleafColors.textSecondary,
-              ),
-            ),
-          ],
-        );
-
-        if (compact) return copy;
-
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(child: copy),
-            const SizedBox(width: ReleafSpacing.md),
-            Container(
-              width: 56,
-              height: 56,
-              decoration: BoxDecoration(
-                color: const Color(0xFF141725),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: const Color(0xFF9A9DB4).withValues(alpha: 0.24),
-                ),
-              ),
-              child: const Icon(
-                Icons.nightlight_round,
-                color: Color(0xFFD4D5DE),
-                size: 24,
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-}
-
-class _StoriesPreviewEntry extends StatelessWidget {
-  const _StoriesPreviewEntry({required this.onPressed});
-
+class _OwnerPreviewEntry extends StatelessWidget {
+  const _OwnerPreviewEntry({required this.onPressed});
   final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        key: const Key('sleep-stories-preview'),
-        onTap: onPressed,
+    return ListTile(
+      key: const Key('sleep-stories-preview'),
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(ReleafRadii.large),
-        child: Ink(
-          width: double.infinity,
-          padding: const EdgeInsets.all(ReleafSpacing.lg),
-          decoration: BoxDecoration(
-            color: ReleafColors.surface,
-            borderRadius: BorderRadius.circular(ReleafRadii.large),
-            border: Border.all(
-              color: ReleafColors.premium.withValues(alpha: 0.28),
-            ),
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Container(
-                width: 46,
-                height: 46,
-                decoration: BoxDecoration(
-                  color: ReleafColors.premiumSoft,
-                  borderRadius: BorderRadius.circular(ReleafRadii.medium),
-                ),
-                child: const Icon(
-                  Icons.auto_stories_rounded,
-                  color: ReleafColors.premium,
-                ),
-              ),
-              const SizedBox(width: ReleafSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'OWNER PREVIEW',
-                      style: ReleafTypography.eyebrow.copyWith(
-                        color: ReleafColors.premium,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text('Stories', style: ReleafTypography.cardTitle),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Test narrated Stories before they become part of the public Sleep library.',
-                      style: ReleafTypography.meta.copyWith(
-                        color: ReleafColors.textSecondary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: ReleafSpacing.sm),
-              const Icon(
-                Icons.chevron_right_rounded,
-                color: ReleafColors.textSecondary,
-              ),
-            ],
-          ),
-        ),
       ),
+      tileColor: ReleafColors.surface,
+      leading: const Icon(Icons.auto_stories_rounded),
+      title: const Text('Stories'),
+      subtitle: const Text('OWNER PREVIEW'),
+      trailing: const Icon(Icons.chevron_right_rounded),
+      onTap: onPressed,
     );
   }
 }
 
-class _FeaturedSleepSound extends StatelessWidget {
-  const _FeaturedSleepSound({required this.track, required this.onPressed});
-
-  final SoundContent track;
-  final VoidCallback onPressed;
+class _SleepPremiumPreview extends StatelessWidget {
+  const _SleepPremiumPreview({required this.content});
+  final SleepContent content;
 
   @override
   Widget build(BuildContext context) {
-    final compact = MediaQuery.sizeOf(context).width < 360;
-
     return Container(
-      key: const Key('sleep-featured-sound'),
-      height: compact ? 330 : 300,
-      clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(ReleafRadii.extraLarge),
-        border: Border.all(
-          color: const Color(0xFF9E9FB1).withValues(alpha: 0.22),
+      key: const Key('sleep-premium-preview'),
+      decoration: const BoxDecoration(
+        color: ReleafColors.surface,
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(ReleafRadii.extraLarge),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF505775).withValues(alpha: 0.14),
-            blurRadius: 36,
-            offset: const Offset(0, 18),
-          ),
-        ],
       ),
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          const ReleafSleepArtwork(
-            variant: ReleafSleepArtworkVariant.sound,
-            intensity: 1,
-          ),
-          const DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Color(0x08000000),
-                  Color(0x50000000),
-                  Color(0xF007090D),
-                ],
-                stops: [0, 0.54, 1],
-              ),
-            ),
-          ),
-          Positioned(
-            top: ReleafSpacing.lg,
-            left: ReleafSpacing.lg,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-              decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.22),
-                borderRadius: BorderRadius.circular(ReleafRadii.pill),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
-              ),
-              child: Text(
-                'TONIGHT · NO VOICE',
-                style: ReleafTypography.eyebrow.copyWith(
-                  color: const Color(0xFFD1D3DE),
-                  fontSize: 8.5,
-                  letterSpacing: 1.3,
-                ),
-              ),
-            ),
-          ),
-          Positioned(
-            left: ReleafSpacing.lg,
-            right: ReleafSpacing.lg,
-            bottom: ReleafSpacing.lg,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  track.title,
-                  style: ReleafTypography.display.copyWith(
-                    fontSize: compact ? 27 : 31,
-                    letterSpacing: -0.8,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  'A slow tonal bed with no vocals and no spoken guidance. Start at a low volume and let it fade into the room.',
-                  maxLines: compact ? 4 : 3,
-                  overflow: TextOverflow.ellipsis,
-                  style: ReleafTypography.body.copyWith(
-                    color: ReleafColors.textPrimary.withValues(alpha: 0.78),
-                  ),
-                ),
-                const SizedBox(height: ReleafSpacing.md),
-                FilledButton.icon(
-                  onPressed: onPressed,
-                  icon: const Icon(Icons.play_arrow_rounded),
-                  label: const Text('Play for sleep'),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: const Color(0xFFD8D5CB),
-                    foregroundColor: const Color(0xFF101116),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+      padding: EdgeInsets.fromLTRB(
+        ReleafSpacing.screen,
+        ReleafSpacing.lg,
+        ReleafSpacing.screen,
+        ReleafSpacing.lg + MediaQuery.paddingOf(context).bottom,
       ),
-    );
-  }
-}
-
-class _SectionHeading extends StatelessWidget {
-  const _SectionHeading({
-    required this.eyebrow,
-    required this.title,
-    required this.description,
-  });
-
-  final String eyebrow;
-  final String title;
-  final String description;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          eyebrow,
-          style: ReleafTypography.eyebrow.copyWith(
-            color: const Color(0xFF9EA4BC),
-          ),
-        ),
-        const SizedBox(height: ReleafSpacing.xs),
-        Text(title, style: ReleafTypography.sectionTitle),
-        const SizedBox(height: 4),
-        Text(description, style: ReleafTypography.body),
-      ],
-    );
-  }
-}
-
-class _SoundRail extends StatelessWidget {
-  const _SoundRail({
-    required this.sounds,
-    required this.isPremium,
-    required this.onOpen,
-  });
-
-  final List<SoundContent> sounds;
-  final bool isPremium;
-  final ValueChanged<SoundContent> onOpen;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      key: const Key('sleep-sound-rail'),
-      height:
-          220 +
-          ((MediaQuery.textScalerOf(context).scale(18) / 18 - 1) * 100).clamp(
-            0,
-            200,
-          ),
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        physics: const BouncingScrollPhysics(),
-        itemCount: sounds.length,
-        separatorBuilder: (_, _) => const SizedBox(width: ReleafSpacing.sm),
-        itemBuilder: (context, index) {
-          final track = sounds[index];
-          final compact = MediaQuery.sizeOf(context).width < 360;
-          return SizedBox(
-            width: compact ? 232 : 270,
-            child: _SoundCard(
-              track: track,
-              isLocked: track.isPremium && !isPremium,
-              onPressed: () => onOpen(track),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const _PremiumTag(),
+            const SizedBox(height: ReleafSpacing.md),
+            Text(content.title, style: ReleafTypography.display),
+            const SizedBox(height: ReleafSpacing.xs),
+            Text(content.description, style: ReleafTypography.body),
+            const SizedBox(height: ReleafSpacing.lg),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                key: const Key('sleep-premium-preview-unlock'),
+                onPressed: () => Navigator.of(context).pop(true),
+                icon: const Icon(Icons.lock_open_rounded),
+                label: const Text('Unlock Premium'),
+              ),
             ),
-          );
-        },
-      ),
-    );
-  }
-}
-
-class _SoundCard extends StatelessWidget {
-  const _SoundCard({
-    required this.track,
-    required this.isLocked,
-    required this.onPressed,
-  });
-
-  final SoundContent track;
-  final bool isLocked;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      key: Key('sleep-sound-${track.id}'),
-      color: Colors.transparent,
-      borderRadius: BorderRadius.circular(ReleafRadii.large),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onPressed,
-        child: Ink(
-          decoration: BoxDecoration(
-            color: const Color(0xFF0B1218),
-            borderRadius: BorderRadius.circular(ReleafRadii.large),
-            border: Border.all(
-              color: const Color(0xFF6E8796).withValues(alpha: 0.25),
-            ),
-          ),
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              const Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                height: 122,
-                child: ReleafSleepArtwork(
-                  variant: ReleafSleepArtworkVariant.sound,
-                  intensity: 0.92,
-                ),
-              ),
-              const DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.transparent,
-                      Color(0xB30B1218),
-                      Color(0xFF0B1218),
-                    ],
-                    stops: [0.10, 0.50, 0.70],
-                  ),
-                ),
-              ),
-              if (isLocked)
-                const Positioned(top: 10, right: 10, child: _SleepPremiumTag()),
-              Padding(
-                padding: const EdgeInsets.all(ReleafSpacing.md),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      _soundCategoryLabel(track.category),
-                      style: ReleafTypography.eyebrow.copyWith(
-                        color: const Color(0xFFA9B8C4),
-                        fontSize: 8.5,
-                      ),
-                    ),
-                    const Spacer(),
-                    Text(
-                      track.title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: ReleafTypography.cardTitle.copyWith(fontSize: 18),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      track.subtitle,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: ReleafTypography.meta.copyWith(
-                        color: ReleafColors.textSecondary,
-                        height: 1.35,
-                      ),
-                    ),
-                    const SizedBox(height: 9),
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.all_inclusive_rounded,
-                          size: 15,
-                          color: Color(0xFFA9B8C4),
-                        ),
-                        const SizedBox(width: 5),
-                        Expanded(
-                          child: Text(
-                            'Continuous loop',
-                            style: ReleafTypography.meta.copyWith(
-                              color: ReleafColors.textMuted,
-                              fontSize: 8.5,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 5),
-                        Icon(
-                          isLocked
-                              ? Icons.lock_outline_rounded
-                              : Icons.play_circle_outline_rounded,
-                          size: 19,
-                          color: isLocked
-                              ? ReleafColors.premium
-                              : const Color(0xFFD1D7DE),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+          ],
         ),
       ),
     );
   }
 }
 
-class _SleepPremiumSoundPreview extends StatelessWidget {
-  const _SleepPremiumSoundPreview({required this.track});
-
-  final SoundContent track;
-
-  @override
-  Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.bottomCenter,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 680),
-        child: Material(
-          key: const Key('sleep-premium-preview'),
-          color: ReleafColors.backgroundRaised,
-          borderRadius: const BorderRadius.vertical(
-            top: Radius.circular(ReleafRadii.extraLarge),
-          ),
-          clipBehavior: Clip.antiAlias,
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(
-              ReleafSpacing.screen,
-              ReleafSpacing.lg,
-              ReleafSpacing.screen,
-              ReleafSpacing.xl,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    const _SleepPremiumTag(),
-                    const Spacer(),
-                    IconButton(
-                      tooltip: 'Close preview',
-                      onPressed: () => Navigator.of(context).pop(false),
-                      icon: const Icon(Icons.close_rounded),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: ReleafSpacing.md),
-                Container(
-                  height: 170,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(ReleafRadii.large),
-                  ),
-                  clipBehavior: Clip.antiAlias,
-                  child: const Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      ReleafSleepArtwork(
-                        variant: ReleafSleepArtworkVariant.sound,
-                        intensity: 1,
-                      ),
-                      DecoratedBox(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [Color(0x12000000), Color(0xD507090D)],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: ReleafSpacing.lg),
-                Text(
-                  track.title,
-                  style: ReleafTypography.display.copyWith(fontSize: 28),
-                ),
-                const SizedBox(height: ReleafSpacing.xs),
-                Text(
-                  track.subtitle,
-                  style: ReleafTypography.body.copyWith(
-                    color: ReleafColors.textSecondary,
-                    height: 1.5,
-                  ),
-                ),
-                const SizedBox(height: ReleafSpacing.sm),
-                Text(
-                  '${_soundCategoryLabel(track.category)} • Continuous loop • No voice',
-                  style: ReleafTypography.meta.copyWith(
-                    color: const Color(0xFFA9B8C4),
-                  ),
-                ),
-                const SizedBox(height: ReleafSpacing.lg),
-                Text(
-                  'This sleep sound is included with Releaf Premium. Sleep playback remains audio-only: no narration, spoken guidance or instructions are added.',
-                  style: ReleafTypography.meta.copyWith(
-                    color: ReleafColors.textMuted,
-                    height: 1.5,
-                  ),
-                ),
-                const SizedBox(height: ReleafSpacing.lg),
-                SizedBox(
-                  width: double.infinity,
-                  child: FilledButton.icon(
-                    key: const Key('sleep-premium-preview-unlock'),
-                    onPressed: () => Navigator.of(context).pop(true),
-                    icon: const Icon(Icons.lock_open_rounded),
-                    label: const Text('Unlock Premium'),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _SleepPremiumTag extends StatelessWidget {
-  const _SleepPremiumTag();
+class _PremiumTag extends StatelessWidget {
+  const _PremiumTag();
 
   @override
   Widget build(BuildContext context) {
@@ -821,25 +955,10 @@ class _SleepPremiumTag extends StatelessWidget {
       decoration: BoxDecoration(
         color: ReleafColors.premium.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(ReleafRadii.pill),
-        border: Border.all(color: ReleafColors.premium.withValues(alpha: 0.26)),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(
-            Icons.workspace_premium_outlined,
-            size: 13,
-            color: ReleafColors.premium,
-          ),
-          const SizedBox(width: 5),
-          Text(
-            'PREMIUM',
-            style: ReleafTypography.eyebrow.copyWith(
-              color: ReleafColors.premium,
-              fontSize: 8,
-            ),
-          ),
-        ],
+      child: Text(
+        'PREMIUM',
+        style: ReleafTypography.eyebrow.copyWith(color: ReleafColors.premium),
       ),
     );
   }
@@ -856,39 +975,15 @@ class _ResearchNote extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xE6090C11),
         borderRadius: BorderRadius.circular(ReleafRadii.medium),
-        border: Border.all(
-          color: const Color(0xFF5F6575).withValues(alpha: 0.22),
-        ),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Icon(
-            Icons.hearing_outlined,
-            size: 18,
-            color: Color(0xFFA8ADBE),
-          ),
-          const SizedBox(width: ReleafSpacing.sm),
-          Expanded(
-            child: Text(
-              'Sound can help some people mask disruptions or settle, but responses vary. Keep playback comfortably low and stop if it feels intrusive. Releaf does not claim that one special carrier frequency treats insomnia.',
-              style: ReleafTypography.meta.copyWith(
-                color: ReleafColors.textSecondary,
-                height: 1.5,
-              ),
-            ),
-          ),
-        ],
+      child: Text(
+        'Sound and listening preferences vary. Keep playback comfortably low and stop if it feels intrusive. Releaf does not claim that one special frequency treats insomnia.',
+        style: ReleafTypography.meta.copyWith(
+          color: ReleafColors.textSecondary,
+          height: 1.5,
+        ),
       ),
     );
   }
-}
-
-String _soundCategoryLabel(SoundCategory category) {
-  return switch (category) {
-    SoundCategory.atmosphere => 'SLEEP TONE',
-    SoundCategory.noise => 'COLOURED NOISE',
-    SoundCategory.weather => 'NATURE · RAIN',
-    SoundCategory.environment => 'NATURE · NIGHT',
-  };
 }

@@ -8,7 +8,10 @@ The owner-selected voice is now the production baseline. Reference generation ID
 
 Canonical delivery speed: **0.82x**. Generate narration at 0.82 in the voice provider when supported. When the approved provider does not expose numeric speed control, apply pitch-preserving 0.82 mastering before bundling the asset. Never alter narration playback speed in Flutter.
 
-The voice applies to **Meditate**, guided Reset experiences, and Emergency guidance where voice is enabled. **Sleep is voice-free** and must contain only sleep audio/music/nature sound content.
+The voice applies to **Meditate**, guided Reset experiences, Emergency guidance
+where voice is enabled, Stories and guided Sleep Meditations. Nature and Sleep
+Music are voice-free. Missing approved narration must never be replaced with
+device TTS or another narrator.
 
 ## Voice identity
 
@@ -75,7 +78,8 @@ Longer sessions should generally contain a lower narration density than short in
 - still clearly guided; do not turn the delivery into whisper/ASMR
 
 ### Sleep
-No Releaf Guide narration. Sleep is a voice-free audio destination.
+No Releaf Guide narration in Nature or Sleep Music. Stories and guided Sleep
+Meditations may use only their separately approved recorded narration.
 
 ## Recording / generation workflow
 
