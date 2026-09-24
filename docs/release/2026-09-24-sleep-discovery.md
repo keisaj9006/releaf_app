@@ -22,6 +22,9 @@ voice.
 
 ## Verification
 
+Implementation checkpoint: `3e6774f` on `releaf-development`, pushed only to
+`origin/releaf-development`.
+
 - `dart format ...` — passed.
 - `flutter analyze --no-pub` — passed, no issues.
 - Focused Sleep/navigation regression — **90/90 passed**.

@@ -131,4 +131,4 @@
 - [x] Update older broad “Sleep has no narration” language to the precise approved rule: Nature/Music have no narration; Stories and guided Sleep Meditations may narrate.
 - [x] Record missing approved production audio/artwork and physical Bluetooth/background/lock-screen checks as open dependencies.
 - [x] Run `dart format`, `flutter analyze --no-pub`, focused tests, full tests and the ignored-config Android build.
-- [ ] Inspect `git diff --check`, confirm no secrets/generated artifacts, commit and push only `origin/releaf-development`.
+- [x] Inspect `git diff --check`, confirm no secrets/generated artifacts, commit and push only `origin/releaf-development`.
