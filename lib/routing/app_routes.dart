@@ -20,12 +20,15 @@ class AppRoutes {
 
   static const reliefSession = '/relief/session/:sessionId';
   static const soundPlayer = '/sound/:trackId';
+  static const sleepStoryPlayer = '/sleep/story/:storyId';
   static const meditationSession = '/meditate/:meditationId';
 
   static String reliefSessionFor(String sessionId) =>
       '/relief/session/$sessionId';
 
   static String soundPlayerFor(String trackId) => '/sound/$trackId';
+
+  static String sleepStoryPlayerFor(String storyId) => '/sleep/story/$storyId';
 
   static String meditationSessionFor(String meditationId) =>
       '/meditate/$meditationId';

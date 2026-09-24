@@ -422,12 +422,27 @@ is clean.
 
 The existing Sound playback controller and background AudioService now expose an
 explicit looping/finite mode. Existing Nature and Sleep Music remain looped;
-future long-form Stories use finite playback, report completion once and restart
+long-form Stories use finite playback, report completion once and restart
 from zero after completion. Relative and absolute seeking clamp exactly at zero
 and the known duration, while forward seeking remains available before duration
 metadata arrives. Android media repeat metadata follows the selected mode. No
 second audio service was introduced. Focused audio regression passed 102/102;
 the full suite passed 619/619 and analysis is clean.
+
+The parameterized Story player route is now implemented on that shared playback
+boundary. It provides fallback artwork, title/narrator metadata, loading and
+recoverable-error states, elapsed/remaining time, scrubber, exact ±10-second
+seeking, timer controls and current-chapter capability. Local progress restores
+on entry and persists during meaningful movement, pause, lifecycle transitions
+and finite completion. Premium Stories use the existing entitlement preview
+gate. The current `ST-DC-004` entry remains honestly asset-pending and exposes no
+play action because approved audio, duration, artwork and access assignment have
+not been supplied. The player is route-ready but is intentionally not promoted
+from the public Sleep discovery screen until the registry-driven discovery
+milestone is complete. Focused Sleep/Sound/Stories verification passed 138/138;
+the full suite passed 629/629, analysis is clean and the configured Android debug
+APK built successfully. See
+[`release/2026-09-24-sleep-story-player.md`](release/2026-09-24-sleep-story-player.md).
 
 Current bundled canonical sound catalog contains 10 real tracks:
 
@@ -454,8 +469,8 @@ system interruption recovery preserves later user and notification decisions.
 Nature and Sleep Music must not contain narration. Stories and guided Sleep
 Meditations may use approved narration; missing production recordings remain
 unavailable rather than falling back to another voice. The current visible
-Sleep screen is still the earlier sound-first implementation until the new
-registry-driven discovery/player milestones are complete.
+Sleep screen is still the earlier sound-first implementation until the
+registry-driven discovery milestone is complete.
 
 The user previously reported timer/seek/audio UX defects during development; later project work reported the ±10-second seek fix and the current release gate marks player/timer behavior as tested. Treat those earlier bug reports as historical unless reproduced.
 

@@ -95,10 +95,10 @@
 - Consumes: `SleepCatalog`, the finite playback boundary and `SleepProgressStore`.
 - Produces: one parameterized Story player route with artwork fallback, title, narrator, elapsed/remaining, play/pause, exact seek, scrubber, timer, progress and chapter capability.
 
-- [ ] Write failing widget tests for asset-pending, free/Premium access, responsive layout, exact seek controls, loading/error/retry and progress restore.
-- [ ] Implement the parameterized player and route; missing audio shows an honest unavailable state.
-- [ ] Persist progress on meaningful position changes, pause, lifecycle transition and completion.
-- [ ] Verify focused tests, analyzer and an Android debug build.
+- [x] Write failing widget tests for asset-pending, free/Premium access, responsive layout, exact seek controls, loading/error/retry and progress restore.
+- [x] Implement the parameterized player and route; missing audio shows an honest unavailable state.
+- [x] Persist progress on meaningful position changes, pause, lifecycle transition and completion.
+- [x] Verify focused tests, analyzer and an Android debug build.
 
 ### Task 5: Sleep discovery
 

@@ -1,4 +1,10 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../domain/relief_story.dart';
+
+final storyByIdProvider = Provider.family<ReliefStory?, String>((ref, id) {
+  return StoryCatalog.getById(id);
+});
 
 abstract final class StoryCatalog {
   static const ownerPreview = <ReliefStory>[
