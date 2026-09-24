@@ -94,6 +94,12 @@ passed: web release, six generated-resource assertions, 11 release/privacy tests
 and existing Android source checks. This adds artifact evidence without closing
 private signing, public URL deployment, owner listening or physical release QA.
 
+[Measured release size budgets](release/2026-09-24-release-size-budgets.md) now
+fail closed when a production AAB exceeds 105,000,000 bytes or bundled runtime
+assets exceed 63,000,000 bytes. The policy runs after local and GitHub production
+builds. Final production signing, Store assets and physical performance QA remain
+open.
+
 [Single SDK initialization](release/2026-09-12-sdk-single-initialization.md)
 closes overlapping native configuration: 517 tests, clean analysis and Android
 debug build. Device installation is batched with the next device-review milestone.

@@ -124,6 +124,12 @@ jobs:
           sha256sum "$aab" > "$aab.sha256"
           test -s "$aab.sha256"
 
+      - name: Enforce measured release size budgets
+        run: >-
+          dart run tool/release/release_size_budget_policy.dart
+          --aab build/app/outputs/bundle/release/app-release.aab
+          --assets assets
+
       - name: Upload signed production AAB
         uses: actions/upload-artifact@v4
         with:

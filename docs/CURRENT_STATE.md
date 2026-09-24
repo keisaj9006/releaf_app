@@ -221,29 +221,36 @@ Its current high-level state:
 
 | Area | Current release-gate status |
 |---|---|
-| RESET core | DONE / CONTENT |
+| RESET core | DONE / CONTENT + DEVICE QA |
 | BRAIN core | DONE / QA |
-| Sleep player/timer | DONE / CONTENT |
-| Meditation player | DONE / CONTENT |
+| Sleep player/timer | IN PROGRESS / CONTENT + PHYSICAL QA |
+| Meditate module | PARKED / NON-BLOCKING FOR ACTIVE 1.0 SURFACE |
 | Account auth | DONE / QA |
 | Account deletion | DONE / E2E VERIFIED |
 | Emergency privacy/access | DONE |
 | Progress sync | DEFERRED / HARDENED |
 | Supabase security | DONE / MONITOR |
 | Android API level | DONE |
-| Android release signing | PREPARED / SECRET REQUIRED |
-| Release AAB | CI DONE / PROD SIGNING REQUIRED |
-| RevenueCat / Google Play Billing | CODE READY / EXTERNAL CONFIG REQUIRED |
-| Privacy policy | BLOCKED |
-| Web account-deletion URL | CODE READY / PUBLIC DEPLOY REQUIRED |
+| Android release signing | WORKFLOW READY / SECRETS + VARIABLES REQUIRED |
+| Release AAB | CI SMOKE DONE / PROD SIGNING REQUIRED |
+| RevenueCat / Google Play Billing | ENGINEERING + PRICING LOCKED / EXTERNAL CONFIG REQUIRED |
+| Privacy policy | LIVE / PLAY ENTRY + FINAL LEGAL REVIEW REQUIRED |
+| Web account-deletion URL | LIVE / FINAL RC QA REQUIRED |
 | Google Play health declaration | CONTENT READY / PLAY CONSOLE SUBMISSION REQUIRED |
-| Store listing | COPY READY / ASSETS + PLAY ENTRY REQUIRED |
-| Google Play Data safety | CONTENT READY / VERIFY + PLAY SUBMISSION REQUIRED |
-| Versioning | OPEN |
-| Device release QA | AUTOMATION READY / PHYSICAL DEVICE RUN REQUIRED |
+| Store listing | COPY + LEGAL CONTACTS READY / ASSETS + PLAY ENTRY REQUIRED |
+| Google Play Data safety | CONTENT + PUBLIC LEGAL URLS READY / VERIFY + PLAY SUBMISSION REQUIRED |
+| Versioning | FROZEN / RC |
+| Device release QA | AUTOMATION READY / FINAL PHYSICAL RUN REQUIRED |
 | Play closed testing | PLAN READY / ACCOUNT CHECK + PLAY RUN REQUIRED |
 
 Do not duplicate this table as a new authority; update the release gate itself when a gate actually changes.
+
+Release artifact growth is now guarded by the
+[measured size-budget policy](release/2026-09-24-release-size-budgets.md): local
+and GitHub production AAB builds fail closed above 105,000,000 bytes or when the
+bundled runtime assets exceed 63,000,000 bytes. This closes the unimplemented
+measured-budget requirement without claiming a final signed artifact or device
+performance result.
 
 ## RESET / Relief
 

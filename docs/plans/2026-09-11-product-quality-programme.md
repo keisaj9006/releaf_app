@@ -123,7 +123,7 @@ generation, production deployment or store submission under this approval.
 | 4 | Brain | IMPLEMENTED: Memory has 50 defined profiles, persisted progression and browsable all-level stats; legacy profiles and rewards preserved. Labyrinth 50-stage architecture preserved; physical game-quality review pending. |
 | 5 | Progress / personalisation / mascot | IMPLEMENTED: Home time-dependent content refreshes while active/on resume; daily rollover is fixed and tested (see daily-progress-rollover evidence). Saved focus, accumulated Leaves, reward semantics and character identity remain unchanged. |
 | 6 | Backend / subscriptions / offline | IMPLEMENTED: runtime public-key validation, single SDK initialization, unresolved-identity isolation and local-first behavior are covered. Production Play billing/distribution and purchase/restore remain external gates. |
-| 7 | Release / performance / security | Refresh evidence, asset provenance, measured budgets and store deliverables up to the explicit deployment/submission boundary. |
+| 7 | Release / performance / security | IN PROGRESS: measured AAB/runtime-asset budgets now fail closed in local and GitHub production builds. Asset provenance, exact production signing, Store assets and Play/device work remain explicit dependencies. |
 
 ## Milestone 1: know the guidance before starting
 

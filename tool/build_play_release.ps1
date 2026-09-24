@@ -74,6 +74,13 @@ try {
         throw "Expected release bundle was not produced: $bundle"
     }
 
+    dart run tool/release/release_size_budget_policy.dart `
+        --aab "$bundle" `
+        --assets (Join-Path $repoRoot "assets")
+    if ($LASTEXITCODE -ne 0) {
+        throw "Production release size budget failed. Review artifact or asset growth before release."
+    }
+
     $item = Get-Item $bundle
     Write-Host ""
     Write-Host "SUCCESS: Releaf Play release bundle created."
