@@ -16,12 +16,15 @@ class ReliefStoryChapter {
   const ReliefStoryChapter({
     required this.id,
     required this.title,
-    required this.start,
+    this.start,
   });
 
   final String id;
   final String title;
-  final Duration start;
+
+  /// Measured offset in the final delivery recording. Null means not imported.
+  /// Zero is a real first-chapter timestamp, never an unknown-time placeholder.
+  final Duration? start;
 }
 
 class ReliefStory {

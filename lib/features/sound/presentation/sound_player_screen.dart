@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/audio/releaf_audio_session.dart';
+import '../../../core/audio/relief_shared_audio_handler.dart';
 import '../../../routing/app_routes.dart';
 import '../../../theme/app_theme.dart';
 import '../../../theme/releaf_design_tokens.dart';
@@ -38,6 +39,11 @@ class _SoundPlayerScreenState extends ConsumerState<SoundPlayerScreen>
   }
 
   Future<void> _configureAudioSession() async {
+    if (ref.read(soundPlayerControllerProvider.notifier)
+        is ReliefManagedSoundController) {
+      // The application root owns managed events; drivers set content mode.
+      return;
+    }
     final session = await configureReleafAudioSession(ReleafAudioMode.sound);
     if (!mounted) return;
 
@@ -69,6 +75,10 @@ class _SoundPlayerScreenState extends ConsumerState<SoundPlayerScreen>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state != AppLifecycleState.resumed) return;
+    if (ref.read(soundPlayerControllerProvider.notifier)
+        is ReliefManagedSoundController) {
+      return;
+    }
     unawaited(
       ref.read(soundPlayerControllerProvider.notifier).syncSleepTimerNow(),
     );

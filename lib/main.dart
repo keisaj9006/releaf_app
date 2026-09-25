@@ -9,11 +9,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'core/audio/releaf_audio_session.dart';
+import 'core/audio/relief_audio_providers.dart';
+import 'core/audio/relief_audio_runtime.dart';
+import 'core/audio/relief_shared_audio_handler.dart';
 import 'core/providers.dart';
 import 'core/subscription/revenuecat_auth_identity_coordinator.dart';
 import 'core/subscription/revenuecat_lifecycle_policy.dart';
 import 'features/sound/application/releaf_background_sound_driver.dart';
 import 'features/sound/application/sound_player_controller.dart';
+import 'features/stories/application/audioplayers_story_playback_driver.dart';
+import 'features/stories/story_preview_config.dart';
 import 'routing/app_router.dart';
 import 'routing/app_routes.dart';
 import 'theme/app_theme.dart';
@@ -31,17 +37,42 @@ const _releafSupabasePublishableKey = String.fromEnvironment(
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  final prefs = await SharedPreferences.getInstance();
+  final sharedAudio = StoryPreviewConfig.enabled
+      ? ReliefSharedAudioHandler(
+          preferences: prefs,
+          soundDriver: AudioplayersSoundPlaybackDriver(),
+          storyDriver: AudioplayersStoryPlaybackDriver(),
+          configureSoundSession: () async {
+            await configureReleafAudioSession(ReleafAudioMode.sound);
+          },
+        )
+      : null;
+
   SoundPlaybackDriver? backgroundSoundDriver;
   try {
-    backgroundSoundDriver =
-        await AudioService.init<ReleafBackgroundSoundDriver>(
-          builder: ReleafBackgroundSoundDriver.new,
-          config: const AudioServiceConfig(
-            androidNotificationChannelId: 'app.releaf.mobile.audio',
-            androidNotificationChannelName: 'Releaf audio',
-            androidNotificationOngoing: true,
-          ),
-        );
+    if (sharedAudio != null) {
+      // The fallback keeps this same handler/controllers; it never initializes
+      // a second service or a competing Sound/Stories notification handler.
+      await AudioService.init<ReliefSharedAudioHandler>(
+        builder: () => sharedAudio,
+        config: const AudioServiceConfig(
+          androidNotificationChannelId: 'app.releaf.mobile.audio',
+          androidNotificationChannelName: 'Relief audio',
+          androidNotificationOngoing: true,
+        ),
+      );
+    } else {
+      backgroundSoundDriver =
+          await AudioService.init<ReleafBackgroundSoundDriver>(
+            builder: ReleafBackgroundSoundDriver.new,
+            config: const AudioServiceConfig(
+              androidNotificationChannelId: 'app.releaf.mobile.audio',
+              androidNotificationChannelName: 'Releaf audio',
+              androidNotificationOngoing: true,
+            ),
+          );
+    }
   } catch (error, stackTrace) {
     debugPrint(
       'Background audio service unavailable; using foreground playback. '
@@ -66,12 +97,14 @@ Future<void> main() async {
     publishableKey: _releafSupabasePublishableKey,
   );
 
-  final prefs = await SharedPreferences.getInstance();
-
   final overrides = [
     sharedPreferencesProvider.overrideWithValue(prefs),
     if (backgroundSoundDriver != null)
       soundPlaybackDriverProvider.overrideWithValue(backgroundSoundDriver),
+    if (sharedAudio != null) ...[
+      reliefSharedAudioHandlerProvider.overrideWithValue(sharedAudio),
+      soundPlayerControllerProvider.overrideWith((ref) => sharedAudio.sound),
+    ],
   ];
 
   final container = ProviderContainer(overrides: overrides);
@@ -114,11 +147,26 @@ class _ReleafAppState extends ConsumerState<ReleafApp>
     with WidgetsBindingObserver {
   StreamSubscription<AuthState>? _authSubscription;
   RevenueCatAuthIdentityCoordinator? _premiumIdentity;
+  ReliefAudioRuntime? _audioRuntime;
+  ReliefSharedAudioHandler? _sharedAudio;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+
+    final audio = ref.read(reliefSharedAudioHandlerProvider);
+    _sharedAudio = audio;
+    if (audio != null) {
+      final runtime = ReliefAudioRuntime(
+        onInterruption: audio.handleAudioInterruption,
+        onNoisy: audio.handleBecomingNoisy,
+        onResume: audio.onAppResumed,
+        onCheckpoint: audio.checkpoint,
+      );
+      _audioRuntime = runtime;
+      unawaited(runtime.start());
+    }
 
     try {
       final auth = Supabase.instance.client.auth;
@@ -188,10 +236,20 @@ class _ReleafAppState extends ConsumerState<ReleafApp>
     }
   }
 
+  Future<void> _closeSharedAudio() async {
+    try {
+      await _audioRuntime?.close();
+      await _sharedAudio?.close();
+    } catch (_) {
+      debugPrint('Relief audio cleanup could not finish normally.');
+    }
+  }
+
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _authSubscription?.cancel();
+    unawaited(_closeSharedAudio());
     super.dispose();
   }
 
