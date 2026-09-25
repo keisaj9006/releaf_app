@@ -7,6 +7,8 @@ import '../../sound/domain/sound_content.dart';
 import '../../stories/data/story_catalog.dart';
 import '../../stories/domain/relief_story.dart';
 import '../domain/sleep_content.dart';
+import '../domain/sleep_content_manifest.dart';
+import 'sleep_content_manifest.dart';
 
 final sleepCatalogProvider = Provider<SleepCatalog>((ref) {
   return SleepCatalog(
@@ -19,10 +21,28 @@ class SleepCatalog {
   const SleepCatalog({
     this.soundCatalog = const SoundCatalog(),
     this.meditationCatalog = const MeditationCatalog(),
+    this.manifestEntries = SleepContentManifest.candidates,
   });
 
   final SoundCatalog soundCatalog;
   final MeditationCatalog meditationCatalog;
+  final List<SleepManifestEntry> manifestEntries;
+
+  SleepReleaseStatus _releaseStatusFor(
+    String id,
+    SleepReleaseStatus sourceStatus,
+  ) {
+    for (final entry in manifestEntries) {
+      if (entry.id != id) continue;
+      if (entry.approval != SleepApprovalState.approved ||
+          entry.rights != SleepRightsState.cleared ||
+          !SleepContentManifest.promotedIds.contains(id)) {
+        return SleepReleaseStatus.assetPending;
+      }
+      break;
+    }
+    return sourceStatus;
+  }
 
   static const _storyIds = <String>['ST-DC-004'];
 
@@ -153,9 +173,12 @@ class SleepCatalog {
               false => SleepAccessTier.free,
               null => SleepAccessTier.undecided,
             },
-            releaseStatus: story.isAudioAvailable
-                ? SleepReleaseStatus.ready
-                : SleepReleaseStatus.assetPending,
+            releaseStatus: _releaseStatusFor(
+              story.id,
+              story.isAudioAvailable
+                  ? SleepReleaseStatus.ready
+                  : SleepReleaseStatus.assetPending,
+            ),
             duration: story.estimatedDuration,
             playbackSource: SleepPlaybackSource.story(story.id),
             accessibilityLabel:
@@ -179,7 +202,10 @@ class SleepCatalog {
             accessTier: track.isPremium
                 ? SleepAccessTier.premium
                 : SleepAccessTier.free,
-            releaseStatus: SleepReleaseStatus.ready,
+            releaseStatus: _releaseStatusFor(
+              track.id,
+              SleepReleaseStatus.ready,
+            ),
             featuredRank: switch (track.id) {
               'deep-drift' => 1,
               'soft-rain' => 2,
@@ -213,9 +239,12 @@ class SleepCatalog {
             accessTier: practice.accessTier == MeditationAccessTier.premium
                 ? SleepAccessTier.premium
                 : SleepAccessTier.free,
-            releaseStatus: practice.hasRecordedNarration || practice.unguided
-                ? SleepReleaseStatus.ready
-                : SleepReleaseStatus.guidanceOnly,
+            releaseStatus: _releaseStatusFor(
+              practice.id,
+              practice.hasRecordedNarration || practice.unguided
+                  ? SleepReleaseStatus.ready
+                  : SleepReleaseStatus.guidanceOnly,
+            ),
             duration: Duration(seconds: practice.durationSeconds),
             playbackSource: SleepPlaybackSource.meditation(practice.id),
             accessibilityLabel:

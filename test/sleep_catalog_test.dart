@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:releaf_app/features/meditation/data/meditation_catalog.dart';
 import 'package:releaf_app/features/meditation/domain/meditation_content.dart';
 import 'package:releaf_app/features/sleep/data/sleep_catalog.dart';
+import 'package:releaf_app/features/sleep/domain/sleep_content_manifest.dart';
 import 'package:releaf_app/features/sleep/domain/sleep_content.dart';
 import 'package:releaf_app/features/sound/data/sound_catalog.dart';
 import 'package:releaf_app/features/sound/domain/sound_content.dart';
@@ -37,6 +38,29 @@ void main() {
 
   group('Sleep catalog', () {
     const catalog = SleepCatalog();
+
+    test('a newly submitted candidate cannot activate an existing sound', () {
+      const pending = SleepManifestEntry(
+        id: 'soft-rain',
+        title: 'Soft Rain',
+        description: 'Rain for winding down.',
+        category: SleepCategory.nature,
+        audioAsset: '',
+        artworkAsset: '',
+        duration: null,
+        accessTier: SleepAccessTier.free,
+        source: SleepPlaybackSource.sound('soft-rain'),
+        creatorSource: 'Releaf',
+        licenceRecord: '',
+        approval: SleepApprovalState.pending,
+        rights: SleepRightsState.pending,
+        releaseNotes: 'Pending review.',
+      );
+      const withCandidate = SleepCatalog(manifestEntries: [pending]);
+
+      expect(withCandidate.getById('soft-rain')?.isPlayable, isFalse);
+      expect(catalog.getById('soft-rain')?.isPlayable, isTrue);
+    });
 
     test('registers the first Story without fabricating production assets', () {
       final story = catalog.getById('ST-DC-004');
