@@ -126,7 +126,7 @@ Commit: `feat(sleep): add approved content intake contract`
 
 **Interfaces:**
 - Consumes: repository root and canonical manifest data.
-- Produces: exit code `0` only when runtime-ready entries pass; human-readable errors for pending/invalid candidates; total candidate and runtime-ready bytes.
+- Produces: a Flutter test gate that fails when promoted entries are invalid; readable pending-candidate diagnostics and measured candidate/promoted bytes.
 
 - [ ] **Step 1: Write policy contract tests**
 
@@ -138,9 +138,9 @@ Run: `flutter test test/sleep_content_manifest_policy_test.dart`
 
 Expected: FAIL because the policy tool is absent.
 
-- [ ] **Step 3: Implement the CLI around shared validation rules**
+- [ ] **Step 3: Implement the Flutter release gate around shared validation rules**
 
-Accept `--root <repository>` and print only paths/metadata, never credentials. Support `.mp3`, `.m4a`, `.wav`, `.png`, `.jpg` and `.webp`; reject other runtime formats. Calculate byte totals with `File.lengthSync()` and compare the full asset tree through the existing release-size command.
+Use the repository root in the Flutter release test and report only paths/metadata, never credentials. Support `.mp3`, `.m4a`, `.wav`, `.png`, `.jpg` and `.webp`; reject other runtime formats. Calculate byte totals with `File.lengthSync()` and compare the full asset tree through the existing release-size command.
 
 - [ ] **Step 4: Record evidence without approving pending media**
 
@@ -152,7 +152,7 @@ Run: `dart format tool/release/sleep_content_manifest_policy.dart test/sleep_con
 
 Run: `flutter test test/sleep_content_manifest_policy_test.dart test/release_size_budget_policy_test.dart`
 
-Run: `dart run tool/release/sleep_content_manifest_policy.dart --root .`
+Run: `flutter test --no-pub --reporter expanded test/sleep_content_release_gate_test.dart` (the canonical catalogs require the Flutter test runner).
 
 Commit: `build(sleep): validate local content intake`
 
