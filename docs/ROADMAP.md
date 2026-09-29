@@ -333,13 +333,15 @@ Resumed milestone: [Reset audio handoff](release/2026-09-12-reset-audio-handoff.
 Reset ambience cancellation milestone passed 453 tests, clean analysis and Android build. Subsequent Memory Mirror 50-level progression is complete; bounded Sleep/Sound recheck found no additional demonstrable defect.
 
 The 23 September owner rebaseline elevates Sleep into four frozen categories:
-Stories, Nature, Meditations and Sleep Music. The recovery audit found no prior
-Story subsystem. The canonical Sleep registry, persistent local progress, finite
-playback on the existing AudioService boundary and parameterized Story player
-are now implemented and verified. Registry-driven Sleep discovery is also
-complete with the frozen taxonomy, Continue Listening, editorial rails and
-existing player routes. Next are production-asset intake and physical long-form
-playback QA. See
-`docs/superpowers/plans/2026-09-23-sleep-content-and-playback.md`.
+Stories, Nature, Meditations and Sleep Music. The canonical Sleep registry,
+local long-form progress, finite playback on the existing AudioService boundary
+and parameterized Story player are implemented. The 29 September discovery
+checkpoint replaced duplicated rails with one Continue/Tonight action and four
+responsive category gateways while preserving existing routes and player
+access. Incoming content has a fail-closed intake manifest and repository QA
+gate. `ST-DC-004` remains pending, unpromoted and unplayable. Next are approved
+production assets, owner listening, and physical long-form/background playback
+QA. See `docs/superpowers/plans/2026-09-24-sleep-content-readiness.md` and
+[Sleep intake evidence](release/2026-09-29-sleep-content-intake.md).
 
 Memory 50-level milestone implemented and verified: 462 full tests, clean analysis and Android APK. The subsequently identified subscription identity race is fixed; 467 full tests, clean analysis and Android build passed. Local web release build and all six resource assertions also passed; see release/2026-09-12-programme-verification.md. Owner/content and production-equivalent device/store gates remain open.

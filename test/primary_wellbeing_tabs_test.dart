@@ -539,11 +539,12 @@ void main() {
 
     expect(find.text('NIGHT'), findsOneWidget);
     expect(find.text('Sleep'), findsWidgets);
-    expect(find.text('SLEEP MUSIC'), findsOneWidget);
-    expect(find.text('NATURE AT NIGHT'), findsOneWidget);
+    for (final category in ['stories', 'nature', 'meditations', 'sleepMusic']) {
+      expect(find.byKey(Key('sleep-category-$category')), findsOneWidget);
+    }
+    expect(find.byKey(const Key('sleep-primary-tonight')), findsOneWidget);
     expect(find.byKey(const Key('sleep-featured-sound')), findsOneWidget);
     expect(find.text('TONIGHT · NO VOICE'), findsOneWidget);
-    expect(find.text('SLEEP MEDITATIONS'), findsOneWidget);
     expect(find.text('WIND DOWN'), findsNothing);
     expect(find.byKey(const Key('sleep-back')), findsNothing);
     expect(find.byType(NavigationBar), findsOneWidget);
@@ -693,9 +694,13 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
 
     expect(tester.takeException(), isNull);
-    await tester.ensureVisible(find.text('NATURE AT NIGHT'));
-    await tester.pumpAndSettle();
-    expect(tester.takeException(), isNull);
+    for (final category in ['stories', 'nature', 'meditations', 'sleepMusic']) {
+      final gateway = find.byKey(Key('sleep-category-$category'));
+      await tester.ensureVisible(gateway);
+      await tester.tap(gateway);
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+    }
   });
 
   testWidgets('Direct premium meditation route is gated for free users', (
@@ -1042,13 +1047,28 @@ void main() {
       );
 
       expect(find.text('TONIGHT · NO VOICE'), findsOneWidget);
-      expect(find.text('SLEEP MEDITATIONS'), findsOneWidget);
+      final meditations = find.byKey(const Key('sleep-category-meditations'));
+      await tester.ensureVisible(meditations);
+      await tester.tap(meditations);
+      await tester.pumpAndSettle();
       expect(find.text('Let the Day Go'), findsOneWidget);
       expect(find.text('RECORDED VOICE PENDING'), findsNWidgets(3));
       expect(find.text('Evening → Proper Unwind'), findsNothing);
-      expect(find.text('Deep Drift'), findsWidgets);
-      expect(find.text('Soft Rain'), findsWidgets);
+
+      final nature = find.byKey(const Key('sleep-category-nature'));
+      await tester.ensureVisible(nature);
+      await tester.tap(nature);
+      await tester.pumpAndSettle();
+      expect(find.text('Soft Rain'), findsOneWidget);
       expect(find.text('Night Air'), findsOneWidget);
+      expect(find.text('RECORDED VOICE PENDING'), findsNothing);
+
+      final music = find.byKey(const Key('sleep-category-sleepMusic'));
+      await tester.ensureVisible(music);
+      await tester.tap(music);
+      await tester.pumpAndSettle();
+      expect(find.text('Deep Drift'), findsWidgets);
+      expect(find.text('RECORDED VOICE PENDING'), findsNothing);
     },
   );
 }

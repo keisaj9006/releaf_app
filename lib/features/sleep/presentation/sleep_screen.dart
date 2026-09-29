@@ -125,28 +125,26 @@ class _SleepScreenState extends ConsumerState<SleepScreen> {
                           ),
                         ],
                         const SizedBox(height: ReleafSpacing.lg),
-                        _CategoryFilters(
+                        _PrimaryDiscovery(
+                          catalog: catalog,
+                          continueRecords: continueRecords,
+                          onOpen: open,
+                        ),
+                        const SizedBox(height: ReleafSpacing.section),
+                        _CategoryGateways(
                           selected: _selectedCategory,
                           onSelected: (category) {
                             setState(() => _selectedCategory = category);
                           },
                         ),
-                        const SizedBox(height: ReleafSpacing.xl),
-                        if (_selectedCategory == null)
-                          _AllDiscovery(
-                            catalog: catalog,
-                            continueRecords: continueRecords,
-                            onOpen: open,
-                            onSeeCategory: (category) {
-                              setState(() => _selectedCategory = category);
-                            },
-                          )
-                        else
+                        if (_selectedCategory != null) ...[
+                          const SizedBox(height: ReleafSpacing.section),
                           _CategoryDiscovery(
                             category: _selectedCategory!,
                             catalog: catalog,
                             onOpen: open,
                           ),
+                        ],
                         const SizedBox(height: ReleafSpacing.section),
                         const _ResearchNote(),
                       ],
@@ -193,69 +191,37 @@ _resolveContinueListening(
       .toList(growable: false);
 }
 
-class _AllDiscovery extends StatelessWidget {
-  const _AllDiscovery({
+class _PrimaryDiscovery extends StatelessWidget {
+  const _PrimaryDiscovery({
     required this.catalog,
     required this.continueRecords,
     required this.onOpen,
-    required this.onSeeCategory,
   });
-
   final SleepCatalog catalog;
   final List<({SleepContent content, SleepProgressRecord progress})>
   continueRecords;
   final ValueChanged<SleepContent> onOpen;
-  final ValueChanged<SleepCategory> onSeeCategory;
 
   @override
   Widget build(BuildContext context) {
+    if (continueRecords.isNotEmpty) {
+      final latest = continueRecords.first;
+      return _ContinuePrimary(
+        content: latest.content,
+        progress: latest.progress,
+        onOpen: onOpen,
+      );
+    }
     final featured = catalog.getFeatured();
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (featured.isNotEmpty)
-          _TonightCard(content: featured.first, onOpen: onOpen),
-        if (continueRecords.isNotEmpty) ...[
-          const SizedBox(height: ReleafSpacing.section),
-          const _SectionTitle(title: 'Continue Listening'),
-          const SizedBox(height: ReleafSpacing.md),
-          _ContinueRail(records: continueRecords, onOpen: onOpen),
-        ],
-        const SizedBox(height: ReleafSpacing.section),
-        const _SectionTitle(eyebrow: 'FAMILIAR FAVOURITES', title: 'Popular'),
-        const SizedBox(height: ReleafSpacing.md),
-        _ContentRail(
-          items: catalog.getPopular(),
-          keyPrefix: 'sleep-popular',
-          onOpen: onOpen,
-        ),
-        const SizedBox(height: ReleafSpacing.section),
-        _CategorySection(
-          eyebrow: 'NATURE AT NIGHT',
-          title: 'Nature for the night',
-          items: catalog.getByCategory(SleepCategory.nature),
-          onOpen: onOpen,
-          onSeeAll: () => onSeeCategory(SleepCategory.nature),
-        ),
-        const SizedBox(height: ReleafSpacing.section),
-        _CategorySection(
-          eyebrow: 'SLEEP MEDITATIONS',
-          title: 'Settle with gentle guidance',
-          items: catalog.getByCategory(SleepCategory.meditations),
-          onOpen: onOpen,
-          onSeeAll: () => onSeeCategory(SleepCategory.meditations),
-        ),
-        const SizedBox(height: ReleafSpacing.section),
-        _CategorySection(
-          eyebrow: 'SLEEP MUSIC',
-          title: 'Low-stimulation sound',
-          items: catalog.getByCategory(SleepCategory.sleepMusic),
-          onOpen: onOpen,
-          onSeeAll: () => onSeeCategory(SleepCategory.sleepMusic),
-        ),
-        const SizedBox(height: ReleafSpacing.section),
-        _StoryCollections(catalog: catalog, onOpen: onOpen),
-      ],
+    if (featured.isEmpty) {
+      return const _SectionTitle(
+        title: 'Tonight',
+        description: 'Choose a category to find something for tonight.',
+      );
+    }
+    return KeyedSubtree(
+      key: const Key('sleep-primary-tonight'),
+      child: _TonightCard(content: featured.first, onOpen: onOpen),
     );
   }
 }
@@ -433,33 +399,72 @@ class _StoryCollectionSheet extends StatelessWidget {
   }
 }
 
-class _CategoryFilters extends StatelessWidget {
-  const _CategoryFilters({required this.selected, required this.onSelected});
+class _CategoryGateways extends StatelessWidget {
+  const _CategoryGateways({required this.selected, required this.onSelected});
   final SleepCategory? selected;
-  final ValueChanged<SleepCategory?> onSelected;
+  final ValueChanged<SleepCategory> onSelected;
 
   @override
   Widget build(BuildContext context) {
-    final entries = <(SleepCategory?, String)>[
-      (null, 'All'),
-      for (final category in SleepCategory.values) (category, category.label),
-    ];
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: [
-          for (var index = 0; index < entries.length; index++) ...[
-            ChoiceChip(
-              key: Key('sleep-filter-${entries[index].$1?.name ?? 'all'}'),
-              label: Text(entries[index].$2),
-              selected: selected == entries[index].$1,
-              onSelected: (_) => onSelected(entries[index].$1),
-            ),
-            if (index != entries.length - 1)
-              const SizedBox(width: ReleafSpacing.sm),
+    final largeText = MediaQuery.textScalerOf(context).scale(16) > 24;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final columns = constraints.maxWidth >= 360 && !largeText ? 2 : 1;
+        final width = columns == 2
+            ? (constraints.maxWidth - ReleafSpacing.md) / 2
+            : constraints.maxWidth;
+        return Wrap(
+          spacing: ReleafSpacing.md,
+          runSpacing: ReleafSpacing.md,
+          children: [
+            for (final category in SleepCategory.values)
+              SizedBox(
+                width: width,
+                child: Semantics(
+                  button: true,
+                  selected: selected == category,
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      key: Key('sleep-category-${category.name}'),
+                      onTap: () => onSelected(category),
+                      borderRadius: BorderRadius.circular(ReleafRadii.large),
+                      child: Ink(
+                        padding: const EdgeInsets.all(ReleafSpacing.md),
+                        decoration: BoxDecoration(
+                          color: selected == category
+                              ? ReleafColors.surface
+                              : ReleafColors.surface.withValues(alpha: 0.76),
+                          borderRadius: BorderRadius.circular(
+                            ReleafRadii.large,
+                          ),
+                          border: Border.all(
+                            color: selected == category
+                                ? ReleafColors.premium.withValues(alpha: 0.5)
+                                : Colors.white.withValues(alpha: 0.08),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            _CategoryIcon(category: category),
+                            const SizedBox(width: ReleafSpacing.sm),
+                            Expanded(
+                              child: Text(
+                                category.label,
+                                style: ReleafTypography.cardTitle,
+                              ),
+                            ),
+                            const Icon(Icons.chevron_right_rounded),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
           ],
-        ],
-      ),
+        );
+      },
     );
   }
 }
@@ -526,40 +531,6 @@ class _TonightCard extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _CategorySection extends StatelessWidget {
-  const _CategorySection({
-    required this.eyebrow,
-    required this.title,
-    required this.items,
-    required this.onOpen,
-    required this.onSeeAll,
-  });
-  final String eyebrow;
-  final String title;
-  final List<SleepContent> items;
-  final ValueChanged<SleepContent> onOpen;
-  final VoidCallback onSeeAll;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: _SectionTitle(eyebrow: eyebrow, title: title),
-            ),
-            TextButton(onPressed: onSeeAll, child: const Text('See all')),
-          ],
-        ),
-        const SizedBox(height: ReleafSpacing.md),
-        _ContentRail(items: items, keyPrefix: 'sleep-content', onOpen: onOpen),
-      ],
     );
   }
 }
@@ -724,33 +695,36 @@ class _ContentCard extends StatelessWidget {
   }
 }
 
-class _ContinueRail extends StatelessWidget {
-  const _ContinueRail({required this.records, required this.onOpen});
-  final List<({SleepContent content, SleepProgressRecord progress})> records;
+class _ContinuePrimary extends StatelessWidget {
+  const _ContinuePrimary({
+    required this.content,
+    required this.progress,
+    required this.onOpen,
+  });
+  final SleepContent content;
+  final SleepProgressRecord progress;
   final ValueChanged<SleepContent> onOpen;
 
   @override
   Widget build(BuildContext context) {
     return Column(
+      key: const Key('sleep-primary-continue'),
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        for (final entry in records)
-          Padding(
-            padding: const EdgeInsets.only(bottom: ReleafSpacing.sm),
-            child: ListTile(
-              key: Key('sleep-continue-${entry.content.id}'),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(ReleafRadii.large),
-              ),
-              tileColor: ReleafColors.surface.withValues(alpha: 0.92),
-              leading: _CategoryIcon(category: entry.content.category),
-              title: Text(entry.content.title),
-              subtitle: Text(
-                '${entry.progress.position.inMinutes} min listened',
-              ),
-              trailing: const Icon(Icons.play_arrow_rounded),
-              onTap: () => onOpen(entry.content),
-            ),
+        const _SectionTitle(title: 'Continue Listening'),
+        const SizedBox(height: ReleafSpacing.md),
+        ListTile(
+          key: Key('sleep-continue-${content.id}'),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(ReleafRadii.large),
           ),
+          tileColor: ReleafColors.surface.withValues(alpha: 0.92),
+          leading: _CategoryIcon(category: content.category),
+          title: Text(content.title),
+          subtitle: Text('${progress.position.inMinutes} min listened'),
+          trailing: const Icon(Icons.play_arrow_rounded),
+          onTap: () => onOpen(content),
+        ),
       ],
     );
   }

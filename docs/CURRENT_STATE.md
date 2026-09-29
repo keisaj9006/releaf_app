@@ -477,17 +477,19 @@ Nature and Sleep Music must not contain narration. Stories and guided Sleep
 Meditations may use approved narration; missing production recordings remain
 unavailable rather than falling back to another voice.
 
-The visible Sleep screen now reads the canonical registry. It exposes the exact
-All / Stories / Nature / Meditations / Sleep Music taxonomy, Tonight, Popular,
-local Continue Listening, and all five Story collections with See all views.
-Cards route to the existing Sound, Meditation and Story boundaries; Premium
-content previews before the paywall, and the legacy Sound library remains
-reachable. Pending Story audio and missing recorded Meditation guidance are
-labelled and disabled rather than substituted. The 320 px / 200% text layout is
-covered. Focused cross-route verification passed 90/90, the full suite passed
-636/636, analysis is clean and the configured Android debug APK built. ADB
-reported no attached device, so installation and physical review remain open.
-See [Sleep discovery evidence](release/2026-09-24-sleep-discovery.md).
+The visible Sleep screen reads the canonical registry and now leads with exactly
+one action: local Continue Listening when a valid unfinished record exists, or
+Tonight otherwise. Four responsive gateways open Stories, Nature, Meditations
+and Sleep Music; only the selected category's content appears below them.
+All five Story collections and their See all views remain within Stories.
+Cards still route to the existing Sound, Meditation and Story boundaries;
+Premium content previews before the paywall, and the legacy Sound library
+remains reachable. Pending Story audio and missing recorded Meditation guidance
+are labelled and disabled rather than substituted. Unknown local progress
+falls back to Tonight, and the gateways are exercised at 320 px / 200% text.
+The earlier layout and its verification remain documented in
+[Sleep discovery evidence](release/2026-09-24-sleep-discovery.md); the current
+layout is tracked in [Sleep discovery simplification](release/2026-09-29-sleep-discovery-simplification.md).
 
 The user previously reported timer/seek/audio UX defects during development; later project work reported the ±10-second seek fix and the current release gate marks player/timer behavior as tested. Treat those earlier bug reports as historical unless reproduced.
 
