@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -8,6 +10,49 @@ import 'package:releaf_app/features/relief/domain/models/breath_pattern.dart';
 import 'package:releaf_app/features/relief/domain/models/reset_content.dart';
 import 'package:releaf_app/features/relief/domain/models/reset_session_program.dart';
 import 'package:releaf_app/features/relief/domain/reset_access_policy.dart';
+
+String _protectedCatalogFingerprint(ResetCatalog catalog) {
+  final records = catalog.getAll().map((item) {
+    final program = item.program!;
+    List<Object?> steps(List<ResetSessionStep> values) => values
+        .map(
+          (step) => [
+            step.label,
+            step.guidance,
+            step.durationSeconds,
+            step.advanceActionLabel,
+            step.narrationAssetPath,
+          ],
+        )
+        .toList();
+    final pattern = program.breathPattern;
+    return [
+      item.id,
+      item.durationSeconds,
+      item.level.name,
+      item.quickCategory?.name,
+      item.modality.name,
+      item.accessTier.name,
+      program.type.name,
+      steps(program.steps),
+      steps(program.simplifiedSteps),
+      program.simplifyActionLabel,
+      if (pattern != null)
+        [
+          pattern.inhaleSeconds,
+          pattern.holdAfterInhaleSeconds,
+          pattern.exhaleSeconds,
+          pattern.holdAfterExhaleSeconds,
+          pattern.label,
+        ],
+    ];
+  }).toList();
+  var hash = 0x811c9dc5;
+  for (final byte in utf8.encode(jsonEncode(records))) {
+    hash = ((hash ^ byte) * 0x01000193) & 0xffffffff;
+  }
+  return hash.toRadixString(16).padLeft(8, '0');
+}
 
 void main() {
   const catalog = ResetCatalog();
@@ -64,6 +109,31 @@ void main() {
     '3min-breath',
     '5min-focus',
   };
+
+  test('discovery changes preserve every session program and access rule', () {
+    expect(_protectedCatalogFingerprint(catalog), 'fe40fdf2');
+  });
+
+  test('every non-Emergency session has one explicit discovery purpose', () {
+    final groups = <ResetDiscoveryGroup>{};
+    for (final item in catalog.getAll()) {
+      if (item.isEmergency) {
+        expect(item.discoveryGroup, isNull, reason: item.id);
+        expect(item.accessTier, ResetAccessTier.free, reason: item.id);
+        continue;
+      }
+      expect(item.discoveryGroup, isNotNull, reason: item.id);
+      groups.add(item.discoveryGroup!);
+      if (item.modality == ResetModality.breathing) {
+        expect(
+          item.discoveryGroup,
+          ResetDiscoveryGroup.breathingMethods,
+          reason: item.id,
+        );
+      }
+    }
+    expect(groups, ResetDiscoveryGroup.values.toSet());
+  });
 
   test('every active and current session ID resolves uniquely', () {
     final content = catalog.getAll();
@@ -216,24 +286,27 @@ void main() {
     expect(session.program?.breathPattern?.holdAfterExhaleSeconds, 0);
   });
 
-  test('Box Breathing and Sleep Downshift keep their explicit hold timings', () {
-    final box = catalog.getById('box-breathing')!;
-    final sleep = catalog.getById('sleep-downshift')!;
+  test(
+    'Box Breathing and Sleep Downshift keep their explicit hold timings',
+    () {
+      final box = catalog.getById('box-breathing')!;
+      final sleep = catalog.getById('sleep-downshift')!;
 
-    expect(box.program?.breathPattern?.inhaleSeconds, 4);
-    expect(box.program?.breathPattern?.holdAfterInhaleSeconds, 4);
-    expect(box.program?.breathPattern?.exhaleSeconds, 4);
-    expect(box.program?.breathPattern?.holdAfterExhaleSeconds, 4);
-    expect(box.methodLabel, contains('4–4–4–4'));
-    expect(box.safetyNote, isNotNull);
+      expect(box.program?.breathPattern?.inhaleSeconds, 4);
+      expect(box.program?.breathPattern?.holdAfterInhaleSeconds, 4);
+      expect(box.program?.breathPattern?.exhaleSeconds, 4);
+      expect(box.program?.breathPattern?.holdAfterExhaleSeconds, 4);
+      expect(box.methodLabel, contains('4–4–4–4'));
+      expect(box.safetyNote, isNotNull);
 
-    expect(sleep.program?.breathPattern?.inhaleSeconds, 4);
-    expect(sleep.program?.breathPattern?.holdAfterInhaleSeconds, 7);
-    expect(sleep.program?.breathPattern?.exhaleSeconds, 8);
-    expect(sleep.program?.breathPattern?.holdAfterExhaleSeconds, 0);
-    expect(sleep.methodLabel, contains('4–7–8'));
-    expect(sleep.safetyNote, isNotNull);
-  });
+      expect(sleep.program?.breathPattern?.inhaleSeconds, 4);
+      expect(sleep.program?.breathPattern?.holdAfterInhaleSeconds, 7);
+      expect(sleep.program?.breathPattern?.exhaleSeconds, 8);
+      expect(sleep.program?.breathPattern?.holdAfterExhaleSeconds, 0);
+      expect(sleep.methodLabel, contains('4–7–8'));
+      expect(sleep.safetyNote, isNotNull);
+    },
+  );
 
   test('six core Deep Reset protocols explain use case and rationale', () {
     const ids = <String>{
@@ -257,10 +330,7 @@ void main() {
   });
 
   test('movement demo requirement stays selective and explicit', () {
-    const expectedDemoIds = <String>{
-      'pushups-activation',
-      'shake-it-out',
-    };
+    const expectedDemoIds = <String>{'pushups-activation', 'shake-it-out'};
 
     final demoIds = catalog
         .getAll()
@@ -311,29 +381,36 @@ void main() {
     }
   });
 
-  test('Life Upgrade category contains the planned practical micro-routines', () {
-    const ids = <String>{
-      'sleep-faster-routine',
-      'morning-reset-ritual',
-      'confidence-posture-reset',
-      'deep-focus-method',
-      'emotional-stability-drill',
-      'night-nervous-system-unwind',
-      'quick-mood-shift',
-      'body-recalibration',
-    };
+  test(
+    'Life Upgrade category contains the planned practical micro-routines',
+    () {
+      const ids = <String>{
+        'sleep-faster-routine',
+        'morning-reset-ritual',
+        'confidence-posture-reset',
+        'deep-focus-method',
+        'emotional-stability-drill',
+        'night-nervous-system-unwind',
+        'quick-mood-shift',
+        'body-recalibration',
+      };
 
-    for (final id in ids) {
-      final session = catalog.getById(id)!;
-      expect(session.level, ResetLevel.quick, reason: id);
-      expect(session.quickCategory, QuickResetCategory.lifeUpgrade, reason: id);
-      expect(session.program?.type, ResetProgramType.guidedSteps, reason: id);
-      expect(session.summary, isNotNull, reason: id);
-      expect(session.bestFor, isNotNull, reason: id);
-      expect(session.whyItMayHelp, isNotNull, reason: id);
-      expect(session.durationSeconds, inInclusiveRange(90, 240), reason: id);
-    }
-  });
+      for (final id in ids) {
+        final session = catalog.getById(id)!;
+        expect(session.level, ResetLevel.quick, reason: id);
+        expect(
+          session.quickCategory,
+          QuickResetCategory.lifeUpgrade,
+          reason: id,
+        );
+        expect(session.program?.type, ResetProgramType.guidedSteps, reason: id);
+        expect(session.summary, isNotNull, reason: id);
+        expect(session.bestFor, isNotNull, reason: id);
+        expect(session.whyItMayHelp, isNotNull, reason: id);
+        expect(session.durationSeconds, inInclusiveRange(90, 240), reason: id);
+      }
+    },
+  );
 
   test('remaining Breath Programs expose distinct pacing and education', () {
     final energy = catalog.getById('energy-up-breath')!;
@@ -379,23 +456,17 @@ void main() {
     expect(focus.durationSeconds, 300);
   });
 
-  test('canonical access policy covers free and premium entitlement states', () {
-    final free = catalog.getById('60s-grounding')!;
-    final premium = catalog.getById('3min-breath')!;
+  test(
+    'canonical access policy covers free and premium entitlement states',
+    () {
+      final free = catalog.getById('60s-grounding')!;
+      final premium = catalog.getById('3min-breath')!;
 
-    expect(
-      policy.canAccess(free, hasPremiumEntitlement: false),
-      isTrue,
-    );
-    expect(
-      policy.canAccess(premium, hasPremiumEntitlement: false),
-      isFalse,
-    );
-    expect(
-      policy.canAccess(premium, hasPremiumEntitlement: true),
-      isTrue,
-    );
-  });
+      expect(policy.canAccess(free, hasPremiumEntitlement: false), isTrue);
+      expect(policy.canAccess(premium, hasPremiumEntitlement: false), isFalse);
+      expect(policy.canAccess(premium, hasPremiumEntitlement: true), isTrue);
+    },
+  );
 
   test('unknown session ID returns null from the canonical catalog', () {
     expect(catalog.getById('missing-session'), isNull);
@@ -419,10 +490,7 @@ void main() {
 
     final legacyItems = await container.read(reliefRepositoryProvider.future);
 
-    expect(
-      legacyItems.map((item) => item.id).toSet(),
-      currentSessionIds,
-    );
+    expect(legacyItems.map((item) => item.id).toSet(), currentSessionIds);
     expect(legacyItems, same(catalog.getAll()));
   });
 }

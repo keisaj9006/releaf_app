@@ -8,6 +8,8 @@ enum ResetModality { breathing, grounding, guidedPractice }
 
 enum ResetAccessTier { free, premium }
 
+enum ResetDiscoveryGroup { breathingMethods, situationalCalm, bodyMindReset }
+
 enum ResetDemoRequirement { none, movementTechnique }
 
 enum ResetVisualType {
@@ -38,6 +40,7 @@ class ResetContent {
   final ResetLevel level;
   final QuickResetCategory? quickCategory;
   final ResetModality modality;
+  final ResetDiscoveryGroup? discoveryGroup;
   final ResetAccessTier accessTier;
   final ResetDemoRequirement demoRequirement;
   final List<String> instructions;
@@ -57,6 +60,7 @@ class ResetContent {
     required this.durationSeconds,
     required this.level,
     required this.modality,
+    this.discoveryGroup,
     required this.accessTier,
     required this.instructions,
     this.demoRequirement = ResetDemoRequirement.none,
@@ -79,9 +83,14 @@ class ResetContent {
          'Only Quick Reset content may have a Quick Reset category.',
        ),
        assert(
-         level != ResetLevel.emergency ||
-             accessTier == ResetAccessTier.free,
+         level != ResetLevel.emergency || accessTier == ResetAccessTier.free,
          'Emergency content must always be free.',
+       ),
+       assert(
+         level == ResetLevel.emergency
+             ? discoveryGroup == null
+             : discoveryGroup != null,
+         'Only non-Emergency content has a discovery group.',
        );
 
   bool get isEmergency => level == ResetLevel.emergency;

@@ -73,6 +73,7 @@ class ResetCatalog {
       level: ResetLevel.quick,
       quickCategory: QuickResetCategory.noBreath,
       modality: ResetModality.grounding,
+      discoveryGroup: ResetDiscoveryGroup.bodyMindReset,
       accessTier: ResetAccessTier.free,
       summary:
           'A one-minute body-contact grounding practice for returning attention to physical support.',
@@ -124,6 +125,7 @@ class ResetCatalog {
       level: ResetLevel.quick,
       quickCategory: QuickResetCategory.noBreath,
       modality: ResetModality.grounding,
+      discoveryGroup: ResetDiscoveryGroup.bodyMindReset,
       accessTier: ResetAccessTier.free,
       summary:
           'A full 5–4–3–2–1 sensory grounding sequence with a shorter 3–2–1 option.',
@@ -220,6 +222,7 @@ class ResetCatalog {
       level: ResetLevel.quick,
       quickCategory: QuickResetCategory.noBreath,
       modality: ResetModality.guidedPractice,
+      discoveryGroup: ResetDiscoveryGroup.bodyMindReset,
       accessTier: ResetAccessTier.free,
       summary:
           'A brief tension-awareness and release sequence for the jaw and shoulders.',
@@ -290,6 +293,7 @@ class ResetCatalog {
       level: ResetLevel.quick,
       quickCategory: QuickResetCategory.noBreath,
       modality: ResetModality.guidedPractice,
+      discoveryGroup: ResetDiscoveryGroup.bodyMindReset,
       accessTier: ResetAccessTier.free,
       summary:
           'A short cognitive-defusion practice for creating distance from a recurring thought.',
@@ -349,6 +353,7 @@ class ResetCatalog {
       level: ResetLevel.quick,
       quickCategory: QuickResetCategory.noBreath,
       modality: ResetModality.grounding,
+      discoveryGroup: ResetDiscoveryGroup.bodyMindReset,
       accessTier: ResetAccessTier.free,
       summary:
           'A visual and tactile attention anchor using one ordinary object nearby.',
@@ -416,6 +421,7 @@ class ResetCatalog {
       level: ResetLevel.quick,
       quickCategory: QuickResetCategory.noBreath,
       modality: ResetModality.grounding,
+      discoveryGroup: ResetDiscoveryGroup.bodyMindReset,
       accessTier: ResetAccessTier.free,
       summary:
           'A listening practice that moves from near sounds to farther and layered sounds.',
@@ -477,6 +483,7 @@ class ResetCatalog {
       level: ResetLevel.quick,
       quickCategory: QuickResetCategory.noBreath,
       modality: ResetModality.guidedPractice,
+      discoveryGroup: ResetDiscoveryGroup.bodyMindReset,
       accessTier: ResetAccessTier.free,
       summary:
           'A gentle pressure-and-release exercise using the hands or feet against a stable surface.',
@@ -539,6 +546,7 @@ class ResetCatalog {
       level: ResetLevel.quick,
       quickCategory: QuickResetCategory.noBreath,
       modality: ResetModality.guidedPractice,
+      discoveryGroup: ResetDiscoveryGroup.bodyMindReset,
       accessTier: ResetAccessTier.free,
       summary:
           'An acceptance-based pause for allowing a difficult feeling or thought without letting it choose the next action.',
@@ -597,6 +605,7 @@ class ResetCatalog {
       level: ResetLevel.quick,
       quickCategory: QuickResetCategory.noBreath,
       modality: ResetModality.guidedPractice,
+      discoveryGroup: ResetDiscoveryGroup.bodyMindReset,
       accessTier: ResetAccessTier.free,
       summary:
           'A brief sensory reset using comfortably cool water on the hands or face.',
@@ -648,6 +657,7 @@ class ResetCatalog {
       level: ResetLevel.quick,
       quickCategory: QuickResetCategory.noBreath,
       modality: ResetModality.guidedPractice,
+      discoveryGroup: ResetDiscoveryGroup.bodyMindReset,
       accessTier: ResetAccessTier.premium,
       demoRequirement: ResetDemoRequirement.movementTechnique,
       summary:
@@ -701,6 +711,7 @@ class ResetCatalog {
       level: ResetLevel.quick,
       quickCategory: QuickResetCategory.noBreath,
       modality: ResetModality.guidedPractice,
+      discoveryGroup: ResetDiscoveryGroup.bodyMindReset,
       accessTier: ResetAccessTier.free,
       summary:
           'A one-minute check for shoulder tension that has crept up unnoticed.',
@@ -752,6 +763,7 @@ class ResetCatalog {
       level: ResetLevel.quick,
       quickCategory: QuickResetCategory.noBreath,
       modality: ResetModality.grounding,
+      discoveryGroup: ResetDiscoveryGroup.bodyMindReset,
       accessTier: ResetAccessTier.premium,
       summary:
           'A short visual-attention reset after prolonged close-up screen focus.',
@@ -804,6 +816,7 @@ class ResetCatalog {
       level: ResetLevel.quick,
       quickCategory: QuickResetCategory.noBreath,
       modality: ResetModality.guidedPractice,
+      discoveryGroup: ResetDiscoveryGroup.bodyMindReset,
       accessTier: ResetAccessTier.premium,
       demoRequirement: ResetDemoRequirement.movementTechnique,
       summary:
@@ -861,6 +874,7 @@ class ResetCatalog {
       level: ResetLevel.quick,
       quickCategory: QuickResetCategory.noBreath,
       modality: ResetModality.guidedPractice,
+      discoveryGroup: ResetDiscoveryGroup.bodyMindReset,
       accessTier: ResetAccessTier.premium,
       summary:
           'A two-minute walking reset that uses movement and environmental detail as the anchor.',
@@ -918,6 +932,7 @@ class ResetCatalog {
       level: ResetLevel.quick,
       quickCategory: QuickResetCategory.lifeUpgrade,
       modality: ResetModality.guidedPractice,
+      discoveryGroup: ResetDiscoveryGroup.bodyMindReset,
       accessTier: ResetAccessTier.free,
       summary:
           'A short planning reset that turns a broad problem into one visible next action.',
@@ -978,6 +993,7 @@ class ResetCatalog {
       level: ResetLevel.quick,
       quickCategory: QuickResetCategory.lifeUpgrade,
       modality: ResetModality.guidedPractice,
+      discoveryGroup: ResetDiscoveryGroup.bodyMindReset,
       accessTier: ResetAccessTier.free,
       summary:
           'A short pre-sleep routine for reducing unfinished-task friction and lowering stimulation before bed.',
@@ -1036,6 +1052,7 @@ class ResetCatalog {
       level: ResetLevel.quick,
       quickCategory: QuickResetCategory.lifeUpgrade,
       modality: ResetModality.guidedPractice,
+      discoveryGroup: ResetDiscoveryGroup.bodyMindReset,
       accessTier: ResetAccessTier.free,
       summary:
           'A two-minute morning sequence for orienting, moving and choosing the first useful priority.',
@@ -1094,6 +1111,7 @@ class ResetCatalog {
       level: ResetLevel.quick,
       quickCategory: QuickResetCategory.lifeUpgrade,
       modality: ResetModality.guidedPractice,
+      discoveryGroup: ResetDiscoveryGroup.bodyMindReset,
       accessTier: ResetAccessTier.premium,
       summary:
           'A grounded posture-and-attention reset before a meeting, conversation or task.',
@@ -1150,6 +1168,7 @@ class ResetCatalog {
       level: ResetLevel.quick,
       quickCategory: QuickResetCategory.lifeUpgrade,
       modality: ResetModality.guidedPractice,
+      discoveryGroup: ResetDiscoveryGroup.bodyMindReset,
       accessTier: ResetAccessTier.premium,
       safetyNote:
           'Use this as a task-setup aid rather than a productivity demand. Take a break if sustained focus is becoming physically uncomfortable or counterproductive.',
@@ -1207,6 +1226,7 @@ class ResetCatalog {
       level: ResetLevel.quick,
       quickCategory: QuickResetCategory.lifeUpgrade,
       modality: ResetModality.guidedPractice,
+      discoveryGroup: ResetDiscoveryGroup.bodyMindReset,
       accessTier: ResetAccessTier.premium,
       safetyNote:
           'Do not use the pause to remain in an unsafe situation. If there is risk of harm, prioritise distance, safety and appropriate support.',
@@ -1263,6 +1283,7 @@ class ResetCatalog {
       level: ResetLevel.quick,
       quickCategory: QuickResetCategory.lifeUpgrade,
       modality: ResetModality.guidedPractice,
+      discoveryGroup: ResetDiscoveryGroup.bodyMindReset,
       accessTier: ResetAccessTier.premium,
       summary:
           'A low-stimulation body-and-environment unwind for the end of the day.',
@@ -1318,6 +1339,7 @@ class ResetCatalog {
       level: ResetLevel.quick,
       quickCategory: QuickResetCategory.lifeUpgrade,
       modality: ResetModality.guidedPractice,
+      discoveryGroup: ResetDiscoveryGroup.bodyMindReset,
       accessTier: ResetAccessTier.premium,
       summary:
           'A brief behaviour-and-environment reset when you feel flat, stuck or mentally stale.',
@@ -1369,6 +1391,7 @@ class ResetCatalog {
       level: ResetLevel.quick,
       quickCategory: QuickResetCategory.lifeUpgrade,
       modality: ResetModality.guidedPractice,
+      discoveryGroup: ResetDiscoveryGroup.bodyMindReset,
       accessTier: ResetAccessTier.premium,
       summary:
           'A short head-to-toe check for unnecessary effort after sitting, scrolling or working in one position.',
@@ -1431,6 +1454,7 @@ class ResetCatalog {
       level: ResetLevel.quick,
       quickCategory: QuickResetCategory.situational,
       modality: ResetModality.grounding,
+      discoveryGroup: ResetDiscoveryGroup.situationalCalm,
       accessTier: ResetAccessTier.free,
       summary:
           'A no-hold sensory orientation routine for early rising panic or strong activation.',
@@ -1509,6 +1533,7 @@ class ResetCatalog {
       level: ResetLevel.quick,
       quickCategory: QuickResetCategory.situational,
       modality: ResetModality.guidedPractice,
+      discoveryGroup: ResetDiscoveryGroup.situationalCalm,
       accessTier: ResetAccessTier.free,
       summary:
           'A short pre-exam routine that narrows attention from the whole subject to the first concrete action.',
@@ -1570,6 +1595,7 @@ class ResetCatalog {
       level: ResetLevel.quick,
       quickCategory: QuickResetCategory.situational,
       modality: ResetModality.guidedPractice,
+      discoveryGroup: ResetDiscoveryGroup.situationalCalm,
       accessTier: ResetAccessTier.free,
       summary:
           'A pre-interview routine for reducing mental load and choosing one clear opening action.',
@@ -1630,6 +1656,7 @@ class ResetCatalog {
       level: ResetLevel.quick,
       quickCategory: QuickResetCategory.situational,
       modality: ResetModality.guidedPractice,
+      discoveryGroup: ResetDiscoveryGroup.situationalCalm,
       accessTier: ResetAccessTier.free,
       summary:
           'A pre-presentation body-and-attention routine focused on releasing extra effort and choosing the opening line.',
@@ -1687,6 +1714,7 @@ class ResetCatalog {
       level: ResetLevel.quick,
       quickCategory: QuickResetCategory.situational,
       modality: ResetModality.guidedPractice,
+      discoveryGroup: ResetDiscoveryGroup.situationalCalm,
       accessTier: ResetAccessTier.free,
       summary:
           'A post-conflict pause for naming activation and choosing whether the next step is pause, repair or distance.',
@@ -1747,6 +1775,7 @@ class ResetCatalog {
       level: ResetLevel.quick,
       quickCategory: QuickResetCategory.situational,
       modality: ResetModality.grounding,
+      discoveryGroup: ResetDiscoveryGroup.situationalCalm,
       accessTier: ResetAccessTier.free,
       summary:
           'A rapid external sensory grounding sequence for a sudden spike of panic-like activation.',
@@ -1820,6 +1849,7 @@ class ResetCatalog {
       level: ResetLevel.quick,
       quickCategory: QuickResetCategory.situational,
       modality: ResetModality.guidedPractice,
+      discoveryGroup: ResetDiscoveryGroup.situationalCalm,
       accessTier: ResetAccessTier.free,
       summary:
           'A night-time thought-unhooking routine that avoids turning bedtime into another problem-solving session.',
@@ -1878,6 +1908,7 @@ class ResetCatalog {
       level: ResetLevel.quick,
       quickCategory: QuickResetCategory.situational,
       modality: ResetModality.grounding,
+      discoveryGroup: ResetDiscoveryGroup.situationalCalm,
       accessTier: ResetAccessTier.free,
       summary:
           'An external-focus routine for moments of strong self-monitoring in social situations.',
@@ -1939,6 +1970,7 @@ class ResetCatalog {
       level: ResetLevel.quick,
       quickCategory: QuickResetCategory.situational,
       modality: ResetModality.grounding,
+      discoveryGroup: ResetDiscoveryGroup.situationalCalm,
       accessTier: ResetAccessTier.free,
       summary:
           'A travel-specific grounding routine using support, sound and one concrete next travel step.',
@@ -1998,6 +2030,7 @@ class ResetCatalog {
       level: ResetLevel.quick,
       quickCategory: QuickResetCategory.situational,
       modality: ResetModality.guidedPractice,
+      discoveryGroup: ResetDiscoveryGroup.situationalCalm,
       accessTier: ResetAccessTier.free,
       summary:
           'A work reset that reduces a crowded workload to one visible action and clears competing tasks from attention.',
@@ -2056,6 +2089,7 @@ class ResetCatalog {
       level: ResetLevel.quick,
       quickCategory: QuickResetCategory.breath,
       modality: ResetModality.breathing,
+      discoveryGroup: ResetDiscoveryGroup.breathingMethods,
       accessTier: ResetAccessTier.free,
       methodLabel: '5–5 balanced breathing',
       bestFor: 'Everyday settling, steady focus, and learning paced breathing.',
@@ -2102,6 +2136,7 @@ class ResetCatalog {
       level: ResetLevel.quick,
       quickCategory: QuickResetCategory.breath,
       modality: ResetModality.breathing,
+      discoveryGroup: ResetDiscoveryGroup.breathingMethods,
       accessTier: ResetAccessTier.free,
       methodLabel: '4–6 extended-exhale breathing',
       bestFor:
@@ -2151,6 +2186,7 @@ class ResetCatalog {
       level: ResetLevel.quick,
       quickCategory: QuickResetCategory.breath,
       modality: ResetModality.breathing,
+      discoveryGroup: ResetDiscoveryGroup.breathingMethods,
       accessTier: ResetAccessTier.free,
       methodLabel: '3–6 long-exhale breathing',
       bestFor:
@@ -2200,6 +2236,7 @@ class ResetCatalog {
       level: ResetLevel.quick,
       quickCategory: QuickResetCategory.breath,
       modality: ResetModality.breathing,
+      discoveryGroup: ResetDiscoveryGroup.breathingMethods,
       accessTier: ResetAccessTier.premium,
       methodLabel: '4–4–4–4 box breathing',
       bestFor:
@@ -2251,6 +2288,7 @@ class ResetCatalog {
       level: ResetLevel.quick,
       quickCategory: QuickResetCategory.breath,
       modality: ResetModality.breathing,
+      discoveryGroup: ResetDiscoveryGroup.breathingMethods,
       accessTier: ResetAccessTier.premium,
       methodLabel: '4–7–8 breathing',
       bestFor:
@@ -2301,6 +2339,7 @@ class ResetCatalog {
       level: ResetLevel.quick,
       quickCategory: QuickResetCategory.breath,
       modality: ResetModality.breathing,
+      discoveryGroup: ResetDiscoveryGroup.breathingMethods,
       accessTier: ResetAccessTier.premium,
       methodLabel: '3–3 active paced breathing',
       bestFor:
@@ -2350,6 +2389,7 @@ class ResetCatalog {
       level: ResetLevel.quick,
       quickCategory: QuickResetCategory.breath,
       modality: ResetModality.breathing,
+      discoveryGroup: ResetDiscoveryGroup.breathingMethods,
       accessTier: ResetAccessTier.premium,
       methodLabel: '4–4 focus breathing',
       bestFor:
@@ -2399,6 +2439,7 @@ class ResetCatalog {
       level: ResetLevel.quick,
       quickCategory: QuickResetCategory.breath,
       modality: ResetModality.breathing,
+      discoveryGroup: ResetDiscoveryGroup.breathingMethods,
       accessTier: ResetAccessTier.premium,
       methodLabel: '5–7 slow-cycle breathing',
       bestFor:
@@ -2447,6 +2488,7 @@ class ResetCatalog {
       durationSeconds: 480,
       level: ResetLevel.deep,
       modality: ResetModality.breathing,
+      discoveryGroup: ResetDiscoveryGroup.breathingMethods,
       accessTier: ResetAccessTier.premium,
       summary:
           'An eight-minute paced-breathing reset for high activation and restless energy.',
@@ -2498,6 +2540,7 @@ class ResetCatalog {
       durationSeconds: 480,
       level: ResetLevel.deep,
       modality: ResetModality.guidedPractice,
+      discoveryGroup: ResetDiscoveryGroup.bodyMindReset,
       accessTier: ResetAccessTier.premium,
       summary:
           'A slow eight-minute scan through common tension points without forcing the body to relax.',
@@ -2574,6 +2617,7 @@ class ResetCatalog {
       durationSeconds: 480,
       level: ResetLevel.deep,
       modality: ResetModality.guidedPractice,
+      discoveryGroup: ResetDiscoveryGroup.bodyMindReset,
       accessTier: ResetAccessTier.premium,
       summary:
           'An eight-minute overload reset that turns too many active demands into one realistic next action.',
@@ -2639,6 +2683,7 @@ class ResetCatalog {
       durationSeconds: 480,
       level: ResetLevel.deep,
       modality: ResetModality.guidedPractice,
+      discoveryGroup: ResetDiscoveryGroup.bodyMindReset,
       accessTier: ResetAccessTier.premium,
       summary:
           'An eight-minute evening downshift for unfinished thoughts, residual tension and difficulty ending the day.',
@@ -2703,6 +2748,7 @@ class ResetCatalog {
       durationSeconds: 480,
       level: ResetLevel.deep,
       modality: ResetModality.guidedPractice,
+      discoveryGroup: ResetDiscoveryGroup.bodyMindReset,
       accessTier: ResetAccessTier.premium,
       summary:
           'An eight-minute pause for strong activation before you choose what to say or do next.',
@@ -2766,6 +2812,7 @@ class ResetCatalog {
       durationSeconds: 480,
       level: ResetLevel.deep,
       modality: ResetModality.guidedPractice,
+      discoveryGroup: ResetDiscoveryGroup.bodyMindReset,
       accessTier: ResetAccessTier.premium,
       summary:
           'An eight-minute thought-unhooking practice for loops that keep reopening without producing a useful next step.',
@@ -2828,6 +2875,7 @@ class ResetCatalog {
       durationSeconds: 180,
       level: ResetLevel.deep,
       modality: ResetModality.breathing,
+      discoveryGroup: ResetDiscoveryGroup.breathingMethods,
       accessTier: ResetAccessTier.premium,
       taxonomyStatus: ResetTaxonomyStatus.legacyCompatible,
       instructions: [
@@ -2870,6 +2918,7 @@ class ResetCatalog {
       level: ResetLevel.quick,
       quickCategory: QuickResetCategory.noBreath,
       modality: ResetModality.grounding,
+      discoveryGroup: ResetDiscoveryGroup.bodyMindReset,
       accessTier: ResetAccessTier.premium,
       summary:
           'A longer 5–4–3–2–1 sensory anchor for deliberately returning attention to the immediate environment.',
