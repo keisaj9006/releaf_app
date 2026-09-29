@@ -6,6 +6,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:releaf_app/core/providers.dart';
 import 'package:releaf_app/features/home/home_personalization.dart';
 import 'package:releaf_app/features/home/home_screen.dart';
+import 'package:releaf_app/features/home/whats_new_content.dart';
+import 'package:releaf_app/features/home/whats_new_store.dart';
 import 'package:releaf_app/routing/app_router.dart';
 import 'package:releaf_app/routing/app_routes.dart';
 
@@ -16,6 +18,10 @@ Future<void> _pumpHome(
 }) async {
   SharedPreferences.setMockInitialValues(initialValues);
   final preferences = await SharedPreferences.getInstance();
+  await preferences.setString(
+    SharedPreferencesWhatsNewStore.storageKey,
+    WhatsNewContent.current.releaseId,
+  );
   final router = createAppRouter(initialLocation: AppRoutes.home);
   addTearDown(router.dispose);
 
@@ -23,9 +29,7 @@ Future<void> _pumpHome(
     ProviderScope(
       overrides: [
         sharedPreferencesProvider.overrideWithValue(preferences),
-        homeNowProvider.overrideWith(
-          (ref) => DateTime(2026, 9, 13, hour),
-        ),
+        homeNowProvider.overrideWith((ref) => DateTime(2026, 9, 13, hour)),
       ],
       child: MaterialApp.router(routerConfig: router),
     ),
@@ -40,9 +44,7 @@ void main() {
   ) async {
     await _pumpHome(
       tester,
-      initialValues: const {
-        'releaf.home.intro.dismissed.v1': true,
-      },
+      initialValues: const {'releaf.home.intro.dismissed.v1': true},
       hour: 21,
     );
 

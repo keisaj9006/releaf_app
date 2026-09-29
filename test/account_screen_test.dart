@@ -8,6 +8,8 @@ import 'package:releaf_app/features/account/application/account_auth_service.dar
 import 'package:releaf_app/features/account/application/account_email_service.dart';
 import 'package:releaf_app/features/account/application/account_recovery_service.dart';
 import 'package:releaf_app/features/account/presentation/account_screen.dart';
+import 'package:releaf_app/features/home/whats_new_content.dart';
+import 'package:releaf_app/features/home/whats_new_store.dart';
 import 'package:releaf_app/routing/app_router.dart';
 import 'package:releaf_app/routing/app_routes.dart';
 
@@ -65,10 +67,7 @@ class _FakeAccountAuthService implements AccountAuthService {
     required String password,
     required String displayName,
   }) async {
-    return const AccountAuthResult(
-      user: null,
-      needsEmailConfirmation: true,
-    );
+    return const AccountAuthResult(user: null, needsEmailConfirmation: true);
   }
 
   @override
@@ -141,6 +140,10 @@ void main() {
   ) async {
     SharedPreferences.setMockInitialValues({});
     final preferences = await SharedPreferences.getInstance();
+    await preferences.setString(
+      SharedPreferencesWhatsNewStore.storageKey,
+      WhatsNewContent.current.releaseId,
+    );
     final router = createAppRouter(initialLocation: AppRoutes.account);
     addTearDown(router.dispose);
 
@@ -192,10 +195,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
 
     expect(recovery.lastResetEmail, 'jo@example.com');
-    expect(
-      find.textContaining('Password reset email sent'),
-      findsOneWidget,
-    );
+    expect(find.textContaining('Password reset email sent'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -214,10 +214,7 @@ void main() {
     final nameField = find.byKey(const Key('account-name-field'));
     await tester.ensureVisible(nameField);
     await tester.pumpAndSettle();
-    await tester.enterText(
-      nameField,
-      'Jo',
-    );
+    await tester.enterText(nameField, 'Jo');
     await tester.enterText(
       find.byKey(const Key('account-email-field')),
       'jo@example.com',
@@ -280,9 +277,6 @@ void main() {
       find.textContaining('progress currently stays on this device'),
       findsOneWidget,
     );
-    expect(
-      find.textContaining('not a cloud backup'),
-      findsOneWidget,
-    );
+    expect(find.textContaining('not a cloud backup'), findsOneWidget);
   });
 }

@@ -1,0 +1,7 @@
+# Versioned What's New checkpoint — 29 September 2026
+
+A local acknowledgement now records release ID `releaf-1.0` under `releaf.whats_new.last_acknowledged.v1`. An ordinary Home entry shows a calm, scrollable update screen once for that ID. Continue enters Home and persists acknowledgement. The old welcome card is retired, while the Home focus control remains available.
+
+Emergency help is at the top of the update screen and opens the existing free Emergency session without acknowledging the release. Explicit Reset, Sleep, Brain, Account, password-recovery, Emergency-session and Story routes bypass the screen. Failed preference reads fall back to Home; failed writes enter Home for the current session and may show the notice on a later launch. No route, entitlement, account or reward semantics changed.
+
+Verification: controller, Home, direct-route, Emergency and 320 dp / 200% text tests are covered. `flutter test --no-pub --reporter expanded` passed **676/676**; `flutter analyze --no-pub` reported **No issues found**. `flutter build apk --debug --dart-define-from-file=tool/local/revenuecat-test-store.json` succeeded (assembleDebug 85.0 s), producing `build/app/outputs/flutter-apk/app-debug.apk`. Flutter printed future Gradle/AGP/Kotlin compatibility warnings; no build check was bypassed. This APK was not installed or physically reviewed in this batch. This checkpoint does not close production signing, Play billing or device QA.

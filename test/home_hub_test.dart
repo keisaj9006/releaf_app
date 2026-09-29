@@ -10,6 +10,8 @@ import 'package:releaf_app/core/subscription/subscription_state.dart';
 import 'package:releaf_app/features/home/daily_insight.dart';
 import 'package:releaf_app/features/home/home_personalization.dart';
 import 'package:releaf_app/features/home/home_screen.dart';
+import 'package:releaf_app/features/home/whats_new_content.dart';
+import 'package:releaf_app/features/home/whats_new_store.dart';
 import 'package:releaf_app/features/progress/data/leaves_repository.dart';
 import 'package:releaf_app/routing/app_router.dart';
 import 'package:releaf_app/routing/app_routes.dart';
@@ -27,6 +29,10 @@ Future<void> _pumpHome(
   DateTime Function()? clock,
   String Function()? day,
 }) async {
+  await preferences.setString(
+    SharedPreferencesWhatsNewStore.storageKey,
+    WhatsNewContent.current.releaseId,
+  );
   final router = createAppRouter(initialLocation: AppRoutes.home);
   addTearDown(router.dispose);
 
@@ -336,20 +342,12 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Home first-use welcome is optional and persists dismissal', (
+  testWidgets('Home keeps personalization without a second welcome', (
     WidgetTester tester,
   ) async {
-    final preferences = await _preferences();
-    await _pumpHome(tester, preferences: preferences);
-
-    expect(find.byKey(const Key('home-welcome-card')), findsOneWidget);
-    expect(find.text('WELCOME TO RELEAF'), findsOneWidget);
-
-    await tester.tap(find.byKey(const Key('home-welcome-dismiss')));
-    await tester.pumpAndSettle();
-
+    await _pumpHome(tester, preferences: await _preferences());
     expect(find.byKey(const Key('home-welcome-card')), findsNothing);
-    expect(preferences.getBool('releaf.home.intro.dismissed.v1'), isTrue);
+    expect(find.byKey(const Key('home-focus-strip')), findsOneWidget);
   });
 
   testWidgets('Home recommendation reacts to the selected need', (

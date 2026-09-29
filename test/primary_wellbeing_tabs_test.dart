@@ -10,6 +10,8 @@ import 'package:releaf_app/core/session/session_manager.dart';
 import 'package:releaf_app/core/subscription/revenuecat_service.dart';
 import 'package:releaf_app/core/subscription/subscription_controller.dart';
 import 'package:releaf_app/core/subscription/subscription_state.dart';
+import 'package:releaf_app/features/home/whats_new_content.dart';
+import 'package:releaf_app/features/home/whats_new_store.dart';
 import 'package:releaf_app/features/meditation/application/meditation_audio_controller.dart';
 import 'package:releaf_app/features/meditation/application/meditation_library_controller.dart';
 import 'package:releaf_app/features/meditation/application/meditation_voice_controller.dart';
@@ -158,6 +160,10 @@ Future<void> _pumpRoute(
   MeditationCatalog? catalog,
   double textScale = 1,
 }) async {
+  await preferences.setString(
+    SharedPreferencesWhatsNewStore.storageKey,
+    WhatsNewContent.current.releaseId,
+  );
   final router = createAppRouter(initialLocation: location);
   addTearDown(router.dispose);
 

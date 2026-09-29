@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:releaf_app/core/providers.dart';
 import 'package:releaf_app/core/subscription/revenuecat_service.dart';
 import 'package:releaf_app/main.dart';
+import 'package:releaf_app/features/home/whats_new_content.dart';
 
 void main() {
   test(
@@ -67,6 +68,12 @@ void main() {
     await tester.pump();
 
     expect(find.byType(MaterialApp), findsOneWidget);
+    expect(find.text(WhatsNewContent.current.heading), findsOneWidget);
+    expect(find.byKey(const Key('whats-new-emergency')), findsOneWidget);
+    await tester.ensureVisible(find.byKey(const Key('whats-new-continue')));
+    await tester.tap(find.byKey(const Key('whats-new-continue')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
     expect(find.text('RELEAF'), findsOneWidget);
     expect(find.text('RIGHT NOW'), findsOneWidget);
   });

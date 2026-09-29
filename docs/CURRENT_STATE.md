@@ -495,6 +495,15 @@ The user previously reported timer/seek/audio UX defects during development; lat
 
 ## Home / personalization
 
+Home now uses a versioned, local `releaf-1.0` What's New acknowledgement.
+On an ordinary Home entry with no acknowledgement, a scrollable update screen
+precedes Home once; Continue records the release ID. A failed preference read
+opens Home, while a failed write still opens Home for the current session.
+Emergency has an immediately visible action, and direct Reset, Sleep, Brain,
+Account, recovery, Emergency-session and Story routes bypass the update.
+The former generic welcome card is retired; focus selection remains on Home.
+See [What's New evidence](release/2026-09-29-versioned-whats-new.md).
+
 Current `HomeFocus` preferences are:
 - Feel steadier
 - Focus better
@@ -505,17 +514,17 @@ This is a useful base for personalization but it is not yet the complete researc
 
 ## Navigation
 
-Current bottom nav:
+Current active bottom nav:
 - Home
 - Reset
-- Meditate
 - Sleep
 - Brain
 
-The owner approved this exact order on 12 September. Existing screens now use the
-stateful shell. Sound remains a secondary library inside the Sleep branch; its
-URL, favourites, recents and player routes are preserved. Meditate and Sleep have
-direct Emergency/account shortcuts. See `docs/DECISION_CONFLICTS.md`.
+The owner approved a five-destination exploration on 12 September. The later
+canonical 1.0 release scope parks Meditate outside active discovery while
+preserving its direct route and existing session handling. The stateful shell
+retains Sound as a secondary library in Sleep, with its URLs, favourites,
+recents and player routes. See `docs/DECISION_CONFLICTS.md` and the release gate.
 
 ## Leaves / progress
 

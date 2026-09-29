@@ -183,6 +183,10 @@ Home time/recommendation continuity is implemented with foreground/resume clock
 refresh and honest Sleep sound/timer copy ([evidence](release/2026-09-12-home-continuity.md)).
 Next: daily progress rollover without loss or changes to reward semantics, then
 remaining backend/release-quality tasks.
+A later Home checkpoint replaces the generic welcome card with a once-per-release
+`releaf-1.0` What's New entry. Emergency remains available immediately; direct
+routes bypass the entry. Focus selection stays on Home. See
+[versioned entry evidence](release/2026-09-29-versioned-whats-new.md).
 
 **Priority: immediate**
 
