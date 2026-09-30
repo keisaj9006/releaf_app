@@ -49,28 +49,28 @@ void main() {
     expect((last.pairs, last.seconds), (12, 47));
   });
 
-  test(
-    'Memory and Sequence Echo reach fifty while unfinished games retain twelve',
-    () {
-      for (final count in [22, 24, 96, 98, 120]) {
-        final state = BrainTrainingState(
-          completionCounts: {
-            'memory': count,
-            'sequence_echo': count,
-            'rule_shift': count,
-          },
-        );
-        expect(state.trainingLevelFor('memory'), (1 + count ~/ 2).clamp(1, 50));
-        expect(
-          state.trainingLevelFor('sequence_echo'),
-          (1 + count ~/ 2).clamp(1, 50),
-        );
-        expect(state.trainingLevelFor('rule_shift'), 12);
-        expect(
-          state.sessionsUntilNextTrainingLevelFor('memory'),
-          count >= 98 ? 0 : 2,
-        );
-      }
-    },
-  );
+  test('Memory, Sequence Echo and Rule Shift reach fifty', () {
+    for (final count in [22, 24, 96, 98, 120]) {
+      final state = BrainTrainingState(
+        completionCounts: {
+          'memory': count,
+          'sequence_echo': count,
+          'rule_shift': count,
+        },
+      );
+      expect(state.trainingLevelFor('memory'), (1 + count ~/ 2).clamp(1, 50));
+      expect(
+        state.trainingLevelFor('sequence_echo'),
+        (1 + count ~/ 2).clamp(1, 50),
+      );
+      expect(
+        state.trainingLevelFor('rule_shift'),
+        (1 + count ~/ 2).clamp(1, 50),
+      );
+      expect(
+        state.sessionsUntilNextTrainingLevelFor('memory'),
+        count >= 98 ? 0 : 2,
+      );
+    }
+  });
 }

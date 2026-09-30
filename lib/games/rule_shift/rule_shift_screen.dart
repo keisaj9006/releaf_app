@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'rule_shift_level_profile.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
@@ -29,22 +30,14 @@ class _RuleShiftScreenState extends State<RuleShiftScreen> {
   int get _practiceLevel => brainPracticeLevelForDifficulty(
     widget.trainingLevel,
     _selectedDifficulty,
+    maxLevel: 50,
   );
-
-  int get _levelIndex => (_practiceLevel - 1).clamp(0, 11).toInt();
-  int get _trialCount => 12 + _levelIndex;
-
-  int get _ruleCount {
-    if (_practiceLevel >= 7) return 4;
-    if (_practiceLevel >= 4) return 3;
-    return 2;
-  }
-
-  int get _switchBlockSize {
-    if (_practiceLevel >= 6) return 1;
-    if (_practiceLevel >= 3) return 2;
-    return 3;
-  }
+  RuleShiftLevelProfile get _profile =>
+      ruleShiftProfileForLevel(_practiceLevel);
+  int get _levelIndex => _profile.level - 1;
+  int get _trialCount => _profile.trialCount;
+  int get _ruleCount => _profile.ruleCount;
+  int get _switchBlockSize => _profile.switchBlockSize;
 
   List<_Rule> get _availableRules =>
       _Rule.values.take(_ruleCount).toList(growable: false);
@@ -55,6 +48,8 @@ class _RuleShiftScreenState extends State<RuleShiftScreen> {
       _Rule.high => value > 5,
       _Rule.multipleOfThree => value % 3 == 0,
       _Rule.inRange => value >= 3 && value <= 7,
+      _Rule.prime => value == 2 || value == 3 || value == 5 || value == 7,
+      _Rule.lessThanFour => value < 4,
     };
   }
 
@@ -361,41 +356,8 @@ class _RuleShiftScreenState extends State<RuleShiftScreen> {
 }
 
 @visibleForTesting
-class RuleShiftLevelProfile {
-  const RuleShiftLevelProfile({
-    required this.level,
-    required this.trialCount,
-    required this.ruleCount,
-    required this.switchBlockSize,
-  });
-
-  final int level;
-  final int trialCount;
-  final int ruleCount;
-  final int switchBlockSize;
-}
-
-@visibleForTesting
-RuleShiftLevelProfile ruleShiftLevelProfileForTesting(int rawLevel) {
-  final level = rawLevel.clamp(1, 12).toInt();
-  final ruleCount = level >= 7
-      ? 4
-      : level >= 4
-      ? 3
-      : 2;
-  final switchBlockSize = level >= 6
-      ? 1
-      : level >= 3
-      ? 2
-      : 3;
-
-  return RuleShiftLevelProfile(
-    level: level,
-    trialCount: 12 + (level - 1),
-    ruleCount: ruleCount,
-    switchBlockSize: switchBlockSize,
-  );
-}
+RuleShiftLevelProfile ruleShiftLevelProfileForTesting(int rawLevel) =>
+    ruleShiftProfileForLevel(rawLevel);
 
 enum _Rule {
   odd(label: 'IS THE NUMBER ODD?', semanticLabel: 'Rule: is the number odd'),
@@ -410,6 +372,14 @@ enum _Rule {
   inRange(
     label: 'IS IT BETWEEN 3 AND 7?',
     semanticLabel: 'Rule: is the number between three and seven inclusive',
+  ),
+  prime(
+    label: 'IS IT A PRIME NUMBER?',
+    semanticLabel: 'Rule: is the number prime',
+  ),
+  lessThanFour(
+    label: 'IS IT LESS THAN 4?',
+    semanticLabel: 'Rule: is the number less than four',
   );
 
   const _Rule({required this.label, required this.semanticLabel});

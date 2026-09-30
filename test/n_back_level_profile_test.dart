@@ -46,7 +46,7 @@ void main() {
     }
     expect(signatures, hasLength(5));
     expect(maxBrainTrainingLevelFor('n_back'), 50);
-    expect(maxBrainTrainingLevelFor('rule_shift'), 12);
+    expect(maxBrainTrainingLevelFor('color_conflict'), 12);
   });
 
   testWidgets('N-Back level 50 opens and advances at 320 dp', (tester) async {

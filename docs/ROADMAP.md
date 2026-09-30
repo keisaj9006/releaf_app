@@ -8,8 +8,10 @@ now also has bounded, tested profiles through 50.
 [Spatial Span](release/2026-09-30-spatial-span-fifty-levels.md) has a
 compatible 50-level profile too.
 [Signal Scan](release/2026-09-30-signal-scan-fifty-levels.md) now uses a
-phone-usable multi-target field beyond level 12. Next implement and verify
-the remaining nine games in logic/inhibition and planning/spatial families,
+phone-usable multi-target field beyond level 12.
+[Rule Shift](release/2026-09-30-rule-shift-fifty-levels.md) has bounded
+four-to-six-rule sessions through level 50. Next implement and verify the
+remaining eight games in logic/inhibition and planning/spatial families,
 raising each live cap only after gameplay tests pass. Cross-game level-50
 replay and physical-device review remain open.
 
