@@ -5,9 +5,10 @@ Rolling state; latest engineering checkpoint: **2026-09-30**
 [Brain 50-level foundation](release/2026-09-30-brain-level-foundation.md)
 defines tested challenge bands and opt-in difficulty boundaries through 50.
 Memory/Labyrinth retain their 50-level paths. [Sequence Echo](release/2026-09-30-sequence-echo-fifty-levels.md),
-[N-back](release/2026-09-30-n-back-fifty-levels.md) and
-[Spatial Span](release/2026-09-30-spatial-span-fifty-levels.md) now have tested
-profiles through level 50; the other 10 games remain runtime-capped at 12.
+[N-back](release/2026-09-30-n-back-fifty-levels.md),
+[Spatial Span](release/2026-09-30-spatial-span-fifty-levels.md) and
+[Signal Scan](release/2026-09-30-signal-scan-fifty-levels.md) now have tested
+profiles through level 50; the other nine games remain runtime-capped at 12.
 Existing levels 1–12, rewards and saved progression are unchanged.
 
 [Reset manual pause](release/2026-09-30-reset-manual-pause.md) now freezes the

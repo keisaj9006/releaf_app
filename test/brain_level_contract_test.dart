@@ -31,7 +31,8 @@ void main() {
             id == 'labyrinth' ||
             id == 'sequence_echo' ||
             id == 'n_back' ||
-            id == 'spatial_span') {
+            id == 'spatial_span' ||
+            id == 'signal_scan') {
           expect(training.maxBrainTrainingLevelFor(id), 50);
         } else {
           expect(training.maxBrainTrainingLevelFor(id), 12, reason: id);

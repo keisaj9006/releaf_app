@@ -73,7 +73,7 @@ void main() {
     }
     expect(signatures, hasLength(5));
     expect(maxBrainTrainingLevelFor('spatial_span'), 50);
-    expect(maxBrainTrainingLevelFor('signal_scan'), 12);
+    expect(maxBrainTrainingLevelFor('color_conflict'), 12);
   });
 
   testWidgets('Spatial Span level 50 shows its grid on a narrow phone', (

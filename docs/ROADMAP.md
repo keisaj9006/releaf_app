@@ -6,8 +6,10 @@ the first legacy game with playable profiles 13–50 and a raised live cap; its
 levels 1–12 are pinned by tests. [N-back](release/2026-09-30-n-back-fifty-levels.md)
 now also has bounded, tested profiles through 50.
 [Spatial Span](release/2026-09-30-spatial-span-fifty-levels.md) has a
-compatible 50-level profile too. Next implement and verify Signal Scan, then
-the other nine games in logic/inhibition and planning/spatial families,
+compatible 50-level profile too.
+[Signal Scan](release/2026-09-30-signal-scan-fifty-levels.md) now uses a
+phone-usable multi-target field beyond level 12. Next implement and verify
+the remaining nine games in logic/inhibition and planning/spatial families,
 raising each live cap only after gameplay tests pass. Cross-game level-50
 replay and physical-device review remain open.
 
