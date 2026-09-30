@@ -1,5 +1,11 @@
 # Releaf Completion Roadmap
 
+[Manual Reset pause checkpoint](release/2026-09-30-reset-manual-pause.md)
+passed 685 full tests, clean analysis and an Android debug build. Continue the
+remaining Reset safety/accessibility boundaries only where code or tests show
+a gap, then proceed to the next unblocked Sleep/Brain requirements. Device
+audio/TalkBack and owner content review remain open.
+
 [Reset discovery checkpoint](release/2026-09-30-reset-purpose-discovery.md)
 is implemented and verified with 680 full tests, clean analysis and an Android
 debug build. Continue the session safety/accessibility regression task in

@@ -66,6 +66,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
   bool _completionRecorded = false;
   bool _usingSimplifiedProgram = false;
   bool _pausedByLifecycle = false;
+  bool _pausedByUser = false;
   final Map<int, int> _sensoryCompletedByStep = <int, int>{};
 
   late final MeditationAudioDriver _ambientPlayer;
@@ -124,7 +125,10 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
   }
 
   void _onBreathingClock() {
-    if (!mounted || _phase != SessionPhase.running || _pausedByLifecycle) {
+    if (!mounted ||
+        _phase != SessionPhase.running ||
+        _pausedByLifecycle ||
+        _pausedByUser) {
       return;
     }
     final remaining = (_activeDurationSeconds - _breathingClock.value)
@@ -142,7 +146,8 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
     _timer = null;
     if (_remainingSeconds <= 0 ||
         _phase != SessionPhase.running ||
-        _pausedByLifecycle) {
+        _pausedByLifecycle ||
+        _pausedByUser) {
       _deadline = null;
       return;
     }
@@ -213,7 +218,10 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
   }
 
   bool get _canPlayAudio =>
-      mounted && !_pausedByLifecycle && _phase == SessionPhase.running;
+      mounted &&
+      !_pausedByLifecycle &&
+      !_pausedByUser &&
+      _phase == SessionPhase.running;
 
   Future<void> _startAmbience(int request) async {
     if (!_canPlayAudio || !_ambientEnabled || request != _audioRequest) return;
@@ -245,7 +253,8 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
         session == null ||
         !_voiceEnabled ||
         _phase != SessionPhase.running ||
-        _pausedByLifecycle) {
+        _pausedByLifecycle ||
+        _pausedByUser) {
       return;
     }
 
@@ -621,7 +630,9 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
     if (program == null ||
         !program.hasSimplifiedPath ||
         _usingSimplifiedProgram ||
-        _phase != SessionPhase.running) {
+        _phase != SessionPhase.running ||
+        _pausedByLifecycle ||
+        _pausedByUser) {
       return;
     }
 
@@ -643,7 +654,9 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
     final session = _session;
     if (session == null ||
         session.visualType != ResetVisualType.sensoryHalo ||
-        _phase != SessionPhase.running) {
+        _phase != SessionPhase.running ||
+        _pausedByLifecycle ||
+        _pausedByUser) {
       return;
     }
 
@@ -669,7 +682,12 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
   void _advanceGuidedStep() {
     final session = _session;
     final program = session?.program;
-    if (session == null || program == null) return;
+    if (session == null ||
+        program == null ||
+        _pausedByLifecycle ||
+        _pausedByUser) {
+      return;
+    }
 
     final steps = program.stepsFor(simplified: _usingSimplifiedProgram);
     final currentIndex = _sessionStepIndex(session);
@@ -730,6 +748,23 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
     }
   }
 
+  void _toggleManualPause() {
+    if (_phase != SessionPhase.running || _session == null) return;
+    if (!_pausedByUser) {
+      _breathingClock.stop();
+      _timer?.cancel();
+      _timer = null;
+      _deadline = null;
+      setState(() => _pausedByUser = true);
+      unawaited(_pauseAudioForLifecycle());
+      return;
+    }
+    setState(() => _pausedByUser = false);
+    if (_pausedByLifecycle) return;
+    _startTimer();
+    unawaited(_startSessionAudio());
+  }
+
   Future<void> _pauseAudioForLifecycle() async {
     _audioRequest++;
     final pausingAmbience = _ambientPlayer.pause();
@@ -740,7 +775,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
   }
 
   Future<void> _resumeAfterLifecyclePause() async {
-    if (!_canPlayAudio) return;
+    if (_pausedByUser || !_canPlayAudio) return;
 
     if (_remainingSeconds > 0) {
       _startTimer();
@@ -810,6 +845,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
     final session = _session!;
     final reducedMotion =
         MediaQuery.maybeOf(context)?.disableAnimations ?? false;
+    final enlargedText = MediaQuery.textScalerOf(context).scale(14) > 21;
     final progress = _activeDurationSeconds <= 0
         ? 1.0
         : 1 - (_remainingSeconds / _activeDurationSeconds);
@@ -873,6 +909,8 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
                         timeString: timeString,
                         showTimer: widget.launchOptions.showSessionTimer,
                         onClose: _abortSession,
+                        onPausePressed: _toggleManualPause,
+                        isPaused: _pausedByUser,
                         onAudioPressed: _showSessionAudioSettings,
                         audioEnabled: !_allAudioMuted,
                       ),
@@ -932,7 +970,9 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
                                         ),
                                         phaseLabel: phaseLabel ?? 'Notice',
                                         onNotice:
-                                            _sensoryTargetFor(phaseLabel) > 0
+                                            _sensoryTargetFor(phaseLabel) > 0 &&
+                                                !_pausedByLifecycle &&
+                                                !_pausedByUser
                                             ? _registerSensoryNotice
                                             : null,
                                         reducedMotion: reducedMotion,
@@ -982,7 +1022,8 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
                                     ResetVisualType.livingForm =>
                                       ReleafSessionLivingForm(
                                         variant: artwork,
-                                        paused: _pausedByLifecycle,
+                                        paused:
+                                            _pausedByLifecycle || _pausedByUser,
                                         progress: progress,
                                         breathing: isPacedBreathing,
                                         elapsedSeconds: isPacedBreathing
@@ -996,7 +1037,8 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
                                             widget
                                                 .launchOptions
                                                 .showGuidanceText &&
-                                            !_pausedByLifecycle,
+                                            !_pausedByLifecycle &&
+                                            !_pausedByUser,
                                         holdAfterInhaleSeconds:
                                             breathPattern
                                                 ?.holdAfterInhaleSeconds ??
@@ -1101,7 +1143,9 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
                         Center(
                           child: OutlinedButton.icon(
                             key: const Key('reset-step-advance-action'),
-                            onPressed: _advanceGuidedStep,
+                            onPressed: _pausedByLifecycle || _pausedByUser
+                                ? null
+                                : _advanceGuidedStep,
                             icon: const Icon(
                               Icons.arrow_forward_rounded,
                               size: 17,
@@ -1147,7 +1191,9 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
                           Center(
                             child: OutlinedButton.icon(
                               key: const Key('reset-simplify-action'),
-                              onPressed: _activateSimplifiedPath,
+                              onPressed: _pausedByLifecycle || _pausedByUser
+                                  ? null
+                                  : _activateSimplifiedPath,
                               icon: const Icon(
                                 Icons.compress_rounded,
                                 size: 17,
@@ -1198,7 +1244,8 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
                     ],
                   ),
                 );
-                if (session.visualType == ResetVisualType.sensoryHalo) {
+                if (session.visualType == ResetVisualType.sensoryHalo ||
+                    enlargedText) {
                   return SingleChildScrollView(
                     child: ConstrainedBox(
                       constraints: BoxConstraints(
@@ -1598,7 +1645,9 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
                       Center(
                         child: OutlinedButton.icon(
                           key: const Key('emergency-advance-action'),
-                          onPressed: _advanceGuidedStep,
+                          onPressed: _pausedByLifecycle || _pausedByUser
+                              ? null
+                              : _advanceGuidedStep,
                           icon: const Icon(
                             Icons.arrow_forward_rounded,
                             size: 17,
@@ -1929,6 +1978,8 @@ class _SessionTopBar extends StatelessWidget {
     required this.timeString,
     required this.showTimer,
     required this.onClose,
+    required this.onPausePressed,
+    required this.isPaused,
     required this.onAudioPressed,
     required this.audioEnabled,
   });
@@ -1937,11 +1988,103 @@ class _SessionTopBar extends StatelessWidget {
   final String timeString;
   final bool showTimer;
   final VoidCallback onClose;
+  final VoidCallback onPausePressed;
+  final bool isPaused;
   final VoidCallback onAudioPressed;
   final bool audioEnabled;
 
   @override
   Widget build(BuildContext context) {
+    final compact =
+        MediaQuery.sizeOf(context).width < 400 ||
+        MediaQuery.textScalerOf(context).scale(14) > 21;
+    if (compact) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              ReleafRoundIconButton(
+                icon: Icons.close_rounded,
+                tooltip: 'Exit reset',
+                onPressed: onClose,
+              ),
+              const SizedBox(width: ReleafSpacing.sm),
+              Expanded(
+                child: Text(
+                  session.title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: ReleafTypography.cardTitle,
+                ),
+              ),
+              IconButton(
+                key: const Key('reset-active-audio-button'),
+                tooltip: 'Session audio',
+                onPressed: onAudioPressed,
+                icon: Icon(
+                  audioEnabled
+                      ? Icons.volume_up_rounded
+                      : Icons.volume_off_rounded,
+                  color: ReleafColors.textSecondary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: ReleafSpacing.xs),
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            spacing: ReleafSpacing.sm,
+            runSpacing: ReleafSpacing.xs,
+            children: [
+              OutlinedButton.icon(
+                key: Key(
+                  isPaused ? 'reset-manual-resume' : 'reset-manual-pause',
+                ),
+                onPressed: onPausePressed,
+                icon: Icon(
+                  isPaused ? Icons.play_arrow_rounded : Icons.pause_rounded,
+                ),
+                label: Text(isPaused ? 'Resume' : 'Pause'),
+              ),
+              if (showTimer)
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: ReleafColors.surfaceSoft.withValues(alpha: 0.78),
+                    borderRadius: BorderRadius.circular(ReleafRadii.pill),
+                    border: Border.all(color: ReleafColors.borderSoft),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    child: Text(
+                      timeString,
+                      key: const Key('reset-active-session-timer'),
+                      style: ReleafTypography.meta.copyWith(
+                        color: ReleafColors.textPrimary,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.4,
+                      ),
+                    ),
+                  ),
+                )
+              else
+                Text(
+                  session.title,
+                  key: const Key('reset-active-session-title'),
+                  style: const TextStyle(
+                    fontSize: 0,
+                    color: Colors.transparent,
+                  ),
+                ),
+            ],
+          ),
+        ],
+      );
+    }
     return Row(
       children: [
         ReleafRoundIconButton(
@@ -1968,6 +2111,17 @@ class _SessionTopBar extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+        ),
+        const SizedBox(width: ReleafSpacing.xs),
+        IconButton(
+          key: Key(isPaused ? 'reset-manual-resume' : 'reset-manual-pause'),
+          tooltip: isPaused ? 'Resume reset' : 'Pause reset',
+          onPressed: onPausePressed,
+          visualDensity: VisualDensity.compact,
+          icon: Icon(
+            isPaused ? Icons.play_arrow_rounded : Icons.pause_rounded,
+            color: ReleafColors.textSecondary,
           ),
         ),
         const SizedBox(width: ReleafSpacing.xs),

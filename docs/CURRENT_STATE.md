@@ -2,6 +2,12 @@
 
 Rolling state; latest engineering checkpoint: **2026-09-30**
 
+[Reset manual pause](release/2026-09-30-reset-manual-pause.md) now freezes the
+existing clock and audio, keeps user-paused sessions stopped after app resume,
+and makes Pause/Resume/Exit usable at 320 dp with 200% text. 685/685 full tests
+and the configured Android debug APK passed. Physical audio/accessibility QA
+and owner-approved content remain open.
+
 [Reset purpose-first discovery](release/2026-09-30-reset-purpose-discovery.md)
 now presents separate free Emergency access and Breathing methods, Calm for a
 situation and Body & mind reset, backed by the canonical catalog. A 320 dp /

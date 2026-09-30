@@ -1,0 +1,9 @@
+# Reset manual pause and large-text player — 30 September 2026
+
+Active non-Emergency Reset sessions now expose a manual Pause/Resume control. Pausing stops the existing shared breathing clock or guided-session deadline, cancels pending narration/ambience, freezes the phase visual, and disables guided-step, sensory and simplified-path actions. Resume uses the same clock/audio path; a session left paused by the user does not auto-resume when the app returns from the background. Exit remains available. Emergency access, catalog IDs, all breathing phase durations, entitlement and Leaves semantics are unchanged.
+
+The compact player top bar uses a wrapping control row at narrow widths. Enlarged session content scrolls at 200% text, preventing the reproduced horizontal and vertical overflows at 320 × 640 dp. Tests cover breath-hold timing across app pause/resume, guided-step inactivity and countdown recovery, delayed ambience cancellation, and reachable Pause/Resume/Exit controls. A separate audio test confirms rapid resume survives a delayed ambience pause.
+
+Verification: dart format completed; flutter analyze --no-pub reported no issues; 79/79 focused Reset, audio, access and discovery tests passed; the complete flutter test --no-pub --reporter expanded passed 685/685; flutter build apk --debug --dart-define-from-file=tool/local/revenuecat-test-store.json succeeded (assembleDebug 89.5 s). APK: build/app/outputs/flutter-apk/app-debug.apk; 224,018,201 bytes; SHA-256 BBB475DDA0EC2DE60AE2243D1D7CED59F7F220C7344B300ADE0E270B2E11CF22. The local Dart-define file is ignored by Git and was not read or committed.
+
+Open: physical Samsung pause/resume/background-audio and 200% text/TalkBack review; approved human breathing recordings and owner listening; final artwork/content approval and the external Play/signing gates. The APK was built but not installed in this batch. No production or account operation was performed.

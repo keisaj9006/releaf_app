@@ -14,6 +14,7 @@ Future<void> _pumpResetSession(
   WidgetTester tester, {
   String sessionId = 'equal-rhythm',
   bool reducedMotion = false,
+  double textScale = 1,
 }) async {
   SharedPreferences.setMockInitialValues(<String, Object>{});
   final preferences = await SharedPreferences.getInstance();
@@ -23,9 +24,10 @@ Future<void> _pumpResetSession(
       overrides: [sharedPreferencesProvider.overrideWithValue(preferences)],
       child: MaterialApp(
         builder: (context, child) => MediaQuery(
-          data: MediaQuery.of(
-            context,
-          ).copyWith(disableAnimations: reducedMotion),
+          data: MediaQuery.of(context).copyWith(
+            disableAnimations: reducedMotion,
+            textScaler: TextScaler.linear(textScale),
+          ),
           child: child!,
         ),
         home: BreathingWidget(sessionId: sessionId),
@@ -150,6 +152,72 @@ void main() {
       },
     );
   }
+
+  testWidgets(
+    'manual pause holds breath time through app lifecycle and resumes',
+    (tester) async {
+      await _pumpResetSession(tester, sessionId: 'box-breathing');
+      await tester.pump(const Duration(milliseconds: 4200));
+      final beforePause = _timerText(tester);
+      final phaseBeforePause = find.text('Hold');
+      expect(phaseBeforePause, findsOneWidget);
+      await tester.tap(find.byKey(const Key('reset-manual-pause')));
+      await tester.pump();
+      expect(find.byKey(const Key('reset-manual-resume')), findsOneWidget);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+      await tester.pump(const Duration(seconds: 8));
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pump();
+      expect(_timerText(tester), beforePause);
+      expect(phaseBeforePause, findsOneWidget);
+      await tester.tap(find.byKey(const Key('reset-manual-resume')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 900));
+      expect(_timerText(tester), isNot(beforePause));
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
+
+  testWidgets('manual pause blocks guided-step advancement and completion', (
+    tester,
+  ) async {
+    await _pumpResetSession(tester, sessionId: 'back-to-room');
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(BreathingWidget)),
+    );
+    final advance = find.byKey(const Key('reset-step-advance-action'));
+    expect(tester.widget<OutlinedButton>(advance).onPressed, isNotNull);
+    await tester.tap(find.byKey(const Key('reset-manual-pause')));
+    await tester.pump();
+    final pausedTime = _timerText(tester);
+    expect(tester.widget<OutlinedButton>(advance).onPressed, isNull);
+    await tester.pump(const Duration(seconds: 5));
+    expect(_timerText(tester), pausedTime);
+    expect(container.read(resetCompletionStoreProvider), isEmpty);
+    await tester.tap(find.byKey(const Key('reset-manual-resume')));
+    await tester.pump();
+    expect(tester.widget<OutlinedButton>(advance).onPressed, isNotNull);
+    await tester.pump(const Duration(seconds: 1));
+    expect(_timerText(tester), isNot(pausedTime));
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('pause, resume and exit remain reachable at 200% text', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(320, 640));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await _pumpResetSession(tester, textScale: 2, reducedMotion: true);
+    expect(find.byTooltip('Exit reset'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('reset-manual-pause')));
+    await tester.pump();
+    expect(find.byKey(const Key('reset-manual-resume')), findsOneWidget);
+    await tester.tap(find.byKey(const Key('reset-manual-resume')));
+    await tester.pump();
+    expect(find.byTooltip('Exit reset').hitTestable(), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
 
   testWidgets('breathing visual stops when no background frame is drawn', (
     tester,

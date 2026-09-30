@@ -17,6 +17,7 @@ class _DelayedPlayer implements AudioPlayer {
   final prepared = Completer<void>();
   final List<String> played = [];
   bool disposed = false;
+  Completer<void>? pauseGate;
 
   @override
   Future<void> setReleaseMode(ReleaseMode mode) async {
@@ -27,7 +28,10 @@ class _DelayedPlayer implements AudioPlayer {
   @override
   Future<void> stop() async {}
   @override
-  Future<void> pause() async {}
+  Future<void> pause() async {
+    await pauseGate?.future;
+  }
+
   @override
   Future<void> setVolume(double volume) async {}
   @override
@@ -65,10 +69,45 @@ class _DelayedPlayer implements AudioPlayer {
 }
 
 void main() {
+  testWidgets('manual resume waits for a delayed ambience pause', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({});
+    final prefs = await SharedPreferences.getInstance();
+    final player = _DelayedPlayer();
+    player.prepared.complete();
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(prefs),
+          resetAmbientPlayerProvider.overrideWithValue(player),
+        ],
+        child: const MaterialApp(
+          home: BreathingWidget(sessionId: 'equal-rhythm'),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+    expect(player.played, hasLength(1));
+    player.pauseGate = Completer<void>();
+    await tester.tap(find.byKey(const Key('reset-manual-pause')));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('reset-manual-resume')));
+    await tester.pump();
+    expect(player.played, hasLength(1));
+    player.pauseGate!.complete();
+    await tester.pump();
+    await tester.pump();
+    expect(player.played, hasLength(2));
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
   for (final action in [
     'background',
     'exit',
     'mute',
+    'manual pause',
     'background and resume',
   ]) {
     testWidgets('$action cancels pending Reset ambience', (tester) async {
@@ -98,6 +137,8 @@ void main() {
         }
       } else if (action == 'exit') {
         await tester.pumpWidget(const SizedBox.shrink());
+      } else if (action == 'manual pause') {
+        await tester.tap(find.byKey(const Key('reset-manual-pause')));
       } else {
         await tester.tap(find.byTooltip('Session audio'));
         await tester.pumpAndSettle();
