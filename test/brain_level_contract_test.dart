@@ -33,7 +33,8 @@ void main() {
             id == 'n_back' ||
             id == 'spatial_span' ||
             id == 'signal_scan' ||
-            id == 'rule_shift') {
+            id == 'rule_shift' ||
+            id == 'color_conflict') {
           expect(training.maxBrainTrainingLevelFor(id), 50);
         } else {
           expect(training.maxBrainTrainingLevelFor(id), 12, reason: id);

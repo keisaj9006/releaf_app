@@ -4,16 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../features/brain/presentation/widgets/brain_difficulty_selector.dart';
+import 'color_conflict_level_profile.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/releaf_design_tokens.dart';
 import '../../theme/widgets/releaf_brain_artwork.dart';
 
 class ColorConflictScreen extends StatefulWidget {
-  const ColorConflictScreen({
-    super.key,
-    this.onFinish,
-    this.trainingLevel = 1,
-  });
+  const ColorConflictScreen({super.key, this.onFinish, this.trainingLevel = 1});
 
   final ValueChanged<int?>? onFinish;
   final int trainingLevel;
@@ -44,45 +41,29 @@ class _ColorConflictScreenState extends State<ColorConflictScreen>
   bool _locked = false;
   bool? _lastCorrect;
 
-  int get _levelIndex => (widget.trainingLevel - 1).clamp(0, 11).toInt();
-
-  int get _colorCount => switch (_difficulty) {
-        BrainDifficulty.easy => _round < 3 ? 3 : 4,
-        BrainDifficulty.medium => _round < 4 ? 4 : 5,
-        BrainDifficulty.hard => 5,
-      };
-
-  int get _totalRounds {
-    final base = switch (_difficulty) {
-      BrainDifficulty.easy => 9,
-      BrainDifficulty.medium => 11,
-      BrainDifficulty.hard => 13,
-    };
-    return base + (_levelIndex ~/ 3);
-  }
-
-  int get _sessionSeconds {
-    final base = switch (_difficulty) {
-      BrainDifficulty.easy => 38,
-      BrainDifficulty.medium => 30,
-      BrainDifficulty.hard => 24,
-    };
-    return (base - _levelIndex).clamp(12, 38).toInt();
-  }
+  ColorConflictLevelProfile get _profile =>
+      colorConflictProfileForLevel(widget.trainingLevel, _difficulty, _round);
+  int get _colorCount => _profile.colorCount;
+  int get _totalRounds => _profile.totalRounds;
+  int get _sessionSeconds => _profile.sessionSeconds;
 
   int get _multiplier => switch (_difficulty) {
-        BrainDifficulty.easy => 1,
-        BrainDifficulty.medium => 2,
-        BrainDifficulty.hard => 3,
-      };
+    BrainDifficulty.easy => 1,
+    BrainDifficulty.medium => 2,
+    BrainDifficulty.hard => 3,
+  };
 
   _ConflictTrial get _trial {
     final wordIndex = (_round * 2 + _difficulty.index) % _colorCount;
-    final shift = switch (_difficulty) {
-      BrainDifficulty.easy => _round % 3 == 0 ? 0 : 1,
-      BrainDifficulty.medium => 1 + (_round % 2),
-      BrainDifficulty.hard => 1 + ((_round * 2 + 1) % (_colorCount - 1)),
-    };
+    final shift = widget.trainingLevel > 12
+        ? (_round + 1) % _profile.congruentEvery == 0
+              ? 0
+              : 1 + ((_round + widget.trainingLevel) % (_colorCount - 1))
+        : switch (_difficulty) {
+            BrainDifficulty.easy => _round % 3 == 0 ? 0 : 1,
+            BrainDifficulty.medium => 1 + (_round % 2),
+            BrainDifficulty.hard => 1 + ((_round * 2 + 1) % (_colorCount - 1)),
+          };
     final inkIndex = (wordIndex + shift) % _colorCount;
     return _ConflictTrial(
       word: _colors[wordIndex],
@@ -314,10 +295,7 @@ class _ColorConflictScreenState extends State<ColorConflictScreen>
                               value: _started ? '${_timeLeft}s' : '—',
                             ),
                             const SizedBox(width: ReleafSpacing.xs),
-                            _ConflictStat(
-                              label: 'SCORE',
-                              value: '$_score',
-                            ),
+                            _ConflictStat(label: 'SCORE', value: '$_score'),
                           ],
                         ),
                         const SizedBox(height: ReleafSpacing.lg),
@@ -329,8 +307,9 @@ class _ColorConflictScreenState extends State<ColorConflictScreen>
                           ),
                           decoration: BoxDecoration(
                             color: const Color(0xE9171119),
-                            borderRadius:
-                                BorderRadius.circular(ReleafRadii.extraLarge),
+                            borderRadius: BorderRadius.circular(
+                              ReleafRadii.extraLarge,
+                            ),
                             border: Border.all(
                               color: _accent.withValues(alpha: 0.22),
                             ),
@@ -370,16 +349,16 @@ class _ColorConflictScreenState extends State<ColorConflictScreen>
                                   _lastCorrect == null
                                       ? 'Ignore the word. Answer only the color you see.'
                                       : _lastCorrect!
-                                          ? 'Correct'
-                                          : 'Conflict won that round',
+                                      ? 'Correct'
+                                      : 'Conflict won that round',
                                   key: ValueKey(_lastCorrect),
                                   textAlign: TextAlign.center,
                                   style: ReleafTypography.meta.copyWith(
                                     color: _lastCorrect == null
                                         ? ReleafColors.textSecondary
                                         : _lastCorrect!
-                                            ? const Color(0xFF80CDB7)
-                                            : const Color(0xFFE1A184),
+                                        ? const Color(0xFF80CDB7)
+                                        : const Color(0xFFE1A184),
                                     fontWeight: _lastCorrect == null
                                         ? FontWeight.w500
                                         : FontWeight.w700,
@@ -397,20 +376,23 @@ class _ColorConflictScreenState extends State<ColorConflictScreen>
                             itemCount: _colorCount,
                             gridDelegate:
                                 const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              mainAxisSpacing: 10,
-                              crossAxisSpacing: 10,
-                              childAspectRatio: 2.55,
-                            ),
+                                  crossAxisCount: 2,
+                                  mainAxisSpacing: 10,
+                                  crossAxisSpacing: 10,
+                                  childAspectRatio: 2.55,
+                                ),
                             itemBuilder: (context, index) {
                               final item = _colors[index];
                               return OutlinedButton(
                                 key: Key('color-conflict-answer-$index'),
-                                onPressed: _locked ? null : () => _answer(index),
+                                onPressed: _locked
+                                    ? null
+                                    : () => _answer(index),
                                 style: OutlinedButton.styleFrom(
                                   foregroundColor: item.color,
-                                  backgroundColor:
-                                      item.color.withValues(alpha: 0.08),
+                                  backgroundColor: item.color.withValues(
+                                    alpha: 0.08,
+                                  ),
                                   side: BorderSide(
                                     color: item.color.withValues(alpha: 0.30),
                                   ),
@@ -441,7 +423,9 @@ class _ColorConflictScreenState extends State<ColorConflictScreen>
                           ),
                         const SizedBox(height: ReleafSpacing.md),
                         Text(
-                          'Harder levels add more color choices and reduce the session time. Score reflects this exercise only.',
+                          widget.trainingLevel > 12
+                              ? 'Answer the ink color. Some words match it; others do not. Score reflects this exercise only.'
+                              : 'Harder levels add more color choices and reduce the session time. Score reflects this exercise only.',
                           textAlign: TextAlign.center,
                           style: ReleafTypography.meta.copyWith(
                             color: ReleafColors.textMuted,
@@ -481,10 +465,7 @@ class _ConflictTrial {
 }
 
 class _ConflictStat extends StatelessWidget {
-  const _ConflictStat({
-    required this.label,
-    required this.value,
-  });
+  const _ConflictStat({required this.label, required this.value});
 
   final String label;
   final String value;

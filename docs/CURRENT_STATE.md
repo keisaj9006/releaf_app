@@ -7,9 +7,11 @@ defines tested challenge bands and opt-in difficulty boundaries through 50.
 Memory/Labyrinth retain their 50-level paths. [Sequence Echo](release/2026-09-30-sequence-echo-fifty-levels.md),
 [N-back](release/2026-09-30-n-back-fifty-levels.md),
 [Spatial Span](release/2026-09-30-spatial-span-fifty-levels.md),
-[Signal Scan](release/2026-09-30-signal-scan-fifty-levels.md) and
-[Rule Shift](release/2026-09-30-rule-shift-fifty-levels.md) now have tested
-profiles through level 50; the other eight games remain runtime-capped at 12.
+[Signal Scan](release/2026-09-30-signal-scan-fifty-levels.md),
+[Rule Shift](release/2026-09-30-rule-shift-fifty-levels.md) and
+[Color Conflict](release/2026-09-30-color-conflict-fifty-levels.md) now have
+tested profiles through level 50; the other seven games remain runtime-capped
+at 12.
 Existing levels 1–12, rewards and saved progression are unchanged.
 
 [Reset manual pause](release/2026-09-30-reset-manual-pause.md) now freezes the
