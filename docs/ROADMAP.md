@@ -3,9 +3,10 @@
 [Brain level foundation](release/2026-09-30-brain-level-foundation.md) is
 tested. [Sequence Echo](release/2026-09-30-sequence-echo-fifty-levels.md) is
 the first legacy game with playable profiles 13–50 and a raised live cap; its
-levels 1–12 are pinned by tests. Next implement and verify the remaining 12
-games in recall/attention, logic/inhibition and planning/spatial families,
-raising each live cap only after its gameplay tests pass. Cross-game level-50
+levels 1–12 are pinned by tests. [N-back](release/2026-09-30-n-back-fifty-levels.md)
+now also has bounded, tested profiles through 50. Next implement and verify
+the remaining 11 games in recall/attention, logic/inhibition and
+planning/spatial families, raising each live cap only after gameplay tests pass. Cross-game level-50
 replay and physical-device review remain open.
 
 [Manual Reset pause checkpoint](release/2026-09-30-reset-manual-pause.md)

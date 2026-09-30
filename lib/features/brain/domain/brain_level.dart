@@ -1,5 +1,5 @@
 /// Profile ceiling prepared for all registered Brain games.
-/// The legacy runtime cap remains at 12 until every game profile is playable.
+/// Live caps rise per game only after its 13–50 profile is playable and tested.
 const maxBrainProfileLevel = 50;
 const brainCompletionsPerLevel = 2;
 

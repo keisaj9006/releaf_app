@@ -27,7 +27,10 @@ void main() {
     'legacy games remain capped until their 13–50 profiles are playable',
     () {
       for (final id in training.progressiveBrainGameIds) {
-        if (id == 'memory' || id == 'labyrinth' || id == 'sequence_echo') {
+        if (id == 'memory' ||
+            id == 'labyrinth' ||
+            id == 'sequence_echo' ||
+            id == 'n_back') {
           expect(training.maxBrainTrainingLevelFor(id), 50);
         } else {
           expect(training.maxBrainTrainingLevelFor(id), 12, reason: id);

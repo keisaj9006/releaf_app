@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../features/brain/presentation/widgets/brain_difficulty_selector.dart';
+import 'n_back_level_profile.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/releaf_design_tokens.dart';
 
@@ -33,32 +34,14 @@ class _NBackScreenState extends State<NBackScreen> {
   bool _started = false;
   bool _locked = false;
   bool _finished = false;
-  String _feedback = 'Watch the first items, then compare each one with the item N steps back.';
+  String _feedback =
+      'Watch the first items, then compare each one with the item N steps back.';
 
-  int get _levelIndex => (widget.trainingLevel - 1).clamp(0, 11).toInt();
+  NBackLevelProfile get _profile =>
+      nBackProfileForLevel(widget.trainingLevel, _difficulty);
 
-  int get _nBack {
-    final base = switch (_difficulty) {
-      BrainDifficulty.easy => 1,
-      BrainDifficulty.medium => 2,
-      BrainDifficulty.hard => 3,
-    };
-    final extra = switch (_difficulty) {
-      BrainDifficulty.easy => _levelIndex >= 9 ? 1 : 0,
-      BrainDifficulty.medium => _levelIndex >= 7 ? 1 : 0,
-      BrainDifficulty.hard => _levelIndex >= 8 ? 1 : 0,
-    };
-    return (base + extra).clamp(1, 4).toInt();
-  }
-
-  int get _trialCount {
-    final base = switch (_difficulty) {
-      BrainDifficulty.easy => 12,
-      BrainDifficulty.medium => 15,
-      BrainDifficulty.hard => 18,
-    };
-    return base + (_levelIndex ~/ 2);
-  }
+  int get _nBack => _profile.depth;
+  int get _trialCount => _profile.trialCount;
 
   int get _multiplier => switch (_difficulty) {
     BrainDifficulty.easy => 1,
@@ -73,13 +56,12 @@ class _NBackScreenState extends State<NBackScreen> {
   }
 
   List<String> _buildSequence() {
-    final random = math.Random(
-      9049 + (widget.trainingLevel * 271) + (_difficulty.index * 991),
-    );
+    final profile = _profile;
+    final random = math.Random(profile.seed);
     final result = <String>[];
 
     for (var i = 0; i < _trialCount; i++) {
-      if (i >= _nBack && random.nextDouble() < 0.34) {
+      if (i >= _nBack && random.nextDouble() < profile.matchChance) {
         result.add(result[i - _nBack]);
         continue;
       }
@@ -145,8 +127,8 @@ class _NBackScreenState extends State<NBackScreen> {
       _feedback = correct
           ? 'Correct.'
           : actualMatch
-              ? 'That was a match.'
-              : 'That one was different.';
+          ? 'That was a match.'
+          : 'That one was different.';
     });
 
     if (correct) {
@@ -366,8 +348,9 @@ class _NBackScreenState extends State<NBackScreen> {
                                 style: FilledButton.styleFrom(
                                   backgroundColor: _accent,
                                   foregroundColor: const Color(0xFF171225),
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 15),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 15,
+                                  ),
                                 ),
                               )
                             else
@@ -376,8 +359,9 @@ class _NBackScreenState extends State<NBackScreen> {
                                   Expanded(
                                     child: OutlinedButton(
                                       key: const Key('n-back-different'),
-                                      onPressed:
-                                          _locked ? null : () => _answer(false),
+                                      onPressed: _locked
+                                          ? null
+                                          : () => _answer(false),
                                       style: OutlinedButton.styleFrom(
                                         padding: const EdgeInsets.symmetric(
                                           vertical: 15,
@@ -390,12 +374,14 @@ class _NBackScreenState extends State<NBackScreen> {
                                   Expanded(
                                     child: FilledButton(
                                       key: const Key('n-back-match'),
-                                      onPressed:
-                                          _locked ? null : () => _answer(true),
+                                      onPressed: _locked
+                                          ? null
+                                          : () => _answer(true),
                                       style: FilledButton.styleFrom(
                                         backgroundColor: _accent,
-                                        foregroundColor:
-                                            const Color(0xFF171225),
+                                        foregroundColor: const Color(
+                                          0xFF171225,
+                                        ),
                                         padding: const EdgeInsets.symmetric(
                                           vertical: 15,
                                         ),
@@ -443,7 +429,9 @@ class _Stat extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xD9151622),
         borderRadius: BorderRadius.circular(ReleafRadii.pill),
-        border: Border.all(color: _NBackScreenState._accent.withValues(alpha: 0.18)),
+        border: Border.all(
+          color: _NBackScreenState._accent.withValues(alpha: 0.18),
+        ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
