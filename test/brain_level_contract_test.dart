@@ -30,7 +30,8 @@ void main() {
         if (id == 'memory' ||
             id == 'labyrinth' ||
             id == 'sequence_echo' ||
-            id == 'n_back') {
+            id == 'n_back' ||
+            id == 'spatial_span') {
           expect(training.maxBrainTrainingLevelFor(id), 50);
         } else {
           expect(training.maxBrainTrainingLevelFor(id), 12, reason: id);

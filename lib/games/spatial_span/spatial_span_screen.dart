@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../features/brain/presentation/widgets/brain_difficulty_selector.dart';
+import 'spatial_span_level_profile.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/releaf_design_tokens.dart';
 
@@ -43,52 +44,19 @@ class _SpatialSpanScreenState extends State<SpatialSpanScreen>
   String _feedback =
       'Watch the path light up, then reproduce the same spatial sequence.';
 
-  int get _trainingLevel => widget.trainingLevel.clamp(1, 12).toInt();
-  int get _levelIndex => _trainingLevel - 1;
-
-  int get _gridSide {
-    return switch (_difficulty) {
-      BrainDifficulty.easy => _trainingLevel >= 10 ? 4 : 3,
-      BrainDifficulty.medium => _trainingLevel >= 8 ? 5 : 4,
-      BrainDifficulty.hard => _trainingLevel >= 7 ? 5 : 4,
-    };
-  }
-
-  int get _sequenceLength {
-    final difficultyOffset = switch (_difficulty) {
-      BrainDifficulty.easy => 0,
-      BrainDifficulty.medium => 1,
-      BrainDifficulty.hard => 2,
-    };
-    final progression = _levelIndex ~/ 2;
-    final roundGrowth = _round - 1;
-    return (3 + difficultyOffset + progression + roundGrowth)
-        .clamp(3, 11)
-        .toInt();
-  }
-
-  Duration get _onDuration {
-    final difficultyPenalty = switch (_difficulty) {
-      BrainDifficulty.easy => 0,
-      BrainDifficulty.medium => 55,
-      BrainDifficulty.hard => 105,
-    };
-    final milliseconds =
-        (620 - (_levelIndex * 20) - difficultyPenalty).clamp(260, 620).toInt();
-    return Duration(milliseconds: milliseconds);
-  }
-
-  Duration get _gapDuration {
-    final milliseconds =
-        (210 - (_levelIndex * 8)).clamp(100, 210).toInt();
-    return Duration(milliseconds: milliseconds);
-  }
+  int get _trainingLevel => widget.trainingLevel.clamp(1, 50).toInt();
+  SpatialSpanLevelProfile get _profile =>
+      spatialSpanProfileForLevel(_trainingLevel, _difficulty, _round);
+  int get _gridSide => _profile.gridSide;
+  int get _sequenceLength => _profile.sequenceLength;
+  Duration get _onDuration => Duration(milliseconds: _profile.onMs);
+  Duration get _gapDuration => Duration(milliseconds: _profile.gapMs);
 
   int get _difficultyMultiplier => switch (_difficulty) {
-        BrainDifficulty.easy => 1,
-        BrainDifficulty.medium => 2,
-        BrainDifficulty.hard => 3,
-      };
+    BrainDifficulty.easy => 1,
+    BrainDifficulty.medium => 2,
+    BrainDifficulty.hard => 3,
+  };
 
   bool get _canChangeDifficulty =>
       _phase == _SpatialSpanPhase.ready && _round == 1;
@@ -125,8 +93,7 @@ class _SpatialSpanScreenState extends State<SpatialSpanScreen>
 
     final partialCorrectTaps = _input.length;
     setState(() {
-      _correctTaps =
-          math.max(0, _correctTaps - partialCorrectTaps).toInt();
+      _correctTaps = math.max(0, _correctTaps - partialCorrectTaps).toInt();
       _sequence = const [];
       _input.clear();
       _activeCell = null;
@@ -147,12 +114,7 @@ class _SpatialSpanScreenState extends State<SpatialSpanScreen>
 
   List<int> _buildSequence() {
     final cellCount = _gridSide * _gridSide;
-    final random = math.Random(
-      1733 +
-          (_trainingLevel * 1009) +
-          (_difficulty.index * 4093) +
-          (_round * 7919),
-    );
+    final random = math.Random(_profile.seed);
     final result = <int>[];
 
     while (result.length < _sequenceLength) {
@@ -259,8 +221,7 @@ class _SpatialSpanScreenState extends State<SpatialSpanScreen>
   }
 
   void _nextRound() {
-    if (_phase != _SpatialSpanPhase.feedback ||
-        _round >= _roundsPerSession) {
+    if (_phase != _SpatialSpanPhase.feedback || _round >= _roundsPerSession) {
       return;
     }
 
@@ -447,17 +408,18 @@ class _SpatialSpanScreenState extends State<SpatialSpanScreen>
                               child: AspectRatio(
                                 aspectRatio: 1,
                                 child: GridView.builder(
-                                  physics:
-                                      const NeverScrollableScrollPhysics(),
+                                  physics: const NeverScrollableScrollPhysics(),
                                   itemCount: cellCount,
                                   gridDelegate:
                                       SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: _gridSide,
-                                    crossAxisSpacing:
-                                        compact ? 8 : ReleafSpacing.sm,
-                                    mainAxisSpacing:
-                                        compact ? 8 : ReleafSpacing.sm,
-                                  ),
+                                        crossAxisCount: _gridSide,
+                                        crossAxisSpacing: compact
+                                            ? 8
+                                            : ReleafSpacing.sm,
+                                        mainAxisSpacing: compact
+                                            ? 8
+                                            : ReleafSpacing.sm,
+                                      ),
                                   itemBuilder: (context, index) {
                                     final active = _activeCell == index;
                                     final selected =
@@ -473,9 +435,7 @@ class _SpatialSpanScreenState extends State<SpatialSpanScreen>
                                         ),
                                         clipBehavior: Clip.antiAlias,
                                         child: InkWell(
-                                          key: Key(
-                                            'spatial-span-cell-$index',
-                                          ),
+                                          key: Key('spatial-span-cell-$index'),
                                           onTap: input && !_tapLocked
                                               ? () => _tapCell(index)
                                               : null,
@@ -485,16 +445,14 @@ class _SpatialSpanScreenState extends State<SpatialSpanScreen>
                                               color: active
                                                   ? _accent
                                                   : selected
-                                                      ? _accent.withValues(
-                                                          alpha: 0.22,
-                                                        )
-                                                      : const Color(
-                                                          0xFF12242E,
-                                                        ),
+                                                  ? _accent.withValues(
+                                                      alpha: 0.22,
+                                                    )
+                                                  : const Color(0xFF12242E),
                                               borderRadius:
                                                   BorderRadius.circular(
-                                                ReleafRadii.medium,
-                                              ),
+                                                    ReleafRadii.medium,
+                                                  ),
                                               border: Border.all(
                                                 color: active
                                                     ? const Color(0xFFE4F7FF)
@@ -508,8 +466,8 @@ class _SpatialSpanScreenState extends State<SpatialSpanScreen>
                                                       BoxShadow(
                                                         color: _accent
                                                             .withValues(
-                                                          alpha: 0.36,
-                                                        ),
+                                                              alpha: 0.36,
+                                                            ),
                                                         blurRadius: 18,
                                                       ),
                                                     ]
@@ -654,10 +612,7 @@ class _SpatialStat extends StatelessWidget {
 }
 
 class _SpatialStatusButton extends StatelessWidget {
-  const _SpatialStatusButton({
-    required this.icon,
-    required this.label,
-  });
+  const _SpatialStatusButton({required this.icon, required this.label});
 
   final IconData icon;
   final String label;
@@ -677,11 +632,7 @@ class _SpatialStatusButton extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            icon,
-            size: 18,
-            color: _SpatialSpanScreenState._accent,
-          ),
+          Icon(icon, size: 18, color: _SpatialSpanScreenState._accent),
           const SizedBox(width: 8),
           Text(
             label,

@@ -30,6 +30,7 @@ int maxBrainTrainingLevelFor(String gameId) => switch (gameId) {
   'labyrinth' => maxLabyrinthTrainingLevel,
   'sequence_echo' => 50,
   'n_back' => 50,
+  'spatial_span' => 50,
   _ => maxBrainTrainingLevel,
 };
 const brainSessionsPerTrainingLevel = 2;
