@@ -2,6 +2,12 @@
 
 Rolling state; latest engineering checkpoint: **2026-09-30**
 
+[Brain 50-level foundation](release/2026-09-30-brain-level-foundation.md)
+defines tested challenge bands and opt-in difficulty boundaries through 50.
+Memory/Labyrinth retain their 50-level paths; the other 13 games remain
+runtime-capped at 12 until playable profiles are implemented. No rewards or
+saved progression changed.
+
 [Reset manual pause](release/2026-09-30-reset-manual-pause.md) now freezes the
 existing clock and audio, keeps user-paused sessions stopped after app resume,
 and makes Pause/Resume/Exit usable at 320 dp with 200% text. 685/685 full tests

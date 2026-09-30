@@ -1,5 +1,11 @@
 # Releaf Completion Roadmap
 
+[Brain level foundation](release/2026-09-30-brain-level-foundation.md) is
+tested without exposing unfinished levels. Next implement profiles 13–50 for
+the 13 legacy games in recall/attention, logic/inhibition and planning/spatial
+families, preserving levels 1–12; only then raise the live cap and verify
+level-50 replay across the registry.
+
 [Manual Reset pause checkpoint](release/2026-09-30-reset-manual-pause.md)
 passed 685 full tests, clean analysis and an Android debug build. Continue the
 remaining Reset safety/accessibility boundaries only where code or tests show

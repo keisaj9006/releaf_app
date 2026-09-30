@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:releaf_app/core/providers.dart';
+import 'package:releaf_app/features/brain/domain/brain_level.dart';
 import 'package:releaf_app/features/brain/presentation/game_host_screen.dart';
 import 'package:releaf_app/features/brain/presentation/widgets/brain_difficulty_selector.dart';
 
@@ -31,6 +32,58 @@ void main() {
       expect(brainPracticeLevelForDifficulty(99, BrainDifficulty.hard), 12);
     },
   );
+  test('extended practice offset preserves legacy levels and clamps to 50', () {
+    for (var level = 1; level <= 12; level++) {
+      expect(
+        brainPracticeLevelForDifficulty(
+          level,
+          BrainDifficulty.easy,
+          maxLevel: maxBrainProfileLevel,
+        ),
+        (level - 2).clamp(1, 12),
+      );
+      expect(
+        brainPracticeLevelForDifficulty(
+          level,
+          BrainDifficulty.hard,
+          maxLevel: maxBrainProfileLevel,
+        ),
+        (level + 2).clamp(1, 12),
+      );
+    }
+    for (final (level, easy, medium, hard) in [
+      (13, 11, 13, 15),
+      (25, 23, 25, 27),
+      (49, 47, 49, 50),
+      (50, 48, 50, 50),
+    ]) {
+      expect(
+        brainPracticeLevelForDifficulty(
+          level,
+          BrainDifficulty.easy,
+          maxLevel: maxBrainProfileLevel,
+        ),
+        easy,
+      );
+      expect(
+        brainPracticeLevelForDifficulty(
+          level,
+          BrainDifficulty.medium,
+          maxLevel: maxBrainProfileLevel,
+        ),
+        medium,
+      );
+      expect(
+        brainPracticeLevelForDifficulty(
+          level,
+          BrainDifficulty.hard,
+          maxLevel: maxBrainProfileLevel,
+        ),
+        hard,
+      );
+    }
+  });
+
   for (final game in ['memory', 'broken_mirror', 'rule_shift']) {
     testWidgets(
       '$game supports difficulty before play and locks after interaction',

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../theme/releaf_design_tokens.dart';
+import '../../domain/brain_level.dart';
 
 enum BrainDifficulty {
   easy,
@@ -17,15 +18,19 @@ enum BrainDifficulty {
 /// Session challenge adjustment; never writes the user's saved training level.
 int brainPracticeLevelForDifficulty(
   int trainingLevel,
-  BrainDifficulty difficulty,
-) {
-  final level = trainingLevel.clamp(1, 12).toInt();
+  BrainDifficulty difficulty, {
+  int maxLevel = 12,
+}) {
+  assert(maxLevel >= 1 && maxLevel <= maxBrainProfileLevel);
+  final level = trainingLevel.clamp(1, maxLevel).toInt();
   final offset = switch (difficulty) {
     BrainDifficulty.easy => -2,
     BrainDifficulty.medium => 0,
     BrainDifficulty.hard => 2,
   };
-  return (level + offset).clamp(1, 12).toInt();
+  // Preserve every pre-expansion challenge at saved levels 1–12.
+  final ceiling = level <= 12 && maxLevel > 12 ? 12 : maxLevel;
+  return (level + offset).clamp(1, ceiling).toInt();
 }
 
 class BrainDifficultySelector extends StatelessWidget {
