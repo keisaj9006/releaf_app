@@ -546,6 +546,8 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 250));
 
+    await tester.tap(find.byKey(const Key('reset-group-bodyMindReset')));
+    await tester.pumpAndSettle();
     await tester.ensureVisible(find.text(freeSession.title));
     await tester.pump();
     await tester.tap(find.text(freeSession.title));
@@ -702,6 +704,8 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 250));
 
+      await tester.tap(find.byKey(const Key('reset-group-bodyMindReset')));
+      await tester.pumpAndSettle();
       await tester.ensureVisible(find.text(freeSession.title));
       await tester.pump();
       await tester.tap(find.text(freeSession.title));

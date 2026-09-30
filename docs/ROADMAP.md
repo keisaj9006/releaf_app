@@ -1,5 +1,12 @@
 # Releaf Completion Roadmap
 
+[Reset discovery checkpoint](release/2026-09-30-reset-purpose-discovery.md)
+is implemented and verified with 680 full tests, clean analysis and an Android
+debug build. Continue the session safety/accessibility regression task in
+docs/superpowers/plans/2026-09-24-reset-discovery.md, then the next unblocked
+Sleep/Brain milestones. Owner-approved artwork, natural breathing recordings,
+content listening and final device QA remain open.
+
 This roadmap converts the current repo + release gate + latest project decisions + Deep Research into execution order.
 
 [CI e2952b7](release/2026-09-12-ci-e2952b7.md) passed through AAB smoke and release

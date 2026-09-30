@@ -1,6 +1,12 @@
 # Releaf Current State
 
-Snapshot: **2026-09-12**
+Rolling state; latest engineering checkpoint: **2026-09-30**
+
+[Reset purpose-first discovery](release/2026-09-30-reset-purpose-discovery.md)
+now presents separate free Emergency access and Breathing methods, Calm for a
+situation and Body & mind reset, backed by the canonical catalog. A 320 dp /
+200% text overflow was corrected. 680/680 full tests and Android debug build
+passed; device/artwork/audio-owner review remains open.
 
 [Full Ubuntu CI at e2952b7](release/2026-09-12-ci-e2952b7.md) completed successfully:
 analysis, full tests, audio decoding, both debug APKs, test-signed AAB and release
