@@ -2,16 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../features/brain/presentation/widgets/brain_difficulty_selector.dart';
+import 'sequence_echo_level_profile.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/releaf_design_tokens.dart';
 import '../../theme/widgets/releaf_brain_artwork.dart';
 
 class SequenceEchoScreen extends StatefulWidget {
-  const SequenceEchoScreen({
-    super.key,
-    this.onFinish,
-    this.trainingLevel = 1,
-  });
+  const SequenceEchoScreen({super.key, this.onFinish, this.trainingLevel = 1});
 
   final ValueChanged<int?>? onFinish;
   final int trainingLevel;
@@ -23,10 +20,6 @@ class SequenceEchoScreen extends StatefulWidget {
 class _SequenceEchoScreenState extends State<SequenceEchoScreen>
     with WidgetsBindingObserver {
   static const _accent = Color(0xFF8FA8E8);
-  static const _baseSequence = <int>[
-    0, 4, 8, 2, 6, 1, 7, 3, 5, 0, 8, 4, 2, 7, 1, 6, 3, 5,
-  ];
-
   BrainDifficulty _difficulty = BrainDifficulty.medium;
   int _round = 0;
   int _score = 0;
@@ -41,48 +34,20 @@ class _SequenceEchoScreenState extends State<SequenceEchoScreen>
   bool _finished = false;
   String _status = 'Choose a difficulty, then watch the sequence.';
 
-  int get _levelIndex => (widget.trainingLevel - 1).clamp(0, 11).toInt();
+  SequenceEchoLevelProfile get _profile =>
+      sequenceEchoProfileForLevel(widget.trainingLevel, _difficulty, _round);
 
-  int get _totalRounds {
-    final base = switch (_difficulty) {
-      BrainDifficulty.easy => 5,
-      BrainDifficulty.medium => 6,
-      BrainDifficulty.hard => 7,
-    };
-    return base + (_levelIndex ~/ 3);
-  }
-
-  int get _sequenceLength {
-    return switch (_difficulty) {
-      BrainDifficulty.easy => 3 + _round + (_levelIndex ~/ 2),
-      BrainDifficulty.medium => 4 + _round + (_levelIndex ~/ 2),
-      BrainDifficulty.hard => 5 + _round + (_levelIndex ~/ 2),
-    };
-  }
-
-  int get _flashMs {
-    final base = switch (_difficulty) {
-      BrainDifficulty.easy => 560 - (_round * 35),
-      BrainDifficulty.medium => 410 - (_round * 30),
-      BrainDifficulty.hard => 290 - (_round * 18),
-    };
-    return (base - (_levelIndex * 12)).clamp(145, 560).toInt();
-  }
+  int get _totalRounds => _profile.totalRounds;
+  int get _sequenceLength => _profile.sequenceLength;
+  int get _flashMs => _profile.flashMs;
 
   int get _multiplier => switch (_difficulty) {
-        BrainDifficulty.easy => 1,
-        BrainDifficulty.medium => 2,
-        BrainDifficulty.hard => 3,
-      };
+    BrainDifficulty.easy => 1,
+    BrainDifficulty.medium => 2,
+    BrainDifficulty.hard => 3,
+  };
 
-  List<int> get _sequence {
-    final offset = (_round * 3 + _difficulty.index * 2) % _baseSequence.length;
-    return List<int>.generate(
-      _sequenceLength,
-      (index) => _baseSequence[(offset + index) % _baseSequence.length],
-      growable: false,
-    );
-  }
+  List<int> get _sequence => _profile.sequence;
 
   @override
   void initState() {
@@ -338,10 +303,7 @@ class _SequenceEchoScreenState extends State<SequenceEchoScreen>
                               ),
                             ),
                             const SizedBox(width: ReleafSpacing.xs),
-                            _SequenceStat(
-                              label: 'SCORE',
-                              value: '$_score',
-                            ),
+                            _SequenceStat(label: 'SCORE', value: '$_score'),
                           ],
                         ),
                         const SizedBox(height: ReleafSpacing.lg),
@@ -350,8 +312,9 @@ class _SequenceEchoScreenState extends State<SequenceEchoScreen>
                           padding: const EdgeInsets.all(ReleafSpacing.md),
                           decoration: BoxDecoration(
                             color: const Color(0xE9111824),
-                            borderRadius:
-                                BorderRadius.circular(ReleafRadii.extraLarge),
+                            borderRadius: BorderRadius.circular(
+                              ReleafRadii.extraLarge,
+                            ),
                             border: Border.all(
                               color: _accent.withValues(alpha: 0.22),
                             ),
@@ -370,10 +333,10 @@ class _SequenceEchoScreenState extends State<SequenceEchoScreen>
                               itemCount: 9,
                               gridDelegate:
                                   const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 3,
-                                crossAxisSpacing: 10,
-                                mainAxisSpacing: 10,
-                              ),
+                                    crossAxisCount: 3,
+                                    crossAxisSpacing: 10,
+                                    mainAxisSpacing: 10,
+                                  ),
                               itemBuilder: (context, index) {
                                 final lit = _litCell == index;
                                 final pressed = _pressedCell == index;
@@ -388,8 +351,8 @@ class _SequenceEchoScreenState extends State<SequenceEchoScreen>
                                   label: pressedCorrect
                                       ? 'Sequence cell ${index + 1}, correct'
                                       : pressedWrong
-                                          ? 'Sequence cell ${index + 1}, try again'
-                                          : 'Sequence cell ${index + 1}',
+                                      ? 'Sequence cell ${index + 1}, try again'
+                                      : 'Sequence cell ${index + 1}',
                                   child: Material(
                                     color: Colors.transparent,
                                     borderRadius: BorderRadius.circular(20),
@@ -401,7 +364,13 @@ class _SequenceEchoScreenState extends State<SequenceEchoScreen>
                                       borderRadius: BorderRadius.circular(20),
                                       child: AnimatedContainer(
                                         key: Key(
-                                          'sequence-echo-cell-$index-${lit ? 'lit' : pressedCorrect ? 'correct' : pressedWrong ? 'wrong' : 'idle'}',
+                                          'sequence-echo-cell-$index-${lit
+                                              ? 'lit'
+                                              : pressedCorrect
+                                              ? 'correct'
+                                              : pressedWrong
+                                              ? 'wrong'
+                                              : 'idle'}',
                                         ),
                                         duration: const Duration(
                                           milliseconds: 120,
@@ -410,30 +379,40 @@ class _SequenceEchoScreenState extends State<SequenceEchoScreen>
                                           color: lit
                                               ? const Color(0xFFDDE7FF)
                                               : pressedCorrect
-                                                  ? const Color(0xFFBEEAD8)
-                                                  : pressedWrong
-                                                      ? const Color(0xFFF1C7C0)
-                                                      : const Color(0xFF151E2D),
-                                          borderRadius:
-                                              BorderRadius.circular(20),
+                                              ? const Color(0xFFBEEAD8)
+                                              : pressedWrong
+                                              ? const Color(0xFFF1C7C0)
+                                              : const Color(0xFF151E2D),
+                                          borderRadius: BorderRadius.circular(
+                                            20,
+                                          ),
                                           border: Border.all(
                                             color: lit
                                                 ? _accent
                                                 : pressedCorrect
-                                                    ? const Color(0xFF80CDB7)
-                                                    : pressedWrong
-                                                        ? const Color(0xFFE1A184)
-                                                        : _accent.withValues(alpha: 0.18),
+                                                ? const Color(0xFF80CDB7)
+                                                : pressedWrong
+                                                ? const Color(0xFFE1A184)
+                                                : _accent.withValues(
+                                                    alpha: 0.18,
+                                                  ),
                                           ),
                                           boxShadow: lit || pressed
                                               ? [
                                                   BoxShadow(
-                                                    color: (pressedCorrect
-                                                            ? const Color(0xFF80CDB7)
-                                                            : pressedWrong
-                                                                ? const Color(0xFFE1A184)
+                                                    color:
+                                                        (pressedCorrect
+                                                                ? const Color(
+                                                                    0xFF80CDB7,
+                                                                  )
+                                                                : pressedWrong
+                                                                ? const Color(
+                                                                    0xFFE1A184,
+                                                                  )
                                                                 : _accent)
-                                                        .withValues(alpha: 0.32),
+                                                            .withValues(
+                                                              alpha: 0.32,
+                                                            ),
                                                     blurRadius: 24,
                                                   ),
                                                 ]
@@ -445,7 +424,9 @@ class _SequenceEchoScreenState extends State<SequenceEchoScreen>
                                             size: lit || pressed ? 22 : 12,
                                             color: lit || pressed
                                                 ? const Color(0xFF1A2440)
-                                                : _accent.withValues(alpha: 0.34),
+                                                : _accent.withValues(
+                                                    alpha: 0.34,
+                                                  ),
                                           ),
                                         ),
                                       ),
@@ -470,10 +451,9 @@ class _SequenceEchoScreenState extends State<SequenceEchoScreen>
                           height: ReleafControlSizes.prominent,
                           child: FilledButton.icon(
                             key: const Key('sequence-echo-start'),
-                            onPressed:
-                                _showing || _accepting || _finished
-                                    ? null
-                                    : _showSequence,
+                            onPressed: _showing || _accepting || _finished
+                                ? null
+                                : _showSequence,
                             icon: Icon(
                               _round == 0
                                   ? Icons.play_arrow_rounded
@@ -511,10 +491,7 @@ class _SequenceEchoScreenState extends State<SequenceEchoScreen>
 }
 
 class _SequenceStat extends StatelessWidget {
-  const _SequenceStat({
-    required this.label,
-    required this.value,
-  });
+  const _SequenceStat({required this.label, required this.value});
 
   final String label;
   final String value;

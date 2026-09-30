@@ -786,6 +786,25 @@ void main() {
     expect(find.text('L3'), findsOneWidget);
   });
 
+  testWidgets('Sequence Echo host opens earned level 50', (tester) async {
+    SharedPreferences.setMockInitialValues({
+      'brain.training.completion_counts.v1': <String>['sequence_echo|98'],
+    });
+    final preferences = await SharedPreferences.getInstance();
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [sharedPreferencesProvider.overrideWithValue(preferences)],
+        child: const MaterialApp(home: GameHostScreen(gameId: 'sequence_echo')),
+      ),
+    );
+    await tester.pump();
+    final game = tester.widget<SequenceEchoScreen>(
+      find.byType(SequenceEchoScreen),
+    );
+    expect(game.trainingLevel, 50);
+    expect(find.text('L50'), findsOneWidget);
+  });
+
   testWidgets('Memory uses the persistent Brain training level', (
     WidgetTester tester,
   ) async {

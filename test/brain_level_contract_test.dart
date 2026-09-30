@@ -27,7 +27,7 @@ void main() {
     'legacy games remain capped until their 13–50 profiles are playable',
     () {
       for (final id in training.progressiveBrainGameIds) {
-        if (id == 'memory' || id == 'labyrinth') {
+        if (id == 'memory' || id == 'labyrinth' || id == 'sequence_echo') {
           expect(training.maxBrainTrainingLevelFor(id), 50);
         } else {
           expect(training.maxBrainTrainingLevelFor(id), 12, reason: id);
@@ -35,6 +35,14 @@ void main() {
       }
     },
   );
+
+  test('Sequence Echo reveals earned level 50 without migrating counts', () {
+    const state = training.BrainTrainingState(
+      completionCounts: {'sequence_echo': 98},
+    );
+    expect(state.trainingLevelFor('sequence_echo'), 50);
+    expect(state.sessionsUntilNextTrainingLevelFor('sequence_echo'), 0);
+  });
 
   test('two completions per level reach and stop at 50', () {
     for (final (count, level, remaining) in [

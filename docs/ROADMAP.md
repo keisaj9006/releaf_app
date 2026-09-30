@@ -1,10 +1,12 @@
 # Releaf Completion Roadmap
 
 [Brain level foundation](release/2026-09-30-brain-level-foundation.md) is
-tested without exposing unfinished levels. Next implement profiles 13–50 for
-the 13 legacy games in recall/attention, logic/inhibition and planning/spatial
-families, preserving levels 1–12; only then raise the live cap and verify
-level-50 replay across the registry.
+tested. [Sequence Echo](release/2026-09-30-sequence-echo-fifty-levels.md) is
+the first legacy game with playable profiles 13–50 and a raised live cap; its
+levels 1–12 are pinned by tests. Next implement and verify the remaining 12
+games in recall/attention, logic/inhibition and planning/spatial families,
+raising each live cap only after its gameplay tests pass. Cross-game level-50
+replay and physical-device review remain open.
 
 [Manual Reset pause checkpoint](release/2026-09-30-reset-manual-pause.md)
 passed 685 full tests, clean analysis and an Android debug build. Continue the

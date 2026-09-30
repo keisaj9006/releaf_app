@@ -20,15 +20,13 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          sharedPreferencesProvider.overrideWithValue(preferences),
-        ],
+        overrides: [sharedPreferencesProvider.overrideWithValue(preferences)],
         child: const MaterialApp(home: BrainScreen()),
       ),
     );
     await tester.pump();
 
     expect(find.text('L26/50 · 3 MODES'), findsOneWidget);
-    expect(find.text('L12/12 · 3 MODES'), findsOneWidget);
+    expect(find.text('L12/50 · 3 MODES'), findsOneWidget);
   });
 }

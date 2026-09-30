@@ -50,14 +50,22 @@ void main() {
   });
 
   test(
-    'Memory hosted progress reaches fifty while other games retain twelve',
+    'Memory and Sequence Echo reach fifty while unfinished games retain twelve',
     () {
       for (final count in [22, 24, 96, 98, 120]) {
         final state = BrainTrainingState(
-          completionCounts: {'memory': count, 'sequence_echo': count},
+          completionCounts: {
+            'memory': count,
+            'sequence_echo': count,
+            'rule_shift': count,
+          },
         );
         expect(state.trainingLevelFor('memory'), (1 + count ~/ 2).clamp(1, 50));
-        expect(state.trainingLevelFor('sequence_echo'), 12);
+        expect(
+          state.trainingLevelFor('sequence_echo'),
+          (1 + count ~/ 2).clamp(1, 50),
+        );
+        expect(state.trainingLevelFor('rule_shift'), 12);
         expect(
           state.sessionsUntilNextTrainingLevelFor('memory'),
           count >= 98 ? 0 : 2,
