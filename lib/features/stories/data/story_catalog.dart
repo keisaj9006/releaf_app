@@ -28,32 +28,26 @@ abstract final class StoryCatalog {
         ReliefStoryChapter(
           id: 'ts01-ch01',
           title: 'The Barrier',
-          start: Duration.zero,
         ),
         ReliefStoryChapter(
           id: 'ts01-ch02',
           title: 'The Man Who Was Running Out of Time',
-          start: Duration.zero,
         ),
         ReliefStoryChapter(
           id: 'ts01-ch03',
           title: 'Four Things They Were Never Supposed to Have',
-          start: Duration.zero,
         ),
         ReliefStoryChapter(
           id: 'ts01-ch04',
           title: 'Saturday',
-          start: Duration.zero,
         ),
         ReliefStoryChapter(
           id: 'ts01-ch05',
           title: 'Act Like the Uniform',
-          start: Duration.zero,
         ),
         ReliefStoryChapter(
           id: 'ts01-ch06',
           title: 'What They Carried Out',
-          start: Duration.zero,
         ),
       ],
       rightsStatus: 'NOT YET CLEARED FOR COMMERCIAL RELEASE',
@@ -80,32 +74,26 @@ abstract final class StoryCatalog {
         ReliefStoryChapter(
           id: 'ts02-ch01',
           title: 'Three Men Were Waiting to Die',
-          start: Duration.zero,
         ),
         ReliefStoryChapter(
           id: 'ts02-ch02',
           title: 'The Woman Who Went Back',
-          start: Duration.zero,
         ),
         ReliefStoryChapter(
           id: 'ts02-ch03',
           title: 'The Blood on the Handkerchief',
-          start: Duration.zero,
         ),
         ReliefStoryChapter(
           id: 'ts02-ch04',
           title: 'Dropped Into France',
-          start: Duration.zero,
         ),
         ReliefStoryChapter(
           id: 'ts02-ch05',
           title: 'Make Them Afraid of Tomorrow',
-          start: Duration.zero,
         ),
         ReliefStoryChapter(
           id: 'ts02-ch06',
           title: 'A Life Larger Than Its Ending',
-          start: Duration.zero,
         ),
       ],
       rightsStatus: 'NOT YET CLEARED FOR COMMERCIAL RELEASE',
