@@ -15,13 +15,13 @@ enum ReleafMeditationArtworkVariant {
 String? _assetFor(ReleafMeditationArtworkVariant variant) {
   return switch (variant) {
     ReleafMeditationArtworkVariant.editorial =>
-      'assets/art/meditation/editorial.jpg',
+      'assets/art/relief/meditate.webp',
     ReleafMeditationArtworkVariant.anxiety =>
-      'assets/art/meditation/anxiety.jpg',
+      'assets/art/relief/emergency_calm.webp',
     ReleafMeditationArtworkVariant.focus =>
       'assets/art/meditation/focus.jpg',
     ReleafMeditationArtworkVariant.body =>
-      'assets/art/meditation/body.jpg',
+      'assets/art/relief/body_scan.webp',
     ReleafMeditationArtworkVariant.compassion ||
     ReleafMeditationArtworkVariant.everyday ||
     ReleafMeditationArtworkVariant.timer => null,

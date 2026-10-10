@@ -2,6 +2,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import 'relief_editorial_image.dart';
+
 /// Brain-specific artwork built from the same premium Releaf language as Reset,
 /// but with sharper geometry and more structured visual rhythm.
 enum ReleafBrainArtworkVariant {
@@ -29,7 +31,7 @@ class ReleafBrainArtwork extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ExcludeSemantics(
+    final fallback = ExcludeSemantics(
       child: CustomPaint(
         painter: _ReleafBrainArtworkPainter(
           variant: variant,
@@ -37,6 +39,12 @@ class ReleafBrainArtwork extends StatelessWidget {
         ),
         child: const SizedBox.expand(),
       ),
+    );
+    if (variant != ReleafBrainArtworkVariant.hero) return fallback;
+    return ReliefEditorialImage(
+      asset: ReliefEditorialAsset.brainGames,
+      intensity: intensity,
+      fallback: fallback,
     );
   }
 }

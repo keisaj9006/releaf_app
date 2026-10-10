@@ -2,6 +2,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import 'relief_editorial_image.dart';
+
 enum ReleafSoundArtworkVariant {
   field,
   atmosphereOne,
@@ -26,7 +28,7 @@ class ReleafSoundArtwork extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ExcludeSemantics(
+    final fallback = ExcludeSemantics(
       child: CustomPaint(
         painter: _ReleafSoundArtworkPainter(
           variant: variant,
@@ -34,6 +36,12 @@ class ReleafSoundArtwork extends StatelessWidget {
         ),
         child: const SizedBox.expand(),
       ),
+    );
+    if (variant != ReleafSoundArtworkVariant.field) return fallback;
+    return ReliefEditorialImage(
+      asset: ReliefEditorialAsset.soundscapes,
+      intensity: intensity,
+      fallback: fallback,
     );
   }
 }

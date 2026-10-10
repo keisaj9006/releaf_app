@@ -8,6 +8,7 @@ import '../../../routing/primary_destination_actions.dart';
 import '../../../theme/app_theme.dart';
 import '../../../theme/releaf_design_tokens.dart';
 import '../../../theme/widgets/releaf_sleep_artwork.dart';
+import '../../../theme/widgets/relief_editorial_image.dart';
 import '../../relief/application/relief_paywall_hooks.dart';
 import '../../stories/domain/relief_story.dart';
 import '../../stories/story_preview_config.dart';
@@ -444,17 +445,46 @@ class _CategoryGateways extends StatelessWidget {
                                 : Colors.white.withValues(alpha: 0.08),
                           ),
                         ),
-                        child: Row(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            _CategoryIcon(category: category),
-                            const SizedBox(width: ReleafSpacing.sm),
-                            Expanded(
-                              child: Text(
-                                category.label,
-                                style: ReleafTypography.cardTitle,
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(
+                                ReleafRadii.medium,
+                              ),
+                              child: AspectRatio(
+                                aspectRatio: 16 / 10,
+                                child: ReliefEditorialImage(
+                                  asset: switch (category) {
+                                    SleepCategory.stories =>
+                                      ReliefEditorialAsset.sleepStories,
+                                    SleepCategory.nature =>
+                                      ReliefEditorialAsset.soundscapes,
+                                    SleepCategory.meditations =>
+                                      ReliefEditorialAsset.meditate,
+                                    SleepCategory.sleepMusic =>
+                                      ReliefEditorialAsset.sleep,
+                                  },
+                                  fallback: const ReleafSleepArtwork(
+                                    variant: ReleafSleepArtworkVariant.night,
+                                  ),
+                                ),
                               ),
                             ),
-                            const Icon(Icons.chevron_right_rounded),
+                            const SizedBox(height: ReleafSpacing.md),
+                            Row(
+                              children: [
+                                _CategoryIcon(category: category),
+                                const SizedBox(width: ReleafSpacing.sm),
+                                Expanded(
+                                  child: Text(
+                                    category.label,
+                                    style: ReleafTypography.cardTitle,
+                                  ),
+                                ),
+                                const Icon(Icons.chevron_right_rounded),
+                              ],
+                            ),
                           ],
                         ),
                       ),
