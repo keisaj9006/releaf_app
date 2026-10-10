@@ -454,6 +454,32 @@ void main() {
     expect(find.text('Unlock Premium'), findsNothing);
   });
 
+  testWidgets('Emergency keeps visual and action grouped on tall phones', (
+    WidgetTester tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(412, 915));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await _pumpResetHub(tester, preferences: await _preferences());
+
+    await tester.tap(find.byKey(const Key('reset-emergency-action')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    final visual = find.byKey(const Key('emergency-calming-visual'));
+    final phase = find.byKey(const Key('emergency-phase-label'));
+    final action = find.byKey(const Key('emergency-advance-action'));
+
+    expect(visual, findsOneWidget);
+    expect(phase, findsOneWidget);
+    expect(action.hitTestable(), findsOneWidget);
+
+    final gap =
+        tester.getTopLeft(phase).dy - tester.getBottomLeft(visual).dy;
+    expect(gap, lessThanOrEqualTo(40));
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Breathing guide remains readable on a narrow phone', (
     WidgetTester tester,
   ) async {
