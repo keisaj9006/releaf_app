@@ -2,6 +2,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import 'relief_editorial_image.dart';
+
 /// Reusable visual identities for editorial Releaf content.
 ///
 /// Each variant shares the same organic Living Form construction while using
@@ -30,7 +32,7 @@ class ReleafArtwork extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ExcludeSemantics(
+    final fallback = ExcludeSemantics(
       child: CustomPaint(
         painter: _ReleafArtworkPainter(
           variant: variant,
@@ -38,6 +40,21 @@ class ReleafArtwork extends StatelessWidget {
         ),
         child: const SizedBox.expand(),
       ),
+    );
+    return ReliefEditorialImage(
+      asset: switch (variant) {
+        ReleafArtworkVariant.ambient ||
+        ReleafArtworkVariant.situational ||
+        ReleafArtworkVariant.lifeUpgrade => ReliefEditorialAsset.reset,
+        ReleafArtworkVariant.breath => ReliefEditorialAsset.breathe,
+        ReleafArtworkVariant.noBreath => ReliefEditorialAsset.tensionRelief,
+        ReleafArtworkVariant.grounding ||
+        ReleafArtworkVariant.deepReset => ReliefEditorialAsset.bodyScan,
+        ReleafArtworkVariant.calm => ReliefEditorialAsset.emergencyCalm,
+        ReleafArtworkVariant.focus => ReliefEditorialAsset.meditate,
+      },
+      intensity: intensity,
+      fallback: fallback,
     );
   }
 }

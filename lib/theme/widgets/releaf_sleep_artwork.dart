@@ -2,6 +2,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import 'relief_editorial_image.dart';
+
 enum ReleafSleepArtworkVariant {
   night,
   sound,
@@ -22,7 +24,7 @@ class ReleafSleepArtwork extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ExcludeSemantics(
+    final fallback = ExcludeSemantics(
       child: CustomPaint(
         painter: _ReleafSleepArtworkPainter(
           variant: variant,
@@ -30,6 +32,17 @@ class ReleafSleepArtwork extends StatelessWidget {
         ),
         child: const SizedBox.expand(),
       ),
+    );
+    return ReliefEditorialImage(
+      asset: switch (variant) {
+        ReleafSleepArtworkVariant.night ||
+        ReleafSleepArtworkVariant.racingMind => ReliefEditorialAsset.sleep,
+        ReleafSleepArtworkVariant.sound => ReliefEditorialAsset.soundscapes,
+        ReleafSleepArtworkVariant.body => ReliefEditorialAsset.bodyScan,
+        ReleafSleepArtworkVariant.breath => ReliefEditorialAsset.breathe,
+      },
+      intensity: intensity,
+      fallback: fallback,
     );
   }
 }
