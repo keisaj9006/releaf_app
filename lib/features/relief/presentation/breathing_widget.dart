@@ -1456,15 +1456,13 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
                     ),
                   ],
                 );
-                final visual = Center(
-                  child: SizedBox(
-                    width: visualSize,
-                    height: visualSize,
-                    child: ReleafEmergencyVisual(
-                      progress: progress,
-                      phaseLabel: phaseLabel,
-                      reducedMotion: reducedMotion,
-                    ),
+                final visual = SizedBox(
+                  width: visualSize,
+                  height: visualSize,
+                  child: ReleafEmergencyVisual(
+                    progress: progress,
+                    phaseLabel: phaseLabel,
+                    reducedMotion: reducedMotion,
                   ),
                 );
                 Widget layout(List<Widget> children) {
@@ -1573,7 +1571,15 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
                           ? ReleafSpacing.sm
                           : ReleafSpacing.lg,
                     ),
-                    if (largeText) visual else Expanded(child: visual),
+                    if (largeText)
+                      Center(child: visual)
+                    else
+                      Expanded(
+                        child: Align(
+                          alignment: Alignment.bottomCenter,
+                          child: visual,
+                        ),
+                      ),
                     SizedBox(
                       height: compactHeight
                           ? ReleafSpacing.xs
