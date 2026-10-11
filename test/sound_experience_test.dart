@@ -757,7 +757,7 @@ void main() {
     expect(find.text('AMBIENT AUDIO'), findsOneWidget);
     expect(find.text('Sound'), findsOneWidget);
     expect(find.byKey(const Key('sound-featured-card')), findsOneWidget);
-    expect(find.text('Releaf Atmosphere I'), findsWidgets);
+    expect(find.text('Relief Atmosphere I'), findsWidgets);
     expect(find.text('Relief Atmosphere II'), findsOneWidget);
     expect(find.text('Brown Noise'), findsOneWidget);
     expect(find.text('Soft Rain'), findsOneWidget);
