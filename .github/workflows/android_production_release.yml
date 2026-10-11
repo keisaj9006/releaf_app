@@ -41,7 +41,7 @@ jobs:
             exit 1
           fi
           grep -Fxq 'version: 1.0.0+20260913' pubspec.yaml || {
-            echo "::error::Expected frozen Releaf 1.0 RC version: 1.0.0+20260913."
+            echo "::error::Expected frozen Relief 1.0 RC version: 1.0.0+20260913."
             exit 1
           }
 
