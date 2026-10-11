@@ -31,18 +31,21 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Stories'), findsOneWidget);
-    for (final id in const [
-      'TS01_BEYOND_THE_GATE',
-      'TS02_KRYSTYNA_SKARBEK',
-      'ST_L05_COMPUTER',
-    ]) {
-      final card = find.byKey(Key('story-preview-$id'));
+    const titles = <String, String>{
+      'TS01_BEYOND_THE_GATE': 'Beyond the Gate',
+      'TS02_KRYSTYNA_SKARBEK': 'The Woman Who Crossed Every Border',
+      'ST_L05_COMPUTER': 'Computer',
+    };
+
+    for (final entry in titles.entries) {
+      final card = find.byKey(Key('story-preview-${entry.key}'));
       await tester.scrollUntilVisible(card, 300);
       expect(card, findsOneWidget);
+      expect(
+        find.descendant(of: card, matching: find.text(entry.value)),
+        findsOneWidget,
+      );
     }
-    expect(find.text('Beyond the Gate'), findsOneWidget);
-    expect(find.text('The Woman Who Crossed Every Border'), findsOneWidget);
-    expect(find.text('Computer'), findsOneWidget);
     expect(find.text('OWNER PREVIEW'), findsNothing);
     expect(find.text('Night Mysteries'), findsNothing);
     expect(find.text('Fiction Escapes'), findsNothing);
