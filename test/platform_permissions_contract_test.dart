@@ -10,7 +10,7 @@ void main() {
     expect(
       plist,
       contains(
-        'Releaf uses motion data so you can guide the ball in Labyrinth by tilting your device.',
+        'Relief uses motion data so you can guide the ball in Labyrinth by tilting your device.',
       ),
     );
   });
