@@ -10,6 +10,7 @@ import '../../theme/app_theme.dart';
 import '../../theme/releaf_design_tokens.dart';
 import '../../theme/widgets/releaf_brain_artwork.dart';
 import '../../features/brain/presentation/widgets/brain_difficulty_selector.dart';
+import 'broken_mirror_level_profile.dart';
 
 class BrokenMirrorGameScreen extends ConsumerStatefulWidget {
   const BrokenMirrorGameScreen({
@@ -42,8 +43,11 @@ class _BrokenMirrorGameScreenState extends ConsumerState<BrokenMirrorGameScreen>
   bool _pausedByLifecycle = false;
   BrainDifficulty _selectedDifficulty = BrainDifficulty.medium;
   bool _difficultyLocked = false;
-  int get _practiceLevel =>
-      brainPracticeLevelForDifficulty(widget.level, _selectedDifficulty);
+  int get _practiceLevel => brainPracticeLevelForDifficulty(
+        widget.level,
+        _selectedDifficulty,
+        maxLevel: 50,
+      );
 
   void _selectDifficulty(BrainDifficulty difficulty) {
     if (_difficultyLocked || difficulty == _selectedDifficulty) return;
@@ -56,18 +60,12 @@ class _BrokenMirrorGameScreenState extends ConsumerState<BrokenMirrorGameScreen>
 
   late AnimationController _pulse;
 
-  int get _levelIndex => (_practiceLevel - 1).clamp(0, 11).toInt();
+  BrokenMirrorLevelProfile get _levelProfile =>
+      brokenMirrorProfileForLevel(_practiceLevel);
 
-  int get _fragmentCount {
-    if (_practiceLevel >= 12) return 8;
-    if (_practiceLevel >= 10) return 7;
-    if (_practiceLevel >= 7) return 6;
-    if (_practiceLevel >= 4) return 5;
-    return 4;
-  }
+  int get _fragmentCount => _levelProfile.fragmentCount;
 
-  double get _snapFraction =>
-      (0.13 - (_levelIndex * 0.0035)).clamp(0.09, 0.13).toDouble();
+  double get _snapFraction => _levelProfile.snapFraction;
 
   @override
   void initState() {
@@ -186,8 +184,12 @@ class _BrokenMirrorGameScreenState extends ConsumerState<BrokenMirrorGameScreen>
         .map(
           (entry) => entry.value.copyWith(
             position: Offset(
-              18 + ((entry.key % 3) * 54) + (random.nextDouble() * 14),
-              18 + ((entry.key ~/ 3) * 54) + (random.nextDouble() * 14),
+              18 +
+                  ((entry.key % 3) * 54) +
+                  (random.nextDouble() * _levelProfile.spawnJitter),
+              18 +
+                  ((entry.key ~/ 3) * 54) +
+                  (random.nextDouble() * _levelProfile.spawnJitter),
             ),
           ),
         )
@@ -425,6 +427,9 @@ class _BrokenMirrorGameScreenState extends ConsumerState<BrokenMirrorGameScreen>
                                           pulse: _pulse,
                                           boardSize: _boardSize,
                                           snapFraction: _snapFraction,
+                                          minSnapPixels:
+                                              _levelProfile.minSnapPixels,
+                                          shardSize: _levelProfile.shardSize,
                                           onUpdate: (updated) {
                                             setState(() {
                                               _difficultyLocked = true;
@@ -568,38 +573,8 @@ class _BoardFrame extends StatelessWidget {
 // ---------------- Game model & painters ----------------
 
 @visibleForTesting
-class BrokenMirrorLevelProfile {
-  const BrokenMirrorLevelProfile({
-    required this.level,
-    required this.fragmentCount,
-    required this.snapFraction,
-  });
-
-  final int level;
-  final int fragmentCount;
-  final double snapFraction;
-}
-
-@visibleForTesting
-BrokenMirrorLevelProfile brokenMirrorLevelProfileForTesting(int rawLevel) {
-  final level = rawLevel.clamp(1, 12).toInt();
-  final index = level - 1;
-  final fragmentCount = level >= 12
-      ? 8
-      : level >= 10
-      ? 7
-      : level >= 7
-      ? 6
-      : level >= 4
-      ? 5
-      : 4;
-
-  return BrokenMirrorLevelProfile(
-    level: level,
-    fragmentCount: fragmentCount,
-    snapFraction: (0.13 - (index * 0.0035)).clamp(0.09, 0.13).toDouble(),
-  );
-}
+BrokenMirrorLevelProfile brokenMirrorLevelProfileForTesting(int rawLevel) =>
+    brokenMirrorProfileForLevel(rawLevel);
 
 class _Shard {
   final int id;
@@ -673,6 +648,8 @@ class _DraggableShard extends StatefulWidget {
     required this.pulse,
     required this.boardSize,
     required this.snapFraction,
+    required this.minSnapPixels,
+    required this.shardSize,
     required this.onUpdate,
   });
 
@@ -680,6 +657,8 @@ class _DraggableShard extends StatefulWidget {
   final AnimationController pulse;
   final Size boardSize;
   final double snapFraction;
+  final double minSnapPixels;
+  final double shardSize;
   final void Function(_Shard) onUpdate;
 
   @override
@@ -687,8 +666,6 @@ class _DraggableShard extends StatefulWidget {
 }
 
 class _DraggableShardState extends State<_DraggableShard> {
-  static const _shardSize = 120.0;
-
   late Offset _position;
   bool _dragging = false;
 
@@ -715,14 +692,14 @@ class _DraggableShardState extends State<_DraggableShard> {
   void _finishDrag() {
     _dragging = false;
 
-    const half = _shardSize / 2;
+    const half = widget.shardSize / 2;
     final target = Offset(
       widget.shard.targetCenter.dx * widget.boardSize.width,
       widget.shard.targetCenter.dy * widget.boardSize.height,
     );
     final currentCenter = _position + const Offset(half, half);
     final snapDistance = math.max(
-      28.0,
+      widget.minSnapPixels,
       widget.boardSize.shortestSide * widget.snapFraction,
     );
 
@@ -771,7 +748,7 @@ class _DraggableShardState extends State<_DraggableShard> {
             );
           },
           child: CustomPaint(
-            size: const Size.square(_shardSize),
+            size: const Size.square(widget.shardSize),
             painter: _ShardPainter(widget.shard),
           ),
         ),
