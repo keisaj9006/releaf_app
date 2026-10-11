@@ -15,7 +15,7 @@ abstract final class SleepContentManifest {
       description: 'A gentle bedtime retelling awaiting production assets.',
       category: SleepCategory.stories,
       audioAsset: '',
-      artworkAsset: '',
+      artworkAsset: 'assets/art/relief/sleep_stories.webp',
       duration: null,
       accessTier: SleepAccessTier.undecided,
       source: SleepPlaybackSource.story('ST-DC-004'),
