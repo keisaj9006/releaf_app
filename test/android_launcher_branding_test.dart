@@ -13,7 +13,7 @@ int _fnv1a32(List<int> bytes) {
 }
 
 void main() {
-  test('all legacy Android launcher icons use the approved Releaf render', () {
+  test('all legacy Android launcher icons use the approved Relief render', () {
     const expected = <String, List<int>>{
       'mipmap-mdpi': <int>[48, 0x730b5259],
       'mipmap-hdpi': <int>[72, 0xd4323b41],
@@ -57,7 +57,7 @@ void main() {
         _fnv1a32(bytes),
         entry.value[1],
         reason:
-            '${file.path} must be the approved Releaf legacy launcher render, '
+            '${file.path} must be the approved Relief legacy launcher render, '
             'not the Flutter template icon or another unreviewed asset.',
       );
     }
