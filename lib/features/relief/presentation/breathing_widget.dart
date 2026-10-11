@@ -19,6 +19,7 @@ import '../../../theme/widgets/releaf_artwork.dart';
 import '../../../theme/widgets/releaf_body_release_visual.dart';
 import '../../../theme/widgets/releaf_components.dart';
 import '../../../theme/widgets/releaf_emergency_visual.dart';
+import '../../../theme/widgets/relief_editorial_image.dart';
 import '../../../theme/widgets/releaf_grounding_body_visual.dart';
 import '../../../theme/widgets/releaf_movement_demo_visual.dart';
 import '../../../theme/widgets/releaf_session_living_form.dart';
@@ -1397,15 +1398,24 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
       key: const ValueKey('running'),
       fit: StackFit.expand,
       children: [
-        const DecoratedBox(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [Color(0xFF12120F), Color(0xFF0D110F), Color(0xFF070907)],
-              stops: [0, 0.58, 1],
+        const ReliefEditorialImage(
+          asset: ReliefEditorialAsset.emergencyCalm,
+          fallback: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFF12120F),
+                  Color(0xFF0D110F),
+                  Color(0xFF070907),
+                ],
+                stops: [0, 0.58, 1],
+              ),
             ),
           ),
+          intensity: 0.32,
+          alignment: Alignment(0, -0.2),
         ),
         Positioned(
           top: -100,
