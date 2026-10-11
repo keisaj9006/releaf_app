@@ -1,11 +1,11 @@
 {
-    "name": "releaf_fixed",
-    "short_name": "releaf_fixed",
+    "name": "Relief",
+    "short_name": "Relief",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Relief — calm, reset, sleep, sound and cognitive training.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
