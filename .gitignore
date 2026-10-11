@@ -51,3 +51,7 @@ app.*.map.json
 
 # Local development credentials and build-time Dart defines. Never commit them.
 /tool/local/
+
+# Rights-pending Stories owner-preview masters are injected only for local builds.
+/assets/audio/stories/*.m4a
+!/assets/audio/stories/.gitkeep

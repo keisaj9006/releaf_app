@@ -2,6 +2,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../domain/relief_story.dart';
 
+const _ownerPreviewAudioBundled = bool.fromEnvironment(
+  'RELIEF_STORIES_AUDIO_BUNDLED',
+  defaultValue: false,
+);
+
 final storyByIdProvider = Provider.family<ReliefStory?, String>((ref, id) {
   return StoryCatalog.getById(id);
 });
@@ -17,48 +22,19 @@ abstract final class StoryCatalog {
       category: StoryCategory.trueStoriesOfCourage,
       description:
           'Four prisoners find a sequence of openings inside a system designed to make escape impossible.',
-      estimatedDuration: Duration(minutes: 33),
-      audioAssetPath: null,
+      estimatedDuration: Duration(seconds: 1971),
+      audioAssetPath: _ownerPreviewAudioBundled
+          ? 'audio/stories/ST_TS01_BEYOND_THE_GATE_v01_128k.m4a'
+          : null,
       artworkAssetPath: 'assets/art/relief/sleep_stories.webp',
       contentWarning:
           'This true story discusses imprisonment at Auschwitz and escape during the Second World War. It contains no graphic descriptions.',
       labels: <String>['TRUE STORY', 'WORLD WAR II', 'NON-GRAPHIC'],
       isPremium: false,
-      chapters: <ReliefStoryChapter>[
-        ReliefStoryChapter(
-          id: 'ts01-ch01',
-          title: 'The Barrier',
-          start: Duration.zero,
-        ),
-        ReliefStoryChapter(
-          id: 'ts01-ch02',
-          title: 'The Man Who Was Running Out of Time',
-          start: Duration.zero,
-        ),
-        ReliefStoryChapter(
-          id: 'ts01-ch03',
-          title: 'Four Things They Were Never Supposed to Have',
-          start: Duration.zero,
-        ),
-        ReliefStoryChapter(
-          id: 'ts01-ch04',
-          title: 'Saturday',
-          start: Duration.zero,
-        ),
-        ReliefStoryChapter(
-          id: 'ts01-ch05',
-          title: 'Act Like the Uniform',
-          start: Duration.zero,
-        ),
-        ReliefStoryChapter(
-          id: 'ts01-ch06',
-          title: 'What They Carried Out',
-          start: Duration.zero,
-        ),
-      ],
+      chapters: <ReliefStoryChapter>[],
       rightsStatus: 'OWNER PREVIEW — RELEASE REVIEW PENDING',
       scriptVersion: '2.0',
-      audioVersion: 'preview master prepared off-repo',
+      audioVersion: 'owner-preview app delivery v1 (128 kb/s AAC)',
     ),
     ReliefStory(
       id: 'TS02_KRYSTYNA_SKARBEK',
@@ -69,48 +45,19 @@ abstract final class StoryCatalog {
       category: StoryCategory.trueStoriesOfCourage,
       description:
           'A Polish intelligence agent repeatedly looks for movement inside situations that appear completely closed.',
-      estimatedDuration: Duration(minutes: 37),
-      audioAssetPath: null,
+      estimatedDuration: Duration(seconds: 2198),
+      audioAssetPath: _ownerPreviewAudioBundled
+          ? 'audio/stories/ST_TS02_KRYSTYNA_SKARBEK_v01_128k.m4a'
+          : null,
       artworkAssetPath: 'assets/art/relief/sleep_stories.webp',
       contentWarning:
           'This true story discusses wartime imprisonment, Gestapo arrest, stalking and a post-war murder. It contains no graphic descriptions.',
       labels: <String>['TRUE STORY', 'WORLD WAR II', 'NON-GRAPHIC'],
       isPremium: false,
-      chapters: <ReliefStoryChapter>[
-        ReliefStoryChapter(
-          id: 'ts02-ch01',
-          title: 'Three Men Were Waiting to Die',
-          start: Duration.zero,
-        ),
-        ReliefStoryChapter(
-          id: 'ts02-ch02',
-          title: 'The Woman Who Went Back',
-          start: Duration.zero,
-        ),
-        ReliefStoryChapter(
-          id: 'ts02-ch03',
-          title: 'The Blood on the Handkerchief',
-          start: Duration.zero,
-        ),
-        ReliefStoryChapter(
-          id: 'ts02-ch04',
-          title: 'Dropped Into France',
-          start: Duration.zero,
-        ),
-        ReliefStoryChapter(
-          id: 'ts02-ch05',
-          title: 'Make Them Afraid of Tomorrow',
-          start: Duration.zero,
-        ),
-        ReliefStoryChapter(
-          id: 'ts02-ch06',
-          title: 'A Life Larger Than Its Ending',
-          start: Duration.zero,
-        ),
-      ],
+      chapters: <ReliefStoryChapter>[],
       rightsStatus: 'OWNER PREVIEW — RELEASE REVIEW PENDING',
       scriptVersion: '2.0',
-      audioVersion: 'preview master prepared off-repo',
+      audioVersion: 'owner-preview app delivery v1 (128 kb/s AAC)',
     ),
     ReliefStory(
       id: 'ST_L05_COMPUTER',
@@ -120,8 +67,10 @@ abstract final class StoryCatalog {
       category: StoryCategory.meaningStories,
       description:
           'A contemplative long-form story about what technology can preserve, what it cannot replace and the traces people leave behind.',
-      estimatedDuration: Duration(minutes: 21),
-      audioAssetPath: null,
+      estimatedDuration: Duration(seconds: 1245),
+      audioAssetPath: _ownerPreviewAudioBundled
+          ? 'audio/stories/ST_L05_COMPUTER_v01_128k.m4a'
+          : null,
       artworkAssetPath: 'assets/art/relief/sleep_stories.webp',
       contentWarning: '',
       labels: <String>['REFLECTIVE', 'MODERN STORY', 'NON-GRAPHIC'],
@@ -129,7 +78,7 @@ abstract final class StoryCatalog {
       chapters: <ReliefStoryChapter>[],
       rightsStatus: 'OWNER PREVIEW — RELEASE REVIEW PENDING',
       scriptVersion: '1.0',
-      audioVersion: 'preview master prepared off-repo',
+      audioVersion: 'owner-preview app delivery v1 (128 kb/s AAC)',
     ),
   ];
 

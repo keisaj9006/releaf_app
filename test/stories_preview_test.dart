@@ -3,6 +3,11 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:releaf_app/features/stories/presentation/stories_preview_screen.dart';
 
+const _audioBundled = bool.fromEnvironment(
+  'RELIEF_STORIES_AUDIO_BUNDLED',
+  defaultValue: false,
+);
+
 Future<void> _pumpStories(
   WidgetTester tester, {
   Size size = const Size(800, 900),
@@ -33,29 +38,37 @@ void main() {
     expect(find.text('3 prepared titles'), findsOneWidget);
     expect(find.text('OWNER PREVIEW'), findsNothing);
 
-    const titles = <String, String>{
-      'TS01_BEYOND_THE_GATE': 'Beyond the Gate',
-      'TS02_KRYSTYNA_SKARBEK': 'The Woman Who Crossed Every Border',
-      'ST_L05_COMPUTER': 'Computer',
-    };
-
-    for (final entry in titles.entries) {
-      final card = find.byKey(Key('story-preview-${entry.key}'));
+    for (final id in const [
+      'TS01_BEYOND_THE_GATE',
+      'TS02_KRYSTYNA_SKARBEK',
+      'ST_L05_COMPUTER',
+    ]) {
+      final card = find.byKey(Key('story-preview-$id'));
       await tester.scrollUntilVisible(card, 300);
       expect(card, findsOneWidget);
-      expect(
-        find.descendant(of: card, matching: find.text(entry.value)),
-        findsOneWidget,
-      );
-      expect(
-        find.descendant(
-          of: card,
-          matching: find.byKey(
-            Key('story-preview-audio-missing-${entry.key}'),
-          ),
-        ),
-        findsOneWidget,
-      );
+      if (_audioBundled) {
+        expect(find.byKey(Key('story-preview-play-$id')), findsOneWidget);
+        expect(
+          find.byKey(Key('story-preview-audio-missing-$id')),
+          findsNothing,
+        );
+      } else {
+        expect(find.byKey(Key('story-preview-play-$id')), findsNothing);
+        expect(
+          find.byKey(Key('story-preview-audio-missing-$id')),
+          findsOneWidget,
+        );
+      }
+    }
+
+    for (final title in const [
+      'Beyond the Gate',
+      'The Woman Who Crossed Every Border',
+      'Computer',
+    ]) {
+      final titleFinder = find.text(title);
+      await tester.scrollUntilVisible(titleFinder, 300);
+      expect(titleFinder, findsOneWidget);
     }
 
     expect(find.text('Night Mysteries'), findsNothing);

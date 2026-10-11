@@ -46,6 +46,7 @@ flutter:
     - assets/art/brain/
     - assets/narration/releaf-guide/
     - assets/narration/releaf-guide/mindfulness-basics-2/
+    - assets/audio/stories/
     - assets/games/labyrinth/level1.png
     - assets/games/labyrinth/level1_mask.png
     - assets/games/labyrinth/level2.png
