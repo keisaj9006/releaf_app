@@ -70,17 +70,19 @@ void main() {
     await _pumpStoriesRoute(tester, previewEnabled: false);
 
     expect(find.byKey(const Key('sleep-featured-sound')), findsOneWidget);
-    expect(find.text('Stories Preview'), findsNothing);
+    expect(find.byKey(const Key('stories-screen-scroll')), findsNothing);
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('direct Stories preview route opens when enabled', (
+  testWidgets('direct Stories route opens the focused catalogue when enabled', (
     WidgetTester tester,
   ) async {
     await _pumpStoriesRoute(tester, previewEnabled: true);
 
-    expect(find.text('Stories Preview'), findsOneWidget);
-    expect(find.text('OWNER PREVIEW'), findsOneWidget);
+    expect(find.byKey(const Key('stories-screen-scroll')), findsOneWidget);
+    expect(find.text('Stories'), findsOneWidget);
+    expect(find.text('3 prepared titles'), findsOneWidget);
+    expect(find.text('OWNER PREVIEW'), findsNothing);
     expect(tester.takeException(), isNull);
   });
 
