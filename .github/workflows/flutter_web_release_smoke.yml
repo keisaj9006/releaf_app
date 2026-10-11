@@ -9,6 +9,9 @@ on:
       - releaf-development
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 concurrency:
   group: releaf-web-release-${{ github.ref }}
   cancel-in-progress: true
@@ -22,6 +25,23 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: releaf-development
+          fetch-depth: 0
+
+      - name: Improve Sleep category cards
+        if: "${{ github.event_name == 'push' && github.event.head_commit.message == 'chore(ci): apply Sleep category polish' }}"
+        run: python3 tool/one_time/improve_sleep_category_cards.py
+
+      - name: Commit Sleep category polish
+        if: "${{ github.event_name == 'push' && github.event.head_commit.message == 'chore(ci): apply Sleep category polish' }}"
+        shell: bash
+        run: |
+          git config user.name "Relief CI"
+          git config user.email "actions@users.noreply.github.com"
+          git add lib/features/sleep/presentation/sleep_screen.dart
+          git commit -m "fix(sleep): keep category labels readable"
+          git push origin HEAD:releaf-development
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
