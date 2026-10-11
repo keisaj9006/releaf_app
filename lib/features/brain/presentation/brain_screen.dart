@@ -6,6 +6,7 @@ import '../../../routing/app_routes.dart';
 import '../../../theme/app_theme.dart';
 import '../../../theme/releaf_design_tokens.dart';
 import '../../../theme/widgets/releaf_brain_artwork.dart';
+import 'brain_game_editorial_artwork.dart';
 import '../../../theme/widgets/relief_editorial_image.dart';
 import '../../../theme/widgets/releaf_components.dart';
 import '../../relief/data/reset_catalog.dart';
@@ -1021,9 +1022,13 @@ class _SkillGameCardState extends State<_SkillGameCard> {
                     left: 0,
                     right: 0,
                     height: 102,
-                    child: ReleafBrainArtwork(
-                      variant: widget.presentation.artwork,
-                      intensity: 0.78,
+                    child: BrainGameEditorialArtwork(
+                      gameId: widget.game.id,
+                      intensity: 0.92,
+                      fallback: ReleafBrainArtwork(
+                        variant: widget.presentation.artwork,
+                        intensity: 0.78,
+                      ),
                     ),
                   ),
                   const Positioned.fill(
