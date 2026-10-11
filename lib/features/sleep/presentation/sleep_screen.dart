@@ -517,9 +517,13 @@ class _TonightCard extends StatelessWidget {
       child: Stack(
         children: [
           const Positioned.fill(
-            child: ReleafSleepArtwork(
-              variant: ReleafSleepArtworkVariant.sound,
-              intensity: 1,
+            child: ReliefEditorialImage(
+              asset: ReliefEditorialAsset.soundscapes,
+              fallback: ReleafSleepArtwork(
+                variant: ReleafSleepArtworkVariant.sound,
+                intensity: 1,
+              ),
+              intensity: 0.92,
             ),
           ),
           const Positioned.fill(
