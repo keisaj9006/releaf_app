@@ -150,6 +150,19 @@ jobs:
           --dart-define=RELIEF_STORIES_AUDIO_BUNDLED=true
           --reporter expanded
 
+      - name: Reset Flutter test compiler after preview defines
+        run: |
+          grep -q 'Audio is not included in this test build.' \
+            lib/features/stories/presentation/stories_preview_screen.dart
+          if grep -R -n \
+            'The prepared audio master needs to be restored to this build' \
+            lib test; then
+            echo "::error::Legacy internal Stories copy is still present in source."
+            exit 1
+          fi
+          flutter clean
+          flutter pub get
+
       - name: Test full suite
         timeout-minutes: 5
         run: flutter test --reporter expanded
