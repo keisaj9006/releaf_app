@@ -10,7 +10,6 @@ import '../../../theme/releaf_design_tokens.dart';
 import '../../../theme/widgets/releaf_sleep_artwork.dart';
 import '../../../theme/widgets/relief_editorial_image.dart';
 import '../../relief/application/relief_paywall_hooks.dart';
-import '../../stories/domain/relief_story.dart';
 import '../../stories/story_preview_config.dart';
 import '../application/sleep_progress_store.dart';
 import '../data/sleep_catalog.dart';
@@ -118,13 +117,6 @@ class _SleepScreenState extends ConsumerState<SleepScreen> {
                           icon: const Icon(Icons.library_music_outlined),
                           label: const Text('Your sound library'),
                         ),
-                        if (widget.storiesPreviewEnabled) ...[
-                          const SizedBox(height: ReleafSpacing.sm),
-                          _OwnerPreviewEntry(
-                            onPressed: () =>
-                                context.push(AppRoutes.storiesPreview),
-                          ),
-                        ],
                         const SizedBox(height: ReleafSpacing.lg),
                         _PrimaryDiscovery(
                           catalog: catalog,
@@ -135,6 +127,11 @@ class _SleepScreenState extends ConsumerState<SleepScreen> {
                         _CategoryGateways(
                           selected: _selectedCategory,
                           onSelected: (category) {
+                            if (category == SleepCategory.stories &&
+                                widget.storiesPreviewEnabled) {
+                              context.push(AppRoutes.storiesPreview);
+                              return;
+                            }
                             setState(() => _selectedCategory = category);
                           },
                         ),
@@ -241,7 +238,7 @@ class _CategoryDiscovery extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (category == SleepCategory.stories) {
-      return _StoryCollections(catalog: catalog, onOpen: onOpen);
+      return const _StoriesUnavailableNotice();
     }
     final title = switch (category) {
       SleepCategory.nature => 'Nature for the night',
@@ -260,142 +257,16 @@ class _CategoryDiscovery extends StatelessWidget {
   }
 }
 
-class _StoryCollections extends StatelessWidget {
-  const _StoryCollections({required this.catalog, required this.onOpen});
-  final SleepCatalog catalog;
-  final ValueChanged<SleepContent> onOpen;
+class _StoriesUnavailableNotice extends StatelessWidget {
+  const _StoriesUnavailableNotice();
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const _SectionTitle(
-          eyebrow: 'STORIES',
-          title: 'Story collections',
-          description:
-              'Long-form listening will appear here only after its narration and artwork are approved.',
-        ),
-        const SizedBox(height: ReleafSpacing.md),
-        for (final collection in SleepStoryCollection.values) ...[
-          _StoryCollectionSection(
-            collection: collection,
-            items: catalog.getByStoryCollection(collection),
-            onOpen: onOpen,
-          ),
-          if (collection != SleepStoryCollection.values.last)
-            const SizedBox(height: ReleafSpacing.lg),
-        ],
-      ],
-    );
-  }
-}
-
-class _StoryCollectionSection extends StatelessWidget {
-  const _StoryCollectionSection({
-    required this.collection,
-    required this.items,
-    required this.onOpen,
-  });
-  final SleepStoryCollection collection;
-  final List<SleepContent> items;
-  final ValueChanged<SleepContent> onOpen;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: Text(collection.label, style: ReleafTypography.cardTitle),
-            ),
-            TextButton(
-              key: Key('sleep-story-collection-${collection.name}-see-all'),
-              onPressed: () => _showCollection(context),
-              child: const Text('See all'),
-            ),
-          ],
-        ),
-        const SizedBox(height: ReleafSpacing.sm),
-        if (items.isEmpty)
-          _EmptyCollection(collection: collection)
-        else
-          _ContentRail(
-            items: items,
-            keyPrefix: 'sleep-content',
-            onOpen: onOpen,
-          ),
-      ],
-    );
-  }
-
-  Future<void> _showCollection(BuildContext context) {
-    return showModalBottomSheet<void>(
-      context: context,
-      useSafeArea: true,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => _StoryCollectionSheet(
-        collection: collection,
-        items: items,
-        onOpen: onOpen,
-      ),
-    );
-  }
-}
-
-class _StoryCollectionSheet extends StatelessWidget {
-  const _StoryCollectionSheet({
-    required this.collection,
-    required this.items,
-    required this.onOpen,
-  });
-  final SleepStoryCollection collection;
-  final List<SleepContent> items;
-  final ValueChanged<SleepContent> onOpen;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      key: Key('sleep-story-collection-${collection.name}-sheet'),
-      constraints: BoxConstraints(
-        maxHeight: MediaQuery.sizeOf(context).height * 0.82,
-      ),
-      decoration: const BoxDecoration(
-        color: ReleafColors.surface,
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(ReleafRadii.extraLarge),
-        ),
-      ),
-      padding: EdgeInsets.fromLTRB(
-        ReleafSpacing.screen,
-        ReleafSpacing.lg,
-        ReleafSpacing.screen,
-        ReleafSpacing.lg + MediaQuery.paddingOf(context).bottom,
-      ),
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('STORIES', style: ReleafTypography.eyebrow),
-            const SizedBox(height: ReleafSpacing.xs),
-            Text(collection.label, style: ReleafTypography.display),
-            const SizedBox(height: ReleafSpacing.lg),
-            if (items.isEmpty)
-              _EmptyCollection(collection: collection)
-            else
-              _ContentWrap(
-                items: items,
-                onOpen: (content) {
-                  Navigator.of(context).pop();
-                  onOpen(content);
-                },
-              ),
-          ],
-        ),
-      ),
+    return const _SectionTitle(
+      eyebrow: 'STORIES',
+      title: 'Bedtime stories',
+      description:
+          'Narrated titles are being prepared for the dedicated library. Check back soon.',
     );
   }
 }
@@ -479,7 +350,12 @@ class _CategoryGateways extends StatelessWidget {
                                 Expanded(
                                   child: Text(
                                     category.label,
-                                    style: ReleafTypography.cardTitle,
+                                    maxLines: 1,
+                                    softWrap: false,
+                                    overflow: TextOverflow.fade,
+                                    style: ReleafTypography.cardTitle.copyWith(
+                                      fontSize: 18,
+                                    ),
                                   ),
                                 ),
                                 const Icon(Icons.chevron_right_rounded),
@@ -813,27 +689,6 @@ class _CategoryIcon extends StatelessWidget {
   }
 }
 
-class _EmptyCollection extends StatelessWidget {
-  const _EmptyCollection({required this.collection});
-  final SleepStoryCollection collection;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(ReleafSpacing.md),
-      decoration: BoxDecoration(
-        color: ReleafColors.surface.withValues(alpha: 0.56),
-        borderRadius: BorderRadius.circular(ReleafRadii.medium),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
-      ),
-      child: Text(
-        '${collection.label} is being prepared for a later content release.',
-        style: ReleafTypography.meta,
-      ),
-    );
-  }
-}
 
 class _Header extends StatelessWidget {
   const _Header();
@@ -885,26 +740,6 @@ class _SleepBackdrop extends StatelessWidget {
   }
 }
 
-class _OwnerPreviewEntry extends StatelessWidget {
-  const _OwnerPreviewEntry({required this.onPressed});
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      key: const Key('sleep-stories-preview'),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(ReleafRadii.large),
-      ),
-      tileColor: ReleafColors.surface,
-      leading: const Icon(Icons.auto_stories_rounded),
-      title: const Text('Stories'),
-      subtitle: const Text('OWNER PREVIEW'),
-      trailing: const Icon(Icons.chevron_right_rounded),
-      onTap: onPressed,
-    );
-  }
-}
 
 class _SleepPremiumPreview extends StatelessWidget {
   const _SleepPremiumPreview({required this.content});

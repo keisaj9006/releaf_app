@@ -75,7 +75,7 @@ void main() {
     );
   });
 
-  testWidgets('Sleep discovery exposes the frozen taxonomy and collections', (
+  testWidgets('Sleep discovery exposes four clear category gateways', (
     tester,
   ) async {
     final state = await _testState();
@@ -94,20 +94,17 @@ void main() {
     expect(find.text('Tonight'), findsOneWidget);
     expect(find.text('Popular'), findsNothing);
     await _selectCategory(tester, SleepCategory.stories);
-    for (final collection in const [
-      'Dream Classics',
-      'Night Mysteries',
-      'Fiction Escapes',
-      'Wonder Journeys',
-      'Drift Through History',
-    ]) {
-      expect(find.text(collection), findsOneWidget);
-    }
+    expect(find.text('Bedtime stories'), findsOneWidget);
+    expect(find.text('Night Mysteries'), findsNothing);
+    expect(find.text('Fiction Escapes'), findsNothing);
+    expect(find.text('Wonder Journeys'), findsNothing);
+    expect(find.text('Drift Through History'), findsNothing);
+    expect(find.text('See all'), findsNothing);
     expect(find.byKey(const Key('sleep-open-sound-library')), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('asset-pending Story is visible without a start action', (
+  testWidgets('pending Story drafts stay out of customer discovery', (
     tester,
   ) async {
     final state = await _testState();
@@ -118,19 +115,12 @@ void main() {
     );
 
     await _selectCategory(tester, SleepCategory.stories);
-    final card = find.byKey(const Key('sleep-content-ST-DC-004'));
-    expect(card, findsOneWidget);
-    expect(find.text('AUDIO IN PRODUCTION'), findsOneWidget);
-    expect(
-      find.descendant(
-        of: card,
-        matching: find.byIcon(Icons.play_arrow_rounded),
-      ),
-      findsNothing,
-    );
+    expect(find.byKey(const Key('sleep-content-ST-DC-004')), findsNothing);
+    expect(find.text('AUDIO IN PRODUCTION'), findsNothing);
+    expect(find.text('Bedtime stories'), findsOneWidget);
   });
 
-  testWidgets('each Story collection exposes its See all destination', (
+  testWidgets('standard Sleep view never renders empty Story collections', (
     tester,
   ) async {
     final state = await _testState();
@@ -141,19 +131,9 @@ void main() {
     );
 
     await _selectCategory(tester, SleepCategory.stories);
-    final seeAll = find.byKey(
-      const Key('sleep-story-collection-dreamClassics-see-all'),
-    );
-    expect(seeAll, findsOneWidget);
-    await tester.ensureVisible(seeAll);
-    await tester.tap(seeAll);
-    await tester.pumpAndSettle();
-
-    expect(
-      find.byKey(const Key('sleep-story-collection-dreamClassics-sheet')),
-      findsOneWidget,
-    );
-    expect(find.text('Dream Classics'), findsWidgets);
+    expect(find.text('Bedtime stories'), findsOneWidget);
+    expect(find.text('Dream Classics'), findsNothing);
+    expect(find.text('See all'), findsNothing);
   });
 
   testWidgets('category filter shows only the selected content family', (
@@ -219,7 +199,7 @@ void main() {
     );
   });
 
-  testWidgets('Sleep keeps the separate owner preview behind its flag', (
+  testWidgets('Sleep removes the duplicate owner-preview row', (
     tester,
   ) async {
     final state = await _testState();
@@ -230,8 +210,9 @@ void main() {
       storiesPreviewEnabled: true,
     );
 
-    expect(find.byKey(const Key('sleep-stories-preview')), findsOneWidget);
-    expect(find.text('OWNER PREVIEW'), findsOneWidget);
+    expect(find.byKey(const Key('sleep-stories-preview')), findsNothing);
+    expect(find.text('OWNER PREVIEW'), findsNothing);
+    expect(find.byKey(const Key('sleep-category-stories')), findsOneWidget);
   });
 
   testWidgets('Sleep remains usable at 320px with large text', (tester) async {
