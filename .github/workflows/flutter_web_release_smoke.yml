@@ -1,4 +1,4 @@
-name: Releaf Web Release Smoke
+name: Relief Web Release Smoke
 
 on:
   push:
@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   web-release-smoke:
-    name: Build Releaf web + deletion resource
+    name: Build Relief web + deletion resource
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
