@@ -81,7 +81,7 @@ void main() {
 
     expect(find.byKey(const Key('stories-screen-scroll')), findsOneWidget);
     expect(find.text('Stories'), findsOneWidget);
-    expect(find.text('3 prepared titles'), findsOneWidget);
+    expect(find.text('3 stories'), findsOneWidget);
     expect(find.text('OWNER PREVIEW'), findsNothing);
     expect(tester.takeException(), isNull);
   });
