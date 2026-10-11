@@ -4,11 +4,11 @@
 
 This is the current external-gates register for the frozen Releaf 1.0 app build candidate. It does **not** declare the app release-ready. Repo-side automated hardening is complete; production signing, Play Billing/RevenueCat provider configuration, store assets, Play Console submission and the final production-equivalent physical-device matrix remain separate gates. The public Privacy Policy and account-deletion resources are now live.
 
-Frozen app build candidate: `ecd3e977b55a9f247459f79e2c4ede92303db323` on `releaf-development`.
+Current app build candidate: `bf53e274136eef2d70c89cc0134be15b7cd7e4dc` on `releaf-development`.
 Frozen release version: `1.0.0+20260913`.
 Android package: `app.releaf.mobile`.
 
-`ecd3e97` supersedes `dd20fb5` after a supported-range launcher regression was found in the earlier built APK: API 24–25 would use legacy Flutter-template launcher PNGs while API 26+ used the Releaf adaptive icon. The current candidate fixes the legacy path using the existing Releaf artwork. Evidence-only documentation commits after `ecd3e97` do not redefine the app build candidate.
+`bf53e274` supersedes the September `ecd3e97` candidate after subsequent app-source changes: the Relief branding correction, level-50 progression for all 15 Brain games, dedicated per-game Brain artwork for the eight existing approved illustrations, and the existing Sleep Stories artwork attached to the pending Sleep intake candidate. The September launcher fix remains preserved. Documentation-only commits after `bf53e274` do not redefine the app build candidate.
 
 ## Automated evidence
 
@@ -86,7 +86,7 @@ Required secrets remain external:
 - `ANDROID_UPLOAD_KEY_ALIAS`;
 - `REVENUECAT_ANDROID_API_KEY`.
 
-The legal metadata values are now known and public, but the current workflow still reads them from GitHub Actions repository variables. Those variables still need to be entered before the production workflow can run:
+The legal metadata values are now known and public, but the current workflow still reads them from GitHub Actions repository variables. Those public values are now pinned directly in the production workflow environment and validated by `tool/release/legal_metadata_policy.dart`; no separate repository-variable entry is currently required. The effective values are:
 
 - `RELEAF_DATA_CONTROLLER_NAME=Relief`
 - `RELEAF_PRIVACY_CONTACT_EMAIL=canius.uk@gmail.com`
@@ -211,7 +211,6 @@ The agreed discipline remains one consolidated final physical-device run after p
 
 The remaining blockers are intentionally narrow:
 
-- enter the five known public legal metadata values as GitHub Actions repository variables;
 - private Android upload keystore and signing secrets;
 - Play subscription/base-plan creation and activation using approved £5.99 / £39.99 UK pricing;
 - RevenueCat Google Play credentials/products/current Offering/real `goog_` key;

@@ -1,6 +1,11 @@
 # Releaf Current State
 
-Rolling state; latest engineering checkpoint: **2026-09-30**
+## 11 October 2026 — current automated RC checkpoint
+
+Current app build candidate: `bf53e274136eef2d70c89cc0134be15b7cd7e4dc` on `releaf-development`. Flutter P0 Validation `38157339295` and Relief Web Release Smoke `38157339291` both completed **SUCCESS**. All 15 Brain games support level 50; eight existing approved per-game illustrations are bundled and mapped to their intended Brain games. Sleep candidate `ST-DC-004` now references the existing Sleep Stories artwork but remains intentionally unpromoted while audio, duration/access, narrator provenance, rights/licence and owner approval remain open. Production signing secrets, RevenueCat/Play configuration, store submission and the consolidated final physical-device pass remain external gates.
+
+
+Rolling state; latest engineering checkpoint: **2026-10-11**
 
 [Brain 50-level foundation](release/2026-09-30-brain-level-foundation.md)
 defines tested challenge bands and opt-in difficulty boundaries through 50.

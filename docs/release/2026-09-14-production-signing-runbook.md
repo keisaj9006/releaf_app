@@ -133,9 +133,9 @@ gh secret set REVENUECAT_ANDROID_API_KEY --repo $repo
 
 Do not put RevenueCat service-account JSON or secret/server API keys into this mobile-build secret.
 
-## GitHub production legal variables
+## Production legal metadata
 
-The production workflow also reads these GitHub Actions **variables**:
+The production workflow passes these public legal metadata fields into the build:
 
 - `RELEAF_DATA_CONTROLLER_NAME`
 - `RELEAF_PRIVACY_CONTACT_EMAIL`
@@ -143,11 +143,15 @@ The production workflow also reads these GitHub Actions **variables**:
 - `RELEAF_ACCOUNT_DELETION_URL`
 - `RELEAF_PRIVACY_LAST_UPDATED`
 
-Known Releaf value:
+The current workflow pins the verified public values directly in its job environment:
 
+- `RELEAF_DATA_CONTROLLER_NAME=Relief`
+- `RELEAF_PRIVACY_CONTACT_EMAIL=canius.uk@gmail.com`
+- `RELEAF_PRIVACY_POLICY_URL=https://releaf-account-deletion-89juqm.v2.appdeploy.ai/privacy-policy.html`
 - `RELEAF_ACCOUNT_DELETION_URL=https://releaf-account-deletion-89juqm.v2.appdeploy.ai/`
+- `RELEAF_PRIVACY_LAST_UPDATED=2026-09-14`
 
-Do not configure placeholders for the remaining values. The real controller identity and privacy contact email are still owner inputs; the Privacy URL and last-updated date should be the actual deployed policy route/date.
+These are public release metadata, not signing secrets. `tool/release/legal_metadata_policy.dart` validates them before the production AAB build. Do not create duplicate GitHub repository variables unless the workflow is intentionally refactored to consume `vars.*`.
 
 ## Run the production workflow
 

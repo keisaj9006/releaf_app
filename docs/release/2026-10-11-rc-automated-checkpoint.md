@@ -3,7 +3,7 @@
 ## Candidate
 
 - Branch: `releaf-development`
-- App build-candidate SHA: `762c7beafd73adf2d4cbdf945efa2583770a0062`
+- App build-candidate SHA: `bf53e274136eef2d70c89cc0134be15b7cd7e4dc`
 - Version/build: `1.0.0+20260913`
 - Status: automated RC evidence complete; production signing, Play configuration,
   content approval and physical-device gates remain open.
@@ -13,7 +13,7 @@ subsequent app-source changes materially affect the shipped build.
 
 ## Automated verification
 
-Flutter P0 Validation run `38149081860`: **SUCCESS**.
+Flutter P0 Validation run `38157339295`: **SUCCESS**.
 
 Completed steps include:
 
@@ -31,13 +31,13 @@ Completed steps include:
 - release Android AAB smoke build,
 - Android 16 KB compatibility verification.
 
-Relief Web Release Smoke run `38149081897`: **SUCCESS** on the same SHA.
+Relief Web Release Smoke run `38157339291`: **SUCCESS** on the same SHA.
 
 ## Android artifacts
 
-- Standard debug APK: artifact `11706201423`
-- Premium Preview debug APK: artifact `11705737027`
-- Release AAB smoke: artifact `11706067971`
+- Standard debug APK: artifact `11709835766`
+- Premium Preview debug APK: artifact `11709621545`
+- Release AAB smoke: artifact `11709032113`
 
 The release AAB smoke artifact uses CI signing. It is **not** the production-signed
 Google Play upload artifact.
@@ -48,10 +48,10 @@ Google Play upload artifact.
 - Reset, Home, Sleep, Sound, Emergency and active Brain surfaces use the approved
   editorial-art system where integrated;
 - all 15 canonical Brain games support persistent progression through level 50;
+- eight approved dedicated Brain illustrations are mapped one-to-one to Memory, Labyrinth, Broken Mirror, Pattern Logic, Sequence Echo, Signal Scan, Trail Switch and Tower Plan; the remaining games retain their distinct procedural artwork;
 - Emergency remains outside Premium and ordinary progress/sync semantics;
 - Meditate remains parked outside the active 1.0 discovery/marketing surface;
-- Sleep candidate `ST-DC-004` remains unpromoted because production audio, artwork,
-  rights/licence evidence and owner approval are not all present.
+- Sleep candidate `ST-DC-004` now references the existing Sleep Stories editorial artwork but remains unpromoted because production audio, measured duration/access decision, narrator provenance, rights/licence evidence and owner approval are still incomplete.
 
 ## Gates still open
 
