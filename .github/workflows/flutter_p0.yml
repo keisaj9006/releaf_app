@@ -100,7 +100,7 @@ jobs:
             exit 1
           }
           grep -q 'android:launchMode="singleTop"' android/app/src/main/AndroidManifest.xml || {
-            echo "::error::Purchase Activity must use standard or singleTop launch mode; Releaf baseline is singleTop."
+            echo "::error::Purchase Activity must use standard or singleTop launch mode; Relief baseline is singleTop."
             exit 1
           }
           grep -q 'ndkVersion = "28.2.13676358"' android/app/build.gradle.kts || {
@@ -146,13 +146,13 @@ jobs:
         timeout-minutes: 5
         run: flutter test --reporter expanded
 
-      - name: Export Releaf Guide production manifest
+      - name: Export Relief Guide production manifest
         run: >-
           flutter test
           test/meditation_narration_manifest_export_test.dart
           --reporter expanded
 
-      - name: Upload Releaf Guide production manifest
+      - name: Upload Relief Guide production manifest
         uses: actions/upload-artifact@v4
         with:
           name: releaf-guide-production-manifest
@@ -160,13 +160,13 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
-      - name: Export Reset Releaf Guide production manifest
+      - name: Export Reset Relief Guide production manifest
         run: >-
           flutter test
           test/reset_narration_manifest_export_test.dart
           --reporter expanded
 
-      - name: Upload Reset Releaf Guide production manifest
+      - name: Upload Reset Relief Guide production manifest
         uses: actions/upload-artifact@v4
         with:
           name: releaf-reset-guide-production-manifest
@@ -246,7 +246,7 @@ jobs:
             -keyalg RSA \
             -keysize 2048 \
             -validity 10000 \
-            -dname "CN=Releaf CI, OU=QA, O=Releaf, L=Edinburgh, ST=Scotland, C=GB"
+            -dname "CN=Relief CI, OU=QA, O=Relief, L=Edinburgh, ST=Scotland, C=GB"
 
           cat > android/key.properties <<'EOF'
           storePassword=changeit
@@ -274,7 +274,7 @@ jobs:
             -keyalg RSA \
             -keysize 2048 \
             -validity 10000 \
-            -dname "CN=Releaf CI, OU=QA, O=Releaf, L=Edinburgh, ST=Scotland, C=GB"
+            -dname "CN=Relief CI, OU=QA, O=Relief, L=Edinburgh, ST=Scotland, C=GB"
 
           cat > android/key.properties <<'EOF'
           storePassword=changeit
