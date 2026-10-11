@@ -9,9 +9,6 @@ on:
       - releaf-development
   workflow_dispatch:
 
-permissions:
-  contents: write
-
 concurrency:
   group: releaf-web-release-${{ github.ref }}
   cancel-in-progress: true
@@ -25,26 +22,22 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          ref: releaf-development
-          fetch-depth: 0
 
-      - name: Apply approved Stories redesign
-        if: github.event_name == 'push' && github.event.head_commit.message == 'chore(ci): execute Stories patch'
+      - name: Apply approved Stories redesign in workspace
+        if: github.event_name == 'push' && github.event.head_commit.message == 'chore(ci): export Stories redesign patch'
         run: python3 tool/one_time/apply_sleep_stories_redesign.py
 
-      - name: Commit approved Stories redesign
-        if: github.event_name == 'push' && github.event.head_commit.message == 'chore(ci): execute Stories patch'
-        shell: bash
-        run: |
-          git config user.name "Relief CI"
-          git config user.email "actions@users.noreply.github.com"
-          git add \
-            lib/features/sleep/presentation/sleep_screen.dart \
-            test/sleep_experience_test.dart \
+      - name: Upload approved Stories redesign patch
+        if: github.event_name == 'push' && github.event.head_commit.message == 'chore(ci): export Stories redesign patch'
+        uses: actions/upload-artifact@v4
+        with:
+          name: sleep-stories-redesign-patch
+          path: |
+            lib/features/sleep/presentation/sleep_screen.dart
+            test/sleep_experience_test.dart
             .github/workflows/flutter_p0.yml
-          git commit -m "feat(sleep): open focused Stories experience"
-          git push origin HEAD:releaf-development
+          if-no-files-found: error
+          retention-days: 1
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
