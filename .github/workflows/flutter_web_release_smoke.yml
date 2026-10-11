@@ -24,11 +24,11 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Apply approved Stories redesign in workspace
-        if: github.event_name == 'push' && github.event.head_commit.message == 'chore(ci): export Stories redesign patch'
+        if: "${{ github.event_name == 'push' && github.event.head_commit.message == 'chore(ci): export Stories redesign patch' }}"
         run: python3 tool/one_time/apply_sleep_stories_redesign.py
 
       - name: Upload approved Stories redesign patch
-        if: github.event_name == 'push' && github.event.head_commit.message == 'chore(ci): export Stories redesign patch'
+        if: "${{ github.event_name == 'push' && github.event.head_commit.message == 'chore(ci): export Stories redesign patch' }}"
         uses: actions/upload-artifact@v4
         with:
           name: sleep-stories-redesign-patch
