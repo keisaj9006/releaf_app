@@ -634,6 +634,7 @@ class _QuickSessionCard extends StatelessWidget {
             ReliefEditorialImage(
               asset: _sessionEditorialAsset(session),
               fallback: ReleafArtwork(variant: _sessionArtwork(session)),
+              intensity: isLocked ? 0.78 : 1,
             ),
             const DecoratedBox(
               decoration: BoxDecoration(
