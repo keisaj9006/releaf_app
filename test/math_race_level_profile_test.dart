@@ -43,7 +43,7 @@ void main() {
 
   test('high-level Math Race puzzles remain integral and unambiguous', () {
     for (final puzzleLevel in [41, 60, 90, 120]) {
-      final generator = MathPuzzleGenerator(Random(1200 + puzzleLevel));
+      final generator = MathPuzzleGenerator(random: Random(1200 + puzzleLevel));
       for (final optionCount in [4, 5, 6]) {
         for (var sample = 0; sample < 40; sample++) {
           final puzzle = generator.generateForLevel(
