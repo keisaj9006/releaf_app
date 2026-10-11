@@ -179,13 +179,9 @@ class _SoundBackdrop extends StatelessWidget {
     return const Stack(
       fit: StackFit.expand,
       children: [
-        ReliefEditorialImage(
-          asset: ReliefEditorialAsset.soundscapes,
-          fallback: ReleafSoundArtwork(
-            variant: ReleafSoundArtworkVariant.field,
-            intensity: 0.72,
-          ),
-          intensity: 0.86,
+        ReleafSoundArtwork(
+          variant: ReleafSoundArtworkVariant.field,
+          intensity: 0.72,
         ),
         DecoratedBox(
           decoration: BoxDecoration(
@@ -380,8 +376,12 @@ class _FeaturedSound extends StatelessWidget {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  ReleafSoundArtwork(
-                    variant: _artworkForTrack(track.id),
+                  ReliefEditorialImage(
+                    asset: ReliefEditorialAsset.soundscapes,
+                    fallback: ReleafSoundArtwork(
+                      variant: _artworkForTrack(track.id),
+                      intensity: 0.96,
+                    ),
                     intensity: 0.96,
                   ),
                   const DecoratedBox(
