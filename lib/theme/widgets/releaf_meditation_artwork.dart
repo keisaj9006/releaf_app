@@ -22,8 +22,10 @@ String? _assetFor(ReleafMeditationArtworkVariant variant) {
       'assets/art/meditation/focus.jpg',
     ReleafMeditationArtworkVariant.body =>
       'assets/art/relief/body_scan.webp',
-    ReleafMeditationArtworkVariant.compassion ||
-    ReleafMeditationArtworkVariant.everyday ||
+    ReleafMeditationArtworkVariant.compassion =>
+      'assets/art/relief/meditate.webp',
+    ReleafMeditationArtworkVariant.everyday =>
+      'assets/art/relief/sleep.webp',
     ReleafMeditationArtworkVariant.timer => null,
   };
 }
