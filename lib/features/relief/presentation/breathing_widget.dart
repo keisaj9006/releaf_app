@@ -406,7 +406,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
                                   Text(
                                     isBreathing
                                         ? 'Breathing cues and calming background'
-                                        : 'Releaf Guide and calming background',
+                                        : 'Relief Guide and calming background',
                                     style: ReleafTypography.sectionTitle
                                         .copyWith(fontSize: 22),
                                   ),
@@ -460,7 +460,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
                           key: const Key('reset-active-voice-toggle'),
                           contentPadding: EdgeInsets.zero,
                           title: Text(
-                            isBreathing ? 'Breathing cues' : 'Releaf Guide',
+                            isBreathing ? 'Breathing cues' : 'Relief Guide',
                             style: ReleafTypography.cardTitle,
                           ),
                           subtitle: Text(
@@ -468,7 +468,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
                                 ? _voiceAvailable
                                       ? 'Gentle inhale and exhale cues. Hold and rest stay silent.'
                                       : 'Follow the on-screen breathing rhythm. Breathing audio is not available yet.'
-                                : 'Only approved Releaf Guide recordings play. Unrecorded guidance stays silent.',
+                                : 'Only approved Relief Guide recordings play. Unrecorded guidance stays silent.',
                             style: ReleafTypography.meta.copyWith(
                               color: ReleafColors.textSecondary,
                             ),
@@ -547,7 +547,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
                         ],
                         const SizedBox(height: ReleafSpacing.sm),
                         Text(
-                          'The background starts at a low level on purpose. Releaf does not claim that a specific tuning frequency is required for relaxation.',
+                          'The background starts at a low level on purpose. Relief does not claim that a specific tuning frequency is required for relaxation.',
                           style: ReleafTypography.meta.copyWith(
                             color: ReleafColors.textMuted,
                             height: 1.45,
@@ -1322,7 +1322,7 @@ class _BreathingWidgetState extends ConsumerState<BreathingWidget>
                   ),
                   const SizedBox(height: ReleafSpacing.sm),
                   Text(
-                    'There is no right answer — this helps Releaf understand the session outcome.',
+                    'There is no right answer — this helps Relief understand the session outcome.',
                     textAlign: TextAlign.center,
                     style: ReleafTypography.body.copyWith(
                       color: ReleafColors.textSecondary,
