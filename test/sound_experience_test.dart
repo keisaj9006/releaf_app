@@ -758,7 +758,7 @@ void main() {
     expect(find.text('Sound'), findsOneWidget);
     expect(find.byKey(const Key('sound-featured-card')), findsOneWidget);
     expect(find.text('Releaf Atmosphere I'), findsWidgets);
-    expect(find.text('Releaf Atmosphere II'), findsOneWidget);
+    expect(find.text('Relief Atmosphere II'), findsOneWidget);
     expect(find.text('Brown Noise'), findsOneWidget);
     expect(find.text('Soft Rain'), findsOneWidget);
     expect(find.text('Night Air'), findsOneWidget);
@@ -834,8 +834,8 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
 
     expect(find.byKey(const Key('sound-premium-preview')), findsOneWidget);
-    expect(find.text('Releaf Atmosphere II'), findsWidgets);
-    expect(find.textContaining('part of Releaf Premium'), findsOneWidget);
+    expect(find.text('Relief Atmosphere II'), findsWidgets);
+    expect(find.textContaining('part of Relief Premium'), findsOneWidget);
     expect(
       find.byKey(const Key('sound-premium-preview-unlock')),
       findsOneWidget,
