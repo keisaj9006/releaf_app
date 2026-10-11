@@ -38,7 +38,7 @@ Future<void> main() async {
           builder: ReleafBackgroundSoundDriver.new,
           config: const AudioServiceConfig(
             androidNotificationChannelId: 'app.releaf.mobile.audio',
-            androidNotificationChannelName: 'Releaf audio',
+            androidNotificationChannelName: 'Relief audio',
             androidNotificationOngoing: true,
           ),
         );
@@ -198,7 +198,7 @@ class _ReleafAppState extends ConsumerState<ReleafApp>
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      title: 'Releaf',
+      title: 'Relief',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
       routerConfig: appRouter,
