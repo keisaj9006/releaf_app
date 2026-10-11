@@ -1,7 +1,10 @@
 abstract final class StoryPreviewConfig {
   static const enabled = bool.fromEnvironment(
     'RELIEF_STORIES_PREVIEW',
-    defaultValue: false,
+    defaultValue: bool.fromEnvironment(
+      'RELEAF_PREMIUM_PREVIEW',
+      defaultValue: false,
+    ),
   );
 
   static String? redirectWhenDisabled({
