@@ -1774,6 +1774,28 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('Tower Plan exposes earned level 50 without clamping to 12', (
+    WidgetTester tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(320, 720));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: TowerPlanScreen(
+          trainingLevel: 50,
+          onFinish: (_) {},
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('L50'), findsOneWidget);
+    expect(find.text('L12'), findsNothing);
+    expect(find.byKey(const Key('tower-plan-board')), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Symbol Code excludes background time from its stopwatch', (
     WidgetTester tester,
   ) async {
