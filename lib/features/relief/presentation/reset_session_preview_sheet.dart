@@ -264,12 +264,12 @@ class _ResetSessionPreviewSheetState
                                     : Icons.record_voice_over_rounded,
                                 title: isBreathing
                                     ? 'Breathing cues'
-                                    : 'Releaf Guide',
+                                    : 'Relief Guide',
                                 subtitle: isBreathing
                                     ? voiceAvailable
                                           ? 'Gentle inhale and exhale cues. Hold and rest stay silent.'
                                           : 'Follow the on-screen breathing rhythm. Breathing audio is not available yet.'
-                                    : 'Only approved Releaf Guide recordings play. Unrecorded guidance stays silent.',
+                                    : 'Only approved Relief Guide recordings play. Unrecorded guidance stays silent.',
                                 value:
                                     voiceAvailable &&
                                     _options.voiceGuidanceEnabled,
