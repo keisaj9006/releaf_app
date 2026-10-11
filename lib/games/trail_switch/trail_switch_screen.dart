@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../features/brain/presentation/widgets/brain_difficulty_selector.dart';
+import 'trail_switch_level_profile.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/releaf_design_tokens.dart';
 
@@ -45,29 +46,16 @@ class _TrailSwitchScreenState extends State<TrailSwitchScreen> {
   bool _finished = false;
   String _feedback = 'Follow the sequence as quickly and accurately as you can.';
 
-  int get _trainingLevel => widget.trainingLevel.clamp(1, 12).toInt();
-  int get _levelIndex => _trainingLevel - 1;
+  int get _trainingLevel => widget.trainingLevel.clamp(1, 50).toInt();
 
-  int get _targetCount {
-    final base = switch (_difficulty) {
-      BrainDifficulty.easy => 6,
-      BrainDifficulty.medium => 8,
-      BrainDifficulty.hard => 10,
-    };
-    return (base + (_levelIndex ~/ 2)).clamp(6, 16).toInt();
-  }
+  TrailSwitchLevelProfile get _levelProfile =>
+      trailSwitchProfileForLevel(_trainingLevel, _difficulty);
 
-  int get _distractorCount {
-    if (_difficulty != BrainDifficulty.hard) return 0;
-    return (3 + (_levelIndex ~/ 3)).clamp(3, 6).toInt();
-  }
+  int get _targetCount => _levelProfile.targetCount;
 
-  int get _gridSide {
-    final total = _targetCount + _distractorCount;
-    if (total <= 9) return 3;
-    if (total <= 16) return 4;
-    return 5;
-  }
+  int get _distractorCount => _levelProfile.distractorCount;
+
+  int get _gridSide => _levelProfile.gridSide;
 
   int get _difficultyMultiplier => switch (_difficulty) {
         BrainDifficulty.easy => 1,
@@ -98,10 +86,12 @@ class _TrailSwitchScreenState extends State<TrailSwitchScreen> {
   String _instructionFor(BrainDifficulty difficulty) {
     return switch (difficulty) {
       BrainDifficulty.easy => 'Tap the numbers in ascending order.',
-      BrainDifficulty.medium =>
-        'Alternate number and letter: 1 → A → 2 → B → …',
-      BrainDifficulty.hard =>
-        'Alternate number and letter while ignoring the distractor symbols.',
+      BrainDifficulty.medium => _levelProfile.startWithLetter
+          ? 'Alternate letter and number: A → 1 → B → 2 → …'
+          : 'Alternate number and letter: 1 → A → 2 → B → …',
+      BrainDifficulty.hard => _levelProfile.startWithLetter
+          ? 'Alternate letter and number while ignoring distractor symbols.'
+          : 'Alternate number and letter while ignoring the distractor symbols.',
     };
   }
 
@@ -144,9 +134,15 @@ class _TrailSwitchScreenState extends State<TrailSwitchScreen> {
     var letter = 0;
 
     while (result.length < _targetCount) {
-      result.add('$number');
-      if (result.length >= _targetCount) break;
-      result.add(String.fromCharCode('A'.codeUnitAt(0) + letter));
+      if (_levelProfile.startWithLetter) {
+        result.add(String.fromCharCode('A'.codeUnitAt(0) + letter));
+        if (result.length >= _targetCount) break;
+        result.add('$number');
+      } else {
+        result.add('$number');
+        if (result.length >= _targetCount) break;
+        result.add(String.fromCharCode('A'.codeUnitAt(0) + letter));
+      }
       number++;
       letter++;
     }
