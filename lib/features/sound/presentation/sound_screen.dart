@@ -9,6 +9,7 @@ import '../../../routing/app_routes.dart';
 import '../../../theme/app_theme.dart';
 import '../../../theme/releaf_design_tokens.dart';
 import '../../../theme/widgets/releaf_sound_artwork.dart';
+import '../../../theme/widgets/relief_editorial_image.dart';
 import '../../../theme/widgets/releaf_components.dart';
 import '../../relief/application/relief_paywall_hooks.dart';
 import '../../relief/data/reset_catalog.dart';
@@ -178,9 +179,13 @@ class _SoundBackdrop extends StatelessWidget {
     return const Stack(
       fit: StackFit.expand,
       children: [
-        ReleafSoundArtwork(
-          variant: ReleafSoundArtworkVariant.field,
-          intensity: 0.72,
+        ReliefEditorialImage(
+          asset: ReliefEditorialAsset.soundscapes,
+          fallback: ReleafSoundArtwork(
+            variant: ReleafSoundArtworkVariant.field,
+            intensity: 0.72,
+          ),
+          intensity: 0.86,
         ),
         DecoratedBox(
           decoration: BoxDecoration(
