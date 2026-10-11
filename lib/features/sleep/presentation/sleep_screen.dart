@@ -866,13 +866,9 @@ class _SleepBackdrop extends StatelessWidget {
     return const Stack(
       fit: StackFit.expand,
       children: [
-        ReliefEditorialImage(
-          asset: ReliefEditorialAsset.sleep,
-          fallback: ReleafSleepArtwork(
-            variant: ReleafSleepArtworkVariant.night,
-            intensity: 0.72,
-          ),
-          intensity: 0.82,
+        ReleafSleepArtwork(
+          variant: ReleafSleepArtworkVariant.night,
+          intensity: 0.72,
         ),
         DecoratedBox(
           decoration: BoxDecoration(
