@@ -8,6 +8,7 @@ import '../../../routing/app_routes.dart';
 import '../../../theme/app_theme.dart';
 import '../../../theme/releaf_design_tokens.dart';
 import '../../../theme/widgets/releaf_artwork.dart';
+import '../../../theme/widgets/releaf_asset_artwork.dart';
 import '../../../theme/widgets/releaf_components.dart';
 import '../application/relief_paywall_hooks.dart';
 import '../application/reset_completion_store.dart';
@@ -630,7 +631,10 @@ class _QuickSessionCard extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            ReleafArtwork(variant: _sessionArtwork(session)),
+            ReleafAssetArtwork(
+              assetPath: _sessionAssetPath(session),
+              fallback: ReleafArtwork(variant: _sessionArtwork(session)),
+            ),
             const DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
@@ -737,7 +741,10 @@ class _DeepResetCard extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            ReleafArtwork(variant: _sessionArtwork(session)),
+            ReleafAssetArtwork(
+              assetPath: _sessionAssetPath(session),
+              fallback: ReleafArtwork(variant: _sessionArtwork(session)),
+            ),
             const DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
@@ -859,7 +866,12 @@ class _SoundGatewayCard extends StatelessWidget {
                 fit: largeText ? StackFit.loose : StackFit.expand,
                 children: [
                   const Positioned.fill(
-                    child: ReleafArtwork(variant: ReleafArtworkVariant.ambient),
+                    child: ReleafAssetArtwork(
+                      assetPath: 'assets/art/relief/soundscapes.webp',
+                      fallback: ReleafArtwork(
+                        variant: ReleafArtworkVariant.ambient,
+                      ),
+                    ),
                   ),
                   const Positioned.fill(
                     child: DecoratedBox(
@@ -1150,6 +1162,22 @@ String _categoryLabel(QuickResetCategory category) {
     QuickResetCategory.noBreath => 'No-Breath',
     QuickResetCategory.lifeUpgrade => 'Life Upgrade',
   };
+}
+
+String _sessionAssetPath(ResetContent session) {
+  if (session.id == 'tension-body-scan') {
+    return 'assets/art/relief/body_scan.webp';
+  }
+  if (session.level == ResetLevel.deep) {
+    return 'assets/art/relief/reset.webp';
+  }
+  if (session.discoveryGroup == ResetDiscoveryGroup.breathingMethods) {
+    return 'assets/art/relief/breathe.webp';
+  }
+  if (session.discoveryGroup == ResetDiscoveryGroup.bodyMethods) {
+    return 'assets/art/relief/tension_relief.webp';
+  }
+  return 'assets/art/relief/reset.webp';
 }
 
 ReleafArtworkVariant _sessionArtwork(ResetContent session) {
