@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../theme/releaf_design_tokens.dart';
 import '../../../theme/widgets/releaf_artwork.dart';
+import '../../../theme/widgets/relief_editorial_image.dart';
 import '../../../theme/widgets/releaf_components.dart';
 import '../application/reset_audio_preferences.dart';
 import '../domain/models/reset_content.dart';
@@ -465,7 +466,10 @@ class _PreviewArtworkHeader extends StatelessWidget {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          ReleafArtwork(variant: _sessionArtwork(session)),
+          ReliefEditorialImage(
+            asset: _sessionEditorialAsset(session),
+            fallback: ReleafArtwork(variant: _sessionArtwork(session)),
+          ),
           DecoratedBox(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -983,6 +987,22 @@ IconData _modalityIcon(ResetModality modality) {
     ResetModality.grounding => Icons.spa_outlined,
     ResetModality.guidedPractice => Icons.self_improvement_rounded,
   };
+}
+
+ReliefEditorialAsset _sessionEditorialAsset(ResetContent session) {
+  if (session.id == 'tension-body-scan') {
+    return ReliefEditorialAsset.bodyScan;
+  }
+  if (session.level == ResetLevel.deep) {
+    return ReliefEditorialAsset.reset;
+  }
+  if (session.discoveryGroup == ResetDiscoveryGroup.breathingMethods) {
+    return ReliefEditorialAsset.breathe;
+  }
+  if (session.discoveryGroup == ResetDiscoveryGroup.bodyMindReset) {
+    return ReliefEditorialAsset.tensionRelief;
+  }
+  return ReliefEditorialAsset.reset;
 }
 
 ReleafArtworkVariant _sessionArtwork(ResetContent session) {
