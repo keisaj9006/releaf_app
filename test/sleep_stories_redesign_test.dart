@@ -25,8 +25,18 @@ void main() {
   testWidgets('Stories screen is focused and does not expose empty collections', (
     tester,
   ) async {
+    SharedPreferences.setMockInitialValues({});
+    final preferences = await SharedPreferences.getInstance();
+    final progress = SleepProgressStore(preferences);
+
     await tester.pumpWidget(
-      const MaterialApp(home: StoriesPreviewScreen()),
+      ProviderScope(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(preferences),
+          sleepProgressStoreProvider.overrideWith((ref) => progress),
+        ],
+        child: const MaterialApp(home: StoriesPreviewScreen()),
+      ),
     );
     await tester.pumpAndSettle();
 
