@@ -44,7 +44,7 @@ class WhatsNewScreen extends StatelessWidget {
                       label: const Text('Emergency help'),
                     ),
                     const SizedBox(height: ReleafSpacing.md),
-                    Text('RELEAF · 1.0', style: ReleafTypography.eyebrow),
+                    Text('RELIEF · 1.0', style: ReleafTypography.eyebrow),
                     const SizedBox(height: ReleafSpacing.md),
                     Semantics(
                       header: true,
