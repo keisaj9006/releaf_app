@@ -27,6 +27,21 @@ Future<void> _pumpStories(
   await tester.pumpAndSettle();
 }
 
+Future<Finder> _revealStoryCard(WidgetTester tester, String id) async {
+  final card = find.byKey(Key('story-preview-$id'));
+  final scroll = find.byKey(const Key('stories-screen-scroll'));
+
+  for (var attempt = 0; card.evaluate().isEmpty && attempt < 20; attempt++) {
+    await tester.drag(scroll, const Offset(0, -360));
+    await tester.pumpAndSettle();
+  }
+
+  expect(card, findsOneWidget, reason: 'Story card $id was not reachable.');
+  await tester.ensureVisible(card);
+  await tester.pumpAndSettle();
+  return card;
+}
+
 void main() {
   testWidgets('dedicated Stories screen exposes the three prepared titles', (
     WidgetTester tester,
@@ -38,37 +53,38 @@ void main() {
     expect(find.text('3 prepared titles'), findsOneWidget);
     expect(find.text('OWNER PREVIEW'), findsNothing);
 
-    for (final id in const [
-      'TS01_BEYOND_THE_GATE',
-      'TS02_KRYSTYNA_SKARBEK',
-      'ST_L05_COMPUTER',
-    ]) {
-      final card = find.byKey(Key('story-preview-$id'));
-      await tester.scrollUntilVisible(card, 300);
-      expect(card, findsOneWidget);
+    const stories = <String, String>{
+      'TS01_BEYOND_THE_GATE': 'Beyond the Gate',
+      'TS02_KRYSTYNA_SKARBEK': 'The Woman Who Crossed Every Border',
+      'ST_L05_COMPUTER': 'Computer',
+    };
+
+    for (final entry in stories.entries) {
+      final card = await _revealStoryCard(tester, entry.key);
+      expect(
+        find.descendant(of: card, matching: find.text(entry.value)),
+        findsOneWidget,
+      );
+
       if (_audioBundled) {
-        expect(find.byKey(Key('story-preview-play-$id')), findsOneWidget);
         expect(
-          find.byKey(Key('story-preview-audio-missing-$id')),
+          find.byKey(Key('story-preview-play-${entry.key}')),
+          findsOneWidget,
+        );
+        expect(
+          find.byKey(Key('story-preview-audio-missing-${entry.key}')),
           findsNothing,
         );
       } else {
-        expect(find.byKey(Key('story-preview-play-$id')), findsNothing);
         expect(
-          find.byKey(Key('story-preview-audio-missing-$id')),
+          find.byKey(Key('story-preview-play-${entry.key}')),
+          findsNothing,
+        );
+        expect(
+          find.byKey(Key('story-preview-audio-missing-${entry.key}')),
           findsOneWidget,
         );
       }
-    }
-
-    for (final title in const [
-      'Beyond the Gate',
-      'The Woman Who Crossed Every Border',
-      'Computer',
-    ]) {
-      final titleFinder = find.text(title);
-      await tester.scrollUntilVisible(titleFinder, 300);
-      expect(titleFinder, findsOneWidget);
     }
 
     expect(find.text('Night Mysteries'), findsNothing);
