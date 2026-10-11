@@ -142,6 +142,14 @@ jobs:
         timeout-minutes: 5
         run: flutter test test/relief_access_test.dart --reporter expanded
 
+      - name: Test Stories owner-preview audio contract
+        timeout-minutes: 5
+        run: >-
+          flutter test
+          test/stories_owner_preview_audio_config_test.dart
+          --dart-define=RELIEF_STORIES_AUDIO_BUNDLED=true
+          --reporter expanded
+
       - name: Test full suite
         timeout-minutes: 5
         run: flutter test --reporter expanded
