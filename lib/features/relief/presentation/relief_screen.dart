@@ -866,8 +866,8 @@ class _SoundGatewayCard extends StatelessWidget {
                 fit: largeText ? StackFit.loose : StackFit.expand,
                 children: [
                   const Positioned.fill(
-                    child: ReleafAssetArtwork(
-                      assetPath: 'assets/art/relief/soundscapes.webp',
+                    child: ReliefEditorialImage(
+                      asset: ReliefEditorialAsset.soundscapes,
                       fallback: ReleafArtwork(
                         variant: ReleafArtworkVariant.ambient,
                       ),
