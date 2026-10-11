@@ -117,6 +117,7 @@ void main() {
       expect(entry.approval, SleepApprovalState.pending);
       expect(entry.rights, SleepRightsState.pending);
       expect(entry.accessTier, SleepAccessTier.undecided);
+      expect(entry.artworkAsset, 'assets/art/relief/sleep_stories.webp');
     },
   );
 }
