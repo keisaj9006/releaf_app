@@ -535,7 +535,7 @@ class _MeditationPremiumPreviewSheet extends StatelessWidget {
                 ],
                 const SizedBox(height: ReleafSpacing.lg),
                 Text(
-                  'You can review the practice before deciding. Access to this practice requires Releaf Premium.',
+                  'You can review the practice before deciding. Access to this practice requires Relief Premium.',
                   style: ReleafTypography.meta.copyWith(
                     color: ReleafColors.textMuted,
                     height: 1.45,
