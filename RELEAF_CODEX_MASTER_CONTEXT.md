@@ -1,9 +1,9 @@
-# Releaf Codex Master Context
+# Relief Codex Master Context
 
 This file is the quick index. The detailed rules live in `AGENTS.md` and `docs/`.
 
 ## Mission
-Finish Releaf 1.0 from the existing `releaf-development` branch. Do not restart the app or rewrite working systems for aesthetic architecture reasons.
+Finish Relief 1.0 from the existing `releaf-development` branch. Do not restart the app or rewrite working systems for aesthetic architecture reasons.
 
 ## Canonical engineering truth
 `docs/release/releaf_1_0_release_gate.md`
@@ -26,7 +26,7 @@ Finish Releaf 1.0 from the existing `releaf-development` branch. Do not restart 
 - RESET / BRAIN / MEDITATE / SLEEP conceptual modes
 - compete on time-to-useful-action, not content volume
 - Sleep: no narration
-- Meditation: approved recorded Releaf Guide, 0.82× direction, separate narration + ambience
+- Meditation: approved recorded Relief Guide, 0.82× direction, separate narration + ambience
 - do not guess narrator ID or use system TTS fallback
 - basic urgent Reset stays accessible
 - preserve internal Emergency privacy/access semantics
