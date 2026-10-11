@@ -39,6 +39,11 @@ void main() {
     }
   });
 
+  test('Flutter bundles the dedicated Brain artwork directory', () {
+    final pubspec = File('pubspec.yaml').readAsStringSync();
+    expect(pubspec, contains('    - assets/art/brain/'));
+  });
+
   test('every mapped Brain editorial asset is bundled as WebP', () {
     for (final path in expected.values) {
       expect(path, endsWith('.webp'));
