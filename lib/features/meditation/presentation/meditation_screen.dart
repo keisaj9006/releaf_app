@@ -11,6 +11,7 @@ import '../../../routing/primary_destination_actions.dart';
 import '../../../theme/app_theme.dart';
 import '../../../theme/releaf_design_tokens.dart';
 import '../../../theme/widgets/releaf_meditation_artwork.dart';
+import '../../../theme/widgets/relief_editorial_image.dart';
 import '../../relief/application/relief_paywall_hooks.dart';
 import '../application/meditation_library_controller.dart';
 import '../data/meditation_catalog.dart';
@@ -567,9 +568,13 @@ class _MeditationBackdrop extends StatelessWidget {
     return const Stack(
       fit: StackFit.expand,
       children: [
-        ReleafMeditationArtwork(
-          variant: ReleafMeditationArtworkVariant.editorial,
-          intensity: 0.42,
+        ReliefEditorialImage(
+          asset: ReliefEditorialAsset.meditate,
+          fallback: ReleafMeditationArtwork(
+            variant: ReleafMeditationArtworkVariant.editorial,
+            intensity: 0.42,
+          ),
+          intensity: 0.70,
         ),
         DecoratedBox(
           decoration: BoxDecoration(
