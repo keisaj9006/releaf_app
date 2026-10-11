@@ -1,8 +1,8 @@
-# Releaf — Codex Agent Instructions
+# Relief — Codex Agent Instructions
 
 ## Mission
 
-Finish and release **Releaf 1.0** from the existing Flutter application. Do not restart, replatform, or rebuild working features simply because a cleaner architecture is imaginable.
+Finish and release **Relief 1.0** from the existing Flutter application. Do not restart, replatform, or rebuild working features simply because a cleaner architecture is imaginable.
 
 Repository: `keisaj9006/releaf_app`  
 Working branch: **`releaf-development`**  
@@ -24,7 +24,7 @@ When information conflicts, use this order:
    - `docs/ROADMAP.md`
    - `docs/plans/2026-09-11-releaf-1.0-completion-plan.md`
 5. **Existing specialist repo documentation**
-   - audio, Reset evidence, Releaf Guide, progress sync, release documentation
+   - audio, Reset evidence, Relief Guide, progress sync, release documentation
 6. **Deep Research**
    - `docs/RESEARCH_INSIGHTS.md`
    - `docs/research/DEEP_RESEARCH_2026-09-11.md`
@@ -70,7 +70,7 @@ Do not perform ceremonial planning for a trivial change, but never make broad ar
 - Never fabricate a secret, production endpoint, privacy-policy URL, provider voice ID, billing product ID, or store configuration.
 - Do not enable runtime cloud progress sync until its materialization and multi-device conflict requirements are actually complete.
 - Do not claim cloud backup while local progress remains the release truth.
-- Do not replace the approved Releaf Guide narrator with a guessed voice.
+- Do not replace the approved Relief Guide narrator with a guessed voice.
 - Do not put narration into the core Sleep experience.
 - Do not turn medical/wellness copy into diagnosis, treatment, cure, prevention, or guaranteed physiological claims.
 - Do not add an AI therapist, open social feed, leaderboards, brain-age/IQ score, complex virtual economy, sleep-diagnosis score, or “healing frequency” claims for 1.0.
@@ -80,7 +80,7 @@ Do not perform ceremonial planning for a trivial change, but never make broad ar
 
 ## Product model
 
-Releaf is a consumer **mental-fitness and general-wellbeing** app.
+Relief is a consumer **mental-fitness and general-wellbeing** app.
 
 Conceptual modes:
 
@@ -95,7 +95,7 @@ The product should optimize **time-to-useful-action**, not content volume or tim
 
 ## Audio contract
 
-### Meditation / Releaf Guide
+### Meditation / Relief Guide
 
 The current code is authoritative:
 
@@ -103,7 +103,7 @@ The current code is authoritative:
 - narrator direction: selected female British-English meditation narrator
 - delivery: natural, warm, calm, intimate, premium
 - no whisper / ASMR
-- recorded Releaf Guide voice only; no system TTS substitution
+- recorded Relief Guide voice only; no system TTS substitution
 - narration and ambience are separate layers with independent control
 - the exact provider voice ID is currently not preserved; production re-rendering remains blocked until it is recovered or the owner deliberately approves a replacement after auditioning.
 
@@ -186,8 +186,8 @@ A task is not complete because code “looks right”. Completion requires:
 - no release-gate regression,
 - clear report of what was verified and what remains external/manual.
 
-## Definition of Releaf 1.0 complete
+## Definition of Relief 1.0 complete
 
 `docs/release/releaf_1_0_release_gate.md` is canonical.
 
-Do not say “Releaf 1.0 is release-ready” until **every P0 gate is closed**, a production-equivalent Android release artifact passes required QA, and required external Play/Supabase/RevenueCat/privacy steps are complete.
+Do not say “Relief 1.0 is release-ready” until **every P0 gate is closed**, a production-equivalent Android release artifact passes required QA, and required external Play/Supabase/RevenueCat/privacy steps are complete.
