@@ -464,7 +464,7 @@ class _BreathingMethodGuide extends StatelessWidget {
           ),
           const SizedBox(height: ReleafSpacing.xs),
           Text(
-            'Releaf writes breathing patterns in phase order: inhale–exhale for continuous breathing, or inhale–hold–exhale–hold when holds are used. The numbers describe timing, not a magic formula.',
+            'Relief writes breathing patterns in phase order: inhale–exhale for continuous breathing, or inhale–hold–exhale–hold when holds are used. The numbers describe timing, not a magic formula.',
             style: ReleafTypography.body.copyWith(
               color: ReleafColors.textSecondary,
               height: 1.45,
@@ -481,7 +481,7 @@ class _BreathingMethodGuide extends StatelessWidget {
           ),
           const SizedBox(height: ReleafSpacing.xs),
           Text(
-            'Evidence note: slow paced breathing has broader support than any one exact ratio. Releaf treats patterns such as box breathing and 4–7–8 as pacing options, not superior formulas.',
+            'Evidence note: slow paced breathing has broader support than any one exact ratio. Relief treats patterns such as box breathing and 4–7–8 as pacing options, not superior formulas.',
             style: ReleafTypography.meta.copyWith(
               color: ReleafColors.textMuted,
               height: 1.45,
