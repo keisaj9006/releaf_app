@@ -10,9 +10,9 @@ import '../../routing/app_routes.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/releaf_design_tokens.dart';
 import '../../theme/widgets/releaf_artwork.dart';
-import '../../theme/widgets/relief_editorial_image.dart';
 import '../../theme/widgets/releaf_brain_artwork.dart';
 import '../../theme/widgets/releaf_components.dart';
+import '../../theme/widgets/releaf_sleep_artwork.dart';
 import '../progress/data/leaves_repository.dart';
 import '../relief/data/reset_catalog.dart';
 import '../sound/application/sound_player_controller.dart';
@@ -1727,11 +1727,8 @@ class _DailyEssentials extends StatelessWidget {
               ? 'Your Brain reward is already counted today.'
               : 'Open the focused 3-game workout.',
           onPressed: onBrain,
-          child: ReliefEditorialImage(
-            asset: ReliefEditorialAsset.brainGames,
-            fallback: ReleafBrainArtwork(
-              variant: ReleafBrainArtworkVariant.hero,
-            ),
+          child: ReleafBrainArtwork(
+            variant: ReleafBrainArtworkVariant.hero,
           ),
         );
 
@@ -1742,9 +1739,8 @@ class _DailyEssentials extends StatelessWidget {
           subtitle: 'Sleep resets and Sound Space in one place.',
           warm: true,
           onPressed: onTonight,
-          child: ReliefEditorialImage(
-            asset: ReliefEditorialAsset.sleep,
-            fallback: ReleafArtwork(variant: ReleafArtworkVariant.ambient),
+          child: ReleafSleepArtwork(
+            variant: ReleafSleepArtworkVariant.night,
           ),
         );
 
