@@ -692,12 +692,12 @@ class _DraggableShardState extends State<_DraggableShard> {
   void _finishDrag() {
     _dragging = false;
 
-    const half = widget.shardSize / 2;
+    final half = widget.shardSize / 2;
     final target = Offset(
       widget.shard.targetCenter.dx * widget.boardSize.width,
       widget.shard.targetCenter.dy * widget.boardSize.height,
     );
-    final currentCenter = _position + const Offset(half, half);
+    final currentCenter = _position + Offset(half, half);
     final snapDistance = math.max(
       widget.minSnapPixels,
       widget.boardSize.shortestSide * widget.snapFraction,
@@ -707,7 +707,7 @@ class _DraggableShardState extends State<_DraggableShard> {
       HapticFeedback.selectionClick();
       widget.onUpdate(
         widget.shard.copyWith(
-          position: target - const Offset(half, half),
+          position: target - Offset(half, half),
           placed: true,
         ),
       );
@@ -748,7 +748,7 @@ class _DraggableShardState extends State<_DraggableShard> {
             );
           },
           child: CustomPaint(
-            size: const Size.square(widget.shardSize),
+            size: Size.square(widget.shardSize),
             painter: _ShardPainter(widget.shard),
           ),
         ),
