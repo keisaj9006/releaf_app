@@ -11,7 +11,7 @@ String _between(String source, String start, String end) {
 }
 
 void main() {
-  test('Google Play listing promotes only active Releaf 1.0 pillars', () {
+  test('Google Play listing promotes only active Relief 1.0 pillars', () {
     final source = File(
       'docs/release/google_play_store_listing.md',
     ).readAsStringSync().replaceAll('\r\n', '\n');
