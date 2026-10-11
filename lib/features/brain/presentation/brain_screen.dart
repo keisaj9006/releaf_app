@@ -1198,7 +1198,7 @@ class _EvidenceNote extends StatelessWidget {
           const SizedBox(width: ReleafSpacing.sm),
           Expanded(
             child: Text(
-              'Game results describe performance inside these exercises. Releaf does not present them as IQ, diagnosis or a medical measure.',
+              'Game results describe performance inside these exercises. Relief does not present them as IQ, diagnosis or a medical measure.',
               style: ReleafTypography.meta.copyWith(
                 color: ReleafColors.textSecondary,
                 height: 1.5,
