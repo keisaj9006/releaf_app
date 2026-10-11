@@ -8,8 +8,8 @@ import '../../../routing/app_routes.dart';
 import '../../../theme/app_theme.dart';
 import '../../../theme/releaf_design_tokens.dart';
 import '../../../theme/widgets/releaf_artwork.dart';
-import '../../../theme/widgets/relief_editorial_image.dart';
 import '../../../theme/widgets/releaf_components.dart';
+import '../../../theme/widgets/releaf_sound_artwork.dart';
 import '../application/relief_paywall_hooks.dart';
 import '../application/reset_completion_store.dart';
 import '../application/reset_progress_summary.dart';
@@ -631,9 +631,8 @@ class _QuickSessionCard extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            ReliefEditorialImage(
-              asset: _sessionEditorialAsset(session),
-              fallback: ReleafArtwork(variant: _sessionArtwork(session)),
+            ReleafArtwork(
+              variant: _sessionArtwork(session),
               intensity: isLocked ? 0.78 : 1,
             ),
             const DecoratedBox(
@@ -742,9 +741,8 @@ class _DeepResetCard extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            ReliefEditorialImage(
-              asset: _sessionEditorialAsset(session),
-              fallback: ReleafArtwork(variant: _sessionArtwork(session)),
+            ReleafArtwork(
+              variant: _sessionArtwork(session),
               intensity: isLocked ? 0.78 : 1,
             ),
             const DecoratedBox(
@@ -868,11 +866,8 @@ class _SoundGatewayCard extends StatelessWidget {
                 fit: largeText ? StackFit.loose : StackFit.expand,
                 children: [
                   const Positioned.fill(
-                    child: ReliefEditorialImage(
-                      asset: ReliefEditorialAsset.soundscapes,
-                      fallback: ReleafArtwork(
-                        variant: ReleafArtworkVariant.ambient,
-                      ),
+                    child: ReleafSoundArtwork(
+                      variant: ReleafSoundArtworkVariant.field,
                     ),
                   ),
                   const Positioned.fill(
@@ -1164,22 +1159,6 @@ String _categoryLabel(QuickResetCategory category) {
     QuickResetCategory.noBreath => 'No-Breath',
     QuickResetCategory.lifeUpgrade => 'Life Upgrade',
   };
-}
-
-ReliefEditorialAsset _sessionEditorialAsset(ResetContent session) {
-  if (session.id == 'tension-body-scan') {
-    return ReliefEditorialAsset.bodyScan;
-  }
-  if (session.level == ResetLevel.deep) {
-    return ReliefEditorialAsset.reset;
-  }
-  if (session.discoveryGroup == ResetDiscoveryGroup.breathingMethods) {
-    return ReliefEditorialAsset.breathe;
-  }
-  if (session.discoveryGroup == ResetDiscoveryGroup.bodyMindReset) {
-    return ReliefEditorialAsset.tensionRelief;
-  }
-  return ReliefEditorialAsset.reset;
 }
 
 ReleafArtworkVariant _sessionArtwork(ResetContent session) {
