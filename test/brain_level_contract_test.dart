@@ -37,7 +37,8 @@ void main() {
             id == 'color_conflict' ||
             id == 'pattern_logic' ||
             id == 'symbol_code' ||
-            id == 'broken_mirror') {
+            id == 'broken_mirror' ||
+            id == 'mental_rotation') {
           expect(training.maxBrainTrainingLevelFor(id), 50);
         } else {
           expect(training.maxBrainTrainingLevelFor(id), 12, reason: id);
