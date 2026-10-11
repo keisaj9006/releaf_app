@@ -525,7 +525,7 @@ class _MissingAudioNotice extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.headphones_off_rounded, size: 21),
+          const Icon(Icons.headphones_rounded, size: 21),
           const SizedBox(width: ReleafSpacing.sm),
           Expanded(
             child: Text(
