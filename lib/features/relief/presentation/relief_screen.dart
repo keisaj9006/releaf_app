@@ -8,7 +8,7 @@ import '../../../routing/app_routes.dart';
 import '../../../theme/app_theme.dart';
 import '../../../theme/releaf_design_tokens.dart';
 import '../../../theme/widgets/releaf_artwork.dart';
-import '../../../theme/widgets/releaf_asset_artwork.dart';
+import '../../../theme/widgets/relief_editorial_image.dart';
 import '../../../theme/widgets/releaf_components.dart';
 import '../application/relief_paywall_hooks.dart';
 import '../application/reset_completion_store.dart';
@@ -631,8 +631,8 @@ class _QuickSessionCard extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            ReleafAssetArtwork(
-              assetPath: _sessionAssetPath(session),
+            ReliefEditorialImage(
+              asset: _sessionEditorialAsset(session),
               fallback: ReleafArtwork(variant: _sessionArtwork(session)),
             ),
             const DecoratedBox(
@@ -741,8 +741,8 @@ class _DeepResetCard extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            ReleafAssetArtwork(
-              assetPath: _sessionAssetPath(session),
+            ReliefEditorialImage(
+              asset: _sessionEditorialAsset(session),
               fallback: ReleafArtwork(variant: _sessionArtwork(session)),
             ),
             const DecoratedBox(
@@ -1164,20 +1164,20 @@ String _categoryLabel(QuickResetCategory category) {
   };
 }
 
-String _sessionAssetPath(ResetContent session) {
+ReliefEditorialAsset _sessionEditorialAsset(ResetContent session) {
   if (session.id == 'tension-body-scan') {
-    return 'assets/art/relief/body_scan.webp';
+    return ReliefEditorialAsset.bodyScan;
   }
   if (session.level == ResetLevel.deep) {
-    return 'assets/art/relief/reset.webp';
+    return ReliefEditorialAsset.reset;
   }
   if (session.discoveryGroup == ResetDiscoveryGroup.breathingMethods) {
-    return 'assets/art/relief/breathe.webp';
+    return ReliefEditorialAsset.breathe;
   }
   if (session.discoveryGroup == ResetDiscoveryGroup.bodyMindReset) {
-    return 'assets/art/relief/tension_relief.webp';
+    return ReliefEditorialAsset.tensionRelief;
   }
-  return 'assets/art/relief/reset.webp';
+  return ReliefEditorialAsset.reset;
 }
 
 ReleafArtworkVariant _sessionArtwork(ResetContent session) {
