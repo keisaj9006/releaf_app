@@ -244,7 +244,7 @@ void main() {
   ) async {
     await _pumpHome(tester, preferences: await _preferences());
 
-    expect(find.text('RELEAF'), findsOneWidget);
+    expect(find.text('RELIEF'), findsOneWidget);
     expect(find.byKey(const Key('home-emergency-action')), findsOneWidget);
     expect(find.byKey(const Key('home-account-button')), findsOneWidget);
     expect(find.byType(FloatingActionButton), findsNothing);
@@ -387,7 +387,7 @@ void main() {
     await tester.tap(find.byKey(const Key('home-focus-strip')));
     await tester.pumpAndSettle();
 
-    expect(find.text('What should Releaf help you with most?'), findsOneWidget);
+    expect(find.text('What should Relief help you with most?'), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('home-focus-mindfulness')));
     await tester.pumpAndSettle();
@@ -482,7 +482,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('home-focus-strip')));
     await tester.pumpAndSettle();
-    expect(find.text('What should Releaf help you with most?'), findsOneWidget);
+    expect(find.text('What should Relief help you with most?'), findsOneWidget);
     expect(tester.takeException(), isNull);
 
     Navigator.of(tester.element(find.text('YOUR FOCUS').last)).pop();
