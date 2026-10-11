@@ -41,8 +41,7 @@ jobs:
           git config user.email "actions@users.noreply.github.com"
           git add \
             lib/features/sleep/presentation/sleep_screen.dart \
-            test/sleep_experience_test.dart \
-            .github/workflows/flutter_p0.yml
+            test/sleep_experience_test.dart
           git commit -m "feat(sleep): open focused Stories experience"
           git push origin HEAD:releaf-development
 
