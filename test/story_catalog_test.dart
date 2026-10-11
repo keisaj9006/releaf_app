@@ -35,12 +35,15 @@ void main() {
     }
   });
 
-  test('Computer retains the prepared master metadata without faking audio', () {
+  test('Computer retains the measured master metadata without faking audio', () {
     final story = StoryCatalog.getById('ST_L05_COMPUTER');
 
     expect(story, isNotNull);
     expect(story!.title, 'Computer');
-    expect(story.estimatedDuration, const Duration(minutes: 21));
+    expect(
+      story.estimatedDuration,
+      const Duration(minutes: 20, seconds: 45),
+    );
     expect(story.category, StoryCategory.meaningStories);
     expect(story.audioAssetPath, isNull);
     expect(story.audioVersion, 'preview master prepared off-repo');
