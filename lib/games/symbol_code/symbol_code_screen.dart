@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../features/brain/presentation/widgets/brain_difficulty_selector.dart';
+import 'symbol_code_level_profile.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/releaf_design_tokens.dart';
 
@@ -56,33 +57,16 @@ class _SymbolCodeScreenState extends State<SymbolCodeScreen>
   Completer<void>? _lifecycleResumeCompleter;
   String _feedback = 'Use the key to decode each symbol. Accuracy comes first.';
 
-  int get _trainingLevel => widget.trainingLevel.clamp(1, 12).toInt();
-  int get _levelIndex => _trainingLevel - 1;
+  int get _trainingLevel => widget.trainingLevel.clamp(1, 50).toInt();
 
-  int get _mappingCount {
-    final base = switch (_difficulty) {
-      BrainDifficulty.easy => 4,
-      BrainDifficulty.medium => 6,
-      BrainDifficulty.hard => 7,
-    };
-    final growth = _levelIndex ~/ 3;
-    return (base + growth).clamp(4, _symbols.length).toInt();
-  }
+  SymbolCodeLevelProfile get _levelProfile =>
+      symbolCodeProfileForLevel(_trainingLevel, _difficulty);
 
-  int get _trialCount {
-    final base = switch (_difficulty) {
-      BrainDifficulty.easy => 8,
-      BrainDifficulty.medium => 10,
-      BrainDifficulty.hard => 12,
-    };
-    return (base + (_levelIndex ~/ 2)).clamp(8, 18).toInt();
-  }
+  int get _mappingCount => _levelProfile.mappingCount;
 
-  int get _optionCount => switch (_difficulty) {
-        BrainDifficulty.easy => 3,
-        BrainDifficulty.medium => 4,
-        BrainDifficulty.hard => 5,
-      };
+  int get _trialCount => _levelProfile.trialCount;
+
+  int get _optionCount => _levelProfile.optionCount;
 
   int get _difficultyMultiplier => switch (_difficulty) {
         BrainDifficulty.easy => 1,
@@ -229,6 +213,34 @@ class _SymbolCodeScreenState extends State<SymbolCodeScreen>
     return result;
   }
 
+  bool _remapKeyForTrial(int trial) {
+    final cadence = _levelProfile.remapEvery;
+    if (cadence <= 0 || trial <= 0 || trial % cadence != 0) return false;
+
+    final random = math.Random(
+      18713 +
+          (_trainingLevel * 919) +
+          (_difficulty.index * 3253) +
+          (trial * 701),
+    );
+    final values = _key.map((pair) => pair.value).toList()..shuffle(random);
+
+    if (values.length > 1 &&
+        List<bool>.generate(
+          values.length,
+          (index) => values[index] == _key[index].value,
+        ).every((same) => same)) {
+      final first = values.removeAt(0);
+      values.add(first);
+    }
+
+    _key = List<_CodePair>.generate(
+      _key.length,
+      (index) => _CodePair(symbol: _key[index].symbol, value: values[index]),
+    );
+    return true;
+  }
+
   Future<void> _answer(int value) async {
     if (_locked) return;
     _locked = true;
@@ -259,8 +271,11 @@ class _SymbolCodeScreenState extends State<SymbolCodeScreen>
 
     setState(() {
       _trial++;
+      final remapped = _remapKeyForTrial(_trial);
       _locked = false;
-      _feedback = 'Decode the next symbol.';
+      _feedback = remapped
+          ? 'The code key changed. Re-map before answering.'
+          : 'Decode the next symbol.';
       _options = _buildOptions(
         math.Random(
           9001 +
@@ -542,7 +557,7 @@ class _SymbolCodeScreenState extends State<SymbolCodeScreen>
                             ),
                             const SizedBox(height: ReleafSpacing.md),
                             Text(
-                              'Symbol Code practises reading a temporary mapping key and applying it accurately. Releaf does not interpret this score as intelligence or a clinical assessment.',
+                              'Symbol Code practises reading a temporary mapping key and applying it accurately. Relief does not interpret this score as intelligence or a clinical assessment.',
                               textAlign: TextAlign.center,
                               style: ReleafTypography.meta.copyWith(
                                 color: ReleafColors.textMuted,
