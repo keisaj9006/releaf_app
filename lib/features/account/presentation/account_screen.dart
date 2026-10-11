@@ -60,7 +60,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
       return;
     }
     if (_mode == _AuthMode.createAccount && name.length < 2) {
-      setState(() => _errorMessage = 'Add the name you want Releaf to use.');
+      setState(() => _errorMessage = 'Add the name you want Relief to use.');
       return;
     }
 
@@ -127,7 +127,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
       if (!mounted) return;
       setState(() {
         _statusMessage =
-            'Password reset email sent. Open the link on this device to return to Releaf.';
+            'Password reset email sent. Open the link on this device to return to Relief.';
       });
     } catch (error) {
       if (mounted) setState(() => _errorMessage = _friendlyError(error));
@@ -182,7 +182,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
         backgroundColor: ReleafColors.surface,
         title: const Text('Delete account?'),
         content: const Text(
-          'This permanently deletes your Releaf account and profile from the account service. Local Brain and Reset progress stored on this device is not erased by this action.',
+          'This permanently deletes your Relief account and profile from the account service. Local Brain and Reset progress stored on this device is not erased by this action.',
         ),
         actions: [
           TextButton(
@@ -674,7 +674,7 @@ class _SignedOutCard extends StatelessWidget {
             Text(
               creating
                   ? 'Use one account across devices and keep Premium linked to you.'
-                  : 'Sign in to restore your Releaf identity on this device.',
+                  : 'Sign in to restore your Relief identity on this device.',
               style: ReleafTypography.body.copyWith(
                 color: ReleafColors.textSecondary,
               ),
