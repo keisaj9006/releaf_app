@@ -40,6 +40,7 @@ int maxBrainTrainingLevelFor(String gameId) => switch (gameId) {
   'mental_rotation' => 50,
   'math_race' => 50,
   'trail_switch' => 50,
+  'tower_plan' => 50,
   _ => maxBrainTrainingLevel,
 };
 const brainSessionsPerTrainingLevel = 2;
