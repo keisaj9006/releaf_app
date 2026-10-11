@@ -711,21 +711,6 @@ _HomeRecommendation _recommendationFor({
   );
 }
 
-ReliefEditorialAsset _homeRecommendationAsset(
-  _HomeRecommendation recommendation,
-) {
-  if (recommendation.route == AppRoutes.brain) {
-    return ReliefEditorialAsset.brainGames;
-  }
-  if (recommendation.route == AppRoutes.sleep) {
-    return ReliefEditorialAsset.sleep;
-  }
-  if (recommendation.route == AppRoutes.sound) {
-    return ReliefEditorialAsset.soundscapes;
-  }
-  return ReliefEditorialAsset.reset;
-}
-
 class _DailyInsightCard extends StatelessWidget {
   const _DailyInsightCard({required this.insight, required this.onOpen});
 
@@ -1538,10 +1523,7 @@ class _RecommendationHero extends StatelessWidget {
             child: Stack(
               fit: StackFit.expand,
               children: [
-                ReliefEditorialImage(
-                  asset: _homeRecommendationAsset(recommendation),
-                  fallback: ReleafArtwork(variant: recommendation.artwork),
-                ),
+                ReleafArtwork(variant: recommendation.artwork),
                 const DecoratedBox(
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
