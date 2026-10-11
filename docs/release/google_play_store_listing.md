@@ -1,11 +1,11 @@
-# Google Play Store Listing — Releaf 1.0
+# Google Play Store Listing — Relief 1.0
 
 Status: **copy + legal contact fields + app icon ready; feature graphic,
 screenshots, website and Play Console entry required**.
 
 Last policy verification: **2026-09-14**.
 
-This document is the canonical English (UK) store-listing pack for Releaf 1.0.
+This document is the canonical English (UK) store-listing pack for Relief 1.0.
 It describes only functionality present in the `releaf-development` release
 surface and keeps health claims aligned with the Health apps declaration.
 
@@ -14,7 +14,7 @@ surface and keeps health claims aligned with the Health apps declaration.
 ### App name
 
 <!-- APP_NAME_START -->
-Releaf
+Relief
 <!-- APP_NAME_END -->
 
 Character limit: 30. Current length: 6.
@@ -22,7 +22,7 @@ Character limit: 30. Current length: 6.
 ### Short description
 
 <!-- SHORT_DESCRIPTION_START -->
-Reset stress, train your brain and unwind for sleep with Releaf.
+Reset stress, train your brain and unwind for sleep with Relief.
 <!-- SHORT_DESCRIPTION_END -->
 
 Character limit: 80. Current length: 64.
@@ -30,7 +30,7 @@ Character limit: 80. Current length: 64.
 ### Full description
 
 <!-- FULL_DESCRIPTION_START -->
-Releaf brings practical wellbeing tools into one calm, focused space.
+Relief brings practical wellbeing tools into one calm, focused space.
 
 Reset
 Use short guided regulation exercises for moments of stress, mental overload, rumination, tension and strong emotions. Sessions are designed to be simple to start when you want to settle and refocus.
@@ -45,12 +45,12 @@ Emergency Calm
 Open grounding and calming tools without a Premium gate or account requirement. Emergency Calm is wellbeing support only and is not an emergency-response service. If you are in immediate danger or need urgent medical help, contact your local emergency service.
 
 Progress, your way
-Track lightweight progress on your device. For Releaf 1.0, local progress remains the primary source of truth and Releaf does not claim automatic cloud backup.
+Track lightweight progress on your device. For Relief 1.0, local progress remains the primary source of truth and Relief does not claim automatic cloud backup.
 
 Premium
-Some deeper Reset protocols, advanced Brain training and expanded Sound & Sleep content may require a Releaf Premium subscription. Subscription availability and pricing are shown through Google Play where applicable.
+Some deeper Reset protocols, advanced Brain training and expanded Sound & Sleep content may require a Relief Premium subscription. Subscription availability and pricing are shown through Google Play where applicable.
 
-Releaf is a wellness app, not a medical device. It does not diagnose, treat, cure, or prevent any medical condition. For medical advice, diagnosis, or treatment, consult a qualified healthcare professional.
+Relief is a wellness app, not a medical device. It does not diagnose, treat, cure, or prevent any medical condition. For medical advice, diagnosis, or treatment, consult a qualified healthcare professional.
 <!-- FULL_DESCRIPTION_END -->
 
 Character limit: 4,000. Keep the final Play Console copy semantically identical to
@@ -106,7 +106,7 @@ required icon alpha and the strong-listing screenshot count/orientation. It does
 **not** certify creative quality, owner approval, rights/provenance, screenshot
 freshness, truthful visual content or successful Play Console entry. The
 canonical app icon is now present as a measured derivative of the existing
-Releaf launcher mark. The feature graphic and current RC screenshots remain
+Relief launcher mark. The feature graphic and current RC screenshots remain
 absent, so the Store listing release gate remains open. Do not add placeholder
 graphics merely to make the validator pass.
 
@@ -118,7 +118,7 @@ Required Play asset:
 - maximum 1,024 KB;
 - no ranking, price, Play-category or misleading badges/text.
 
-Use the final Releaf brand mark as a high-resolution Play icon. Do not substitute
+Use the final Relief brand mark as a high-resolution Play icon. Do not substitute
 an old concept asset if it no longer matches the release app.
 
 ### Feature graphic
@@ -127,7 +127,7 @@ Required Play asset:
 - 1,024 × 500 px;
 - JPEG or 24-bit PNG without alpha.
 
-Creative direction: use the Releaf visual language/living-form identity and a calm,
+Creative direction: use the Relief visual language/living-form identity and a calm,
 recognisable composition that extends the app icon rather than repeating it at
 large scale. Keep the focal visual near the centre. Do not use `#1`, `Best`, price,
 discount, medical-treatment claims or Google Play badges.
@@ -173,7 +173,7 @@ Before entering this copy in Play Console:
 
 - Health declaration selections must remain aligned with
   `docs/release/google_play_health_declaration.md`.
-- Do not describe Releaf as diagnosing, treating, curing or preventing addiction,
+- Do not describe Relief as diagnosing, treating, curing or preventing addiction,
   anxiety, depression, insomnia or any other medical condition.
 - Do not claim "brain regeneration", clinically proven outcomes, medical monitoring
   or automatic cloud backup unless the shipped product and evidence genuinely
