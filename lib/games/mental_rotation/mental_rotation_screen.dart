@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../features/brain/presentation/widgets/brain_difficulty_selector.dart';
+import 'mental_rotation_level_profile.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/releaf_design_tokens.dart';
 
@@ -33,33 +34,16 @@ class _MentalRotationScreenState extends State<MentalRotationScreen> {
 
   late _RotationPuzzle _puzzle;
 
-  int get _trainingLevel => widget.trainingLevel.clamp(1, 12).toInt();
-  int get _levelIndex => _trainingLevel - 1;
+  int get _trainingLevel => widget.trainingLevel.clamp(1, 50).toInt();
 
-  int get _gridSide {
-    if (_trainingLevel >= 9) return 5;
-    if (_trainingLevel >= 5) return 4;
-    return 3;
-  }
+  MentalRotationLevelProfile get _levelProfile =>
+      mentalRotationProfileForLevel(_trainingLevel, _difficulty);
 
-  int get _roundCount {
-    final base = switch (_difficulty) {
-      BrainDifficulty.easy => 6,
-      BrainDifficulty.medium => 8,
-      BrainDifficulty.hard => 10,
-    };
-    return base + (_levelIndex ~/ 4);
-  }
+  int get _gridSide => _levelProfile.gridSide;
 
-  int get _filledCells {
-    final base = switch (_difficulty) {
-      BrainDifficulty.easy => _gridSide + 1,
-      BrainDifficulty.medium => _gridSide + 2,
-      BrainDifficulty.hard => _gridSide + 3,
-    };
-    final maxUseful = (_gridSide * _gridSide) - 2;
-    return base.clamp(4, maxUseful).toInt();
-  }
+  int get _roundCount => _levelProfile.roundCount;
+
+  int get _filledCells => _levelProfile.filledCells;
 
   int get _difficultyMultiplier => switch (_difficulty) {
         BrainDifficulty.easy => 1,
@@ -113,7 +97,8 @@ class _MentalRotationScreenState extends State<MentalRotationScreen> {
 
     final sameUnderRotation =
         (_round + _trainingLevel + _difficulty.index).isEven;
-    final turns = random.nextInt(4);
+    final minimumTurns = _levelProfile.minimumQuarterTurns;
+    final turns = minimumTurns + random.nextInt(4 - minimumTurns);
     final transformed = sameUnderRotation
         ? _rotate(left, _gridSide, turns)
         : _rotate(_mirror(left, _gridSide), _gridSide, turns);
