@@ -9,9 +9,6 @@ on:
       - releaf-development
   workflow_dispatch:
 
-permissions:
-  contents: write
-
 concurrency:
   group: releaf-web-release-${{ github.ref }}
   cancel-in-progress: true
@@ -25,25 +22,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          ref: releaf-development
-          fetch-depth: 0
-
-      - name: Apply approved Stories redesign
-        if: "${{ github.event_name == 'push' && github.event.head_commit.message == 'chore(ci): apply Stories redesign patch' }}"
-        run: python3 tool/one_time/apply_sleep_stories_redesign.py
-
-      - name: Commit approved Stories redesign
-        if: "${{ github.event_name == 'push' && github.event.head_commit.message == 'chore(ci): apply Stories redesign patch' }}"
-        shell: bash
-        run: |
-          git config user.name "Relief CI"
-          git config user.email "actions@users.noreply.github.com"
-          git add \
-            lib/features/sleep/presentation/sleep_screen.dart \
-            test/sleep_experience_test.dart
-          git commit -m "feat(sleep): open focused Stories experience"
-          git push origin HEAD:releaf-development
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
