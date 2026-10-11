@@ -100,7 +100,7 @@ void main() {
     }
     expect(signatures, hasLength(5));
     expect(maxBrainTrainingLevelFor('signal_scan'), 50);
-    expect(maxBrainTrainingLevelFor('pattern_logic'), 12);
+    expect(maxBrainTrainingLevelFor('pattern_logic'), 50);
   });
 
   testWidgets('level 13 accepts each target once before advancing', (
