@@ -35,6 +35,7 @@ int maxBrainTrainingLevelFor(String gameId) => switch (gameId) {
   'rule_shift' => 50,
   'color_conflict' => 50,
   'pattern_logic' => 50,
+  'symbol_code' => 50,
   _ => maxBrainTrainingLevel,
 };
 const brainSessionsPerTrainingLevel = 2;
