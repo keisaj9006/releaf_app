@@ -6,6 +6,7 @@ import '../../../routing/app_routes.dart';
 import '../../../theme/app_theme.dart';
 import '../../../theme/releaf_design_tokens.dart';
 import '../../../theme/widgets/releaf_brain_artwork.dart';
+import '../../../theme/widgets/relief_editorial_image.dart';
 import '../../../theme/widgets/releaf_components.dart';
 import '../../relief/data/reset_catalog.dart';
 import '../application/brain_training_controller.dart';
@@ -380,6 +381,27 @@ class _DailyWorkoutPanel extends StatelessWidget {
             ),
             child: Stack(
               children: [
+                const Positioned.fill(
+                  child: ReliefEditorialImage(
+                    asset: ReliefEditorialAsset.brainGames,
+                    fallback: ReleafBrainArtwork(
+                      variant: ReleafBrainArtworkVariant.hero,
+                    ),
+                    intensity: 0.34,
+                    alignment: Alignment(0.25, -0.35),
+                  ),
+                ),
+                const Positioned.fill(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [Color(0x220A0F19), Color(0xD9101522)],
+                      ),
+                    ),
+                  ),
+                ),
                 const Positioned(right: -30, top: -54, child: _WorkoutOrb()),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
