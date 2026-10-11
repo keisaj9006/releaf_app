@@ -282,7 +282,7 @@ class _HomeHeader extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'RELEAF',
+                'RELIEF',
                 style: ReleafTypography.eyebrow.copyWith(
                   color: ReleafColors.sage,
                   letterSpacing: 2.2,
