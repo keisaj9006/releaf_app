@@ -31,6 +31,15 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Stories'), findsOneWidget);
+    for (final id in const [
+      'TS01_BEYOND_THE_GATE',
+      'TS02_KRYSTYNA_SKARBEK',
+      'ST_L05_COMPUTER',
+    ]) {
+      final card = find.byKey(Key('story-preview-$id'));
+      await tester.scrollUntilVisible(card, 300);
+      expect(card, findsOneWidget);
+    }
     expect(find.text('Beyond the Gate'), findsOneWidget);
     expect(find.text('The Woman Who Crossed Every Border'), findsOneWidget);
     expect(find.text('Computer'), findsOneWidget);
@@ -63,6 +72,7 @@ void main() {
         ),
       ],
     );
+    addTearDown(router.dispose);
 
     await tester.pumpWidget(
       ProviderScope(
