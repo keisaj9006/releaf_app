@@ -46,7 +46,7 @@ void main() {
     );
     expect(story.category, StoryCategory.meaningStories);
     expect(story.audioAssetPath, isNull);
-    expect(story.audioVersion, 'preview master prepared off-repo');
+    expect(story.audioVersion, 'owner-preview app delivery v1 (128 kb/s AAC)');
     expect(story.isAudioAvailable, isFalse);
   });
 
