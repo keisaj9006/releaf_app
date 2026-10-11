@@ -445,40 +445,6 @@ class _TonightCard extends StatelessWidget {
   }
 }
 
-class _ContentRail extends StatelessWidget {
-  const _ContentRail({
-    required this.items,
-    required this.keyPrefix,
-    required this.onOpen,
-  });
-  final List<SleepContent> items;
-  final String keyPrefix;
-  final ValueChanged<SleepContent> onOpen;
-
-  @override
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          for (var index = 0; index < items.length; index++) ...[
-            SizedBox(
-              width: 242,
-              child: _ContentCard(
-                itemKey: Key('$keyPrefix-${items[index].id}'),
-                content: items[index],
-                onOpen: onOpen,
-              ),
-            ),
-            if (index != items.length - 1)
-              const SizedBox(width: ReleafSpacing.md),
-          ],
-        ],
-      ),
-    );
-  }
-}
 
 class _ContentWrap extends StatelessWidget {
   const _ContentWrap({required this.items, required this.onOpen});
