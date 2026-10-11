@@ -23,32 +23,13 @@ void main() {
     }
   });
 
-  test(
-    'legacy games remain capped until their 13–50 profiles are playable',
-    () {
-      for (final id in training.progressiveBrainGameIds) {
-        if (id == 'memory' ||
-            id == 'labyrinth' ||
-            id == 'sequence_echo' ||
-            id == 'n_back' ||
-            id == 'spatial_span' ||
-            id == 'signal_scan' ||
-            id == 'rule_shift' ||
-            id == 'color_conflict' ||
-            id == 'pattern_logic' ||
-            id == 'symbol_code' ||
-            id == 'broken_mirror' ||
-            id == 'mental_rotation' ||
-            id == 'math_race' ||
-            id == 'trail_switch' ||
-            id == 'tower_plan') {
-          expect(training.maxBrainTrainingLevelFor(id), 50);
-        } else {
-          expect(training.maxBrainTrainingLevelFor(id), 12, reason: id);
-        }
-      }
-    },
-  );
+  test('all progressive Brain games support level 50', () {
+    expect(training.progressiveBrainGameIds, hasLength(15));
+
+    for (final id in training.progressiveBrainGameIds) {
+      expect(training.maxBrainTrainingLevelFor(id), 50, reason: id);
+    }
+  });
 
   test('Sequence Echo reveals earned level 50 without migrating counts', () {
     const state = training.BrainTrainingState(
