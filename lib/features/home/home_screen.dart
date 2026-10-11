@@ -10,6 +10,7 @@ import '../../routing/app_routes.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/releaf_design_tokens.dart';
 import '../../theme/widgets/releaf_artwork.dart';
+import '../../theme/widgets/releaf_asset_artwork.dart';
 import '../../theme/widgets/releaf_brain_artwork.dart';
 import '../../theme/widgets/releaf_components.dart';
 import '../progress/data/leaves_repository.dart';
@@ -708,6 +709,19 @@ _HomeRecommendation _recommendationFor({
     artwork: ReleafArtworkVariant.grounding,
     icon: Icons.explore_outlined,
   );
+}
+
+String _homeRecommendationAsset(_HomeRecommendation recommendation) {
+  if (recommendation.route == AppRoutes.brain) {
+    return 'assets/art/relief/brain_games.webp';
+  }
+  if (recommendation.route == AppRoutes.sleep) {
+    return 'assets/art/relief/sleep.webp';
+  }
+  if (recommendation.route == AppRoutes.sound) {
+    return 'assets/art/relief/soundscapes.webp';
+  }
+  return 'assets/art/relief/reset.webp';
 }
 
 class _DailyInsightCard extends StatelessWidget {
@@ -1522,7 +1536,10 @@ class _RecommendationHero extends StatelessWidget {
             child: Stack(
               fit: StackFit.expand,
               children: [
-                ReleafArtwork(variant: recommendation.artwork),
+                ReleafAssetArtwork(
+                  assetPath: _homeRecommendationAsset(recommendation),
+                  fallback: ReleafArtwork(variant: recommendation.artwork),
+                ),
                 const DecoratedBox(
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
@@ -1726,8 +1743,11 @@ class _DailyEssentials extends StatelessWidget {
               ? 'Your Brain reward is already counted today.'
               : 'Open the focused 3-game workout.',
           onPressed: onBrain,
-          child: const ReleafBrainArtwork(
-            variant: ReleafBrainArtworkVariant.hero,
+          child: const ReleafAssetArtwork(
+            assetPath: 'assets/art/relief/brain_games.webp',
+            fallback: ReleafBrainArtwork(
+              variant: ReleafBrainArtworkVariant.hero,
+            ),
           ),
         );
 
@@ -1738,7 +1758,10 @@ class _DailyEssentials extends StatelessWidget {
           subtitle: 'Sleep resets and Sound Space in one place.',
           warm: true,
           onPressed: onTonight,
-          child: const ReleafArtwork(variant: ReleafArtworkVariant.ambient),
+          child: const ReleafAssetArtwork(
+            assetPath: 'assets/art/relief/sleep.webp',
+            fallback: ReleafArtwork(variant: ReleafArtworkVariant.ambient),
+          ),
         );
 
         if (sideBySide) {
