@@ -568,13 +568,9 @@ class _MeditationBackdrop extends StatelessWidget {
     return const Stack(
       fit: StackFit.expand,
       children: [
-        ReliefEditorialImage(
-          asset: ReliefEditorialAsset.meditate,
-          fallback: ReleafMeditationArtwork(
-            variant: ReleafMeditationArtworkVariant.editorial,
-            intensity: 0.42,
-          ),
-          intensity: 0.70,
+        ReleafMeditationArtwork(
+          variant: ReleafMeditationArtworkVariant.editorial,
+          intensity: 0.42,
         ),
         DecoratedBox(
           decoration: BoxDecoration(
@@ -929,6 +925,7 @@ class _ProgramRail extends StatelessWidget {
               title: 'Learn the basics',
               description: 'Four practices that build one skill at a time.',
               artwork: ReleafMeditationArtworkVariant.editorial,
+              editorialAsset: ReliefEditorialAsset.meditate,
               accent: const Color(0xFFC9BBCF),
               completed: foundationsCompleted,
               total: foundationsTotal,
@@ -948,6 +945,7 @@ class _ProgramRail extends StatelessWidget {
                 description:
                     'Longer sessions for attention, uncertainty and whole-body awareness.',
                 artwork: ReleafMeditationArtworkVariant.body,
+                editorialAsset: ReliefEditorialAsset.bodyScan,
                 accent: const Color(0xFFD1B09E),
                 completed: deeperCompleted,
                 total: deeperTotal,
@@ -967,6 +965,7 @@ class _ProgramRail extends StatelessWidget {
                 description:
                     'Three evening practices for letting go, body stillness and a quieter mind.',
                 artwork: ReleafMeditationArtworkVariant.everyday,
+                editorialAsset: ReliefEditorialAsset.sleep,
                 accent: const Color(0xFFB8B9D7),
                 completed: sleepCompleted,
                 total: sleepTotal,
@@ -989,6 +988,7 @@ class _ProgramCard extends StatelessWidget {
     required this.title,
     required this.description,
     required this.artwork,
+    required this.editorialAsset,
     required this.accent,
     required this.completed,
     required this.total,
@@ -1002,6 +1002,7 @@ class _ProgramCard extends StatelessWidget {
   final String title;
   final String description;
   final ReleafMeditationArtworkVariant artwork;
+  final ReliefEditorialAsset editorialAsset;
   final Color accent;
   final int completed;
   final int total;
@@ -1024,7 +1025,14 @@ class _ProgramCard extends StatelessWidget {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              ReleafMeditationArtwork(variant: artwork, intensity: 0.90),
+              ReliefEditorialImage(
+                asset: editorialAsset,
+                fallback: ReleafMeditationArtwork(
+                  variant: artwork,
+                  intensity: 0.90,
+                ),
+                intensity: isLocked ? 0.78 : 0.94,
+              ),
               const DecoratedBox(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
