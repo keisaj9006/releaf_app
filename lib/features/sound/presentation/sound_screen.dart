@@ -772,7 +772,7 @@ class _SoundPremiumPreviewSheet extends StatelessWidget {
                 ),
                 const SizedBox(height: ReleafSpacing.lg),
                 Text(
-                  'This sound is part of Releaf Premium. You can see what it is before deciding to unlock it.',
+                  'This sound is part of Relief Premium. You can see what it is before deciding to unlock it.',
                   style: ReleafTypography.meta.copyWith(
                     color: ReleafColors.textMuted,
                     height: 1.45,
