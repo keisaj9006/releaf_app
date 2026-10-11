@@ -37,7 +37,7 @@ void main() {
     expect(appName.length, lessThanOrEqualTo(30));
     expect(shortDescription.length, lessThanOrEqualTo(80));
     expect(fullDescription.length, lessThanOrEqualTo(4000));
-    expect(appName, 'Releaf');
+    expect(appName, 'Relief');
   });
 
   test('listing keeps release health and product truthfulness safeguards', () {
@@ -52,7 +52,7 @@ void main() {
 
     expect(
       fullDescription,
-      contains('Releaf is a wellness app, not a medical device.'),
+      contains('Relief is a wellness app, not a medical device.'),
     );
     expect(
       fullDescription,
