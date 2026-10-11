@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:releaf_app/core/providers.dart';
+import 'package:releaf_app/features/sleep/application/sleep_progress_store.dart';
 import 'package:releaf_app/features/stories/presentation/stories_preview_screen.dart';
 
 const _audioBundled = bool.fromEnvironment(
@@ -12,15 +16,30 @@ Future<void> _pumpStories(
   WidgetTester tester, {
   Size size = const Size(800, 900),
   double textScale = 1.0,
+  List<SleepProgressRecord> progressRecords = const <SleepProgressRecord>[],
 }) async {
+  SharedPreferences.setMockInitialValues({
+    SleepProgressStore.storageKeyForAccount(null): progressRecords
+        .map((record) => record.encode())
+        .toList(growable: false),
+  });
+  final preferences = await SharedPreferences.getInstance();
+  final progress = SleepProgressStore(preferences);
+
   await tester.binding.setSurfaceSize(size);
   addTearDown(() => tester.binding.setSurfaceSize(null));
 
   await tester.pumpWidget(
-    MaterialApp(
-      home: MediaQuery(
-        data: MediaQueryData(textScaler: TextScaler.linear(textScale)),
-        child: const StoriesPreviewScreen(),
+    ProviderScope(
+      overrides: [
+        sharedPreferencesProvider.overrideWithValue(preferences),
+        sleepProgressStoreProvider.overrideWith((ref) => progress),
+      ],
+      child: MaterialApp(
+        home: MediaQuery(
+          data: MediaQueryData(textScaler: TextScaler.linear(textScale)),
+          child: const StoriesPreviewScreen(),
+        ),
       ),
     ),
   );
@@ -43,14 +62,16 @@ Future<Finder> _revealStoryCard(WidgetTester tester, String id) async {
 }
 
 void main() {
-  testWidgets('dedicated Stories screen exposes the three prepared titles', (
+  testWidgets('dedicated Stories screen exposes three user-facing titles', (
     WidgetTester tester,
   ) async {
     await _pumpStories(tester);
 
     expect(find.byKey(const Key('stories-preview-back')), findsOneWidget);
     expect(find.text('Stories'), findsOneWidget);
-    expect(find.text('3 prepared titles'), findsOneWidget);
+    expect(find.text('3 stories'), findsOneWidget);
+    expect(find.textContaining('prepared'), findsNothing);
+    expect(find.textContaining('audio master'), findsNothing);
     expect(find.text('OWNER PREVIEW'), findsNothing);
 
     const stories = <String, String>{
@@ -92,6 +113,83 @@ void main() {
     expect(find.text('Wonder Journeys'), findsNothing);
     expect(find.text('Drift Through History'), findsNothing);
     expect(find.text('See all'), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('latest unfinished Story becomes the Continue Listening action', (
+    WidgetTester tester,
+  ) async {
+    await _pumpStories(
+      tester,
+      progressRecords: [
+        SleepProgressRecord(
+          contentId: 'TS01_BEYOND_THE_GATE',
+          position: const Duration(minutes: 12),
+          duration: const Duration(seconds: 1971),
+          chapterId: null,
+          updatedAt: DateTime.utc(2026, 10, 10, 20),
+          isCompleted: false,
+          isFavourite: false,
+        ),
+        SleepProgressRecord(
+          contentId: 'ST_L05_COMPUTER',
+          position: const Duration(minutes: 3),
+          duration: const Duration(seconds: 1245),
+          chapterId: null,
+          updatedAt: DateTime.utc(2026, 10, 11, 20),
+          isCompleted: false,
+          isFavourite: false,
+        ),
+      ],
+    );
+
+    final continueCard = find.byKey(
+      const Key('stories-continue-ST_L05_COMPUTER'),
+    );
+    expect(continueCard, findsOneWidget);
+    expect(
+      find.descendant(of: continueCard, matching: find.text('Computer')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: continueCard, matching: find.text('3 min listened')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const Key('stories-continue-TS01_BEYOND_THE_GATE')),
+      findsNothing,
+    );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('completed or unknown progress never creates a resume card', (
+    WidgetTester tester,
+  ) async {
+    await _pumpStories(
+      tester,
+      progressRecords: [
+        SleepProgressRecord(
+          contentId: 'TS02_KRYSTYNA_SKARBEK',
+          position: const Duration(seconds: 2198),
+          duration: const Duration(seconds: 2198),
+          chapterId: null,
+          updatedAt: DateTime.utc(2026, 10, 11, 20),
+          isCompleted: true,
+          isFavourite: false,
+        ),
+        SleepProgressRecord(
+          contentId: 'unknown-story',
+          position: const Duration(minutes: 5),
+          duration: const Duration(minutes: 20),
+          chapterId: null,
+          updatedAt: DateTime.utc(2026, 10, 11, 21),
+          isCompleted: false,
+          isFavourite: false,
+        ),
+      ],
+    );
+
+    expect(find.byKey(const Key('stories-continue-listening')), findsNothing);
     expect(tester.takeException(), isNull);
   });
 
