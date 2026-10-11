@@ -19,7 +19,7 @@ class WhatsNewContent {
 
   static const current = WhatsNewContent(
     releaseId: 'releaf-1.0',
-    heading: 'What’s new in Releaf',
+    heading: 'What’s new in Relief',
     introduction: 'A calmer way to find the next useful step.',
     items: [
       WhatsNewItem(
