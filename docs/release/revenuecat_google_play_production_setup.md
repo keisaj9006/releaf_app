@@ -1,4 +1,4 @@
-# RevenueCat + Google Play Production Setup — Releaf 1.0
+# RevenueCat + Google Play Production Setup — Relief 1.0
 
 Status: **ENGINEERING CONTRACT + PRICING LOCKED / EXTERNAL CONFIGURATION OPEN**
 
@@ -8,11 +8,11 @@ Release: `1.0.0+20260913`
 
 Last policy verification: **2026-09-14**.
 
-This document is the production billing source of truth for Releaf 1.0. It does not certify that Google Play Console or RevenueCat has been configured. It defines exactly what the external configuration must provide to the existing app.
+This document is the production billing source of truth for Relief 1.0. It does not certify that Google Play Console or RevenueCat has been configured. It defines exactly what the external configuration must provide to the existing app.
 
 ## 1. Contract already fixed by the app
 
-Releaf 1.0 expects:
+Relief 1.0 expects:
 
 - Android application ID: `app.releaf.mobile`
 - RevenueCat Android public SDK key: production Google key beginning with `goog_`
@@ -30,7 +30,7 @@ The app intentionally does **not** hardcode a Google Play Product ID or Offering
 
 ## 2. Recommended Google Play structure
 
-Use one auto-renewing Google Play subscription product for Releaf Premium with two active base plans.
+Use one auto-renewing Google Play subscription product for Relief Premium with two active base plans.
 
 Recommended permanent identifiers:
 
@@ -51,7 +51,7 @@ Google Play subscription products are containers; the purchasable billing terms 
 
 Before final billing QA:
 
-1. Releaf must exist in Google Play Console with package `app.releaf.mobile`.
+1. Relief must exist in Google Play Console with package `app.releaf.mobile`.
 2. A valid signed Android artifact must have been uploaded to an appropriate Play track so subscription products and billing testing can be exercised against the real package.
 3. Create the `releaf_premium_v1` subscription if it does not already exist.
 4. Add the monthly auto-renewing base plan.
@@ -61,7 +61,7 @@ Before final billing QA:
 8. Do not add a free trial or introductory offer to the 1.0 production contract unless it is intentionally approved and separately QA-tested.
 9. Prepare the Google accounts used for billing QA as Play **license testers** where test payment methods are required.
 
-### Approved Releaf 1.0 launch pricing
+### Approved Relief 1.0 launch pricing
 
 Owner-approved on **14 September 2026**:
 
@@ -73,23 +73,23 @@ Do not hardcode these strings in the app UI. Google Play localized store metadat
 
 ## 4. RevenueCat production configuration
 
-In the existing Releaf RevenueCat project:
+In the existing Relief RevenueCat project:
 
 1. Add/verify the Android app for package `app.releaf.mobile`.
-2. Create or verify the Google Play service credentials RevenueCat requires to communicate with Google Play on Releaf's behalf.
+2. Create or verify the Google Play service credentials RevenueCat requires to communicate with Google Play on Relief's behalf.
 3. Grant only the store/API permissions required by the current RevenueCat setup guidance and confirm the credential status in RevenueCat rather than assuming that an uploaded JSON key is already usable.
-4. Upload the service-account credential JSON to the Releaf Google Play app settings in RevenueCat and save it.
+4. Upload the service-account credential JSON to the Relief Google Play app settings in RevenueCat and save it.
 5. Allow for Google propagation: newly created/changed Play service credentials can take **up to 36 hours** to validate. During that propagation window RevenueCat may report invalid Play credentials (including 503/521-class failures). Do not treat that propagation delay as an app-code defect without first re-validating the credentials.
 6. When RevenueCat reports the Play credentials as valid, import the two active Google base-plan products.
 7. Create or verify entitlement exactly named `premium`.
 8. Attach both monthly and annual Google products to `premium`.
-9. Create or reuse one Offering intended for Releaf 1.0 and mark it **current**.
+9. Create or reuse one Offering intended for Relief 1.0 and mark it **current**.
 10. Add the annual product as the standard **Annual** package type.
 11. Add the monthly product as the standard **Monthly** package type.
 12. Do not use Custom package types for these two 1.0 subscriptions; the app reads `current.annual` and `current.monthly`.
 13. Copy the Android **public SDK key** beginning with `goog_`; never use a RevenueCat secret key in the app or GitHub build.
 
-The Offering identifier itself is intentionally not hardcoded by Releaf. The requirement is that the intended production Offering is the current Offering.
+The Offering identifier itself is intentionally not hardcoded by Relief. The requirement is that the intended production Offering is the current Offering.
 
 ### Credential closure evidence
 
@@ -163,7 +163,7 @@ Verified against current official documentation on **14 September 2026**:
 - RevenueCat — Google Play Product Setup: subscription products require active base plans and newly configured Google subscription products map using `<subscription_id>:<base-plan-id>`.
 - RevenueCat — Google Play Store service credentials: RevenueCat needs Play service credentials; new/changed credentials may take up to 36 hours to become valid and should be confirmed as valid in the dashboard before billing closure.
 - RevenueCat — Product Configuration: products attach to entitlements; Offerings group packages; Google subscription imports use subscription + base-plan identifiers.
-- RevenueCat — Offerings: standard Annual/Monthly package types are required for the convenience properties used by Releaf.
+- RevenueCat — Offerings: standard Annual/Monthly package types are required for the convenience properties used by Relief.
 - Android Developers — Test your Google Play Billing Library integration: use license testers and Play Billing Lab; license testers have Play test payment methods that avoid real charges, while ordinary test-track users can still be charged.
 
 Re-verify these sources immediately before final Play submission because Google Play and RevenueCat configuration requirements can change independently of the app code.

@@ -1,8 +1,8 @@
-# Releaf Google Play asset pack
+# Relief Google Play asset pack
 
 ## App icon provenance
 
-`app-icon.png` is a mechanical derivative of the existing Releaf launcher source:
+`app-icon.png` is a mechanical derivative of the existing Relief launcher source:
 
 - source: `assets/icon/app_icon.png`;
 - source SHA-256: `9D44B42A62268FA2B9ED79C92C3F245A5DC451F1B8DFAFC1BD3648D77029CAB2`;
@@ -21,5 +21,5 @@ approve the remaining Store pack or replace owner review of the Play listing.
 ## Still required
 
 - final 1024 × 500 feature graphic;
-- at least four current portrait screenshots from the exact release candidate;
+- at least four current portrait screenshots from the exact release candidate (`762c7bea` or an explicitly superseding candidate);
 - owner creative review and Play Console preview.
