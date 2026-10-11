@@ -325,39 +325,52 @@ class _CategoryGateways extends StatelessWidget {
                               ),
                               child: AspectRatio(
                                 aspectRatio: 16 / 10,
-                                child: ReliefEditorialImage(
-                                  asset: switch (category) {
-                                    SleepCategory.stories =>
-                                      ReliefEditorialAsset.sleepStories,
-                                    SleepCategory.nature =>
-                                      ReliefEditorialAsset.soundscapes,
-                                    SleepCategory.meditations =>
-                                      ReliefEditorialAsset.meditate,
-                                    SleepCategory.sleepMusic =>
-                                      ReliefEditorialAsset.sleep,
-                                  },
-                                  fallback: const ReleafSleepArtwork(
-                                    variant: ReleafSleepArtworkVariant.night,
-                                  ),
+                                child: Stack(
+                                  fit: StackFit.expand,
+                                  children: [
+                                    ReliefEditorialImage(
+                                      asset: switch (category) {
+                                        SleepCategory.stories =>
+                                          ReliefEditorialAsset.sleepStories,
+                                        SleepCategory.nature =>
+                                          ReliefEditorialAsset.soundscapes,
+                                        SleepCategory.meditations =>
+                                          ReliefEditorialAsset.meditate,
+                                        SleepCategory.sleepMusic =>
+                                          ReliefEditorialAsset.sleep,
+                                      },
+                                      fallback: const ReleafSleepArtwork(
+                                        variant:
+                                            ReleafSleepArtworkVariant.night,
+                                      ),
+                                    ),
+                                    Positioned(
+                                      left: ReleafSpacing.xs,
+                                      bottom: ReleafSpacing.xs,
+                                      child: _CategoryIcon(category: category),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),
                             const SizedBox(height: ReleafSpacing.md),
                             Row(
                               children: [
-                                _CategoryIcon(category: category),
-                                const SizedBox(width: ReleafSpacing.sm),
                                 Expanded(
-                                  child: Text(
-                                    category.label,
-                                    maxLines: 1,
-                                    softWrap: false,
-                                    overflow: TextOverflow.fade,
-                                    style: ReleafTypography.cardTitle.copyWith(
-                                      fontSize: 18,
+                                  child: FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    alignment: Alignment.centerLeft,
+                                    child: Text(
+                                      category.label,
+                                      maxLines: 1,
+                                      style:
+                                          ReleafTypography.cardTitle.copyWith(
+                                        fontSize: 18,
+                                      ),
                                     ),
                                   ),
                                 ),
+                                const SizedBox(width: ReleafSpacing.xs),
                                 const Icon(Icons.chevron_right_rounded),
                               ],
                             ),
