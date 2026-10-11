@@ -13,11 +13,11 @@ Read `AGENTS.md` first, then read:
 
 Use Superpowers throughout this work.
 
-You are taking over an existing Releaf Flutter application. Do not restart it, do not rewrite working architecture for style reasons, and do not touch `main`. Work only from `releaf-development` (or a feature branch deliberately based on it if isolation is useful).
+You are taking over an existing Relief Flutter application. Do not restart it, do not rewrite working architecture for style reasons, and do not touch `main`. Work only from `releaf-development` (or a feature branch deliberately based on it if isolation is useful).
 
 First perform a read-only repository audit and verify the current HEAD, working tree, architecture, existing release gate, tests, docs and relevant feature implementations. Then run the full automated baseline (`flutter pub get`, `flutter analyze`, `flutter test`, plus existing repo release checks that do not require private external secrets). Compare reality with `docs/CURRENT_STATE.md` and update the context docs if the repo has moved.
 
-After the audit, continue the Releaf 1.0 completion plan in priority order. Do not stop just to ask me to repeat information that already exists in the repo/docs. Work in small verified batches. Use TDD for behavior changes and systematic debugging for failures. Before claiming completion, run the relevant verification.
+After the audit, continue the Relief 1.0 completion plan in priority order. Do not stop just to ask me to repeat information that already exists in the repo/docs. Work in small verified batches. Use TDD for behavior changes and systematic debugging for failures. Before claiming completion, run the relevant verification.
 
 Important:
 - `docs/release/releaf_1_0_release_gate.md` is the canonical 1.0 engineering gate.
@@ -25,7 +25,7 @@ Important:
 - Resolve known research-vs-repo conflicts according to `docs/DECISION_CONFLICTS.md`.
 - Do not add games just to increase game count; there are already 15 registered Brain games.
 - Sleep must remain narration-free at its core.
-- Meditation uses the approved recorded Releaf Guide direction at 0.82× and separate voice/ambience layers.
+- Meditation uses the approved recorded Relief Guide direction at 0.82× and separate voice/ambience layers.
 - Do not silently substitute a narrator/provider voice.
 - Do not enable cloud progress sync or claim cloud backup prematurely.
 - Do not weaken Emergency-class access/privacy behavior.
@@ -47,4 +47,4 @@ At the end of every work batch report:
 - the next highest-priority task.
 
 Goal: reach the point where the canonical release gate permits the exact statement:
-**“Releaf 1.0 is release-ready.”**
+**“Relief 1.0 is release-ready.”**
