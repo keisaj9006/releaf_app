@@ -6,7 +6,7 @@ Branch: `releaf-development`
 Package: `app.releaf.mobile`
 Release: `1.0.0+20260913`
 
-Last policy verification: **2026-09-14**.
+Last policy verification: **2026-10-11**.
 
 This document is the production billing source of truth for Relief 1.0. It does not certify that Google Play Console or RevenueCat has been configured. It defines exactly what the external configuration must provide to the existing app.
 
@@ -158,7 +158,7 @@ Until the remaining items are evidenced, the canonical release gate remains `ENG
 
 ## References checked for the 2026 release contract
 
-Verified against current official documentation on **14 September 2026**:
+Re-verified against current official documentation on **11 October 2026**; the release contract below remains unchanged:
 
 - RevenueCat — Google Play Product Setup: subscription products require active base plans and newly configured Google subscription products map using `<subscription_id>:<base-plan-id>`.
 - RevenueCat — Google Play Store service credentials: RevenueCat needs Play service credentials; new/changed credentials may take up to 36 hours to become valid and should be confirmed as valid in the dashboard before billing closure.

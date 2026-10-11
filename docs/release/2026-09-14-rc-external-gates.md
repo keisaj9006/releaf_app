@@ -39,7 +39,7 @@ The standard debug APK from the same run was inspected directly after build. All
 
 ## Current Google Play policy verification
 
-Policy/runbook guidance was rechecked against current official Google/RevenueCat documentation on **14 September 2026**.
+Policy/runbook guidance was rechecked again against current official Google/RevenueCat documentation on **11 October 2026**; the relevant requirements below remain unchanged.
 
 Current release assumptions remain valid:
 
