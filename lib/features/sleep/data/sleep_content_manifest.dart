@@ -19,7 +19,7 @@ abstract final class SleepContentManifest {
       duration: null,
       accessTier: SleepAccessTier.undecided,
       source: SleepPlaybackSource.story('ST-DC-004'),
-      creatorSource: 'Releaf Story catalog',
+      creatorSource: 'Relief Story catalog',
       licenceRecord: '',
       approval: SleepApprovalState.pending,
       rights: SleepRightsState.pending,
