@@ -1174,7 +1174,7 @@ String _sessionAssetPath(ResetContent session) {
   if (session.discoveryGroup == ResetDiscoveryGroup.breathingMethods) {
     return 'assets/art/relief/breathe.webp';
   }
-  if (session.discoveryGroup == ResetDiscoveryGroup.bodyMethods) {
+  if (session.discoveryGroup == ResetDiscoveryGroup.bodyMindReset) {
     return 'assets/art/relief/tension_relief.webp';
   }
   return 'assets/art/relief/reset.webp';
