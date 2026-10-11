@@ -74,7 +74,7 @@ void main() {
     await tester.tap(find.byKey(const Key('whats-new-continue')));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
-    expect(find.text('RELEAF'), findsOneWidget);
+    expect(find.text('RELIEF'), findsOneWidget);
     expect(find.text('RIGHT NOW'), findsOneWidget);
   });
 }
