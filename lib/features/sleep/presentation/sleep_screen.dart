@@ -990,7 +990,7 @@ class _ResearchNote extends StatelessWidget {
         border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
       ),
       child: Text(
-        'Sound and listening preferences vary. Keep playback comfortably low and stop if it feels intrusive. Releaf does not claim that one special frequency treats insomnia.',
+        'Sound and listening preferences vary. Keep playback comfortably low and stop if it feels intrusive. Relief does not claim that one special frequency treats insomnia.',
         style: ReleafTypography.meta.copyWith(
           color: ReleafColors.textSecondary,
           height: 1.5,
