@@ -34,7 +34,8 @@ void main() {
             id == 'spatial_span' ||
             id == 'signal_scan' ||
             id == 'rule_shift' ||
-            id == 'color_conflict') {
+            id == 'color_conflict' ||
+            id == 'pattern_logic') {
           expect(training.maxBrainTrainingLevelFor(id), 50);
         } else {
           expect(training.maxBrainTrainingLevelFor(id), 12, reason: id);
