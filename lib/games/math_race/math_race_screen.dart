@@ -9,21 +9,14 @@ import '../../theme/app_theme.dart';
 import '../../theme/releaf_design_tokens.dart';
 import '../../theme/widgets/releaf_brain_artwork.dart';
 import 'math_puzzle_generator.dart';
+import 'math_race_level_profile.dart';
 import 'math_race_stats.dart';
 
 int mathRaceStartingPuzzleLevelForDifficulty(
   int trainingLevel,
   BrainDifficulty difficulty,
-) {
-  final safeTrainingLevel = trainingLevel.clamp(1, 12).toInt();
-  final baseline = 1 + ((safeTrainingLevel - 1) * 3);
-  final offset = switch (difficulty) {
-    BrainDifficulty.easy => -2,
-    BrainDifficulty.medium => 0,
-    BrainDifficulty.hard => 2,
-  };
-  return (baseline + offset).clamp(1, 36).toInt();
-}
+) =>
+    mathRaceProfileForLevel(trainingLevel, difficulty).startingPuzzleLevel;
 
 class MathRaceScreen extends ConsumerStatefulWidget {
   final ValueChanged<int>? onFinish;
@@ -53,7 +46,10 @@ class _MathRaceScreenState extends ConsumerState<MathRaceScreen>
   BrainDifficulty _selectedDifficulty = BrainDifficulty.medium;
   bool _difficultyLocked = false;
 
-  int get _trainingLevel => widget.trainingLevel.clamp(1, 12).toInt();
+  int get _trainingLevel => widget.trainingLevel.clamp(1, 50).toInt();
+
+  MathRaceLevelProfile get _levelProfile =>
+      mathRaceProfileForLevel(_trainingLevel, _selectedDifficulty);
 
   int get _startingPuzzleLevel => mathRaceStartingPuzzleLevelForDifficulty(
         _trainingLevel,
@@ -161,9 +157,15 @@ class _MathRaceScreenState extends ConsumerState<MathRaceScreen>
   void _nextPuzzle() {
     _difficulty = _difficultyForLevel(_level);
 
-    _puzzle = _gen.generateForLevel(level: _level);
+    _puzzle = _gen.generateForLevel(
+      level: _level,
+      optionCount: _levelProfile.optionCount,
+    );
     if (_puzzle!.correctAnswer <= 0) {
-      _puzzle = _gen.generateForLevel(level: _level);
+      _puzzle = _gen.generateForLevel(
+        level: _level,
+        optionCount: _levelProfile.optionCount,
+      );
     }
     setState(() {});
   }
