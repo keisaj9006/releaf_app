@@ -2,7 +2,7 @@
 
 This document is the mandatory production-equivalent device checklist for the first public Google Play release. Automated tests reduce risk, but they do not replace a real Play-distributed Android run for billing, deep links, background audio, lifecycle behaviour, sensors, destructive account deletion, and offline behaviour.
 
-Last policy/release-scope alignment: **2026-09-14**.
+Last policy/release-scope alignment: **2026-10-11**.
 
 ## Gate rule
 
@@ -25,7 +25,7 @@ Complete this block for every candidate that is eligible to close the gate.
 | Field | Value |
 | --- | --- |
 | Date | `2026-10-11` |
-| App build-candidate Git SHA | `762c7beafd73adf2d4cbdf945efa2583770a0062` |
+| App build-candidate Git SHA | `bf53e274136eef2d70c89cc0134be15b7cd7e4dc` |
 | App version / build | `1.0.0+20260913` |
 | Production-signed AAB SHA-256 | `TBD` |
 | Play test track / release | `TBD` |
@@ -43,7 +43,7 @@ If multiple devices are used, add one row set per device. At least one real supp
 
 ## Automated release evidence already present
 
-The current `762c7bea` pre-Play-upload candidate has immutable automated evidence in
+The current `bf53e274` pre-Play-upload candidate has immutable automated evidence in
 `docs/release/2026-10-11-rc-automated-checkpoint.md`:
 
 - `flutter analyze`: clean;
@@ -51,15 +51,15 @@ The current `762c7bea` pre-Play-upload candidate has immutable automated evidenc
 - all 15 registered Brain games are locked to level-50 progression;
 - Reset model, hub and access validation: PASS;
 - full Flutter suite: PASS;
-- Relief Web Release Smoke run `38149081897`: PASS;
-- Flutter P0 Validation run `38149081860`: PASS;
+- Relief Web Release Smoke run `38157339291`: PASS;
+- Flutter P0 Validation run `38157339295`: PASS;
 - production manifests exported;
 - standard and Premium Preview debug APKs built;
 - release AAB smoke artifact built;
 - Android 16 KB ZIP/ELF compatibility: PASS;
-- current standard APK artifact: `11706201423`;
-- current Premium Preview APK artifact: `11705737027`;
-- current release AAB smoke artifact: `11706067971`.
+- current standard APK artifact: `11709835766`;
+- current Premium Preview APK artifact: `11709621545`;
+- current release AAB smoke artifact: `11709032113`.
 
 The smoke AAB is CI-signed and is not the production Play upload artifact. These
 checks are prerequisites, not substitutes for the physical-device matrix below.
@@ -73,12 +73,12 @@ For each row record `PASS`, `FAIL`, or `BLOCKED`, plus concise evidence (screen 
 | DQA-01 | Cold start online | App launches cleanly from a force-stopped state; primary navigation is usable and no release-only initialization error is shown. Confirm the installed launcher uses Relief branding rather than a framework/template icon. | `TBD` | `TBD` |
 | DQA-02 | Cold start offline | With network unavailable, local-first areas that do not require network still launch and remain usable; the app does not claim cloud backup or silently discard local progress. Network-only actions fail clearly rather than hanging/crashing. | `TBD` | `TBD` |
 | DQA-03 | Background / foreground | Move app to background and return repeatedly during active Reset, Brain and player flows. State follows the intended lifecycle policy with no duplicate timers, runaway input, crash or corrupted progress. | `TBD` | `TBD` |
-| DQA-04 | Sleep background audio + timer | Start a Sleep sound, background/lock the device, resume, change timer and allow timer expiry. Rapidly change tracks during loading; use notification pause/stop during loading and expiry, then Play. The latest choice wins and resumed audio uses the selected volume. Audio/timer behaviour matches the UI, no narration appears in Sleep, and playback does not continue incorrectly after expiry. | `TBD` | `TBD` |
+| DQA-04 | Sleep background audio + timer | Start a Sleep sound, background/lock the device, resume, change timer and allow timer expiry. Rapidly change tracks during loading; use notification pause/stop during loading and expiry, then Play. The latest choice wins and resumed audio uses the selected volume. Audio/timer behaviour matches the UI, no narration appears in Nature or Sleep Music, and playback does not continue incorrectly after expiry. Confirm the Stories gateway uses the intended Sleep Stories artwork while pending `ST-DC-004` remains non-playable. | `TBD` | `TBD` |
 | DQA-05 | Parked Meditate route / resume safety | Confirm Meditate is not present as an active primary destination and is not auto-discovered from Home/Premium/Store-facing flows. If the preserved direct route or an already-active saved meditation is exercised, it must open/exit/resume safely without crashing or creating duplicate audio. Missing final narration for parked content does **not** fail active Relief 1.0 by itself. | `TBD` | `TBD` |
 | DQA-06 | Audio interruption | During active audio, trigger a real interruption available on the test device (for example another audio app or system interruption). Relief follows its interruption policy and recovers predictably. | `TBD` | `TBD` |
 | DQA-07 | Reset interruption / resume | Start a timed Reset session, background/lock and return. Session timing, step state and completion are not duplicated or incorrectly advanced. | `TBD` | `TBD` |
 | DQA-08 | Brain / Labyrinth lifecycle + sensors | Play Labyrinth using physical tilt input; background/foreground and manually pause/resume. Ball input stops when required, resumes once, collisions remain stable and level state is not corrupted. | `TBD` | `TBD` |
-| DQA-09 | Brain progression persistence | Complete representative Brain sessions, force-stop/relaunch, and confirm expected local level/stat/progress persistence without duplicate rewards. | `TBD` | `TBD` |
+| DQA-09 | Brain progression + artwork persistence | Exercise representative Brain games at low, mid and level-50 progression, including at least Memory/Labyrinth plus two of the newly extended legacy games. Force-stop/relaunch and confirm local level/stat/progress persistence without duplicate rewards. Confirm the eight games with approved dedicated images (Memory, Labyrinth, Broken Mirror, Pattern Logic, Sequence Echo, Signal Scan, Trail Switch, Tower Plan) show their own artwork rather than a repeated generic image; the remaining seven retain distinct procedural identities. | `TBD` | `TBD` |
 | DQA-10 | Sign-up / confirmation / sign-in | Create a fresh test account, complete email confirmation/deep-link flow, sign in and sign out. Session state and navigation are correct after relaunch. | `TBD` | `TBD` |
 | DQA-11 | Password recovery deep link | Request password reset, open the real recovery link on Android, set a new password and sign in with it. Link routing must land in the intended recovery flow rather than a dead/default route. | `TBD` | `TBD` |
 | DQA-12 | Profile update | Change the supported profile/display-name field, relaunch and verify the server-backed value remains correct for the signed-in account. | `TBD` | `TBD` |
