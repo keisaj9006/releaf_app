@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../features/brain/presentation/widgets/brain_difficulty_selector.dart';
+import 'pattern_logic_level_profile.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/releaf_design_tokens.dart';
 import '../../theme/widgets/releaf_brain_artwork.dart';
@@ -30,7 +31,8 @@ class _PatternLogicScreenState extends State<PatternLogicScreen> {
   bool _locked = false;
   bool _finished = false;
 
-  int get _levelIndex => (widget.trainingLevel - 1).clamp(0, 11).toInt();
+  PatternLogicLevelProfile get _levelProfile =>
+      patternLogicProfileForLevel(widget.trainingLevel);
 
   List<_PatternPuzzle> get _puzzles {
     final base = switch (_difficulty) {
@@ -45,17 +47,16 @@ class _PatternLogicScreenState extends State<PatternLogicScreen> {
       BrainDifficulty.hard => <_PatternPuzzle>[..._hardPuzzles],
     };
 
-    if (_levelIndex == 0) return base;
+    final profile = _levelProfile;
+    if (profile.extraRounds == 0) return base;
 
     final supplements = switch (_difficulty) {
-      BrainDifficulty.easy => <_PatternPuzzle>[
-          ..._mediumPuzzles,
-          ..._hardPuzzles,
-        ],
-      BrainDifficulty.medium => <_PatternPuzzle>[
-          ..._hardPuzzles,
-          ..._mediumPuzzles.reversed,
-        ],
+      BrainDifficulty.easy => profile.hardBias >= 3
+          ? <_PatternPuzzle>[..._hardPuzzles, ..._mediumPuzzles]
+          : <_PatternPuzzle>[..._mediumPuzzles, ..._hardPuzzles],
+      BrainDifficulty.medium => profile.hardBias >= 4
+          ? <_PatternPuzzle>[..._hardPuzzles.reversed, ..._hardPuzzles]
+          : <_PatternPuzzle>[..._hardPuzzles, ..._mediumPuzzles.reversed],
       BrainDifficulty.hard => <_PatternPuzzle>[
           ..._hardPuzzles.reversed,
           ..._hardPuzzles,
@@ -63,8 +64,11 @@ class _PatternLogicScreenState extends State<PatternLogicScreen> {
     };
 
     final result = <_PatternPuzzle>[...base];
-    for (var index = 0; index < _levelIndex; index++) {
-      result.add(supplements[(index + _levelIndex) % supplements.length]);
+    for (var index = 0; index < profile.extraRounds; index++) {
+      final supplementIndex =
+          (profile.supplementOffset + index * profile.supplementStride) %
+          supplements.length;
+      result.add(supplements[supplementIndex]);
     }
     return result;
   }
@@ -299,9 +303,9 @@ class _PatternLogicScreenState extends State<PatternLogicScreen> {
                                 duration: ReleafMotion.quick,
                                 child: Text(
                                   _lastCorrect == null
-                                      ? (widget.trainingLevel >= 7
-                                          ? 'No hint at this training level.'
-                                          : puzzle.hint)
+                                      ? (_levelProfile.showHint
+                                          ? puzzle.hint
+                                          : 'No hint at this training level.')
                                       : _lastCorrect!
                                           ? 'Pattern found'
                                           : 'Different rule — keep looking',
