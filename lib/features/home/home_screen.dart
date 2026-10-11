@@ -148,7 +148,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                               const ReleafSectionHeading(
                                 title: 'Right Now',
                                 description:
-                                    'Choose what would help. Releaf will narrow it to one next step.',
+                                    'Choose what would help. Relief will narrow it to one next step.',
                               ),
                               const SizedBox(height: ReleafSpacing.md),
                               _NeedGrid(
@@ -1179,7 +1179,7 @@ Future<void> _showDailyInsightSheet(
                   ),
                   const SizedBox(height: ReleafSpacing.md),
                   Text(
-                    'Educational wellbeing information. Releaf does not use Daily Insights to diagnose, prescribe or replace professional care.',
+                    'Educational wellbeing information. Relief does not use Daily Insights to diagnose, prescribe or replace professional care.',
                     style: ReleafTypography.meta.copyWith(
                       color: ReleafColors.textMuted,
                       fontSize: 9,
@@ -1354,7 +1354,7 @@ Future<void> _showHomeFocusSheet(
               ),
               const SizedBox(height: ReleafSpacing.xs),
               Text(
-                'What should Releaf help you with most?',
+                'What should Relief help you with most?',
                 style: ReleafTypography.sectionTitle.copyWith(fontSize: 24),
               ),
               const SizedBox(height: 6),
@@ -1387,7 +1387,7 @@ Future<void> _showHomeFocusSheet(
                       Navigator.of(sheetContext).pop();
                     }
                   },
-                  child: const Text('Use Releaf without a saved focus'),
+                  child: const Text('Use Relief without a saved focus'),
                 ),
               ],
             ],
