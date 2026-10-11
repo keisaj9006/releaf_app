@@ -39,7 +39,8 @@ void main() {
             id == 'symbol_code' ||
             id == 'broken_mirror' ||
             id == 'mental_rotation' ||
-            id == 'math_race') {
+            id == 'math_race' ||
+            id == 'trail_switch') {
           expect(training.maxBrainTrainingLevelFor(id), 50);
         } else {
           expect(training.maxBrainTrainingLevelFor(id), 12, reason: id);
