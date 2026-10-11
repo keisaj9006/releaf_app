@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../routing/app_routes.dart';
@@ -6,15 +7,18 @@ import '../../../theme/app_theme.dart';
 import '../../../theme/releaf_design_tokens.dart';
 import '../../../theme/widgets/releaf_sleep_artwork.dart';
 import '../../../theme/widgets/relief_editorial_image.dart';
+import '../../sleep/application/sleep_progress_store.dart';
 import '../data/story_catalog.dart';
 import '../domain/relief_story.dart';
 
-class StoriesPreviewScreen extends StatelessWidget {
+class StoriesPreviewScreen extends ConsumerWidget {
   const StoriesPreviewScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final stories = StoryCatalog.ownerPreview;
+    final progressRecords = ref.watch(sleepProgressStoreProvider);
+    final continueListening = _latestStoryProgress(stories, progressRecords);
 
     return Theme(
       data: AppTheme.premiumDark(),
@@ -40,24 +44,27 @@ class StoriesPreviewScreen extends StatelessWidget {
                         ),
                         sliver: SliverList.list(
                           children: [
-                            Align(
-                              alignment: Alignment.centerLeft,
-                              child: IconButton.filledTonal(
-                                key: const Key('stories-preview-back'),
-                                tooltip: 'Back to Sleep',
-                                onPressed: () {
-                                  if (context.canPop()) {
-                                    context.pop();
-                                  } else {
-                                    context.go(AppRoutes.sleep);
-                                  }
-                                },
-                                icon: const Icon(Icons.arrow_back_rounded),
-                              ),
+                            Row(
+                              children: [
+                                IconButton.filledTonal(
+                                  key: const Key('stories-preview-back'),
+                                  tooltip: 'Back to Sleep',
+                                  onPressed: () {
+                                    if (context.canPop()) {
+                                      context.pop();
+                                    } else {
+                                      context.go(AppRoutes.sleep);
+                                    }
+                                  },
+                                  icon: const Icon(Icons.arrow_back_rounded),
+                                ),
+                                const Spacer(),
+                                _StoryCount(count: stories.length),
+                              ],
                             ),
                             const SizedBox(height: ReleafSpacing.lg),
                             Text(
-                              'LONG-FORM AUDIO',
+                              'STORIES FOR THE NIGHT',
                               style: ReleafTypography.eyebrow.copyWith(
                                 color: ReleafFeatureAccents.sleep,
                                 letterSpacing: 1.8,
@@ -65,17 +72,22 @@ class StoriesPreviewScreen extends StatelessWidget {
                             ),
                             const SizedBox(height: ReleafSpacing.xs),
                             Text('Stories', style: ReleafTypography.display),
-                            const SizedBox(height: ReleafSpacing.sm),
+                            const SizedBox(height: ReleafSpacing.xs),
                             Text(
-                              'Immersive listening for evenings when you want to slow down, follow a compelling narrative and let the rest of the day fall away.',
+                              'Settle in with one thoughtful, long-form story.',
                               style: ReleafTypography.body.copyWith(
                                 color: ReleafColors.textSecondary,
-                                height: 1.55,
+                                height: 1.45,
                               ),
                             ),
-                            const SizedBox(height: ReleafSpacing.lg),
-                            _LibrarySummary(count: stories.length),
-                            const SizedBox(height: ReleafSpacing.section),
+                            if (continueListening != null) ...[
+                              const SizedBox(height: ReleafSpacing.lg),
+                              _ContinueListeningCard(
+                                story: continueListening.story,
+                                progress: continueListening.progress,
+                              ),
+                            ],
+                            const SizedBox(height: ReleafSpacing.xl),
                             for (final story in stories) ...[
                               _StoryCard(story: story),
                               if (story != stories.last)
@@ -94,6 +106,28 @@ class StoriesPreviewScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+({ReliefStory story, SleepProgressRecord progress})? _latestStoryProgress(
+  List<ReliefStory> stories,
+  List<SleepProgressRecord> records,
+) {
+  final storiesById = <String, ReliefStory>{
+    for (final story in stories) story.id: story,
+  };
+  final candidates = records
+      .where(
+        (record) =>
+            storiesById.containsKey(record.contentId) &&
+            !record.isCompleted &&
+            record.position > Duration.zero,
+      )
+      .toList(growable: false)
+    ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+
+  if (candidates.isEmpty) return null;
+  final progress = candidates.first;
+  return (story: storiesById[progress.contentId]!, progress: progress);
 }
 
 class _StoriesBackdrop extends StatelessWidget {
@@ -123,57 +157,161 @@ class _StoriesBackdrop extends StatelessWidget {
   }
 }
 
-class _LibrarySummary extends StatelessWidget {
-  const _LibrarySummary({required this.count});
+class _StoryCount extends StatelessWidget {
+  const _StoryCount({required this.count});
 
   final int count;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(
-        horizontal: ReleafSpacing.md,
-        vertical: ReleafSpacing.sm,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
         color: const Color(0xB7121A21),
-        borderRadius: BorderRadius.circular(ReleafRadii.large),
+        borderRadius: BorderRadius.circular(ReleafRadii.pill),
         border: Border.all(
-          color: ReleafFeatureAccents.sleep.withValues(alpha: 0.22),
+          color: ReleafFeatureAccents.sleep.withValues(alpha: 0.24),
         ),
       ),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            width: 42,
-            height: 42,
-            decoration: BoxDecoration(
-              color: ReleafFeatureAccents.sleep.withValues(alpha: 0.14),
-              borderRadius: BorderRadius.circular(ReleafRadii.medium),
-            ),
-            child: const Icon(Icons.auto_stories_rounded, size: 21),
-          ),
-          const SizedBox(width: ReleafSpacing.sm),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '$count prepared titles',
-                  style: ReleafTypography.cardTitle.copyWith(fontSize: 16),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  'Each title has its own long-form master and editorial record.',
-                  style: ReleafTypography.meta.copyWith(
-                    color: ReleafColors.textSecondary,
-                  ),
-                ),
-              ],
+          const Icon(Icons.auto_stories_rounded, size: 17),
+          const SizedBox(width: 7),
+          Text(
+            '$count stories',
+            style: ReleafTypography.meta.copyWith(
+              color: ReleafColors.textPrimary,
+              fontWeight: FontWeight.w700,
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _ContinueListeningCard extends StatelessWidget {
+  const _ContinueListeningCard({
+    required this.story,
+    required this.progress,
+  });
+
+  final ReliefStory story;
+  final SleepProgressRecord progress;
+
+  @override
+  Widget build(BuildContext context) {
+    final duration = progress.duration ?? story.estimatedDuration;
+    final progressValue = duration == null || duration <= Duration.zero
+        ? null
+        : (progress.position.inMilliseconds / duration.inMilliseconds)
+              .clamp(0.0, 1.0)
+              .toDouble();
+    final listenedMinutes = progress.position.inMinutes;
+    final listenedLabel = listenedMinutes <= 0
+        ? 'Started'
+        : '$listenedMinutes min listened';
+
+    return KeyedSubtree(
+      key: const Key('stories-continue-listening'),
+      child: Semantics(
+        button: true,
+        label: 'Continue listening to ${story.title}. $listenedLabel.',
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            key: Key('stories-continue-${story.id}'),
+            onTap: () => context.push(
+              AppRoutes.sleepStoryPlayerFor(story.id),
+            ),
+            borderRadius: BorderRadius.circular(ReleafRadii.large),
+            child: Ink(
+              padding: const EdgeInsets.all(ReleafSpacing.md),
+              decoration: BoxDecoration(
+                color: const Color(0xE0131C21),
+                borderRadius: BorderRadius.circular(ReleafRadii.large),
+                border: Border.all(
+                  color: ReleafFeatureAccents.sleep.withValues(alpha: 0.38),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.20),
+                    blurRadius: 24,
+                    offset: const Offset(0, 12),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 52,
+                    height: 52,
+                    decoration: BoxDecoration(
+                      color: ReleafFeatureAccents.sleep.withValues(alpha: 0.14),
+                      borderRadius: BorderRadius.circular(ReleafRadii.medium),
+                    ),
+                    child: Icon(
+                      _storyIcon(story.id),
+                      color: ReleafColors.textPrimary,
+                      size: 24,
+                    ),
+                  ),
+                  const SizedBox(width: ReleafSpacing.md),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'CONTINUE LISTENING',
+                          style: ReleafTypography.eyebrow.copyWith(
+                            color: ReleafFeatureAccents.sleep,
+                            letterSpacing: 1.35,
+                          ),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          story.title,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: ReleafTypography.cardTitle.copyWith(
+                            fontSize: 17,
+                            height: 1.18,
+                          ),
+                        ),
+                        const SizedBox(height: 5),
+                        Text(
+                          listenedLabel,
+                          style: ReleafTypography.meta.copyWith(
+                            color: ReleafColors.textSecondary,
+                          ),
+                        ),
+                        if (progressValue != null) ...[
+                          const SizedBox(height: 8),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(
+                              ReleafRadii.pill,
+                            ),
+                            child: LinearProgressIndicator(
+                              value: progressValue,
+                              minHeight: 4,
+                              backgroundColor: Colors.white.withValues(
+                                alpha: 0.08,
+                              ),
+                              color: ReleafFeatureAccents.sleep,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: ReleafSpacing.sm),
+                  const Icon(Icons.play_arrow_rounded, size: 30),
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -209,7 +347,7 @@ class _StoryCard extends StatelessWidget {
           children: [
             _StoryArtwork(story: story),
             Padding(
-              padding: const EdgeInsets.all(ReleafSpacing.lg),
+              padding: const EdgeInsets.all(ReleafSpacing.md),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -224,24 +362,19 @@ class _StoryCard extends StatelessWidget {
                   Text(
                     story.title,
                     style: ReleafTypography.cardTitle.copyWith(
-                      fontSize: 24,
-                      height: 1.12,
+                      fontSize: 22,
+                      height: 1.14,
                     ),
                   ),
-                  const SizedBox(height: ReleafSpacing.xs),
+                  const SizedBox(height: ReleafSpacing.sm),
                   Text(
-                    story.subtitle,
+                    story.description,
                     style: ReleafTypography.body.copyWith(
                       color: ReleafColors.textSecondary,
-                      height: 1.42,
+                      height: 1.48,
                     ),
                   ),
                   const SizedBox(height: ReleafSpacing.md),
-                  Text(
-                    story.description,
-                    style: ReleafTypography.body.copyWith(height: 1.5),
-                  ),
-                  const SizedBox(height: ReleafSpacing.lg),
                   if (story.isAudioAvailable)
                     SizedBox(
                       width: double.infinity,
@@ -276,7 +409,7 @@ class _StoryArtwork extends StatelessWidget {
     final duration = story.estimatedDuration;
 
     return AspectRatio(
-      aspectRatio: 16 / 9,
+      aspectRatio: 16 / 8.5,
       child: Stack(
         fit: StackFit.expand,
         children: [
@@ -303,7 +436,7 @@ class _StoryArtwork extends StatelessWidget {
             child: _ArtworkBadge(
               icon: _storyIcon(story.id),
               label: duration == null
-                  ? 'Duration pending'
+                  ? 'Story'
                   : '${duration.inMinutes} min',
             ),
           ),
@@ -329,14 +462,14 @@ class _StoryArtwork extends StatelessWidget {
       ),
     );
   }
-
-  IconData _storyIcon(String id) => switch (id) {
-    'TS01_BEYOND_THE_GATE' => Icons.directions_run_rounded,
-    'TS02_KRYSTYNA_SKARBEK' => Icons.explore_rounded,
-    'ST_L05_COMPUTER' => Icons.memory_rounded,
-    _ => Icons.auto_stories_rounded,
-  };
 }
+
+IconData _storyIcon(String id) => switch (id) {
+  'TS01_BEYOND_THE_GATE' => Icons.directions_run_rounded,
+  'TS02_KRYSTYNA_SKARBEK' => Icons.explore_rounded,
+  'ST_L05_COMPUTER' => Icons.memory_rounded,
+  _ => Icons.auto_stories_rounded,
+};
 
 class _ArtworkBadge extends StatelessWidget {
   const _ArtworkBadge({required this.icon, required this.label});
@@ -392,11 +525,11 @@ class _MissingAudioNotice extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.cloud_download_outlined, size: 21),
+          const Icon(Icons.headphones_off_rounded, size: 21),
           const SizedBox(width: ReleafSpacing.sm),
           Expanded(
             child: Text(
-              'The prepared audio master needs to be restored to this build before playback can be tested.',
+              'Audio is not included in this test build.',
               style: ReleafTypography.meta.copyWith(
                 color: ReleafColors.textSecondary,
                 height: 1.45,
