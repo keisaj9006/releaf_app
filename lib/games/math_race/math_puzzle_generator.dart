@@ -34,7 +34,8 @@ class MathPuzzleGenerator {
   /// 11–20: +,-,×,÷
   /// 21–30: +,-,×,÷,^   (potęgi – tylko brakujące 'res')
   /// 31–40+: +,-,×,÷,%  (procenty – tylko brakujące 'res')
-  MathPuzzle generateForLevel({required int level}) {
+  MathPuzzle generateForLevel({required int level, int optionCount = 4}) {
+    final safeOptionCount = optionCount.clamp(4, 6).toInt();
     // progi operatorów
     List<String> ops;
     if (level <= 10) {
@@ -43,12 +44,21 @@ class MathPuzzleGenerator {
       ops = ['+', '-', '×', '÷'];
     } else if (level <= 30) {
       ops = ['+', '-', '×', '÷', '^'];
-    } else {
+    } else if (level <= 40) {
       ops = ['+', '-', '×', '÷', '%'];
+    } else {
+      ops = ['+', '-', '×', '÷', '^', '%'];
     }
 
-    // zakresy liczb rosną z poziomem
-    final baseMax = level <= 10 ? 10 : level <= 20 ? 20 : 50;
+    // Preserve the original ranges through puzzle level 40. Beyond that,
+    // increase operand range gradually while keeping answers phone-readable.
+    final baseMax = level <= 10
+        ? 10
+        : level <= 20
+        ? 20
+        : level <= 40
+        ? 50
+        : (50 + ((level - 40) * 2)).clamp(50, 200).toInt();
     final op = ops[_rng.nextInt(ops.length)];
 
     int a, b, res;
@@ -101,12 +111,12 @@ class MathPuzzleGenerator {
 
     if (correct <= 0) {
       // jeżeli wyszło niepoprawnie, spróbuj jeszcze raz
-      return generateForLevel(level: level);
+      return generateForLevel(level: level, optionCount: safeOptionCount);
     }
 
-    // 4 opcje – 1 poprawna + 3 mylące
+    // One correct answer plus bounded plausible distractors.
     final options = <int>{correct};
-    while (options.length < 4) {
+    while (options.length < safeOptionCount) {
       final delta = _rng.nextInt(8) + 1;
       final cand = _rng.nextBool()
           ? correct + delta
