@@ -567,7 +567,7 @@ void main() {
     await tester.tap(find.byKey(const Key('meditation-back')));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
-    expect(find.text('RELEAF'), findsOneWidget);
+    expect(find.text('RELIEF'), findsOneWidget);
     expect(find.byType(NavigationBar), findsOneWidget);
     expect(tester.takeException(), isNull);
 
@@ -587,7 +587,7 @@ void main() {
     );
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
-    expect(find.text('RELEAF'), findsOneWidget);
+    expect(find.text('RELIEF'), findsOneWidget);
     expect(find.byType(NavigationBar), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
@@ -644,7 +644,7 @@ void main() {
         preferences: await _preferences(),
       );
 
-      expect(find.text('RELEAF'), findsOneWidget);
+      expect(find.text('RELIEF'), findsOneWidget);
       expect(find.text('RIGHT NOW'), findsOneWidget);
       final navigation = tester.widget<NavigationBar>(
         find.byType(NavigationBar),
