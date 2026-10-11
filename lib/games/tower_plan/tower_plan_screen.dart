@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../features/brain/domain/brain_level.dart';
 import '../../features/brain/presentation/widgets/brain_difficulty_selector.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/releaf_design_tokens.dart';
@@ -35,7 +36,8 @@ class _TowerPlanScreenState extends State<TowerPlanScreen> {
   String _feedback =
       'Move the whole tower to the target peg. A larger disc can never sit on a smaller one.';
 
-  int get _trainingLevel => widget.trainingLevel.clamp(1, 12).toInt();
+  int get _trainingLevel =>
+      widget.trainingLevel.clamp(1, maxBrainProfileLevel).toInt();
   int get _levelIndex => _trainingLevel - 1;
 
   int get _discCount {
@@ -44,15 +46,35 @@ class _TowerPlanScreenState extends State<TowerPlanScreen> {
       BrainDifficulty.medium => 4,
       BrainDifficulty.hard => 5,
     };
-    final progression = _levelIndex >= 8
-        ? 1
-        : _levelIndex >= 4
-            ? (_difficulty == BrainDifficulty.easy ? 1 : 0)
-            : 0;
+
+    if (_trainingLevel <= 12) {
+      final progression = _levelIndex >= 8
+          ? 1
+          : _levelIndex >= 4
+              ? (_difficulty == BrainDifficulty.easy ? 1 : 0)
+              : 0;
+      return (base + progression).clamp(3, 6).toInt();
+    }
+
+    final context = BrainLevelContext(_trainingLevel);
+    final progression = switch (_difficulty) {
+      BrainDifficulty.easy => 1 + context.bandIndex ~/ 2,
+      BrainDifficulty.medium => 1 + context.bandIndex ~/ 3,
+      BrainDifficulty.hard => 1,
+    };
     return (base + progression).clamp(3, 6).toInt();
   }
 
-  int get _targetPeg => _trainingLevel.isEven ? 2 : 1;
+  int get _sourcePeg {
+    if (_trainingLevel <= 12) return 0;
+    return BrainLevelContext(_trainingLevel).bandIndex % 3;
+  }
+
+  int get _targetPeg {
+    if (_trainingLevel <= 12) return _trainingLevel.isEven ? 2 : 1;
+    final offset = _trainingLevel.isEven ? 1 : 2;
+    return (_sourcePeg + offset) % 3;
+  }
 
   int get _optimalMoves => (math.pow(2, _discCount).toInt()) - 1;
 
@@ -82,10 +104,14 @@ class _TowerPlanScreenState extends State<TowerPlanScreen> {
 
   void _resetPuzzle() {
     _pegs = <List<int>>[
-      List<int>.generate(_discCount, (index) => _discCount - index),
+      <int>[],
       <int>[],
       <int>[],
     ];
+    _pegs[_sourcePeg] = List<int>.generate(
+      _discCount,
+      (index) => _discCount - index,
+    );
     _selectedPeg = null;
     _moves = 0;
     _invalidMoves = 0;
