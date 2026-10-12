@@ -216,6 +216,54 @@ void main() {
     );
 
     expect(find.text('Stories'), findsOneWidget);
+    expect(find.text('3 stories'), findsOneWidget);
+    expect(
+      find.byKey(const Key('stories-preview-back')).hitTestable(),
+      findsOneWidget,
+    );
+    final countBounds = tester.getRect(find.text('3 stories'));
+    expect(countBounds.left, greaterThanOrEqualTo(0));
+    expect(countBounds.right, lessThanOrEqualTo(320));
+    expect(
+      MediaQuery.textScalerOf(tester.element(find.text('Stories'))).scale(12),
+      24,
+      reason: 'Layout must adapt without reducing the requested text scale.',
+    );
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('all Stories remain reachable at 320x640 with 200 percent text', (
+    WidgetTester tester,
+  ) async {
+    await _pumpStories(
+      tester,
+      size: const Size(320, 640),
+      textScale: 2.0,
+    );
+    expect(tester.takeException(), isNull);
+
+    const storyIds = <String>[
+      'TS01_BEYOND_THE_GATE',
+      'TS02_KRYSTYNA_SKARBEK',
+      'ST_L05_COMPUTER',
+    ];
+    for (final id in storyIds) {
+      final card = await _revealStoryCard(tester, id);
+      final control = find.descendant(
+        of: card,
+        matching: find.byKey(
+          Key(
+            _audioBundled
+                ? 'story-preview-play-$id'
+                : 'story-preview-audio-missing-$id',
+          ),
+        ),
+      );
+      expect(control, findsOneWidget, reason: id);
+      await tester.ensureVisible(control);
+      await tester.pumpAndSettle();
+      expect(control.hitTestable(), findsOneWidget, reason: id);
+      expect(tester.takeException(), isNull, reason: id);
+    }
   });
 }

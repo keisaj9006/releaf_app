@@ -142,12 +142,16 @@ jobs:
         timeout-minutes: 5
         run: flutter test test/relief_access_test.dart --reporter expanded
 
-      - name: Test Stories owner-preview audio contract
+      - name: Test Stories owner-preview audio contract and screens
         timeout-minutes: 5
         run: >-
           flutter test
           test/stories_owner_preview_audio_config_test.dart
+          test/stories_preview_test.dart
+          test/sleep_stories_redesign_test.dart
+          test/story_player_route_test.dart
           --dart-define=RELIEF_STORIES_AUDIO_BUNDLED=true
+          --dart-define=RELEAF_PREMIUM_PREVIEW=true
           --reporter expanded
 
       - name: Reset Flutter test compiler after preview defines

@@ -44,7 +44,11 @@ class StoriesPreviewScreen extends ConsumerWidget {
                         ),
                         sliver: SliverList.list(
                           children: [
-                            Row(
+                            Wrap(
+                              alignment: WrapAlignment.spaceBetween,
+                              crossAxisAlignment: WrapCrossAlignment.center,
+                              spacing: ReleafSpacing.sm,
+                              runSpacing: ReleafSpacing.xs,
                               children: [
                                 IconButton.filledTonal(
                                   key: const Key('stories-preview-back'),
@@ -58,7 +62,6 @@ class StoriesPreviewScreen extends ConsumerWidget {
                                   },
                                   icon: const Icon(Icons.arrow_back_rounded),
                                 ),
-                                const Spacer(),
                                 _StoryCount(count: stories.length),
                               ],
                             ),
@@ -178,11 +181,13 @@ class _StoryCount extends StatelessWidget {
         children: [
           const Icon(Icons.auto_stories_rounded, size: 17),
           const SizedBox(width: 7),
-          Text(
-            '$count stories',
-            style: ReleafTypography.meta.copyWith(
-              color: ReleafColors.textPrimary,
-              fontWeight: FontWeight.w700,
+          Flexible(
+            child: Text(
+              '$count stories',
+              style: ReleafTypography.meta.copyWith(
+                color: ReleafColors.textPrimary,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
         ],
