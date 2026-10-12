@@ -1,67 +1,58 @@
 # Relief Stories owner-preview build
 
-The three long-form Story masters are rights-pending production assets. They are
-therefore **not committed to GitHub** and are not included in ordinary CI APKs.
-The owner-preview build overlays verified local masters, builds an APK and then
-removes those masters from the working tree automatically.
+The three long-form Story masters remain private, rights-pending production
+assets. They are **not committed to GitHub** and ordinary CI APKs do not contain
+them. The local builder overlays the exact verified files temporarily, builds an
+APK, checks its Story entries, and removes the temporary audio copies. Existing
+local asset copies are restored and a failed audit preserves the previous output.
 
-## Pinned input
+## Current input — received 12 October 2026
 
-Use either the full delivery ZIP or its `APP_DELIVERY` directory. The final v2
-input is pinned by SHA-256 in
-`tool/stories/build_owner_preview_with_local_audio.sh` and must contain:
+The owner supplied a ZIP of **85,229,350 bytes**, containing three actual M4A files
+and macOS metadata. The actual files are **AAC, 48 kHz, stereo**:
 
-- `ST_TS01_BEYOND_THE_GATE_v01_128k.m4a` — 32:51.960 (1971.960 seconds)
-- `ST_TS02_KRYSTYNA_SKARBEK_v01_128k.m4a` — 36:38.667 (2198.667 seconds)
-- `ST_L05_COMPUTER_v01_128k.m4a` — 20:45.260 (1245.260 seconds)
+- `ST_TS01_BEYOND_THE_GATE_v01_128k.m4a` — 32:50.667 (1970.666667 seconds)
+- `ST_TS02_KRYSTYNA_SKARBEK_v01_128k.m4a` — 36:38.292 (2198.291667 seconds)
+- `ST_L05_COMPUTER_v01_128k.m4a` — 20:45.000 (1245.000000 seconds)
 
-The build script verifies the exact SHA-256 of every master and, when `ffprobe`
-is available, checks duration within 0.05 seconds, **44.1 kHz** sample rate and
-stereo channel count. Do not resample the pinned masters to 48 kHz: that would
-change their hashes and invalidate this input contract.
+Exact SHA-256 pins are in `tool/stories/build_owner_preview_with_local_audio.sh`.
+Every file must match its hash. When ffprobe is installed, the builder also checks
+duration within 0.05 seconds, 48 kHz sample rate, and two channels.
+
+The earlier 44.1 kHz pin set does **not** describe this received ZIP. The current
+contract deliberately supersedes those private-preview pins based on inspection
+of the actual owner upload. Do not resample or recompress these files to force
+agreement with an older description. See
+[the measured intake checkpoint](2026-10-12-stories-received-audio-intake.md).
 
 ## Build on macOS or Linux
 
-From the project root:
+This requires a configured Flutter/Android development environment; the script
+does not install Flutter, the Android SDK or Java. From the project root:
 
 ```bash
-chmod +x tool/stories/build_owner_preview_with_local_audio.sh
-./tool/stories/build_owner_preview_with_local_audio.sh \
-  "/absolute/path/to/Relief-Stories-Audio-Delivery-Pack-v2.zip"
+bash tool/stories/build_owner_preview_with_local_audio.sh \
+  "/absolute/path/to/Relief-Stories-Audio-Delivery-Pack-v2(2).zip"
 ```
 
-A directory is accepted as well:
+An `APP_DELIVERY` directory containing the same three exact files is also accepted.
+The output is `build/qa-apks/Relief-Stories-Owner-Preview.apk`.
 
-```bash
-./tool/stories/build_owner_preview_with_local_audio.sh \
-  "/absolute/path/to/APP_DELIVERY"
-```
+The builder enables Premium Preview and Stories Preview and runs the focused
+Stories tests. Keep the resulting APK private because it contains the recordings.
+Its debug signing must be considered when installing over an existing app; do not
+uninstall an existing installation merely to resolve a signing mismatch, because
+local progress may be lost.
 
-The resulting APK is:
+## CI and release boundary
 
-```text
-build/qa-apks/Relief-Stories-Owner-Preview.apk
-```
+Flutter P0 Validation runs the shell-flow regressions using synthetic fixtures,
+then the focused Stories configuration/screens with audio and Premium defines,
+and the ordinary full suite after a compiler reset. These checks do not publish
+private audio and do not certify that an ordinary CI APK contains the recordings.
 
-The build enables both Premium Preview and Stories Preview, validates the focused
-Stories screens, and confirms all three M4A files are physically present in the
-APK. The local M4A copies are deleted automatically after success or failure;
-any pre-existing copies are restored. Keep the resulting APK private as it
-contains the recordings.
-
-## CI boundary
-
-Flutter P0 Validation runs the focused Stories configuration, discovery and player
-route tests with the owner-preview audio and Premium defines, then resets the
-Flutter test compiler before running the ordinary full suite. Large-text coverage
-includes 320 x 640 at 200% text and scrolling to each of the three Story controls.
-These tests exercise UI and configuration contracts without publishing the
-private recordings. Passing them is **not** proof of audio decoding, owner
-listening approval, or the recordings being inside a downloadable APK.
-
-## Release boundary
-
-This APK is for owner/device review only. The three Stories must not be promoted
-to a public store build until rights, editorial approval and final release access
-are recorded. The pending `ST-DC-004` Dream Classics candidate remains separate
-and unavailable.
+The private owner-preview APK still needs a real build, final embedded-file
+verification and owner/device playback review. Input decoding is not listening
+approval. No public promotion, licence clearance, production signing, Play billing
+approval or final physical-device QA is implied. `ST-DC-004` remains separate and
+unavailable.

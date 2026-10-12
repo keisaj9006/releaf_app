@@ -42,13 +42,13 @@ FILES=(
 expected_sha() {
   case "$1" in
     ST_TS01_BEYOND_THE_GATE_v01_128k.m4a)
-      printf '%s' '67009b29d10f04cd8461ea9a130812c8d38fd770ff070b8a8da20df027274786'
+      printf '%s' 'e060325cab7eb37128430e33103688f288b24208463f8dd1efb36cc3d87961cf'
       ;;
     ST_TS02_KRYSTYNA_SKARBEK_v01_128k.m4a)
-      printf '%s' '5f6d8e1686777c40a3049c561ce275eb21759436842a73a116bd8c6764db324c'
+      printf '%s' 'b2f549476bab0e948ceb82ba886a873ac43497ef723753db5a736cc1bb36cbb8'
       ;;
     ST_L05_COMPUTER_v01_128k.m4a)
-      printf '%s' '74102b5fd0c5b0fb99a420c4d8413c739b7d75ae43808792ecbceb7af7cfbf01'
+      printf '%s' '3b9801a65c76d9052624135a430cf26369842d586d50737b21fe49cbf0341982'
       ;;
     *) return 1 ;;
   esac
@@ -56,9 +56,9 @@ expected_sha() {
 
 expected_duration() {
   case "$1" in
-    ST_TS01_BEYOND_THE_GATE_v01_128k.m4a) printf '%s' '1971.960000' ;;
-    ST_TS02_KRYSTYNA_SKARBEK_v01_128k.m4a) printf '%s' '2198.667000' ;;
-    ST_L05_COMPUTER_v01_128k.m4a) printf '%s' '1245.260000' ;;
+    ST_TS01_BEYOND_THE_GATE_v01_128k.m4a) printf '%s' '1970.666667' ;;
+    ST_TS02_KRYSTYNA_SKARBEK_v01_128k.m4a) printf '%s' '2198.291667' ;;
+    ST_L05_COMPUTER_v01_128k.m4a) printf '%s' '1245.000000' ;;
     *) return 1 ;;
   esac
 }
@@ -143,7 +143,7 @@ for name in "${FILES[@]}"; do
         echo "Duration mismatch for $name: $duration seconds" >&2
         exit 65
       }
-    [[ "$sample_rate" == '44100' && "$channels" == '2' ]] || {
+    [[ "$sample_rate" == '48000' && "$channels" == '2' ]] || {
       echo "Unexpected audio format for $name: ${sample_rate} Hz, ${channels} channel(s)" >&2
       exit 65
     }

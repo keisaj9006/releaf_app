@@ -52,7 +52,7 @@ void main() {
     skip: _audioBundled ? 'Audio-enabled contract is tested separately.' : false,
   );
 
-  test('local builder pins the verified final v2 delivery pack', () {
+  test('local builder pins the received 12 October 48 kHz delivery pack', () {
     final script = File(
       'tool/stories/build_owner_preview_with_local_audio.sh',
     ).readAsStringSync();
@@ -60,18 +60,18 @@ void main() {
     const verified = <String, ({String sha256, String duration})>{
       'ST_TS01_BEYOND_THE_GATE_v01_128k.m4a': (
         sha256:
-            '67009b29d10f04cd8461ea9a130812c8d38fd770ff070b8a8da20df027274786',
-        duration: '1971.960000',
+            'e060325cab7eb37128430e33103688f288b24208463f8dd1efb36cc3d87961cf',
+        duration: '1970.666667',
       ),
       'ST_TS02_KRYSTYNA_SKARBEK_v01_128k.m4a': (
         sha256:
-            '5f6d8e1686777c40a3049c561ce275eb21759436842a73a116bd8c6764db324c',
-        duration: '2198.667000',
+            'b2f549476bab0e948ceb82ba886a873ac43497ef723753db5a736cc1bb36cbb8',
+        duration: '2198.291667',
       ),
       'ST_L05_COMPUTER_v01_128k.m4a': (
         sha256:
-            '74102b5fd0c5b0fb99a420c4d8413c739b7d75ae43808792ecbceb7af7cfbf01',
-        duration: '1245.260000',
+            '3b9801a65c76d9052624135a430cf26369842d586d50737b21fe49cbf0341982',
+        duration: '1245.000000',
       ),
     };
 
@@ -80,7 +80,7 @@ void main() {
       expect(script, contains(entry.value.sha256), reason: entry.key);
       expect(script, contains(entry.value.duration), reason: entry.key);
     }
-    expect(script, contains(r'''[[ "$sample_rate" == '44100' && "$channels" == '2' ]]'''));
-    expect(script, isNot(contains(r'''[[ "$sample_rate" == '48000' ''')));
+    expect(script, contains(r'''[[ "$sample_rate" == '48000' && "$channels" == '2' ]]'''));
+    expect(script, isNot(contains(r'''[[ "$sample_rate" == '44100' ''')));
   });
 }
