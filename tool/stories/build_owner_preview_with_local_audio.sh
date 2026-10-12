@@ -176,14 +176,21 @@ flutter build apk --debug \
   --dart-define=RELEAF_PREMIUM_PREVIEW=true \
   --dart-define=REVENUECAT_ANDROID_API_KEY="${REVENUECAT_ANDROID_API_KEY:-}"
 
-cp "$ROOT/build/app/outputs/flutter-apk/app-debug.apk" "$OUTPUT_APK"
+BUILT_APK="$ROOT/build/app/outputs/flutter-apk/app-debug.apk"
+APK_ENTRIES="$TEMP_DIR/apk-entries.txt"
+# Consume the full listing before matching: grep -q in a pipe can terminate
+# unzip with SIGPIPE under pipefail even when the requested entry is present.
+unzip -Z1 "$BUILT_APK" > "$APK_ENTRIES"
 
 for name in "${FILES[@]}"; do
-  unzip -l "$OUTPUT_APK" | grep -q \
-    "assets/flutter_assets/assets/audio/stories/$name" || {
-      echo "Built APK is missing bundled Story audio: $name" >&2
-      exit 70
-    }
+  grep -Fxq "assets/flutter_assets/assets/audio/stories/$name" "$APK_ENTRIES" || {
+    echo "Built APK is missing bundled Story audio: $name" >&2
+    exit 70
+  }
 done
+
+# Only publish the candidate after all entries pass; preserve the previous
+# owner-preview APK if this build is invalid or incomplete.
+cp "$BUILT_APK" "$OUTPUT_APK"
 
 printf '\nOwner-preview APK created successfully:\n%s\n' "$OUTPUT_APK"

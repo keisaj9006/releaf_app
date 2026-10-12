@@ -142,6 +142,10 @@ jobs:
         timeout-minutes: 5
         run: flutter test test/relief_access_test.dart --reporter expanded
 
+      - name: Test Stories owner-preview builder safety
+        timeout-minutes: 2
+        run: python3 -m unittest discover -s tool/stories -p 'test_owner_preview_builder.py' -v
+
       - name: Test Stories owner-preview audio contract and screens
         timeout-minutes: 5
         run: >-
